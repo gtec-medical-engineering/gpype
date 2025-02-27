@@ -1,21 +1,40 @@
-MIT License
+g.tec Non-Commercial License (GNCL) v1.0
 
-Copyright (c) 2025 gtec-medical-engineering
+Copyright (c) 2025 g.tec medical engineering GmbH
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+1. License Grant
+Permission is hereby granted, free of charge, to any individual or
+organization (the "Licensee") to use this software (the "Software")
+solely for private or educational purposes, subject to the following
+conditions.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+2. Permitted Uses
+The Licensee may use the Software:
+- For private or educational purposes (e.g., academic research,
+  teaching).
+- In combination with a biosignal amplifier manufactured by g.tec
+  medical engineering GmbH.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+3. Prohibited Uses
+The Licensee may not:
+- Use the Software for any commercial purpose.
+- Modify, distribute, or sublicense the Software in any form.
+- Compile the Software into standalone executables for use outside
+  an integrated development environment (IDE).
+- Remove or alter any copyright, trademark, or attribution notices.
+- Use the Software with third-party hardware (e.g., biosignal
+  amplifiers not manufactured by g.tec medical engineering GmbH).
+
+4. Commercial Licensing
+To use the Software for commercial purposes, including but not
+limited to:
+- Integrating it into a product or service sold or offered for a fee.
+- Deploying it as part of a commercial SaaS or cloud-based service.
+A separate commercial license must be obtained from the copyright
+holder. For licensing inquiries, please contact g.tec medical
+engineering GmbH.
+
+5. No Warranty
+THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT.
