@@ -1,0 +1,4 @@
+TimeSeriesScope
+===============
+
+.. autoclass:: gpype.TimeSeriesScope

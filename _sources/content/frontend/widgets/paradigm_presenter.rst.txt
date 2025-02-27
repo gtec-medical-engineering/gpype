@@ -1,0 +1,5 @@
+ParadigmPresenter
+=================
+
+.. autoclass:: gpype.ParadigmPresenter
+   

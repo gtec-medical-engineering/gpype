@@ -1,0 +1,8 @@
+Sinks
+=====
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Contents
+
+   file_sink

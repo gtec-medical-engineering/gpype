@@ -1,0 +1,5 @@
+FileSink
+========
+
+.. autoclass:: gpype.FileSink
+   

@@ -1,0 +1,5 @@
+LTIFilter
+=========
+
+.. autoclass:: gpype.LTIFilter
+   

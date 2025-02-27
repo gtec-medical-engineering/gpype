@@ -1,0 +1,5 @@
+Router
+========
+
+.. autoclass:: gpype.Router
+   

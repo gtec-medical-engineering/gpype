@@ -1,0 +1,4 @@
+ONode
+-----
+
+.. autoclass:: gpype.ONode

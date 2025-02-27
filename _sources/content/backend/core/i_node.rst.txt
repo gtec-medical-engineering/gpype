@@ -1,0 +1,4 @@
+INode
+-----
+
+.. autoclass:: gpype.INode

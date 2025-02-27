@@ -1,0 +1,8 @@
+Pipeline
+--------
+
+.. autoclass:: gpype.backend.pipeline.Pipeline
+   :members:
+   :undoc-members:
+   :special-members: __init__
+   :show-inheritance:

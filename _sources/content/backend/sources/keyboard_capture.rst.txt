@@ -1,0 +1,6 @@
+KeyboardCapture
+===============
+
+.. autoclass:: gpype.KeyboardCapture
+
+   

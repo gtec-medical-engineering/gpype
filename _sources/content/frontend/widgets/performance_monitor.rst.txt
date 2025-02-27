@@ -1,0 +1,5 @@
+PerformanceMonitor
+==================
+
+.. autoclass:: gpype.PerformanceMonitor
+   

@@ -1,2 +1,0 @@
-# gpype
-g.Pype SDK

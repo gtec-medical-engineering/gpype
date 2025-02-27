@@ -1,0 +1,10 @@
+Frontent
+========
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Contents
+
+   widgets/index
+   main_app
+   

@@ -1,0 +1,4 @@
+NoiseGenerator
+==============
+
+.. autoclass:: gpype.NoiseGenerator

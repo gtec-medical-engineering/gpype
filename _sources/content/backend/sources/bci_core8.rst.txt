@@ -1,0 +1,5 @@
+BCICore8
+========
+
+.. autoclass:: gpype.BCICore8
+   
