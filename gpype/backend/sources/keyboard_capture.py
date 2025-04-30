@@ -1,6 +1,6 @@
 from pynput import keyboard
 from .base.event_source import EventSource
-from ...utilities.constants import Constants
+from ...common.constants import Constants
 import threading
 import numpy as np
 
@@ -9,7 +9,7 @@ PORT_OUT = Constants.Defaults.PORT_OUT
 
 class KeyboardCapture(EventSource):
 
-    FINGERPRINT = "2eb5b7d981233a65428cb4cdb4682882"
+    FINGERPRINT = "4f7c4485dcd15c576496cbe810c447be"
 
     class Configuration(EventSource.Configuration):
         class Keys(EventSource.Configuration.Keys):

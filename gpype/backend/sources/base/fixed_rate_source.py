@@ -4,7 +4,7 @@ import time
 from typing import Dict
 import numpy as np
 from ...core.o_port import OPort
-from ....utilities.constants import Constants
+from ....common.constants import Constants
 
 OUT_PORT = Constants.Defaults.PORT_OUT
 

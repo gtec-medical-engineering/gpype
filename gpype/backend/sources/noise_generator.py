@@ -2,7 +2,7 @@ import numpy as np
 from typing import Dict
 import ioiocore as ioc
 from .base.fixed_rate_source import FixedRateSource
-from ...utilities.constants import Constants
+from ...common.constants import Constants
 from ..core.o_port import OPort
 
 OUT_PORT = ioc.Constants.Defaults.PORT_OUT
@@ -10,7 +10,7 @@ OUT_PORT = ioc.Constants.Defaults.PORT_OUT
 
 class NoiseGenerator(FixedRateSource):
 
-    FINGERPRINT = "458da03c19bc53abd5a2f946cc6e7be5"
+    FINGERPRINT = "5278262962ee6b1d397db9c1f45e433e"
 
     class Configuration(FixedRateSource.Configuration):
         class Keys(FixedRateSource.Configuration.Keys):

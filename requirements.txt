@@ -1,4 +1,7 @@
-ioiocore>=2.2.4
+ioiocore>=2.3.0
+gtec_ble>=1.0.0
+gtec_gds>=1.0.1; sys_platform == "win32"
+gtec_pp>=1.0.0; sys_platform == "win32"
 numpy>=2.1.2
 pyqtgraph>=0.13.4
 PySide6>=6.8.0.1

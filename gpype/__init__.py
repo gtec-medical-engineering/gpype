@@ -1,16 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-gpype_essentials
--------
-
-A realtime EEG processing framework for python
-
-:copyright: (c) 2024 g.tec medical engineering GmbH
-
-"""
-
-# compatibility
-from __future__ import absolute_import, division, print_function
+import sys
 
 # get version
 from .__version__ import __version__
@@ -31,17 +19,22 @@ from .backend.sources.base.fixed_rate_source import FixedRateSource
 from .backend.sources.base.source import Source
 from .backend.sources.noise_generator import NoiseGenerator
 from .backend.sources.bci_core8 import BCICore8
+if sys.platform == "win32":
+    from .backend.sources.g_nautilus import GNautilus
 from .backend.sources.keyboard_capture import KeyboardCapture
 from .backend.sources.udp_receiver import UDPReceiver
 from .backend.sinks.file_sink import FileSink
 from .backend.routing.router import Router
+from .backend.misc.sq_estimator import SQEstimator
 
 from .frontend.main_app import MainApp
 from .frontend.widgets.time_series_scope import TimeSeriesScope
 from .frontend.widgets.performance_monitor import PerformanceMonitor
-from .frontend.widgets.paradigm_presenter import ParadigmPresenter
+if sys.platform == "win32":
+    from .frontend.widgets.paradigm_presenter import ParadigmPresenter
+    from .frontend.widgets.impedance_chart import ImpedanceChart
 
-from .utilities.constants import Constants
+from .common.constants import Constants
 
 # add gpype_essentials as preinstalled module
 import ioiocore as ioc

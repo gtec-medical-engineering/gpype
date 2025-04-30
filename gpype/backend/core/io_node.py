@@ -1,7 +1,7 @@
 import ioiocore as ioc
 from abc import abstractmethod
 from typing import Dict
-from ...utilities.constants import Constants
+from ...common.constants import Constants
 from .node import Node
 import numpy as np
 

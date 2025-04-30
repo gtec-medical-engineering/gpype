@@ -2,7 +2,7 @@ import ioiocore as ioc
 from ...backend.core.i_port import IPort
 from typing import Dict
 import numpy as np
-from ...utilities.constants import Constants
+from ...common.constants import Constants
 from ...backend.core.i_node import INode
 import queue
 import threading
@@ -70,8 +70,7 @@ class FileSink(INode):
     def step(self, data: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:  # noqa: E501
         d = data[Constants.Defaults.PORT_IN]
         for n in range(d.shape[0]):
-            self._file_queue.put(f"{self.get_counter()}, "
-                                 ", ".join(map(str, d[0, :].tolist())))
+            self._file_queue.put(f"{self.get_counter()}, " + ", ".join(map(str, d[0, :].tolist())))  # noqa: E501
         return {}
 
     def _file_worker(self):

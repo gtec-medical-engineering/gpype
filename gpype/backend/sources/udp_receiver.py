@@ -1,12 +1,15 @@
 import socket
 import threading
 import numpy as np
+from ...common.constants import Constants
 from .base.event_source import EventSource
+
+PORT_OUT = Constants.Defaults.PORT_OUT
 
 
 class UDPReceiver(EventSource):
 
-    FINGERPRINT = "6af879022098bb22dbe76f8d4a93bc3b"
+    FINGERPRINT = "8f59851f7fa3af24db896c6469c5db47"
     DEFAULT_IP: str = "127.0.0.1"
     DEFAULT_PORT: str = 1000
 
@@ -45,8 +48,8 @@ class UDPReceiver(EventSource):
                         value = int(m.group(1))
                     else:
                         continue
-                self.trigger(np.array([[value]]))
-                self.trigger(np.array([[0]]))
+                self.trigger({PORT_OUT: np.array([[value]])})
+                self.trigger({PORT_OUT: np.array([[0]])})
             except Exception:
                 continue
 

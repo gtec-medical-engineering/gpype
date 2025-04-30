@@ -1,5 +1,5 @@
 from ..core.io_node import IONode
-from ...utilities.constants import Constants
+from ...common.constants import Constants
 from typing import Dict
 import numpy as np
 from scipy.signal import lfilter, lfilter_zi
@@ -16,13 +16,13 @@ class LTIFilter(IONode):
             A = 'a'
 
     def __init__(self,
-                 b: list[float] = [1],
-                 a: list[float] = [1],
+                 b: np.ndarray = None,
+                 a: np.ndarray = None,
                  **kwargs):
-        # Validate the coefficients
-        if not b or not a:
-            raise ValueError("Filter coefficients 'b' and 'a' must not be "
-                             "empty.")
+        if b is None:
+            b = np.array([1])
+        if a is None:
+            a = np.array([1])
         super().__init__(b=b, a=a, **kwargs)
         self._z = None  # Initialize filter state
 
@@ -60,8 +60,8 @@ class LTIFilter(IONode):
 
         # Ensure input data is compatible
         if data_in.ndim != 2:
-            raise ValueError("Input data must be a 2D array (channels x "
-                             "samples).")
+            raise ValueError("Input data must be a 2D array (samples x "
+                             "channels).")
 
         # Apply the filter to each channel
         data_out, self._z = lfilter(b, a, data_in, axis=0, zi=self._z)

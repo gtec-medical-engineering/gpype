@@ -1,8 +1,16 @@
 import ioiocore as ioc
 import os
+import sys
 from .core.node import Node
 
-LOG_DIR = os.path.join(os.getenv("APPDATA"), "gtec", "gPype")
+if sys.platform == "win32":
+    LOG_DIR = os.path.join(os.getenv("APPDATA"), "gtec", "gPype")
+elif sys.platform == "darwin":
+    LOG_DIR = os.path.join(os.path.expanduser("~/Library/Application Support"),
+                           "gtec",
+                           "gPype")
+else:
+    raise NotImplementedError("Platform not supported.")
 
 
 class Pipeline(ioc.Pipeline):

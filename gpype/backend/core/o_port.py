@@ -1,5 +1,5 @@
 import ioiocore as ioc
-from ...utilities.constants import Constants
+from ...common.constants import Constants
 import numpy as np
 
 

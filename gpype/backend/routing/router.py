@@ -2,7 +2,7 @@ import ioiocore as ioc
 from ..core.i_port import IPort
 from ..core.o_port import OPort
 from typing import Dict
-from ...utilities.constants import Constants
+from ...common.constants import Constants
 from ..core.io_node import IONode
 import numpy as np
 

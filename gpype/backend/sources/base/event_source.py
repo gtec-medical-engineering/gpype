@@ -1,6 +1,6 @@
 from .source import Source
 from ...core.o_port import OPort
-from ....utilities.constants import Constants
+from ....common.constants import Constants
 from typing import Dict
 import numpy as np
 

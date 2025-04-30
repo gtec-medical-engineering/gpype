@@ -2,7 +2,7 @@ from typing import Dict
 from abc import abstractmethod
 import numpy as np
 import ioiocore as ioc
-from ...utilities.constants import Constants
+from ...common.constants import Constants
 from .node import Node
 from .o_port import OPort
 

@@ -1,10 +1,13 @@
+import sys
+if sys.platform != "win32":
+    raise NotImplementedError("This module is only supported on Windows.")
+
 from PySide6.QtWidgets import (
     QWidget, QPushButton, QComboBox, QFileDialog,
     QLabel, QSizePolicy, QSpacerItem, QMessageBox,
     QHBoxLayout
 )
 from .base.widget import Widget
-import pp_api as pp
 import os
 import glob
 
@@ -15,10 +18,11 @@ class ParadigmPresenter(Widget):
 
     def __init__(self,
                  root_folder: str = None):
+        import gtec_pp as pp
         super().__init__(widget=QWidget(), name="ParadigmPresenter Control",
                          layout=QHBoxLayout)
 
-        self.paradigm_presenter = pp.ParadigmPresenterAPI()
+        self.paradigm_presenter = pp.ParadigmPresenter()
 
         self._root_folder = root_folder
 
@@ -67,10 +71,6 @@ class ParadigmPresenter(Widget):
 
         type_plain = self.paradigm_presenter.constants.WINDOWTYPE_PLAIN
         self.paradigm_presenter.open_window(type_plain)
-
-    def __delete__(self):
-        self.paradigm_presenter.close_windows()
-        self.paradigm_presenter.shutdown()
 
     def _start_paradigm(self):
         if self.dropdown:
@@ -136,3 +136,8 @@ class ParadigmPresenter(Widget):
                 pass  # Ignore invalid paradigms
 
         return valid_paradigms
+
+    def terminate(self):
+        self.paradigm_presenter.close_windows()
+        self.paradigm_presenter.shutdown()
+        super().terminate()

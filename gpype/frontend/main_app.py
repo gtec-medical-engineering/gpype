@@ -22,6 +22,7 @@ class MainApp(QApplication):
         self._window = QMainWindow()
         self._window.setWindowTitle(caption)
         self.setWindowIcon(QIcon(MainApp.ICON_PATH))
+        self._window.setWindowIcon(QIcon(MainApp.ICON_PATH))
         if position is None:
             position = MainApp.DEFAULT_POSITION
         self._window.setGeometry(*position)

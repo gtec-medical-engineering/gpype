@@ -1,5 +1,5 @@
 from .source import Source
-from ....utilities.constants import Constants
+from ....common.constants import Constants
 from ...core.o_port import OPort
 from typing import Any, Dict
 import numpy as np
@@ -37,7 +37,6 @@ class AmplifierSource(Source):
                                                              [OPort.Configuration()])  # noqa: E501
 
         self._devices = []
-        self._device = None
         Source.__init__(self,
                         output_ports=output_ports,
                         sampling_rate=sampling_rate,
