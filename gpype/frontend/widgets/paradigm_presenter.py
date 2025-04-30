@@ -7,6 +7,7 @@ from PySide6.QtWidgets import (
     QLabel, QSizePolicy, QSpacerItem, QMessageBox,
     QHBoxLayout
 )
+
 from .base.widget import Widget
 import os
 import glob
@@ -46,14 +47,19 @@ class ParadigmPresenter(Widget):
             if len(self.paradigms) > 0:
                 self.dropdown.addItems(self.paradigms)
             else:
-                QMessageBox("No Paradigms found",
-                            "No Paradigms found in: " + self._root_folder).exec_()  # noqa: E501
+                QMessageBox.critical(
+                    QWidget(),  # or `self` if inside a QWidget subclass
+                    "No Paradigms found",
+                    f"No Paradigms found in: {self._root_folder}"
+                )
                 self.start_button.setEnabled(False)
 
             self.dropdown.setMinimumWidth(2 * MINIMUM_BUTTON_WIDTH)
             self.dropdown.currentIndexChanged.connect(self._select_paradigm)
-            paradigm_file = os.path.join(self._root_folder, self.paradigms[0])
-            self.paradigm_presenter.load_paradigm(paradigm_file)
+            if len(self.paradigms) > 0:
+                paradigm_file = os.path.join(self._root_folder,
+                                             self.paradigms[0])
+                self.paradigm_presenter.load_paradigm(paradigm_file)
             self._layout.addWidget(label)
             self._layout.addWidget(self.dropdown)
 

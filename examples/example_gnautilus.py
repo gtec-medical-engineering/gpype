@@ -1,4 +1,3 @@
-
 import gpype as gp
 from scipy.signal import butter
 
@@ -27,7 +26,7 @@ if __name__ == '__main__':
     fc = 50.0  # center frequency
     bw = 2.0  # bandwidth
     b, a = butter(N=2,
-                  Wn=[(fs - bw) / (fs / 2), (fs + bw) / (fs / 2)],
+                  Wn=[(fc - bw) / (fs / 2), (fc + bw) / (fs / 2)],
                   btype='bandstop')
     f2 = gp.LTIFilter(b=b, a=a)
 

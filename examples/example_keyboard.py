@@ -1,7 +1,5 @@
-
 from scipy.signal import butter
 import gpype as gp
-
 fs = 250
 
 if __name__ == '__main__':

@@ -33,10 +33,13 @@ Full documentation is available at [GitHub Pages](https://gtec-medical-engineeri
 `gpype` is licensed under the **g.tec Non-Commercial License (GNCL)**. See the [LICENSE](https://github.com/gtec-medical-engineering/gpype/blob/main/LICENSE) file for details.
 
 # Changelog
-
+See the [Changelog](https://gtec-medical-engineering.github.io/gpype/#changelog) section in the official documentation.
 ## Changelog
 
 ## Changelog
+
+### [2.1.1] - 2025-04-30
+- Minor bugfixes
 
 ### [2.1.0] - 2025-04-30
 - Bugfixing

@@ -1,5 +1,8 @@
 ## Changelog
 
+### [2.1.1] - 2025-04-30
+- Minor bugfixes
+
 ### [2.1.0] - 2025-04-30
 - Bugfixing
 - g.Nautilus integrated (Win only)

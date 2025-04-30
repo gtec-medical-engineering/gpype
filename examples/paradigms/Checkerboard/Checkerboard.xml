@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Data  xmlns="xsd"
+           xmlns:ns="http://www.w3.org/2001/XMLSchema-instance"
+           ns:schemaLocation="xsd ..\ParadigmSchema.xsd">
+
+	<Paradigm BaseFolder="media/" TaskOrder="Deterministic" UdpAddress="127.0.0.1" UdpPort="1000">
+		<Task ns:type="SingleTask" ID="ST_PreParadigm" DurationSeconds="10">
+			<Stimulus ns:type="TextStimulus" Caption="+"/>
+		</Task>
+		<Task ns:type="MultiTask" ID="MT_Checkerboard" TaskOrder="Deterministic" SampleSize="60">
+			<Task ns:type="SingleTask" ID="ST_Checkerboard1" DurationSeconds="0.7" Group="1">
+				<Stimulus ns:type="PictureStimulus" FileName="chk1.png" UdpMessage="1"/>
+			</Task>
+			<Task ns:type="SingleTask" ID="ST_Checkerboard2" DurationSeconds="0.7" Group="2">
+				<Stimulus ns:type="PictureStimulus" FileName="chk2.png" UdpMessage="2"/>
+			</Task>
+		</Task>
+		<Task ns:type="SingleTask" ID="ST_PostParadigm" DurationSeconds="2">
+			<Stimulus ns:type="TextStimulus" Caption="Thank You!"/>
+		</Task>
+	</Paradigm>
+</Data>

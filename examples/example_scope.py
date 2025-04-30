@@ -1,4 +1,3 @@
-
 import gpype as gp
 from scipy.signal import butter
 

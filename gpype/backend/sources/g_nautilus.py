@@ -44,9 +44,6 @@ class GNautilus(AmplifierSource):
         self._impedance_check_running = False
         self._impedance_fresh = True
 
-    def __del__(self):
-        super().__del__()
-
     def start(self) -> None:
         self._device.start()
         super().start()

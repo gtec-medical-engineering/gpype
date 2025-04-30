@@ -1,0 +1,260 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:msdata="urn:schemas-microsoft-com:xml-msdata"
+           targetNamespace="xsd"
+           xmlns:xsi="xsd"
+           elementFormDefault="qualified">
+
+
+	<!-- TYPE DEFINITIONS -->
+
+  <!-- Stimuli -->
+
+	<xs:complexType name="Stimulus" abstract="true">
+    <xs:attribute name="UdpMessage" type="xs:string"/>
+    <xs:attribute name="LslMessage" type="xs:string"/>
+  </xs:complexType>
+
+	<xs:complexType name="VisualStimulus" abstract="true">
+		<xs:complexContent>
+			<xs:extension base="xsi:Stimulus">
+				<xs:attribute name="HorizontalAlignment"    type="xsi:HorizontalAlignment"   default="Center"/>
+				<xs:attribute name="VerticalAlignment"      type="xsi:VerticalAlignment"     default="Center"/>
+				<xs:attribute name="Scaling"                type="xsi:Scaling"               default="Manual"/>
+				<xs:attribute name="ManualScalingPercent"   type="xsi:NonNegativeDouble"     default="100"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="StaticVisualStimulus" abstract="true">
+		<xs:complexContent>
+			<xs:extension base="xsi:VisualStimulus">
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="PictureStimulus">
+		<xs:complexContent>
+			<xs:extension base="xsi:StaticVisualStimulus">
+				<xs:attribute name="FileName" type="xs:string"  use="required"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="TextStimulus">
+		<xs:complexContent>
+			<xs:extension base="xsi:StaticVisualStimulus">
+				<xs:attribute name="Caption"     type="xs:string"     default=""/>
+				<xs:attribute name="Color"       type="xsi:HexRGB"    default="FFFFFF"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="AudioStimulus">
+		<xs:complexContent>
+			<xs:extension base="xsi:Stimulus">
+				<xs:attribute name="FileName"      type="xs:string"                   use="required"/>
+				<xs:attribute name="VolumePercent" type="xsi:Max100NonNegativeDouble" default="100"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="VideoStimulus">
+		<xs:complexContent>
+			<xs:extension base="xsi:VisualStimulus">
+				<xs:attribute name="VolumePercent" type="xsi:Max100NonNegativeDouble" default="100"/>
+				<xs:attribute name="FileName"      type="xs:string"                   use="required"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="Port">
+		<xs:attribute name="Index"       type="xsi:DigitalOutPortIndex"  use="required"/>
+		<xs:attribute name="FrequencyHz" type="xsi:NonNegativeDouble"    default="0"/>
+	</xs:complexType>
+
+	<xs:complexType name="DigitalOutStimulus">
+		<xs:complexContent>
+			<xs:extension base="xsi:Stimulus">
+				<xs:choice minOccurs="1" maxOccurs="16">
+					<xs:element name="Port" type="xsi:Port"/>
+				</xs:choice>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+
+  <!-- Contexts -->
+  <xs:complexType name="Contexts">
+    <xs:sequence minOccurs="1" maxOccurs="unbounded">
+      <xs:element name="Context" type="xsi:Context"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="Context">
+    <xs:attribute name="ID" type="xs:NCName" use="required"/>
+    <xs:attribute name="TargetGroup" type="xs:string" use="required"/>
+    <xs:attribute name="DelaySeconds" type="xs:double" use="required"/>
+    <xs:attribute name="DurationSeconds" type="xsi:NonNegativeDouble" use="required"/>
+  </xs:complexType>
+
+	<!-- Tasks -->
+	<xs:complexType name="Node" abstract="true">
+		<xs:attribute name="Label"   type="xs:string"   default=""/>
+	</xs:complexType>
+
+	<xs:complexType name="GenericTask" abstract="true">
+		<xs:complexContent>
+			<xs:extension base="xsi:Node">
+				<xs:attribute name="Multiplicity" type="xs:positiveInteger"  default="1"/>
+				<xs:attribute name="ID"           type="xs:NCName"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<!-- SingleTask -->
+	<xs:complexType name="SingleTask" mixed="true">
+		<xs:complexContent>
+			<xs:extension base="xsi:GenericTask">
+				<xs:sequence minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Stimulus" type="xsi:Stimulus" minOccurs="0">
+            <xs:unique name="UniquePortKey">
+              <xs:selector xpath="xsi:Port" />
+              <xs:field xpath="@Index" />
+            </xs:unique>
+          </xs:element>
+        </xs:sequence>
+				<xs:attribute name="Group"           type="xs:nonNegativeInteger" default="0"/>
+				<xs:attribute name="DurationSeconds"                              default="1">
+					<xs:simpleType>
+						<xs:restriction base="xs:double">
+							<xs:minInclusive value="0.01"/>
+							<xs:maxInclusive value="1200"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:attribute>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+
+	<!-- MultiTask -->
+	<xs:complexType name="MultiTask" mixed="true">
+		<xs:complexContent>
+			<xs:extension base="xsi:GenericTask">
+				<xs:choice minOccurs="1" maxOccurs="unbounded">
+					<xs:element name="Task" type="xsi:GenericTask"/>
+				</xs:choice>
+				<xs:attribute name="TaskOrder"    type="xsi:TaskOrder"         default="Deterministic"/>
+				<xs:attribute name="SampleSize"   type="xs:nonNegativeInteger" default="0"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+
+	<!-- Paradigm -->
+	<xs:complexType name="Paradigm" mixed="true">
+		<xs:complexContent>
+			<xs:extension base="xsi:Node">
+				<xs:choice minOccurs="1" maxOccurs="unbounded">
+					<xs:element name="Task" type="xsi:GenericTask"/>
+				</xs:choice>
+				<xs:attribute name="TaskOrder"             type="xsi:TaskOrder"         default="Deterministic" />
+				<xs:attribute name="SampleSize"            type="xs:nonNegativeInteger" default="0"/>
+				<xs:attribute name="BaseFolder"            type="xs:string"             default="./"/>
+				<xs:attribute name="BackgroundColor"       type="xsi:HexRGB"            default="000000"/>
+				<xs:attribute name="UdpAddress"            type="xs:string"             use="optional"/>
+        <xs:attribute name="UdpPort"               type="xs:nonNegativeInteger" use="optional"/>
+        <xs:attribute name="LslStreamName"         type="xs:string"             use="optional"/>
+      </xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+
+
+
+
+	<!-- Additional Groups/Types -->
+
+	<xs:simpleType name="HexRGB">
+		<xs:restriction base="xs:hexBinary">
+			<xs:length value="3"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="HorizontalAlignment">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Left"/>
+			<xs:enumeration value="Center"/>
+			<xs:enumeration value="Right"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="VerticalAlignment">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Top"/>
+			<xs:enumeration value="Center"/>
+			<xs:enumeration value="Bottom"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="Scaling">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Fit"/>
+			<xs:enumeration value="Fill"/>
+			<xs:enumeration value="Stretch"/>
+			<xs:enumeration value="Manual"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="NonNegativeDouble">
+		<xs:restriction base="xs:double">
+			<xs:minInclusive value="0"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="Max100NonNegativeDouble">
+		<xs:restriction base="xs:double">
+			<xs:minInclusive value="0"/>
+			<xs:maxInclusive value="100"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="DigitalOutPortIndex">
+		<xs:restriction base="xs:integer">
+			<xs:minInclusive value="0"/>
+			<xs:maxInclusive value="15"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+
+	<xs:simpleType name="TaskOrder">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Deterministic"/>
+			<xs:enumeration value="RandomWithReplacement"/>
+			<xs:enumeration value="RandomWithoutReplacement"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+  
+
+	<xs:complexType name="XmlData" mixed="true">
+    <xs:all>
+      <xs:element name="Paradigm"   type="xsi:Paradigm"   minOccurs="1"/>
+      <xs:element name="Contexts"    type="xsi:Contexts"  minOccurs="0" />
+    </xs:all>
+  </xs:complexType>
+
+
+
+	<!-- ELEMENT DEFINITION -->
+
+	<xs:element name="Data" type="xsi:XmlData">
+
+	</xs:element>
+
+
+</xs:schema>
+
+
+

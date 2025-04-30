@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Data xmlns="xsd" xmlns:ns="http://www.w3.org/2001/XMLSchema-instance" ns:schemaLocation="xsd ..\ParadigmSchema.xsd">
+
+  <Paradigm BaseFolder="media_left/" TaskOrder="Deterministic" UdpAddress="127.0.0.1" UdpPort="1000">
+    <Task ns:type="SingleTask" ID="ST_PreParadigm" DurationSeconds="10">
+      <Stimulus ns:type="TextStimulus" Caption="+" />
+    </Task>
+    <Task ns:type="MultiTask" ID="MT_TaskSequence" TaskOrder="Deterministic" SampleSize="120">
+      <Task ns:type="MultiTask" ID="MT_Move" TaskOrder="RandomWithoutReplacement" SampleSize="1">
+        <Task ns:type="SingleTask" ID="ST_Fist" DurationSeconds="1" Group="1">
+          <Stimulus ns:type="PictureStimulus" FileName="fist.jpg" HorizontalAlignment="Center" VerticalAlignment="Center" Scaling="Manual" ManualScalingPercent="100" UdpMessage="1"/>/>
+        </Task>
+        <Task ns:type="SingleTask" ID="ST_Hand" DurationSeconds="1" Group="2">
+          <Stimulus ns:type="PictureStimulus" FileName="hand.jpg" HorizontalAlignment="Center" VerticalAlignment="Center" Scaling="Manual" ManualScalingPercent="100" UdpMessage="2"/>/>
+        </Task>
+        <Task ns:type="SingleTask" ID="ST_Peace" DurationSeconds="1" Group="3">
+          <Stimulus ns:type="PictureStimulus" FileName="peace.jpg" HorizontalAlignment="Center" VerticalAlignment="Center" Scaling="Manual" ManualScalingPercent="100" UdpMessage="3"/>/>
+        </Task>
+      </Task>
+      <Task ns:type="MultiTask" ID="MT_Distract" TaskOrder="RandomWithReplacement" SampleSize="1">
+        <Task ns:type="SingleTask" ID="ST_Distractor1" DurationSeconds="1.5" Group="99">
+          <Stimulus ns:type="PictureStimulus" FileName="fist_scrambled.jpg" HorizontalAlignment="Center" VerticalAlignment="Center" Scaling="Manual" ManualScalingPercent="100" UdpMessage="99"/>
+        </Task>
+        <Task ns:type="SingleTask" ID="ST_Distractor2" DurationSeconds="2.0" Group="99">
+          <Stimulus ns:type="PictureStimulus" FileName="hand_scrambled.jpg" HorizontalAlignment="Center" VerticalAlignment="Center" Scaling="Manual" ManualScalingPercent="100" UdpMessage="99"/>
+        </Task>
+        <Task ns:type="SingleTask" ID="ST_Distractor3" DurationSeconds="2.5" Group="99">
+          <Stimulus ns:type="PictureStimulus" FileName="peace_scrambled.jpg" HorizontalAlignment="Center" VerticalAlignment="Center" Scaling="Manual" ManualScalingPercent="100" UdpMessage="99"/>
+        </Task>
+      </Task>
+    </Task>
+    <Task ns:type="SingleTask" ID="ST_PostParadigm" DurationSeconds="5">
+      <Stimulus ns:type="TextStimulus" Caption="Thank You!" />
+    </Task>
+  </Paradigm>
+</Data>
