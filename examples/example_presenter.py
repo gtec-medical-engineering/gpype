@@ -14,7 +14,9 @@ if __name__ == '__main__':
     p = gp.Pipeline()
 
     # amplifier
-    amp = gp.BCICore8(channel_count=8)
+    amp = gp.NoiseGenerator(variance=30,
+                            channel_count=8,
+                            sampling_rate=fs)
 
     # trigger receiver
     udp_receiver = gp.UDPReceiver()
@@ -42,15 +44,15 @@ if __name__ == '__main__':
                 'label': '1'},
                {'channel': 8,
                 'value': 2,
-                'color': 'r',
+                'color': 'g',
                 'label': '2'},
                {'channel': 8,
                 'value': 3,
-                'color': 'r',
+                'color': 'b',
                 'label': '3'},
                {'channel': 8,
                 'value': 99,
-                'color': 'g',
+                'color': 'k',
                 'label': 'Rest'},
                ]
     scope = gp.TimeSeriesScope(amplitude_limit=100,

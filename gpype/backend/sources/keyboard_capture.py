@@ -9,7 +9,7 @@ PORT_OUT = Constants.Defaults.PORT_OUT
 
 class KeyboardCapture(EventSource):
 
-    FINGERPRINT = "4f7c4485dcd15c576496cbe810c447be"
+    FINGERPRINT = "a9dcf27822847e6f6e0a22fa7f68fdcd"
 
     class Configuration(EventSource.Configuration):
         class Keys(EventSource.Configuration.Keys):

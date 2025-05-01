@@ -14,7 +14,7 @@ PORT_IN = Constants.Defaults.PORT_IN
 
 class GNautilus(AmplifierSource):
 
-    FINGERPRINT = "1e627994b3d4e9c322e6281c996da5dc"
+    FINGERPRINT = "6eea0766ddf031b8b1c0a32893062ec5"
 
     class Configuration(AmplifierSource.Configuration):
         class Keys(AmplifierSource.Configuration.Keys):

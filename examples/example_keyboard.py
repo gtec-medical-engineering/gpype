@@ -44,8 +44,7 @@ if __name__ == '__main__':
                ]
     scope = gp.TimeSeriesScope(amplitude_limit=30,
                                time_window=10,
-                               markers=markers,
-                               hidden_channels=[8])
+                               markers=markers)
 
     # merge
     router = gp.Router(input_selector=[gp.Router.ALL, gp.Router.ALL])

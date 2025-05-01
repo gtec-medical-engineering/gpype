@@ -9,7 +9,7 @@ PORT_OUT = Constants.Defaults.PORT_OUT
 
 class UDPReceiver(EventSource):
 
-    FINGERPRINT = "8f59851f7fa3af24db896c6469c5db47"
+    FINGERPRINT = "9f9be5078cbbe3aa921df3b740a304b1"
     DEFAULT_IP: str = "127.0.0.1"
     DEFAULT_PORT: str = 1000
 

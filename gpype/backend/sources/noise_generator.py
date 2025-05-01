@@ -10,7 +10,7 @@ OUT_PORT = ioc.Constants.Defaults.PORT_OUT
 
 class NoiseGenerator(FixedRateSource):
 
-    FINGERPRINT = "5278262962ee6b1d397db9c1f45e433e"
+    FINGERPRINT = "cfc461984be583d00fa5fd7bb9bbf3db"
 
     class Configuration(FixedRateSource.Configuration):
         class Keys(FixedRateSource.Configuration.Keys):
