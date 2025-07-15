@@ -1,7 +1,10 @@
 # g.Pype
 
 [![Powered by g.tec](https://img.shields.io/badge/powered_by-g.tec-blue)](http://gtec.at)
-[![PyPI version](https://img.shields.io/pypi/v/gpype.svg?label=PyPI%20version&color=brown)](https://pypi.org/project/gpype/)
+[![PyPI](https://img.shields.io/pypi/v/gpype.svg?label=PyPI%20version&color=brown)](https://pypi.org/project/gpype/)
+[![python](https://img.shields.io/pypi/pyversions/gpype.svg)](https://pypi.org/project/gpype/)
+![tests](https://img.shields.io/badge/tests-all_3_passed-brightgreen.svg)
+![coverage](https://img.shields.io/badge/coverage-34.6%25-red.svg)
 [![License](https://img.shields.io/badge/License-GNCL-red)](https://github.com/gtec-medical-engineering/gpype/blob/main/LICENSE)
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-green)](https://gtec-medical-engineering.github.io/gpype/)
 
@@ -34,17 +37,3 @@ Full documentation is available at [GitHub Pages](https://gtec-medical-engineeri
 
 # Changelog
 See the [Changelog](https://gtec-medical-engineering.github.io/gpype/#changelog) section in the official documentation.
-## Changelog
-
-## Changelog
-
-### [2.1.1] - 2025-04-30
-- Minor bugfixes
-
-### [2.1.0] - 2025-04-30
-- Bugfixing
-- g.Nautilus integrated (Win only)
-- ParadigmPresenter integrated (Win only)
-
-### [2.0.0] - 2025-02-26
-- First public beta release

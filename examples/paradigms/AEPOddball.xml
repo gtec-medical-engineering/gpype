@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Data xmlns="xsd" xmlns:ns="http://www.w3.org/2001/XMLSchema-instance" ns:schemaLocation="xsd ParadigmSchema.xsd">
+  <Paradigm BaseFolder="media/" TaskOrder="Deterministic" UdpAddress="127.0.0.1" UdpPort="1000">
+    <Task ns:type="SingleTask" ID="ST_PreParadigm" DurationSeconds="20" Group="0">
+      <Stimulus ns:type="PictureStimulus" FileName="Checkerboard_Rest.png" HorizontalAlignment="Center" VerticalAlignment="Center" Scaling="Fit" />
+    </Task>
+      <Task ns:type="MultiTask" SampleSize="480">
+        <Task ns:type="MultiTask" TaskOrder="RandomWithoutReplacement" SampleSize="1">
+          <Task ns:type="SingleTask" ID="Target" DurationSeconds="0.25" Group="1">
+            <Stimulus ns:type="AudioStimulus" FileName="Target.wav" UdpMessage="1"/>
+          </Task>
+          <Task ns:type="SingleTask" ID="Non_Target" DurationSeconds="0.25" Group="2" Multiplicity="7">
+            <Stimulus ns:type="AudioStimulus" FileName="Nontarget.wav" UdpMessage="2"/>
+          </Task>
+        </Task>
+        <Task ns:type="MultiTask" TaskOrder="RandomWithReplacement" SampleSize="1">
+          <Task ns:type="SingleTask" DurationSeconds="0.2" Group="0"/>
+          <Task ns:type="SingleTask" DurationSeconds="0.3" Group="0"/>
+          <Task ns:type="SingleTask" DurationSeconds="0.4" Group="0"/>
+        </Task>
+      </Task>
+    <Task ns:type="SingleTask" DurationSeconds="10">
+      <Stimulus ns:type="TextStimulus" Caption="Thank You!" />
+    </Task>
+  </Paradigm>
+</Data>

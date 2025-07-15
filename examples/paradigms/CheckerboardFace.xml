@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Data  xmlns="xsd" xmlns:ns="http://www.w3.org/2001/XMLSchema-instance" ns:schemaLocation="xsd ../ParadigmSchema.xsd">
+
+  <Paradigm BaseFolder="media/" TaskOrder="Deterministic" UdpAddress="127.0.0.1" UdpPort="1000">
+    <Task ns:type="SingleTask" ID="ST_PreParadigm" DurationSeconds="20" Group="0">
+      <Stimulus ns:type="PictureStimulus" FileName="Checkerboard_Rest.png" HorizontalAlignment="Center" VerticalAlignment="Center" Scaling="Fit" />
+    </Task>
+	<Task ns:type="MultiTask" ID="MT_Wrapper" TaskOrder="Deterministic" SampleSize="300">
+	
+		<Task ns:type="MultiTask" ID="MT_Stim" TaskOrder="RandomWithoutReplacement" SampleSize="1">
+		 <Task ns:type="SingleTask" ID="Checkerboard_05" DurationSeconds="0.15" Group="1" Multiplicity="20">
+		  <Stimulus ns:type="PictureStimulus" FileName="Checkerboard_05.png" HorizontalAlignment="Center" VerticalAlignment="Center" Scaling="Fit" UdpMessage="1"/>
+		 </Task>
+		 <Task ns:type="SingleTask" ID="Checkerboard_41" DurationSeconds="0.15" Group="2" Multiplicity="20">
+		  <Stimulus ns:type="PictureStimulus" FileName="Checkerboard_41.png" HorizontalAlignment="Center" VerticalAlignment="Center" Scaling="Fit" UdpMessage="2"/>
+		 </Task>
+		 <Task ns:type="MultiTask" ID="MT_Face" TaskOrder="RandomWithReplacement" SampleSize="1" Multiplicity="10">
+			<Task ns:type="SingleTask" ID="Face01" DurationSeconds="0.15" Group="3">
+				<Stimulus ns:type="PictureStimulus" FileName="f01.jpg" HorizontalAlignment="Center" VerticalAlignment="Center" Scaling="Fit" UdpMessage="3"/>
+			</Task>
+			<Task ns:type="SingleTask" ID="Face02" DurationSeconds="0.15" Group="3">
+				<Stimulus ns:type="PictureStimulus" FileName="f02.jpg" HorizontalAlignment="Center" VerticalAlignment="Center" Scaling="Fit" UdpMessage="3"/>
+			</Task>
+			<Task ns:type="SingleTask" ID="Face03" DurationSeconds="0.15" Group="3">
+				<Stimulus ns:type="PictureStimulus" FileName="f03.jpg" HorizontalAlignment="Center" VerticalAlignment="Center" Scaling="Fit" UdpMessage="3"/>
+			</Task>
+			<Task ns:type="SingleTask" ID="Face04" DurationSeconds="0.15" Group="3">
+				<Stimulus ns:type="PictureStimulus" FileName="f04.jpg" HorizontalAlignment="Center" VerticalAlignment="Center" Scaling="Fit" UdpMessage="3"/>
+			</Task>
+			<Task ns:type="SingleTask" ID="Face06" DurationSeconds="0.15" Group="3">
+				<Stimulus ns:type="PictureStimulus" FileName="f06.jpg" HorizontalAlignment="Center" VerticalAlignment="Center" Scaling="Fit" UdpMessage="3"/>
+			</Task>
+			<Task ns:type="SingleTask" ID="Face07" DurationSeconds="0.15" Group="3">
+				<Stimulus ns:type="PictureStimulus" FileName="f07.jpg" HorizontalAlignment="Center" VerticalAlignment="Center" Scaling="Fit" UdpMessage="3"/>
+			</Task>
+		 </Task>
+		</Task>
+		
+		
+		<Task ns:type="MultiTask" ID="MT_Rest" TaskOrder="RandomWithReplacement" SampleSize="1">
+			<Task ns:type="SingleTask" ID="ST_Rest1" DurationSeconds="0.6" Group="0">
+			  <Stimulus ns:type="PictureStimulus" FileName="Checkerboard_Rest.png" HorizontalAlignment="Center" VerticalAlignment="Center" Scaling="Fit" />
+			</Task>
+			<Task ns:type="SingleTask" ID="ST_Rest2" DurationSeconds="0.7" Group="0">
+			  <Stimulus ns:type="PictureStimulus" FileName="Checkerboard_Rest.png" HorizontalAlignment="Center" VerticalAlignment="Center" Scaling="Fit" />
+			</Task>
+			<Task ns:type="SingleTask" ID="ST_Rest3" DurationSeconds="0.8" Group="0">
+			  <Stimulus ns:type="PictureStimulus" FileName="Checkerboard_Rest.png" HorizontalAlignment="Center" VerticalAlignment="Center" Scaling="Fit" />
+			</Task>
+		</Task>
+	</Task>
+  </Paradigm>
+</Data>
