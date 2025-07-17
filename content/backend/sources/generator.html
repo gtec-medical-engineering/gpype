@@ -1,0 +1,287 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Generator &mdash; g.Pype v3.0.1  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="g.Nautilus" href="g_nautilus.html" />
+    <link rel="prev" title="BCI Core-8" href="bci_core8.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            g.Pype v3.0.1
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/index.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Backend</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../core/index.html">Core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../filters/index.html">Filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../flow/index.html">Flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sinks/index.html">Sinks</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Source Nodes</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="base/index.html">Base Source Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bci_core8.html">BCI Core-8</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Generator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="g_nautilus.html">g.Nautilus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="keyboard.html">Keyboard</a></li>
+<li class="toctree-l3"><a class="reference internal" href="udp_receiver.html">UDP Receiver</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../timing/index.html">Timing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../transform/index.html">Transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pipeline.html">Pipeline</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../frontend/index.html">Frontend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">g.Pype v3.0.1</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Backend</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Source Nodes</a></li>
+      <li class="breadcrumb-item active">Generator</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/content/backend/sources/generator.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="generator">
+<h1>Generator<a class="headerlink" href="#generator" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="gpype.backend.sources.generator.Generator">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gpype.backend.sources.generator.</span></span><span class="sig-name descname"><span class="pre">Generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_count</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_amplitude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_amplitude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/backend/sources/generator.html#Generator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.backend.sources.generator.Generator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="base/fixed_rate_source.html#gpype.backend.sources.base.fixed_rate_source.FixedRateSource" title="gpype.backend.sources.base.fixed_rate_source.FixedRateSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">FixedRateSource</span></code></a></p>
+<p>Signal generator source for creating synthetic test signals.</p>
+<p>This class generates configurable test signals with optional noise for
+testing and development of BCI pipelines. It supports multiple waveform
+types including sinusoidal, rectangular, and pulse signals.</p>
+<p>The generator can produce multi-channel signals with identical waveforms
+across all channels, making it useful for testing filters, analyzing
+pipeline performance, and creating controlled test scenarios.</p>
+<dl class="simple">
+<dt>Features:</dt><dd><ul class="simple">
+<li><p>Multiple signal shapes (sine, rectangular, pulse)</p></li>
+<li><p>Configurable frequency, amplitude, and noise levels</p></li>
+<li><p>Multi-channel output support</p></li>
+<li><p>Frame-based output compatible with g.Pype architecture</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sampling_rate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>)</p></li>
+<li><p><strong>channel_count</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>)</p></li>
+<li><p><strong>frame_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>)</p></li>
+<li><p><strong>signal_frequency</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>)</p></li>
+<li><p><strong>signal_shape</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p></li>
+<li><p><strong>signal_amplitude</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>)</p></li>
+<li><p><strong>noise_amplitude</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gpype.backend.sources.generator.Generator.SHAPE_SINUSOID">
+<span class="sig-name descname"><span class="pre">SHAPE_SINUSOID</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'sine'</span></em><a class="headerlink" href="#gpype.backend.sources.generator.Generator.SHAPE_SINUSOID" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gpype.backend.sources.generator.Generator.SHAPE_RECTANGULAR">
+<span class="sig-name descname"><span class="pre">SHAPE_RECTANGULAR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'rect'</span></em><a class="headerlink" href="#gpype.backend.sources.generator.Generator.SHAPE_RECTANGULAR" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gpype.backend.sources.generator.Generator.SHAPE_PULSE">
+<span class="sig-name descname"><span class="pre">SHAPE_PULSE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pulse'</span></em><a class="headerlink" href="#gpype.backend.sources.generator.Generator.SHAPE_PULSE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gpype.backend.sources.generator.Generator.Configuration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Configuration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/backend/sources/generator.html#Generator.Configuration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.backend.sources.generator.Generator.Configuration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="base/fixed_rate_source.html#gpype.backend.sources.base.fixed_rate_source.FixedRateSource.Configuration" title="gpype.backend.sources.base.fixed_rate_source.FixedRateSource.Configuration"><code class="xref py py-class docutils literal notranslate"><span class="pre">Configuration</span></code></a></p>
+<p>Configuration class for Generator signal parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sampling_rate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>)</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="gpype.backend.sources.generator.Generator.Configuration.Keys">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Keys</span></span><a class="reference internal" href="../../../_modules/gpype/backend/sources/generator.html#Generator.Configuration.Keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.backend.sources.generator.Generator.Configuration.Keys" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="base/fixed_rate_source.html#gpype.backend.sources.base.fixed_rate_source.FixedRateSource.Configuration.Keys" title="gpype.backend.sources.base.fixed_rate_source.FixedRateSource.Configuration.Keys"><code class="xref py py-class docutils literal notranslate"><span class="pre">Keys</span></code></a></p>
+<p>Configuration key constants for the Generator.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gpype.backend.sources.generator.Generator.Configuration.Keys.SIGNAL_FREQUENCY">
+<span class="sig-name descname"><span class="pre">SIGNAL_FREQUENCY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'signal_frequency'</span></em><a class="headerlink" href="#gpype.backend.sources.generator.Generator.Configuration.Keys.SIGNAL_FREQUENCY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gpype.backend.sources.generator.Generator.Configuration.Keys.SIGNAL_SHAPE">
+<span class="sig-name descname"><span class="pre">SIGNAL_SHAPE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'signal_shape'</span></em><a class="headerlink" href="#gpype.backend.sources.generator.Generator.Configuration.Keys.SIGNAL_SHAPE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gpype.backend.sources.generator.Generator.Configuration.Keys.SIGNAL_AMPLITUDE">
+<span class="sig-name descname"><span class="pre">SIGNAL_AMPLITUDE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'signal_amplitude'</span></em><a class="headerlink" href="#gpype.backend.sources.generator.Generator.Configuration.Keys.SIGNAL_AMPLITUDE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gpype.backend.sources.generator.Generator.Configuration.Keys.NOISE_AMPLITUDE">
+<span class="sig-name descname"><span class="pre">NOISE_AMPLITUDE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'noise_amplitude'</span></em><a class="headerlink" href="#gpype.backend.sources.generator.Generator.Configuration.Keys.NOISE_AMPLITUDE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpype.backend.sources.generator.Generator.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_count</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_amplitude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_amplitude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/backend/sources/generator.html#Generator.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.backend.sources.generator.Generator.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize the signal generator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sampling_rate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Sampling frequency in Hz for signal
+generation and output timing.</p></li>
+<li><p><strong>channel_count</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Number of output channels. All channels
+will receive identical generated signals.</p></li>
+<li><p><strong>frame_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Number of samples per output frame.
+Affects processing latency and computational efficiency.</p></li>
+<li><p><strong>signal_frequency</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Frequency of the generated
+signal in Hz. Defaults to 10.0 Hz if None.</p></li>
+<li><p><strong>signal_shape</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Shape of the generated waveform.
+Must be one of SHAPE_SINUSOID, SHAPE_RECTANGULAR, or
+SHAPE_PULSE. Defaults to SHAPE_SINUSOID if None.</p></li>
+<li><p><strong>signal_amplitude</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Peak amplitude of the signal component.
+Set to 0.0 for noise-only output.</p></li>
+<li><p><strong>noise_amplitude</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Standard deviation of Gaussian noise
+added to the signal. Set to 0.0 for noise-free output.</p></li>
+<li><p><strong>**kwargs</strong> – Additional configuration parameters passed to
+FixedRateSource.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If signal_frequency or noise_amplitude is negative,
+    or if signal_shape is not a supported waveform type.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpype.backend.sources.generator.Generator.step">
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/backend/sources/generator.html#Generator.step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.backend.sources.generator.Generator.step" title="Link to this definition"></a></dt>
+<dd><p>Generate one frame of synthetic signal data.</p>
+<p>This method implements the core signal generation logic, creating
+a frame of data containing the configured waveform plus optional
+noise. The signal maintains phase continuity across frames through
+internal time tracking.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Input data dictionary (unused for signal generation
+but required by the FixedRateSource interface).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Output data dictionary with OUT_PORT key containing the</dt><dd><p>generated signal frame of shape (frame_size, channel_count).
+Returns None if not a decimation step.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The generated signal is identical across all channels. Time
+continuity is maintained between frames for seamless waveforms.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="bci_core8.html" class="btn btn-neutral float-left" title="BCI Core-8" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="g_nautilus.html" class="btn btn-neutral float-right" title="g.Nautilus" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright g.tec medical engineering GmbH.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

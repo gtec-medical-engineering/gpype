@@ -1,0 +1,8 @@
+Event Source
+============
+
+.. autoclass:: gpype.backend.sources.base.event_source.EventSource
+   :members:
+   :undoc-members:
+   :special-members: __init__
+   :show-inheritance:

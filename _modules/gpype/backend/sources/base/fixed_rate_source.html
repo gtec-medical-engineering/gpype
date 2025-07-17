@@ -1,0 +1,349 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gpype.backend.sources.base.fixed_rate_source &mdash; g.Pype v3.0.1  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            g.Pype v3.0.1
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/backend/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/frontend/index.html">Frontend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/examples/index.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">g.Pype v3.0.1</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gpype.backend.sources.base.fixed_rate_source</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gpype.backend.sources.base.fixed_rate_source</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">....common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">Constants</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...core.o_port</span><span class="w"> </span><span class="kn">import</span> <span class="n">OPort</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.source</span><span class="w"> </span><span class="kn">import</span> <span class="n">Source</span>
+
+<span class="c1"># Convenience constant for default output port name</span>
+<span class="n">OUT_PORT</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">PORT_OUT</span>
+
+
+<div class="viewcode-block" id="FixedRateSource">
+<a class="viewcode-back" href="../../../../../content/backend/sources/base/fixed_rate_source.html#gpype.backend.sources.base.fixed_rate_source.FixedRateSource">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FixedRateSource</span><span class="p">(</span><span class="n">Source</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fixed-rate source for continuous data generation at sampling rate.</span>
+
+<span class="sd">    This class implements a source that generates data at a fixed sampling rate</span>
+<span class="sd">    using a background thread. It maintains precise timing by tracking expected</span>
+<span class="sd">    sample times and adjusting sleep periods to compensate for delays.</span>
+
+<span class="sd">    Features:</span>
+<span class="sd">    - Precise timing control with drift compensation</span>
+<span class="sd">    - Background threading for non-blocking operation</span>
+<span class="sd">    - Configurable sampling rate validation</span>
+<span class="sd">    - Automatic context propagation with sampling rate information</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        _running: Flag indicating if the background thread is active</span>
+<span class="sd">        _thread: Background thread for data generation</span>
+<span class="sd">        _time_start: Timestamp when data generation started</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The source uses absolute timing to prevent cumulative drift and</span>
+<span class="sd">        handles timing lag gracefully by skipping excessive sleep periods.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="FixedRateSource.Configuration">
+<a class="viewcode-back" href="../../../../../content/backend/sources/base/fixed_rate_source.html#gpype.backend.sources.base.fixed_rate_source.FixedRateSource.Configuration">[docs]</a>
+    <span class="k">class</span><span class="w"> </span><span class="nc">Configuration</span><span class="p">(</span><span class="n">Source</span><span class="o">.</span><span class="n">Configuration</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Configuration class for FixedRateSource parameters.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="FixedRateSource.Configuration.Keys">
+<a class="viewcode-back" href="../../../../../content/backend/sources/base/fixed_rate_source.html#gpype.backend.sources.base.fixed_rate_source.FixedRateSource.Configuration.Keys">[docs]</a>
+        <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">Source</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Configuration keys for fixed-rate source settings.&quot;&quot;&quot;</span>
+            <span class="n">SAMPLING_RATE</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">SAMPLING_RATE</span>  <span class="c1"># &#39;sampling_rate&#39;</span></div>
+
+
+<div class="viewcode-block" id="FixedRateSource.Configuration.__init__">
+<a class="viewcode-back" href="../../../../../content/backend/sources/base/fixed_rate_source.html#gpype.backend.sources.base.fixed_rate_source.FixedRateSource.Configuration.__init__">[docs]</a>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                     <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                     <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Initialize configuration with sampling rate validation.</span>
+
+<span class="sd">            Args:</span>
+<span class="sd">                sampling_rate: Sampling rate in Hz. Must be positive.</span>
+<span class="sd">                **kwargs: Additional configuration parameters.</span>
+
+<span class="sd">            Raises:</span>
+<span class="sd">                ValueError: If sampling_rate is not positive.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">if</span> <span class="n">sampling_rate</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;sampling_rate must be greater than zero.&quot;</span><span class="p">)</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sampling_rate</span><span class="o">=</span><span class="n">sampling_rate</span><span class="p">,</span>
+                             <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+</div>
+
+
+<div class="viewcode-block" id="FixedRateSource.__init__">
+<a class="viewcode-back" href="../../../../../content/backend/sources/base/fixed_rate_source.html#gpype.backend.sources.base.fixed_rate_source.FixedRateSource.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                 <span class="n">output_ports</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">OPort</span><span class="o">.</span><span class="n">Configuration</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the fixed-rate source with sampling configuration.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sampling_rate: Sampling rate in Hz for data generation.</span>
+<span class="sd">                Must be positive. Higher rates require more precise timing.</span>
+<span class="sd">            output_ports: List of output port configurations. If None,</span>
+<span class="sd">                default port configuration will be used.</span>
+<span class="sd">            **kwargs: Additional arguments passed to parent Source class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Initialize parent source with configuration</span>
+        <span class="n">Source</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                        <span class="n">sampling_rate</span><span class="o">=</span><span class="n">sampling_rate</span><span class="p">,</span>
+                        <span class="n">output_ports</span><span class="o">=</span><span class="n">output_ports</span><span class="p">,</span>
+                        <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Initialize threading components</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_running</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_time_start</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="FixedRateSource.start">
+<a class="viewcode-back" href="../../../../../content/backend/sources/base/fixed_rate_source.html#gpype.backend.sources.base.fixed_rate_source.FixedRateSource.start">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start the fixed-rate source and begin data generation.</span>
+
+<span class="sd">        Initializes the parent source and starts the background thread</span>
+<span class="sd">        for continuous data generation at the specified sampling rate.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The background thread is created as a daemon thread to ensure</span>
+<span class="sd">            clean shutdown when the main program exits. Data generation</span>
+<span class="sd">            begins immediately after the thread starts.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Start parent source first</span>
+        <span class="n">Source</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="c1"># Start background thread if not already running</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_running</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_running</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_thread_function</span><span class="p">,</span>
+                                            <span class="n">daemon</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="FixedRateSource.stop">
+<a class="viewcode-back" href="../../../../../content/backend/sources/base/fixed_rate_source.html#gpype.backend.sources.base.fixed_rate_source.FixedRateSource.stop">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stop the fixed-rate source and terminate data generation.</span>
+
+<span class="sd">        Signals the background thread to stop and waits for it to complete.</span>
+<span class="sd">        The parent stop method handles the main cleanup.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The method waits up to 500ms for the thread to join. After this</span>
+<span class="sd">            timeout, the thread will be abandoned but should terminate</span>
+<span class="sd">            shortly due to daemon status.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Stop parent source first</span>
+        <span class="n">Source</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="c1"># Signal thread to stop and wait for completion</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_running</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_running</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>  <span class="c1"># Wait up to 500ms</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_thread_function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Background thread function for fixed-rate data generation.</span>
+
+<span class="sd">        This method runs continuously in a background thread, generating</span>
+<span class="sd">        data at precise intervals determined by the sampling rate. It uses</span>
+<span class="sd">        absolute timing to prevent cumulative drift and handles timing</span>
+<span class="sd">        delays gracefully.</span>
+
+<span class="sd">        The timing algorithm:</span>
+<span class="sd">        1. Calculate expected time for next sample based on sample count</span>
+<span class="sd">        2. Compare with current time to determine sleep duration</span>
+<span class="sd">        3. Sleep only if duration is &gt; 1ms (avoid inaccurate short sleeps)</span>
+<span class="sd">        4. Handle timing lag by proceeding immediately when behind schedule</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            Uses time.time() for wall-clock timing and maintains sample</span>
+<span class="sd">            count to calculate absolute expected times, preventing drift</span>
+<span class="sd">            accumulation that would occur with relative timing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get configured sampling rate</span>
+        <span class="n">rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="n">FixedRateSource</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">SAMPLING_RATE</span><span class="p">]</span>
+
+        <span class="c1"># Initialize start time if not set</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_start</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_time_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+        <span class="c1"># Initialize timing variables</span>
+        <span class="n">sample_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">expected_next_sample_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_start</span>
+
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_running</span><span class="p">:</span>
+            <span class="c1"># Calculate the absolute time for the next sample</span>
+            <span class="n">sample_count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">expected_next_sample_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_start</span> <span class="o">+</span> <span class="n">sample_count</span> <span class="o">/</span> <span class="n">rate</span>
+
+            <span class="c1"># Calculate how long to sleep until next sample</span>
+            <span class="n">current_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+            <span class="n">sleep_time</span> <span class="o">=</span> <span class="n">expected_next_sample_time</span> <span class="o">-</span> <span class="n">current_time</span>
+
+            <span class="c1"># Handle timing control</span>
+            <span class="k">if</span> <span class="n">sleep_time</span> <span class="o">&gt;</span> <span class="mf">0.001</span><span class="p">:</span>
+                <span class="c1"># Sleep period is significant, wait for proper timing</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">sleep_time</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">sleep_time</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># We are lagging behind schedule - proceed immediately</span>
+                <span class="c1"># This handles cases where processing takes longer than</span>
+                <span class="c1"># the sample period, preventing infinite catch-up loops</span>
+                <span class="k">pass</span>
+            <span class="c1"># For 0 &lt;= sleep_time &lt;= 0.001, proceed immediately to avoid</span>
+            <span class="c1"># inaccurate short sleeps that can cause timing jitter</span>
+
+            <span class="c1"># Generate next sample</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cycle</span><span class="p">()</span>
+
+<div class="viewcode-block" id="FixedRateSource.setup">
+<a class="viewcode-back" href="../../../../../content/backend/sources/base/fixed_rate_source.html#gpype.backend.sources.base.fixed_rate_source.FixedRateSource.setup">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+              <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+              <span class="n">port_context_in</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Setup output port contexts with sampling rate information.</span>
+
+<span class="sd">        Configures output port contexts by adding sampling rate information</span>
+<span class="sd">        to each configured output port. This ensures downstream nodes</span>
+<span class="sd">        receive accurate timing information for their processing.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: Dictionary of input data arrays (empty for source nodes).</span>
+<span class="sd">            port_context_in: Input port contexts (empty for source nodes).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dictionary of output port contexts with sampling_rate information</span>
+<span class="sd">            added to each configured output port.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The sampling rate is propagated to all output ports, enabling</span>
+<span class="sd">            downstream nodes to perform sample-rate dependent processing</span>
+<span class="sd">            such as filtering, windowing, and frequency analysis.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Call parent setup to initialize base contexts</span>
+        <span class="n">port_context_out</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">port_context_in</span><span class="p">)</span>
+
+        <span class="c1"># Get configuration parameters</span>
+        <span class="n">sampling_rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">SAMPLING_RATE</span><span class="p">]</span>
+        <span class="n">out_ports</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">OUTPUT_PORTS</span><span class="p">]</span>
+
+        <span class="c1"># Add sampling rate context to each output port</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">out_ports</span><span class="p">)):</span>
+            <span class="c1"># Create context with sampling rate information</span>
+            <span class="n">context</span> <span class="o">=</span> <span class="p">{</span><span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">SAMPLING_RATE</span><span class="p">:</span> <span class="n">sampling_rate</span><span class="p">}</span>
+
+            <span class="c1"># Get port name and update its context</span>
+            <span class="n">port_name</span> <span class="o">=</span> <span class="n">out_ports</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">OPort</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">NAME</span><span class="p">]</span>
+            <span class="n">port_context_out</span><span class="p">[</span><span class="n">port_name</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">port_context_out</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright g.tec medical engineering GmbH.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

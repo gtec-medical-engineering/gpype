@@ -1,0 +1,260 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gpype.frontend.main_app &mdash; g.Pype v3.0.1  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            g.Pype v3.0.1
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../content/introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../content/backend/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../content/frontend/index.html">Frontend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../content/common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../content/examples/index.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">g.Pype v3.0.1</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gpype.frontend.main_app</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gpype.frontend.main_app</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">PySide6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="n">QIcon</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PySide6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="n">QApplication</span><span class="p">,</span> <span class="n">QMainWindow</span><span class="p">,</span> <span class="n">QVBoxLayout</span><span class="p">,</span> <span class="n">QWidget</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.widgets.base.widget</span><span class="w"> </span><span class="kn">import</span> <span class="n">Widget</span>
+
+
+<div class="viewcode-block" id="MainApp">
+<a class="viewcode-back" href="../../../content/frontend/main_app.html#gpype.frontend.main_app.MainApp">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MainApp</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Main application class for g.Pype frontend applications.</span>
+
+<span class="sd">    Provides a simple framework for creating PyQt6-based applications</span>
+<span class="sd">    with widget management, window configuration, and lifecycle handling.</span>
+<span class="sd">    Uses composition over inheritance for better flexibility and testability.</span>
+
+<span class="sd">    The application manages a collection of widgets, handles window setup,</span>
+<span class="sd">    and coordinates application startup and shutdown procedures.</span>
+
+<span class="sd">    Features:</span>
+<span class="sd">        - Automatic QApplication creation and management</span>
+<span class="sd">        - Window configuration with icon and positioning</span>
+<span class="sd">        - Widget lifecycle management (run/terminate)</span>
+<span class="sd">        - Graceful application shutdown handling</span>
+<span class="sd">        - Support for dependency injection (testing)</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        DEFAULT_POSITION: Default window geometry [x, y, width, height].</span>
+<span class="sd">        ICON_PATH: Path to the application icon file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Default window geometry configuration</span>
+    <span class="n">DEFAULT_POSITION</span> <span class="o">=</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">800</span><span class="p">,</span> <span class="mi">600</span><span class="p">]</span>  <span class="c1"># [x, y, width, height]</span>
+
+    <span class="c1"># Application icon path</span>
+    <span class="n">ICON_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="s2">&quot;resources&quot;</span><span class="p">,</span> <span class="s2">&quot;gtec.ico&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MainApp.__init__">
+<a class="viewcode-back" href="../../../content/frontend/main_app.html#gpype.frontend.main_app.MainApp.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">caption</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;g.Pype Application&quot;</span><span class="p">,</span>
+                 <span class="n">position</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">app</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the main application with window and widget management.</span>
+
+<span class="sd">        Sets up the QApplication, main window, layout system, and event</span>
+<span class="sd">        handling for a complete g.Pype frontend application. Supports</span>
+<span class="sd">        dependency injection for testing purposes.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            caption: Window title text displayed in the title bar.</span>
+<span class="sd">            position: Window geometry as [x, y, width, height] list.</span>
+<span class="sd">                Uses DEFAULT_POSITION if None.</span>
+<span class="sd">            app: Existing QApplication instance for testing or integration.</span>
+<span class="sd">                Creates new QApplication if None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Create or use existing QApplication (composition over inheritance)</span>
+        <span class="c1"># This allows for better testability and flexibility</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_app</span> <span class="o">=</span> <span class="n">app</span> <span class="ow">or</span> <span class="n">QApplication</span><span class="p">([])</span>
+
+        <span class="c1"># Initialize widget collection for lifecycle management</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Widget</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Create and configure main window</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_window</span> <span class="o">=</span> <span class="n">QMainWindow</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_window</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="n">caption</span><span class="p">)</span>
+
+        <span class="c1"># Set application icon if file exists</span>
+        <span class="n">icon_path</span> <span class="o">=</span> <span class="n">MainApp</span><span class="o">.</span><span class="n">ICON_PATH</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">icon_path</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_window</span><span class="o">.</span><span class="n">setWindowIcon</span><span class="p">(</span><span class="n">QIcon</span><span class="p">(</span><span class="n">icon_path</span><span class="p">))</span>
+
+        <span class="c1"># Configure window geometry</span>
+        <span class="k">if</span> <span class="n">position</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">position</span> <span class="o">=</span> <span class="n">MainApp</span><span class="o">.</span><span class="n">DEFAULT_POSITION</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_window</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="o">*</span><span class="n">position</span><span class="p">)</span>
+
+        <span class="c1"># Create central widget and layout system</span>
+        <span class="c1"># QMainWindow requires a central widget to contain other widgets</span>
+        <span class="n">central_widget</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_window</span><span class="o">.</span><span class="n">setCentralWidget</span><span class="p">(</span><span class="n">central_widget</span><span class="p">)</span>
+
+        <span class="c1"># Create vertical layout for widget arrangement</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="n">central_widget</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="p">)</span>
+
+        <span class="c1"># Connect cleanup handler for graceful shutdown</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_app</span><span class="o">.</span><span class="n">aboutToQuit</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_quit</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MainApp.add_widget">
+<a class="viewcode-back" href="../../../content/frontend/main_app.html#gpype.frontend.main_app.MainApp.add_widget">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">:</span> <span class="n">Widget</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a widget to the application layout and management system.</span>
+
+<span class="sd">        Registers the widget for lifecycle management and adds it to the</span>
+<span class="sd">        main window&#39;s vertical layout. The widget will be automatically</span>
+<span class="sd">        started during run() and terminated during shutdown.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            widget: Widget instance to add to the application.</span>
+<span class="sd">                Must inherit from the base Widget class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Register widget for lifecycle management</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
+
+        <span class="c1"># Add widget to the vertical layout for display</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widget</span><span class="o">.</span><span class="n">widget</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_on_quit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Handle application shutdown cleanup.</span>
+
+<span class="sd">        Called automatically when the QApplication is about to quit.</span>
+<span class="sd">        Ensures all registered widgets are properly terminated to</span>
+<span class="sd">        prevent resource leaks and data corruption.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Terminate all widgets gracefully</span>
+        <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">:</span>
+            <span class="n">widget</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+
+<div class="viewcode-block" id="MainApp.run">
+<a class="viewcode-back" href="../../../content/frontend/main_app.html#gpype.frontend.main_app.MainApp.run">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Start the application and enter the main event loop.</span>
+
+<span class="sd">        Shows the main window, starts all registered widgets, and enters</span>
+<span class="sd">        the Qt event loop. This method blocks until the application is</span>
+<span class="sd">        closed by the user or programmatically terminated.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: Application exit code. 0 indicates successful execution,</span>
+<span class="sd">                non-zero values indicate errors or abnormal termination.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Show the main window</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_window</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+        <span class="c1"># Start all registered widgets</span>
+        <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">:</span>
+            <span class="n">widget</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+        <span class="c1"># Enter the Qt event loop (blocks until application closes)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_app</span><span class="o">.</span><span class="n">exec</span><span class="p">()</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright g.tec medical engineering GmbH.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

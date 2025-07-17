@@ -1,0 +1,332 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>g.Nautilus &mdash; g.Pype v3.0.1  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Keyboard" href="keyboard.html" />
+    <link rel="prev" title="Generator" href="generator.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            g.Pype v3.0.1
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/index.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Backend</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../core/index.html">Core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../filters/index.html">Filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../flow/index.html">Flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sinks/index.html">Sinks</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Source Nodes</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="base/index.html">Base Source Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bci_core8.html">BCI Core-8</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generator.html">Generator</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">g.Nautilus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="keyboard.html">Keyboard</a></li>
+<li class="toctree-l3"><a class="reference internal" href="udp_receiver.html">UDP Receiver</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../timing/index.html">Timing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../transform/index.html">Transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pipeline.html">Pipeline</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../frontend/index.html">Frontend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">g.Pype v3.0.1</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Backend</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Source Nodes</a></li>
+      <li class="breadcrumb-item active">g.Nautilus</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/content/backend/sources/g_nautilus.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="g-nautilus">
+<h1>g.Nautilus<a class="headerlink" href="#g-nautilus" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="gpype.backend.sources.g_nautilus.GNautilus">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gpype.backend.sources.g_nautilus.</span></span><span class="sig-name descname"><span class="pre">GNautilus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">serial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensitivity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_di</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/backend/sources/g_nautilus.html#GNautilus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.backend.sources.g_nautilus.GNautilus" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="base/amplifier_source.html#gpype.backend.sources.base.amplifier_source.AmplifierSource" title="gpype.backend.sources.base.amplifier_source.AmplifierSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">AmplifierSource</span></code></a></p>
+<p>g.Nautilus EEG amplifier interface for real-time data acquisition.</p>
+<p>This class provides an interface to g.tec’s g.Nautilus wireless EEG
+amplifier system. It handles device initialization, data streaming,
+and electrode impedance monitoring.</p>
+<dl class="simple">
+<dt>Features:</dt><dd><ul class="simple">
+<li><p>Real-time EEG data acquisition</p></li>
+<li><p>Configurable sampling rates and channel counts</p></li>
+<li><p>Electrode impedance monitoring</p></li>
+<li><p>Digital input channel support</p></li>
+<li><p>Wireless connectivity</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Requires g.tec GDS library and Windows operating system.
+The device must be paired and configured via g.tec software.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>serial</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p></li>
+<li><p><strong>sampling_rate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>)</p></li>
+<li><p><strong>channel_count</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>)</p></li>
+<li><p><strong>frame_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>)</p></li>
+<li><p><strong>sensitivity</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>)</p></li>
+<li><p><strong>enable_di</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="gpype.backend.sources.g_nautilus.GNautilus.Configuration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Configuration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/backend/sources/g_nautilus.html#GNautilus.Configuration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.backend.sources.g_nautilus.GNautilus.Configuration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="base/amplifier_source.html#gpype.backend.sources.base.amplifier_source.AmplifierSource.Configuration" title="gpype.backend.sources.base.amplifier_source.AmplifierSource.Configuration"><code class="xref py py-class docutils literal notranslate"><span class="pre">Configuration</span></code></a></p>
+<p>Configuration class for g.Nautilus amplifier parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sampling_rate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>)</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="gpype.backend.sources.g_nautilus.GNautilus.Configuration.Keys">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Keys</span></span><a class="reference internal" href="../../../_modules/gpype/backend/sources/g_nautilus.html#GNautilus.Configuration.Keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.backend.sources.g_nautilus.GNautilus.Configuration.Keys" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="base/amplifier_source.html#gpype.backend.sources.base.amplifier_source.AmplifierSource.Configuration.Keys" title="gpype.backend.sources.base.amplifier_source.AmplifierSource.Configuration.Keys"><code class="xref py py-class docutils literal notranslate"><span class="pre">Keys</span></code></a></p>
+<p>Configuration key constants for the g.Nautilus amplifier.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gpype.backend.sources.g_nautilus.GNautilus.Configuration.Keys.SENSITIVITY">
+<span class="sig-name descname"><span class="pre">SENSITIVITY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'sensitivity'</span></em><a class="headerlink" href="#gpype.backend.sources.g_nautilus.GNautilus.Configuration.Keys.SENSITIVITY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpype.backend.sources.g_nautilus.GNautilus.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">serial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensitivity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_di</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/backend/sources/g_nautilus.html#GNautilus.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.backend.sources.g_nautilus.GNautilus.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize the g.Nautilus amplifier interface.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>serial</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Device serial number for identification.
+If None, connects to first available device.</p></li>
+<li><p><strong>sampling_rate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Sampling frequency in Hz.</p></li>
+<li><p><strong>channel_count</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Number of EEG channels to acquire.</p></li>
+<li><p><strong>frame_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Number of samples per data frame.
+Affects latency and processing efficiency.</p></li>
+<li><p><strong>sensitivity</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Amplifier sensitivity setting.
+Determines input voltage range.</p></li>
+<li><p><strong>enable_di</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Enable digital input channel for triggers.
+Adds one additional channel for event markers.</p></li>
+<li><p><strong>**kwargs</strong> – Additional configuration parameters passed to
+AmplifierSource.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.13)"><strong>RuntimeError</strong></a> – If GDS library is not available or device
+    initialization fails.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpype.backend.sources.g_nautilus.GNautilus.start">
+<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/backend/sources/g_nautilus.html#GNautilus.start"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.backend.sources.g_nautilus.GNautilus.start" title="Link to this definition"></a></dt>
+<dd><p>Start the g.Nautilus data acquisition.</p>
+<p>Initiates the hardware data streaming and activates the amplifier.
+The device will begin acquiring EEG data and triggering data
+callbacks for real-time processing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpype.backend.sources.g_nautilus.GNautilus.stop">
+<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/backend/sources/g_nautilus.html#GNautilus.stop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.backend.sources.g_nautilus.GNautilus.stop" title="Link to this definition"></a></dt>
+<dd><p>Stop the g.Nautilus data acquisition and cleanup resources.</p>
+<p>Stops the hardware streaming, cleans up device resources, and
+ensures proper shutdown of the amplifier connection.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpype.backend.sources.g_nautilus.GNautilus.start_impedance_check">
+<span class="sig-name descname"><span class="pre">start_impedance_check</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/backend/sources/g_nautilus.html#GNautilus.start_impedance_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.backend.sources.g_nautilus.GNautilus.start_impedance_check" title="Link to this definition"></a></dt>
+<dd><p>Start electrode impedance monitoring in a background thread.</p>
+<p>Initiates continuous impedance measurement for all electrodes.
+This provides real-time feedback on electrode contact quality,
+which is crucial for obtaining good EEG signals. Impedance values
+are updated periodically and can be retrieved with get_impedance().</p>
+<p>The impedance check runs in a separate daemon thread to avoid
+blocking the main data acquisition process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpype.backend.sources.g_nautilus.GNautilus.stop_impedance_check">
+<span class="sig-name descname"><span class="pre">stop_impedance_check</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/backend/sources/g_nautilus.html#GNautilus.stop_impedance_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.backend.sources.g_nautilus.GNautilus.stop_impedance_check" title="Link to this definition"></a></dt>
+<dd><p>Stop electrode impedance monitoring and cleanup the thread.</p>
+<p>Stops the background impedance measurement thread and waits for
+it to complete. Call this before stopping the main data acquisition
+to ensure clean shutdown.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpype.backend.sources.g_nautilus.GNautilus.get_impedance">
+<span class="sig-name descname"><span class="pre">get_impedance</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/backend/sources/g_nautilus.html#GNautilus.get_impedance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.backend.sources.g_nautilus.GNautilus.get_impedance" title="Link to this definition"></a></dt>
+<dd><p>Get current electrode impedance values and freshness status.</p>
+<p>Returns the most recent impedance measurements for all electrodes.
+The freshness flag indicates whether new impedance data is available
+since the last call to this method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>(impedance_array, is_fresh)</dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>impedance_array (np.ndarray): Impedance values in kOhms</dt><dd><p>for each electrode. -10 indicates unknown/disconnected.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>is_fresh (bool): True if impedance data has been updated</dt><dd><p>since last call, False otherwise.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)">tuple</a></p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Impedance values &lt; 5 kOhm are typically considered good for EEG.
+Values &gt; 25 kOhm may indicate poor electrode contact.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpype.backend.sources.g_nautilus.GNautilus.step">
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/backend/sources/g_nautilus.html#GNautilus.step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.backend.sources.g_nautilus.GNautilus.step" title="Link to this definition"></a></dt>
+<dd><p>Process one step of data through the g.Nautilus source.</p>
+<p>This method implements the core data processing step for the
+AmplifierSource interface. It simply passes through the input
+data from PORT_IN to PORT_OUT without modification.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Input data dictionary with PORT_IN key containing
+EEG data array from the amplifier.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Output data dictionary with PORT_OUT key containing</dt><dd><p>the same EEG data array for downstream processing.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="generator.html" class="btn btn-neutral float-left" title="Generator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="keyboard.html" class="btn btn-neutral float-right" title="Keyboard" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright g.tec medical engineering GmbH.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

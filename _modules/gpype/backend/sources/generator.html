@@ -1,0 +1,323 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gpype.backend.sources.generator &mdash; g.Pype v3.0.1  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            g.Pype v3.0.1
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">g.Pype v3.0.1</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gpype.backend.sources.generator</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gpype.backend.sources.generator</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ioiocore</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ioc</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..core.o_port</span><span class="w"> </span><span class="kn">import</span> <span class="n">OPort</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base.fixed_rate_source</span><span class="w"> </span><span class="kn">import</span> <span class="n">FixedRateSource</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">Constants</span>
+
+<span class="c1"># Port identifier for signal output</span>
+<span class="n">OUT_PORT</span> <span class="o">=</span> <span class="n">ioc</span><span class="o">.</span><span class="n">Constants</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">PORT_OUT</span>
+
+
+<div class="viewcode-block" id="Generator">
+<a class="viewcode-back" href="../../../../content/backend/sources/generator.html#gpype.backend.sources.generator.Generator">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Generator</span><span class="p">(</span><span class="n">FixedRateSource</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Signal generator source for creating synthetic test signals.</span>
+
+<span class="sd">    This class generates configurable test signals with optional noise for</span>
+<span class="sd">    testing and development of BCI pipelines. It supports multiple waveform</span>
+<span class="sd">    types including sinusoidal, rectangular, and pulse signals.</span>
+
+<span class="sd">    The generator can produce multi-channel signals with identical waveforms</span>
+<span class="sd">    across all channels, making it useful for testing filters, analyzing</span>
+<span class="sd">    pipeline performance, and creating controlled test scenarios.</span>
+
+<span class="sd">    Features:</span>
+<span class="sd">        - Multiple signal shapes (sine, rectangular, pulse)</span>
+<span class="sd">        - Configurable frequency, amplitude, and noise levels</span>
+<span class="sd">        - Multi-channel output support</span>
+<span class="sd">        - Frame-based output compatible with g.Pype architecture</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Signal shape constants</span>
+    <span class="n">SHAPE_SINUSOID</span> <span class="o">=</span> <span class="s1">&#39;sine&#39;</span>      <span class="c1"># Sinusoidal waveform</span>
+    <span class="n">SHAPE_RECTANGULAR</span> <span class="o">=</span> <span class="s1">&#39;rect&#39;</span>   <span class="c1"># Square wave</span>
+    <span class="n">SHAPE_PULSE</span> <span class="o">=</span> <span class="s1">&#39;pulse&#39;</span>        <span class="c1"># Brief pulses at specified frequency</span>
+
+    <span class="c1"># Source code fingerprint</span>
+    <span class="n">FINGERPRINT</span> <span class="o">=</span> <span class="s2">&quot;d8acd8b7d55d87be1ac12c6db431b2cc&quot;</span>
+
+<div class="viewcode-block" id="Generator.Configuration">
+<a class="viewcode-back" href="../../../../content/backend/sources/generator.html#gpype.backend.sources.generator.Generator.Configuration">[docs]</a>
+    <span class="k">class</span><span class="w"> </span><span class="nc">Configuration</span><span class="p">(</span><span class="n">FixedRateSource</span><span class="o">.</span><span class="n">Configuration</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Configuration class for Generator signal parameters.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Generator.Configuration.Keys">
+<a class="viewcode-back" href="../../../../content/backend/sources/generator.html#gpype.backend.sources.generator.Generator.Configuration.Keys">[docs]</a>
+        <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">FixedRateSource</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Configuration key constants for the Generator.&quot;&quot;&quot;</span>
+            <span class="n">SIGNAL_FREQUENCY</span> <span class="o">=</span> <span class="s1">&#39;signal_frequency&#39;</span>
+            <span class="n">SIGNAL_SHAPE</span> <span class="o">=</span> <span class="s1">&#39;signal_shape&#39;</span>
+            <span class="n">SIGNAL_AMPLITUDE</span> <span class="o">=</span> <span class="s1">&#39;signal_amplitude&#39;</span>
+            <span class="n">NOISE_AMPLITUDE</span> <span class="o">=</span> <span class="s1">&#39;noise_amplitude&#39;</span></div>
+</div>
+
+
+<div class="viewcode-block" id="Generator.__init__">
+<a class="viewcode-back" href="../../../../content/backend/sources/generator.html#gpype.backend.sources.generator.Generator.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                 <span class="n">channel_count</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">frame_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">signal_frequency</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">signal_shape</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">signal_amplitude</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+                 <span class="n">noise_amplitude</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the signal generator.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sampling_rate (float): Sampling frequency in Hz for signal</span>
+<span class="sd">                generation and output timing.</span>
+<span class="sd">            channel_count (int): Number of output channels. All channels</span>
+<span class="sd">                will receive identical generated signals.</span>
+<span class="sd">            frame_size (int, optional): Number of samples per output frame.</span>
+<span class="sd">                Affects processing latency and computational efficiency.</span>
+<span class="sd">            signal_frequency (float, optional): Frequency of the generated</span>
+<span class="sd">                signal in Hz. Defaults to 10.0 Hz if None.</span>
+<span class="sd">            signal_shape (str, optional): Shape of the generated waveform.</span>
+<span class="sd">                Must be one of SHAPE_SINUSOID, SHAPE_RECTANGULAR, or</span>
+<span class="sd">                SHAPE_PULSE. Defaults to SHAPE_SINUSOID if None.</span>
+<span class="sd">            signal_amplitude (float): Peak amplitude of the signal component.</span>
+<span class="sd">                Set to 0.0 for noise-only output.</span>
+<span class="sd">            noise_amplitude (float): Standard deviation of Gaussian noise</span>
+<span class="sd">                added to the signal. Set to 0.0 for noise-free output.</span>
+<span class="sd">            **kwargs: Additional configuration parameters passed to</span>
+<span class="sd">                FixedRateSource.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If signal_frequency or noise_amplitude is negative,</span>
+<span class="sd">                or if signal_shape is not a supported waveform type.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Set default values and validate parameters</span>
+        <span class="k">if</span> <span class="n">signal_frequency</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">signal_frequency</span> <span class="o">=</span> <span class="mf">10.0</span>
+        <span class="k">if</span> <span class="n">signal_frequency</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;signal_frequency must be positive.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">signal_shape</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">signal_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SHAPE_SINUSOID</span>
+
+        <span class="k">if</span> <span class="n">signal_amplitude</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">signal_amplitude</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="k">if</span> <span class="n">noise_amplitude</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">noise_amplitude</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">if</span> <span class="n">noise_amplitude</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;noise_amplitude must be positive.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Configure output ports</span>
+        <span class="n">output_ports</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">Generator</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">OUTPUT_PORTS</span><span class="p">,</span>
+                                  <span class="p">[</span><span class="n">OPort</span><span class="o">.</span><span class="n">Configuration</span><span class="p">()])</span>
+
+        <span class="c1"># Initialize parent FixedRateSource with all parameters</span>
+        <span class="n">FixedRateSource</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                 <span class="n">sampling_rate</span><span class="o">=</span><span class="n">sampling_rate</span><span class="p">,</span>
+                                 <span class="n">channel_count</span><span class="o">=</span><span class="n">channel_count</span><span class="p">,</span>
+                                 <span class="n">frame_size</span><span class="o">=</span><span class="n">frame_size</span><span class="p">,</span>
+                                 <span class="n">decimation_factor</span><span class="o">=</span><span class="n">frame_size</span><span class="p">,</span>
+                                 <span class="n">signal_frequency</span><span class="o">=</span><span class="n">signal_frequency</span><span class="p">,</span>
+                                 <span class="n">signal_amplitude</span><span class="o">=</span><span class="n">signal_amplitude</span><span class="p">,</span>
+                                 <span class="n">signal_shape</span><span class="o">=</span><span class="n">signal_shape</span><span class="p">,</span>
+                                 <span class="n">noise_amplitude</span><span class="o">=</span><span class="n">noise_amplitude</span><span class="p">,</span>
+                                 <span class="n">output_ports</span><span class="o">=</span><span class="n">output_ports</span><span class="p">,</span>
+                                 <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Initialize time tracking for continuous signal generation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_time</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="c1"># Initialize random number generator for noise generation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Generator.step">
+<a class="viewcode-back" href="../../../../content/backend/sources/generator.html#gpype.backend.sources.generator.Generator.step">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate one frame of synthetic signal data.</span>
+
+<span class="sd">        This method implements the core signal generation logic, creating</span>
+<span class="sd">        a frame of data containing the configured waveform plus optional</span>
+<span class="sd">        noise. The signal maintains phase continuity across frames through</span>
+<span class="sd">        internal time tracking.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data (dict): Input data dictionary (unused for signal generation</span>
+<span class="sd">                but required by the FixedRateSource interface).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Output data dictionary with OUT_PORT key containing the</span>
+<span class="sd">                generated signal frame of shape (frame_size, channel_count).</span>
+<span class="sd">                Returns None if not a decimation step.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The generated signal is identical across all channels. Time</span>
+<span class="sd">            continuity is maintained between frames for seamless waveforms.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Check if this is a decimation step (frame generation timing)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_decimation_step</span><span class="p">():</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># Get configuration parameters</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span>
+        <span class="n">frame_size</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">FRAME_SIZE</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">ch_count</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">CHANNEL_COUNT</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Initialize output frame with zeros</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">frame_size</span><span class="p">,</span> <span class="n">ch_count</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">Constants</span><span class="o">.</span><span class="n">DATA_TYPE</span><span class="p">)</span>
+
+        <span class="c1"># Create time vector for this frame</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">SAMPLING_RATE</span><span class="p">]</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_time</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_time</span> <span class="o">+</span> <span class="p">(</span><span class="n">frame_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">dt</span><span class="p">,</span>
+                        <span class="n">frame_size</span><span class="p">)</span>
+
+        <span class="c1"># Generate signal component if amplitude &gt; 0</span>
+        <span class="n">freq</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">SIGNAL_FREQUENCY</span><span class="p">]</span>
+        <span class="n">amp</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">SIGNAL_AMPLITUDE</span><span class="p">]</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">SIGNAL_SHAPE</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">freq</span> <span class="ow">and</span> <span class="n">amp</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="c1"># Generate waveform based on selected shape</span>
+            <span class="k">if</span> <span class="n">shape</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">SHAPE_SINUSOID</span><span class="p">:</span>
+                <span class="c1"># Smooth sinusoidal waveform</span>
+                <span class="n">wave</span> <span class="o">=</span> <span class="n">amp</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">freq</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">shape</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">SHAPE_RECTANGULAR</span><span class="p">:</span>
+                <span class="c1"># Square wave (sign of sine function)</span>
+                <span class="n">wave</span> <span class="o">=</span> <span class="n">amp</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">freq</span> <span class="o">*</span> <span class="n">t</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">shape</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">SHAPE_PULSE</span><span class="p">:</span>
+                <span class="c1"># Brief pulses at specified frequency</span>
+                <span class="n">period</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">freq</span>
+                <span class="n">wave</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ti</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
+                    <span class="c1"># Generate pulse at start of each period</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">ti</span> <span class="o">%</span> <span class="n">period</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">dt</span><span class="p">:</span>
+                        <span class="n">wave</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">amp</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported signal shape: </span><span class="si">{</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Broadcast signal to all channels</span>
+            <span class="n">output</span> <span class="o">+=</span> <span class="n">wave</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+
+        <span class="c1"># Update internal time for next frame (maintains phase continuity)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_time</span> <span class="o">+=</span> <span class="n">frame_size</span> <span class="o">*</span> <span class="n">dt</span>
+
+        <span class="c1"># Add noise component if amplitude &gt; 0</span>
+        <span class="n">noise_amp</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">NOISE_AMPLITUDE</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">noise_amp</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="c1"># Generate Gaussian noise for all channels</span>
+            <span class="n">noise</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">output</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">*</span> <span class="n">noise_amp</span>
+            <span class="n">output</span> <span class="o">+=</span> <span class="n">noise</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">Constants</span><span class="o">.</span><span class="n">DATA_TYPE</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="n">OUT_PORT</span><span class="p">:</span> <span class="n">output</span><span class="p">}</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright g.tec medical engineering GmbH.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,8 @@
+Delay
+=====
+
+.. autoclass:: gpype.backend.timing.delay.Delay
+   :members:
+   :undoc-members:
+   :special-members: __init__
+   :show-inheritance:

@@ -1,0 +1,379 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Time Series Scope &mdash; g.Pype v3.0.1  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Trigger Scope" href="trigger_scope.html" />
+    <link rel="prev" title="Spectrum Scope" href="spectrum_scope.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            g.Pype v3.0.1
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../backend/index.html">Backend</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Frontend</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Widgets</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="base/index.html">Base Widget Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="paradigm_presenter.html">Paradigm Presenter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="performance_monitor.html">Performance Monitor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrum_scope.html">Spectrum Scope</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Time Series Scope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="trigger_scope.html">Trigger Scope</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../main_app.html">MainApp</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">g.Pype v3.0.1</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Frontend</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Widgets</a></li>
+      <li class="breadcrumb-item active">Time Series Scope</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/content/frontend/widgets/time_series_scope.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="time-series-scope">
+<h1>Time Series Scope<a class="headerlink" href="#time-series-scope" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.time_series_scope.TimeSeriesScope">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gpype.frontend.widgets.time_series_scope.</span></span><span class="sig-name descname"><span class="pre">TimeSeriesScope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplitude_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">markers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/frontend/widgets/time_series_scope.html#TimeSeriesScope"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.frontend.widgets.time_series_scope.TimeSeriesScope" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="base/scope.html#gpype.frontend.widgets.base.scope.Scope" title="gpype.frontend.widgets.base.scope.Scope"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scope</span></code></a></p>
+<p>Real-time oscilloscope widget for multi-channel time series visualization.</p>
+<p>Displays continuous time-series data from BCI pipelines with multiple
+channels in a stationary oscilloscope-style view. Features include
+configurable time windows, amplitude scaling, channel hiding, event
+markers, and real-time performance monitoring.</p>
+<p>The widget automatically handles data buffering, display scaling,
+time axis management, and provides interactive features like keyboard
+shortcuts for toggling performance information.</p>
+<dl class="simple">
+<dt>Features:</dt><dd><ul class="simple">
+<li><p>Multi-channel time series visualization</p></li>
+<li><p>Configurable time window and amplitude limits</p></li>
+<li><p>Channel selection and hiding capabilities</p></li>
+<li><p>Event marker support with custom colors and labels</p></li>
+<li><p>Real-time performance monitoring (Alt+R)</p></li>
+<li><p>Automated, internal data decimation for performance</p></li>
+<li><p>Thread-safe data handling</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>time_window</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Display window duration in seconds (1-120).</p></li>
+<li><p><strong>amplitude_limit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Y-axis scale limit in microvolts.</p></li>
+<li><p><strong>markers</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – Event markers configuration.</p></li>
+<li><p><strong>hidden_channels</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>) – Channel indices to hide from display.</p></li>
+<li><p><strong>**kwargs</strong> – Additional arguments passed to parent Scope class.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.time_series_scope.TimeSeriesScope.DEFAULT_TIME_WINDOW">
+<span class="sig-name descname"><span class="pre">DEFAULT_TIME_WINDOW</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.DEFAULT_TIME_WINDOW" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.time_series_scope.TimeSeriesScope.DEFAULT_AMPLITUDE_LIMIT">
+<span class="sig-name descname"><span class="pre">DEFAULT_AMPLITUDE_LIMIT</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">50</span></em><a class="headerlink" href="#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.DEFAULT_AMPLITUDE_LIMIT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Markers">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Markers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">color</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/frontend/widgets/time_series_scope.html#TimeSeriesScope.Markers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Markers" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a></p>
+<p>Container for event marker configuration.</p>
+<p>Stores marker properties including visual appearance (color),
+identification (label), channel association, and trigger value
+for event-based visualization in the time series plot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>color</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Hex color code or color name for marker visualization.</p></li>
+<li><p><strong>label</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Text label for marker identification.</p></li>
+<li><p><strong>channel</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Channel index where marker should be displayed.</p></li>
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Trigger value that activates the marker.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Markers.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">color</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/frontend/widgets/time_series_scope.html#TimeSeriesScope.Markers.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Markers.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize marker configuration with display properties.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>color</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p></li>
+<li><p><strong>label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p></li>
+<li><p><strong>channel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>)</p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Configuration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Configuration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_ports</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/frontend/widgets/time_series_scope.html#TimeSeriesScope.Configuration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Configuration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="base/scope.html#gpype.frontend.widgets.base.scope.Scope.Configuration" title="gpype.frontend.widgets.base.scope.Scope.Configuration"><code class="xref py py-class docutils literal notranslate"><span class="pre">Configuration</span></code></a></p>
+<p>Configuration keys for TimeSeriesScope widget settings.</p>
+<p>Extends the base Scope configuration with time series specific
+parameters for display window, amplitude scaling, event markers,
+and channel visibility management.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>input_ports</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>)</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Configuration.Keys">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Keys</span></span><a class="reference internal" href="../../../_modules/gpype/frontend/widgets/time_series_scope.html#TimeSeriesScope.Configuration.Keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Configuration.Keys" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="base/scope.html#gpype.frontend.widgets.base.scope.Scope.Configuration.Keys" title="gpype.frontend.widgets.base.scope.Scope.Configuration.Keys"><code class="xref py py-class docutils literal notranslate"><span class="pre">Keys</span></code></a></p>
+<p>Required configuration parameter keys.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Configuration.Keys.TIME_WINDOW">
+<span class="sig-name descname"><span class="pre">TIME_WINDOW</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'time_window'</span></em><a class="headerlink" href="#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Configuration.Keys.TIME_WINDOW" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Configuration.Keys.AMPLITUDE_LIMIT">
+<span class="sig-name descname"><span class="pre">AMPLITUDE_LIMIT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'amplitude_limit'</span></em><a class="headerlink" href="#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Configuration.Keys.AMPLITUDE_LIMIT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Configuration.KeysOptional">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">KeysOptional</span></span><a class="reference internal" href="../../../_modules/gpype/frontend/widgets/time_series_scope.html#TimeSeriesScope.Configuration.KeysOptional"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Configuration.KeysOptional" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Optional configuration parameter keys.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Configuration.KeysOptional.MARKERS">
+<span class="sig-name descname"><span class="pre">MARKERS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'markers'</span></em><a class="headerlink" href="#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Configuration.KeysOptional.MARKERS" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Configuration.KeysOptional.HIDDEN_CHANNELS">
+<span class="sig-name descname"><span class="pre">HIDDEN_CHANNELS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'hidden_channels'</span></em><a class="headerlink" href="#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Configuration.KeysOptional.HIDDEN_CHANNELS" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.time_series_scope.TimeSeriesScope.KeyPressFilter">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">KeyPressFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/frontend/widgets/time_series_scope.html#TimeSeriesScope.KeyPressFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.KeyPressFilter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QObject</span></code></p>
+<p>Event filter for keyboard shortcuts in the time series scope.</p>
+<p>Captures and processes keyboard events to provide interactive
+functionality like toggling performance information display.
+Currently handles Alt+R for performance monitoring toggle.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>callback</strong> – Function to call when target key combination is pressed.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.time_series_scope.TimeSeriesScope.KeyPressFilter.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">callback</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/frontend/widgets/time_series_scope.html#TimeSeriesScope.KeyPressFilter.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.KeyPressFilter.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize key press filter with callback function.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.time_series_scope.TimeSeriesScope.KeyPressFilter.eventFilter">
+<span class="sig-name descname"><span class="pre">eventFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/frontend/widgets/time_series_scope.html#TimeSeriesScope.KeyPressFilter.eventFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.KeyPressFilter.eventFilter" title="Link to this definition"></a></dt>
+<dd><p>Filter keyboard events and trigger callbacks for shortcuts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> – Qt object that received the event.</p></li>
+<li><p><strong>event</strong> – Qt event to process.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>False to allow event propagation, True to consume event.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.time_series_scope.TimeSeriesScope.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplitude_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">markers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/frontend/widgets/time_series_scope.html#TimeSeriesScope.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize the time series oscilloscope widget.</p>
+<p>Sets up the plotting area, data buffers, timer configurations,
+and user interface elements for real-time time series visualization.
+Validates input parameters and configures the widget for optimal
+performance with multi-channel BCI data streams.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>time_window</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Display window duration in seconds (1-120).
+Uses DEFAULT_TIME_WINDOW if None.</p></li>
+<li><p><strong>amplitude_limit</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – Y-axis scale limit in microvolts (1-5000).
+Uses DEFAULT_AMPLITUDE_LIMIT if None.</p></li>
+<li><p><strong>markers</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a></span>) – List of marker configurations for event visualization.
+Empty list if None.</p></li>
+<li><p><strong>hidden_channels</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a></span>) – List of channel indices to hide from display.
+Empty list if None.</p></li>
+<li><p><strong>**kwargs</strong> – Additional arguments passed to parent Scope class.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If time_window is outside valid range (1-120).</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If amplitude_limit is outside reasonable range.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.time_series_scope.TimeSeriesScope.setup">
+<span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port_context_in</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/frontend/widgets/time_series_scope.html#TimeSeriesScope.setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.setup" title="Link to this definition"></a></dt>
+<dd><p>Initialize the widget with data stream parameters and allocate buffers.</p>
+<p>Sets up the time series scope based on incoming data characteristics
+including sampling rate, channel count, and frame size. Allocates
+appropriate buffer sizes and initializes display parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>]</span>) – Input data dictionary (not used in setup phase).</p></li>
+<li><p><strong>port_context_in</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>]</span>) – Context information for input ports containing
+sampling rate, channel count, and frame size.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Updated port context for downstream components.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If required context parameters are missing.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.time_series_scope.TimeSeriesScope.step">
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/frontend/widgets/time_series_scope.html#TimeSeriesScope.step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.step" title="Link to this definition"></a></dt>
+<dd><p>Process incoming data frames and store them in the circular buffer.</p>
+<p>This method is called by the pipeline for each new data frame.
+It handles performance monitoring, circular buffer management,
+and thread-safe data storage for real-time visualization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>]</span>) – Dictionary containing input data arrays from connected ports.
+Expected to have PORT_IN key with shape (frame_size, channels).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Empty dictionary (this is a sink node with no outputs).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="spectrum_scope.html" class="btn btn-neutral float-left" title="Spectrum Scope" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="trigger_scope.html" class="btn btn-neutral float-right" title="Trigger Scope" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright g.tec medical engineering GmbH.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

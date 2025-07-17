@@ -1,0 +1,8 @@
+LSL Sender
+==========
+
+.. autoclass:: gpype.backend.sinks.lsl_sender.LSLSender
+   :members:
+   :undoc-members:
+   :special-members: __init__
+   :show-inheritance:

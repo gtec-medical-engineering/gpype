@@ -1,0 +1,9 @@
+Butterworth
+===========
+
+.. autoclass:: gpype.backend.filters.base.butterworth.Butterworth
+   :members:
+   :undoc-members:
+   :special-members: __init__
+   :show-inheritance:
+

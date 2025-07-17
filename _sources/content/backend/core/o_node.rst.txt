@@ -1,0 +1,8 @@
+ONode
+-----
+
+.. autoclass:: gpype.backend.core.o_node.ONode
+   :members:
+   :undoc-members:
+   :special-members: __init__
+   :show-inheritance:

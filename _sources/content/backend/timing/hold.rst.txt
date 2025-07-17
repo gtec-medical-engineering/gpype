@@ -1,0 +1,8 @@
+Hold
+====
+
+.. autoclass:: gpype.backend.timing.hold.Hold
+   :members:
+   :undoc-members:
+   :special-members: __init__
+   :show-inheritance:

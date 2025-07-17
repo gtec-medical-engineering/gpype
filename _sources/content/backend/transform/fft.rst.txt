@@ -1,0 +1,8 @@
+FFT
+===
+
+.. autoclass:: gpype.backend.transform.fft.FFT
+   :members:
+   :undoc-members:
+   :special-members: __init__
+   :show-inheritance:

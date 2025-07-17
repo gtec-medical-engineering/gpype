@@ -1,0 +1,529 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gpype.frontend.widgets.trigger_scope &mdash; g.Pype v3.0.1  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            g.Pype v3.0.1
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">g.Pype v3.0.1</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gpype.frontend.widgets.trigger_scope</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gpype.frontend.widgets.trigger_scope</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">colorsys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pyqtgraph</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pg</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PySide6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="n">QBrush</span><span class="p">,</span> <span class="n">QColor</span><span class="p">,</span> <span class="n">QPalette</span><span class="p">,</span> <span class="n">QPen</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="n">Symbol</span><span class="p">,</span> <span class="n">lambdify</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sympy.parsing.sympy_parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_expr</span><span class="p">,</span> <span class="n">standard_transformations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">ioiocore</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ioc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...backend.core.i_port</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPort</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...backend.flow.trigger</span><span class="w"> </span><span class="kn">import</span> <span class="n">Trigger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">Constants</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base.scope</span><span class="w"> </span><span class="kn">import</span> <span class="n">Scope</span>
+
+
+<span class="c1"># Default input port for trigger data</span>
+<span class="n">PORT_IN</span> <span class="o">=</span> <span class="n">ioc</span><span class="o">.</span><span class="n">Constants</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">PORT_IN</span>
+
+
+<div class="viewcode-block" id="TriggerScope">
+<a class="viewcode-back" href="../../../../content/frontend/widgets/trigger_scope.html#gpype.frontend.widgets.trigger_scope.TriggerScope">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TriggerScope</span><span class="p">(</span><span class="n">Scope</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Event-triggered oscilloscope widget for analyzing signal epochs.</span>
+
+<span class="sd">    Displays triggered signal epochs based on events detected by upstream</span>
+<span class="sd">    trigger nodes. Unlike TimeSeriesScope which shows continuous data,</span>
+<span class="sd">    TriggerScope visualizes fixed-duration signal segments around trigger</span>
+<span class="sd">    events, making it ideal for analyzing event-related potentials (ERPs),</span>
+<span class="sd">    stimulus responses, and other event-locked brain activity.</span>
+
+<span class="sd">    The widget supports multiple mathematical expressions to compute</span>
+<span class="sd">    derived signals and can overlay multiple plots with color-coded</span>
+<span class="sd">    legends for comparative analysis.</span>
+
+<span class="sd">    Features:</span>
+<span class="sd">        - Event-triggered signal visualization</span>
+<span class="sd">        - Mathematical expression evaluation for signal processing</span>
+<span class="sd">        - Multi-plot overlay with automatic color coding</span>
+<span class="sd">        - Channel selection and hiding capabilities</span>
+<span class="sd">        - Automatic signal averaging across trigger epochs</span>
+<span class="sd">        - Interactive legend for multi-plot identification</span>
+<span class="sd">        - Pre/post trigger time window display</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        amplitude_limit (float): Y-axis scale limit in microvolts (1-5000).</span>
+<span class="sd">        plots (list): Mathematical expressions to evaluate and plot.</span>
+<span class="sd">            Defaults to [PORT_IN] for direct signal display.</span>
+<span class="sd">        hidden_channels (list): Channel indices to hide from display.</span>
+<span class="sd">        **kwargs: Additional arguments passed to parent Scope class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TriggerScope.Configuration">
+<a class="viewcode-back" href="../../../../content/frontend/widgets/trigger_scope.html#gpype.frontend.widgets.trigger_scope.TriggerScope.Configuration">[docs]</a>
+    <span class="k">class</span><span class="w"> </span><span class="nc">Configuration</span><span class="p">(</span><span class="n">Scope</span><span class="o">.</span><span class="n">Configuration</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Configuration keys for TriggerScope widget settings.</span>
+
+<span class="sd">        Extends the base Scope configuration with trigger-specific</span>
+<span class="sd">        parameters for amplitude scaling and mathematical plot expressions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TriggerScope.Configuration.Keys">
+<a class="viewcode-back" href="../../../../content/frontend/widgets/trigger_scope.html#gpype.frontend.widgets.trigger_scope.TriggerScope.Configuration.Keys">[docs]</a>
+        <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">Scope</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Required configuration parameter keys.&quot;&quot;&quot;</span>
+            <span class="n">AMPLITUDE_LIMIT</span> <span class="o">=</span> <span class="s1">&#39;amplitude_limit&#39;</span>  <span class="c1"># Y-axis scale in microvolts</span>
+            <span class="n">PLOTS</span> <span class="o">=</span> <span class="s1">&#39;plots&#39;</span>                      <span class="c1"># Mathematical expressions</span></div>
+
+
+<div class="viewcode-block" id="TriggerScope.Configuration.KeysOptional">
+<a class="viewcode-back" href="../../../../content/frontend/widgets/trigger_scope.html#gpype.frontend.widgets.trigger_scope.TriggerScope.Configuration.KeysOptional">[docs]</a>
+        <span class="k">class</span><span class="w"> </span><span class="nc">KeysOptional</span><span class="p">:</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Optional configuration parameter keys.&quot;&quot;&quot;</span>
+            <span class="n">HIDDEN_CHANNELS</span> <span class="o">=</span> <span class="s1">&#39;hidden_channels&#39;</span>  <span class="c1"># Channels to hide</span></div>
+</div>
+
+
+<div class="viewcode-block" id="TriggerScope.__init__">
+<a class="viewcode-back" href="../../../../content/frontend/widgets/trigger_scope.html#gpype.frontend.widgets.trigger_scope.TriggerScope.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">amplitude_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
+                 <span class="n">plots</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">hidden_channels</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the trigger scope widget.</span>
+
+<span class="sd">        Sets up mathematical expression parsing, input port configuration,</span>
+<span class="sd">        and display parameters for event-triggered signal visualization.</span>
+<span class="sd">        Parses mathematical expressions to create lambda functions for</span>
+<span class="sd">        real-time signal computation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            amplitude_limit: Y-axis scale limit in microvolts (1-5000).</span>
+<span class="sd">            plots: List of mathematical expressions to evaluate and plot.</span>
+<span class="sd">                Empty list defaults to [PORT_IN] for direct signal display.</span>
+<span class="sd">            hidden_channels: List of channel indices to hide from display.</span>
+<span class="sd">                Empty list if None.</span>
+<span class="sd">            **kwargs: Additional arguments passed to parent Scope class.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If amplitude_limit is outside reasonable range.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Validate amplitude limit parameters</span>
+        <span class="k">if</span> <span class="n">amplitude_limit</span> <span class="o">&gt;</span> <span class="mf">5e3</span> <span class="ow">or</span> <span class="n">amplitude_limit</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;amplitude_limit without reasonable range.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Initialize configuration lists</span>
+        <span class="k">if</span> <span class="n">hidden_channels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">hidden_channels</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">plots</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">plots</span> <span class="o">=</span> <span class="p">[</span><span class="n">Constants</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">PORT_IN</span><span class="p">]</span>
+
+        <span class="c1"># Initialize expression parsing storage</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plot_funcs</span> <span class="o">=</span> <span class="p">[]</span>     <span class="c1"># Compiled lambda functions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plot_args</span> <span class="o">=</span> <span class="p">[]</span>      <span class="c1"># Argument lists for each function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_port_names</span> <span class="o">=</span> <span class="p">[]</span>     <span class="c1"># Required input port names</span>
+
+        <span class="c1"># Parse mathematical expressions and compile to lambda functions</span>
+        <span class="k">for</span> <span class="n">plot</span> <span class="ow">in</span> <span class="n">plots</span><span class="p">:</span>
+            <span class="c1"># Replace &#39;in&#39; keyword to avoid Python syntax conflicts</span>
+            <span class="n">replaced_expr</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\bin\b&#39;</span><span class="p">,</span> <span class="s1">&#39;__in_alias__&#39;</span><span class="p">,</span> <span class="n">plot</span><span class="p">)</span>
+
+            <span class="c1"># Create symbol mapping for expression parsing</span>
+            <span class="n">local_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;__in_alias__&#39;</span><span class="p">:</span> <span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;in&#39;</span><span class="p">)}</span>  <span class="c1"># Map to symbol</span>
+            <span class="n">expr</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span><span class="n">replaced_expr</span><span class="p">,</span>
+                              <span class="n">local_dict</span><span class="o">=</span><span class="n">local_dict</span><span class="p">,</span>
+                              <span class="n">transformations</span><span class="o">=</span><span class="n">standard_transformations</span><span class="p">)</span>
+
+            <span class="c1"># Extract variables and compile to numpy-compatible function</span>
+            <span class="nb">vars</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">expr</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_plot_funcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lambdify</span><span class="p">(</span><span class="nb">vars</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">modules</span><span class="o">=</span><span class="s2">&quot;numpy&quot;</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_plot_args</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">])</span>
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_port_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">var</span><span class="p">))</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">]</span>
+
+        <span class="c1"># Remove duplicate port names while preserving order</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_port_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_port_names</span><span class="p">))</span>
+
+        <span class="c1"># Configure input ports based on required variables</span>
+        <span class="n">input_ports</span> <span class="o">=</span> <span class="p">[</span><span class="n">IPort</span><span class="o">.</span><span class="n">Configuration</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                                           <span class="nb">type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+                                           <span class="n">timing</span><span class="o">=</span><span class="n">Constants</span><span class="o">.</span><span class="n">Timing</span><span class="o">.</span><span class="n">INHERITED</span><span class="p">)</span>
+                       <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_port_names</span><span class="p">]</span>
+
+        <span class="c1"># Initialize parent Scope class with configuration</span>
+        <span class="n">Scope</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                       <span class="n">input_ports</span><span class="o">=</span><span class="n">input_ports</span><span class="p">,</span>
+                       <span class="n">amplitude_limit</span><span class="o">=</span><span class="n">amplitude_limit</span><span class="p">,</span>
+                       <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Trigger Scope&quot;</span><span class="p">,</span>
+                       <span class="n">plots</span><span class="o">=</span><span class="n">plots</span><span class="p">,</span>
+                       <span class="n">hidden_channels</span><span class="o">=</span><span class="n">hidden_channels</span><span class="p">,</span>
+                       <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Data buffer management</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_max_points</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span>           <span class="c1"># Maximum displayable points</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_buffer</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span>         <span class="c1"># Raw data storage by port</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_display_buffer</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Processed display data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plot_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>              <span class="c1"># Current plot position</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_full</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>        <span class="c1"># Buffer overflow indicator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sample_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>            <span class="c1"># Current sample index</span>
+
+        <span class="c1"># Performance monitoring</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>         <span class="c1"># Widget start timestamp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_counts</span> <span class="o">=</span> <span class="mi">0</span>                <span class="c1"># Display update counter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_step_counts</span> <span class="o">=</span> <span class="mi">0</span>                  <span class="c1"># Processing step counter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_step_rate</span> <span class="o">=</span> <span class="mi">0</span>                    <span class="c1"># Calculated step rate</span>
+
+        <span class="c1"># Thread synchronization</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>          <span class="c1"># Data access synchronization</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_new_data</span> <span class="o">=</span> <span class="kc">False</span>                 <span class="c1"># New data availability flag</span>
+
+        <span class="c1"># UI components</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rate_label</span> <span class="o">=</span> <span class="kc">None</span>                <span class="c1"># Performance display label</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cursor</span> <span class="o">=</span> <span class="kc">None</span>                    <span class="c1"># Time cursor for display</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_no_plots</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_funcs</span><span class="p">)</span>  <span class="c1"># Number of plot functions</span>
+
+        <span class="c1"># Theme and appearance setup</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">palette</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_foreground_color</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">color</span><span class="p">(</span><span class="n">QPalette</span><span class="o">.</span><span class="n">ColorRole</span><span class="o">.</span><span class="n">WindowText</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_background_color</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">color</span><span class="p">(</span><span class="n">QPalette</span><span class="o">.</span><span class="n">ColorRole</span><span class="o">.</span><span class="n">Window</span><span class="p">)</span>
+
+        <span class="c1"># Setup legend for multi-plot visualization</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_port_names</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_funcs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pyqtgraph.graphicsItems.LegendItem</span><span class="w"> </span><span class="kn">import</span> <span class="n">LegendItem</span>
+
+            <span class="c1"># Create custom legend positioned in top-left corner within plot</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_legend</span> <span class="o">=</span> <span class="n">LegendItem</span><span class="p">(</span><span class="n">offset</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_legend</span><span class="o">.</span><span class="n">setParentItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_item</span><span class="o">.</span><span class="n">getViewBox</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_legend</span><span class="o">.</span><span class="n">anchor</span><span class="p">((</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>  <span class="c1"># Anchor to top-left</span>
+            <span class="n">bg_color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_background_color</span>
+            <span class="n">fg_color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_foreground_color</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_legend</span><span class="o">.</span><span class="n">setBrush</span><span class="p">(</span><span class="n">QBrush</span><span class="p">(</span><span class="n">bg_color</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_legend</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">QPen</span><span class="p">(</span><span class="n">fg_color</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_legend</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_legend</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="TriggerScope.setup">
+<a class="viewcode-back" href="../../../../content/frontend/widgets/trigger_scope.html#gpype.frontend.widgets.trigger_scope.TriggerScope.setup">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+              <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+              <span class="n">port_context_in</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the widget with trigger parameters and allocate buffers.</span>
+
+<span class="sd">        Sets up the trigger scope based on upstream trigger node configuration</span>
+<span class="sd">        including sampling rate, channel count, frame size, and pre/post</span>
+<span class="sd">        trigger timing. Validates that all input ports have consistent</span>
+<span class="sd">        parameters and allocates appropriate data structures.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: Input data dictionary (not used in setup phase).</span>
+<span class="sd">            port_context_in: Context information for input ports containing</span>
+<span class="sd">                trigger timing and signal parameters.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Updated port context for downstream components.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If required context parameters are missing or</span>
+<span class="sd">                       inconsistent across ports.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Extract and validate required context parameters</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">SAMPLING_RATE</span><span class="p">,</span>
+                <span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">CHANNEL_COUNT</span><span class="p">,</span>
+                <span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">FRAME_SIZE</span><span class="p">,</span>
+                <span class="n">Trigger</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">TIME_PRE</span><span class="p">,</span>
+                <span class="n">Trigger</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">TIME_POST</span><span class="p">]</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Ensure all ports have consistent parameter values</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">port</span><span class="p">,</span> <span class="n">config</span> <span class="ow">in</span> <span class="n">port_context_in</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+                    <span class="n">values</span><span class="p">[</span><span class="n">port</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+            <span class="n">value_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">value</span> <span class="o">==</span> <span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">value_list</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> must be the same for all ports.&quot;</span><span class="p">)</span>
+
+            <span class="n">context</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Extract validated parameters</span>
+        <span class="n">sampling_rate</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">SAMPLING_RATE</span><span class="p">)</span>
+        <span class="n">channel_count</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">CHANNEL_COUNT</span><span class="p">)</span>
+        <span class="n">frame_size</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">FRAME_SIZE</span><span class="p">)</span>
+
+        <span class="c1"># Create time vector for trigger epochs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_t_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">frame_size</span><span class="p">)</span> <span class="o">/</span> <span class="n">sampling_rate</span>
+        <span class="n">time_pre</span> <span class="o">=</span> <span class="n">context</span><span class="p">[</span><span class="n">Trigger</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">TIME_PRE</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_t_vec</span> <span class="o">-=</span> <span class="n">time_pre</span>  <span class="c1"># Adjust time vector for pre-trigger period</span>
+
+        <span class="c1"># Determine visible channels (exclude hidden ones)</span>
+        <span class="n">hidden_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">KeysOptional</span><span class="o">.</span><span class="n">HIDDEN_CHANNELS</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_channel_vec</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">channel_count</span><span class="p">)</span>
+                             <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">hidden_channels</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_channel_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_channel_vec</span><span class="p">)</span>
+
+        <span class="c1"># Store processing parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_frame_size</span> <span class="o">=</span> <span class="n">frame_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sampling_rate</span> <span class="o">=</span> <span class="n">sampling_rate</span>
+
+        <span class="c1"># Initialize data buffers for each input port</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_buffer</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_port_names</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data_buffer</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Initialize display buffers for each plot function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_display_buffer</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">frame_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channel_count</span><span class="p">))</span>
+                                <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_no_plots</span><span class="p">)]</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">generate_colors</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Generate visually distinct colors using HSV color space.&quot;&quot;&quot;</span>
+            <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_foreground_color</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">col</span> <span class="o">=</span> <span class="p">[</span><span class="n">pg</span><span class="o">.</span><span class="n">mkColor</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">c</span> <span class="o">*</span> <span class="mi">255</span><span class="p">)</span>
+                                    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">colorsys</span><span class="o">.</span><span class="n">hsv_to_rgb</span><span class="p">(((</span><span class="n">i</span> <span class="o">+</span> <span class="mf">0.2</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span><span class="p">)</span> <span class="o">/</span> <span class="n">n</span><span class="p">,</span>  <span class="c1"># noqa: E501</span>
+                                                                 <span class="mf">0.9</span><span class="p">,</span>
+                                                                 <span class="mf">0.8</span><span class="p">)))</span>
+                       <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span>
+                <span class="k">return</span> <span class="n">col</span>
+
+        <span class="c1"># Generate distinct colors for each plot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_curve_colors</span> <span class="o">=</span> <span class="n">generate_colors</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_no_plots</span><span class="p">)</span>
+
+        <span class="c1"># Initialize state variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_new_data</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">port_context_in</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update the visual display with new trigger epoch data.</span>
+
+<span class="sd">        This method is called by the Qt timer to refresh the plot with</span>
+<span class="sd">        the latest trigger epochs. It handles curve creation, mathematical</span>
+<span class="sd">        expression evaluation, signal averaging, and multi-plot visualization</span>
+<span class="sd">        with color-coded legends. The method operates in the main Qt thread</span>
+<span class="sd">        for UI safety.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            This method only updates when new data is available</span>
+<span class="sd">            (_new_data flag). UI elements are created lazily on first</span>
+<span class="sd">            update call.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_new_data</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Set up UI elements. Note that this has to be done in the main Qt</span>
+        <span class="c1"># thread (like this)</span>
+        <span class="n">ylim</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channel_count</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_curves</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="c1"># Create curves for each channel and plot combination</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_channel_count</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_no_plots</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">add_curve</span><span class="p">(</span><span class="n">pen</span><span class="o">=</span><span class="n">pg</span><span class="o">.</span><span class="n">mkPen</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_curve_colors</span><span class="p">[</span><span class="n">k</span><span class="p">],</span>
+                                                <span class="n">width</span><span class="o">=</span><span class="mf">1.5</span><span class="p">))</span>
+                    <span class="c1"># Add legend entry only once per plot (first channel)</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_legend</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">j</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">expr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">PLOTS</span><span class="p">][</span><span class="n">k</span><span class="p">]</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_legend</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_curves</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">expr</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_legend</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="c1"># Configure axis labels and limits</span>
+            <span class="n">amp_lim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">AMPLITUDE_LIMIT</span><span class="p">]</span>
+            <span class="n">yl</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;EEG Amplitudes (-</span><span class="si">{</span><span class="n">amp_lim</span><span class="si">}</span><span class="s2"> ... +</span><span class="si">{</span><span class="n">amp_lim</span><span class="si">}</span><span class="s2"> µV)&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_labels</span><span class="p">(</span><span class="n">x_label</span><span class="o">=</span><span class="s2">&quot;Time (s)&quot;</span><span class="p">,</span>
+                            <span class="n">y_label</span><span class="o">=</span><span class="n">yl</span><span class="p">)</span>
+
+            <span class="c1"># Configure channel labels on Y-axis</span>
+            <span class="n">ticks</span> <span class="o">=</span> <span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">_channel_count</span> <span class="o">-</span> <span class="n">i</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">,</span>
+                      <span class="sa">f</span><span class="s1">&#39;CH</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_channel_vec</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_channel_count</span><span class="p">)]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_plot_item</span><span class="o">.</span><span class="n">getAxis</span><span class="p">(</span><span class="s1">&#39;left&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setTicks</span><span class="p">([</span><span class="n">ticks</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_plot_item</span><span class="o">.</span><span class="n">setYRange</span><span class="p">(</span><span class="o">*</span><span class="n">ylim</span><span class="p">)</span>
+
+            <span class="c1"># Create time cursor at trigger point (t=0)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cursor</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">PlotCurveItem</span><span class="p">(</span><span class="n">pen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_foreground_color</span><span class="p">,</span>
+                                            <span class="n">width</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_plot_item</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cursor</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cursor</span><span class="o">.</span><span class="n">setData</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="o">*</span><span class="n">ylim</span><span class="p">],</span> <span class="n">antialias</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># Update data: evaluate mathematical expressions and average epochs</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
+            <span class="c1"># Average all trigger epochs for each port</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">name</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_buffer</span><span class="p">[</span><span class="n">name</span><span class="p">],</span>
+                                       <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+                              <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_port_names</span>
+            <span class="p">}</span>
+
+            <span class="c1"># Evaluate mathematical expressions for each plot</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_no_plots</span><span class="p">):</span>
+                <span class="n">func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_funcs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                <span class="n">arg_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_args</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">arg_names</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_display_buffer</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_new_data</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># Plot channel data with amplitude scaling and vertical offset</span>
+        <span class="n">ch_lim_key</span> <span class="o">=</span> <span class="n">TriggerScope</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">AMPLITUDE_LIMIT</span>
+        <span class="n">ch_lim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="n">ch_lim_key</span><span class="p">]</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_channel_vec</span><span class="p">)):</span>
+            <span class="c1"># Vertical offset: each channel gets its own &quot;lane&quot;</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channel_count</span> <span class="o">-</span> <span class="n">i</span> <span class="o">-</span> <span class="mf">0.5</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_no_plots</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_curves</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_t_vec</span><span class="p">,</span>
+                    <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_display_buffer</span><span class="p">[</span><span class="n">k</span><span class="p">][:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channel_vec</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+                     <span class="o">/</span> <span class="n">ch_lim</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">d</span><span class="p">),</span>
+                    <span class="n">antialias</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># Update x-axis range with small margin</span>
+        <span class="n">tw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frame_size</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sampling_rate</span>
+        <span class="n">margin</span> <span class="o">=</span> <span class="n">tw</span> <span class="o">*</span> <span class="mf">0.0125</span>
+        <span class="n">xlim</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_t_vec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">margin</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_t_vec</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">margin</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plot_item</span><span class="o">.</span><span class="n">setXRange</span><span class="p">(</span><span class="o">*</span><span class="n">xlim</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TriggerScope.step">
+<a class="viewcode-back" href="../../../../content/frontend/widgets/trigger_scope.html#gpype.frontend.widgets.trigger_scope.TriggerScope.step">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Process incoming trigger epoch data and store for visualization.</span>
+
+<span class="sd">        This method is called by the pipeline for each new trigger epoch.</span>
+<span class="sd">        It accumulates trigger epochs in buffers for averaging and</span>
+<span class="sd">        mathematical expression evaluation. Unlike continuous data streams,</span>
+<span class="sd">        trigger epochs represent fixed-duration signal segments around</span>
+<span class="sd">        detected events.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: Dictionary containing trigger epoch arrays from connected</span>
+<span class="sd">                ports. Each array has shape (frame_size, channels)</span>
+<span class="sd">                representing the pre/post trigger signal segment.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Empty dictionary (this is a sink node with no outputs).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Accumulate trigger epochs for each input port</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_port_names</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data_buffer</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+
+        <span class="c1"># Signal that new data is available for display update</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_new_data</span> <span class="o">=</span> <span class="kc">True</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright g.tec medical engineering GmbH.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

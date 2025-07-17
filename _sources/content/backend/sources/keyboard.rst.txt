@@ -1,0 +1,8 @@
+Keyboard
+========
+
+.. autoclass:: gpype.backend.sources.keyboard.Keyboard
+   :members:
+   :undoc-members:
+   :special-members: __init__
+   :show-inheritance:

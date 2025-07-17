@@ -1,0 +1,8 @@
+Trigger Scope
+=============
+
+.. autoclass:: gpype.frontend.widgets.trigger_scope.TriggerScope
+   :members:
+   :undoc-members:
+   :special-members: __init__
+   :show-inheritance:

@@ -1,0 +1,10 @@
+Sinks
+=====
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Contents
+
+   file_writer
+   lsl_sender
+   udp_sender

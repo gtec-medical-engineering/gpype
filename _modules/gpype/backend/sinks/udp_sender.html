@@ -1,0 +1,308 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gpype.backend.sinks.udp_sender &mdash; g.Pype v3.0.1  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            g.Pype v3.0.1
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">g.Pype v3.0.1</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gpype.backend.sinks.udp_sender</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gpype.backend.sinks.udp_sender</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">socket</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">ioiocore</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ioc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">...common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">Constants</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..core.i_node</span><span class="w"> </span><span class="kn">import</span> <span class="n">INode</span>
+
+
+<div class="viewcode-block" id="UDPSender">
+<a class="viewcode-back" href="../../../../content/backend/sinks/udp_sender.html#gpype.backend.sinks.udp_sender.UDPSender">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">UDPSender</span><span class="p">(</span><span class="n">INode</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;UDP sender for real-time data transmission over network.</span>
+
+<span class="sd">    This class implements a UDP-based data sender that transmits incoming</span>
+<span class="sd">    data blocks immediately during step() execution. The sender uses direct</span>
+<span class="sd">    UDP transmission without additional threading to maintain real-time</span>
+<span class="sd">    performance and minimize latency.</span>
+
+<span class="sd">    The data is automatically serialized as float64 numpy arrays before</span>
+<span class="sd">    transmission, ensuring consistent data format across the network. Each</span>
+<span class="sd">    step() call results in one UDP packet being sent.</span>
+
+<span class="sd">    Features:</span>
+<span class="sd">    - Direct UDP transmission without threading overhead</span>
+<span class="sd">    - Automatic float64 serialization for network compatibility</span>
+<span class="sd">    - Configurable IP address and port settings</span>
+<span class="sd">    - Real-time safe operation with minimal latency</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        DEFAULT_IP: Default target IP address (localhost)</span>
+<span class="sd">        DEFAULT_PORT: Default target port number</span>
+<span class="sd">        _socket: UDP socket for data transmission</span>
+<span class="sd">        _target: Target address tuple (ip, port)</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Data is serialized as float64 numpy array before sending. One UDP</span>
+<span class="sd">        packet is sent per step() call. The receiving end is responsible</span>
+<span class="sd">        for proper deserialization of the binary data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">DEFAULT_IP</span> <span class="o">=</span> <span class="s2">&quot;127.0.0.1&quot;</span>
+    <span class="n">DEFAULT_PORT</span> <span class="o">=</span> <span class="mi">56000</span>
+
+<div class="viewcode-block" id="UDPSender.Configuration">
+<a class="viewcode-back" href="../../../../content/backend/sinks/udp_sender.html#gpype.backend.sinks.udp_sender.UDPSender.Configuration">[docs]</a>
+    <span class="k">class</span><span class="w"> </span><span class="nc">Configuration</span><span class="p">(</span><span class="n">ioc</span><span class="o">.</span><span class="n">INode</span><span class="o">.</span><span class="n">Configuration</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Configuration class for UDPSender parameters.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="UDPSender.Configuration.Keys">
+<a class="viewcode-back" href="../../../../content/backend/sinks/udp_sender.html#gpype.backend.sinks.udp_sender.UDPSender.Configuration.Keys">[docs]</a>
+        <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">ioc</span><span class="o">.</span><span class="n">INode</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Configuration keys for UDP sender settings.&quot;&quot;&quot;</span>
+            <span class="n">IP</span> <span class="o">=</span> <span class="s2">&quot;ip&quot;</span>
+            <span class="n">PORT</span> <span class="o">=</span> <span class="s2">&quot;port&quot;</span></div>
+</div>
+
+
+<div class="viewcode-block" id="UDPSender.__init__">
+<a class="viewcode-back" href="../../../../content/backend/sinks/udp_sender.html#gpype.backend.sinks.udp_sender.UDPSender.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">ip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">port</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the UDP sender with target address and port.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ip: Target IP address for UDP transmission. If None, uses</span>
+<span class="sd">                DEFAULT_IP (localhost). Can be any valid IPv4 address.</span>
+<span class="sd">            port: Target port number for UDP transmission. If None, uses</span>
+<span class="sd">                DEFAULT_PORT. Must be a valid port number (1-65535).</span>
+<span class="sd">            **kwargs: Additional arguments passed to parent INode class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Use default values if not specified</span>
+        <span class="k">if</span> <span class="n">ip</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ip</span> <span class="o">=</span> <span class="n">UDPSender</span><span class="o">.</span><span class="n">DEFAULT_IP</span>
+        <span class="k">if</span> <span class="n">port</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">port</span> <span class="o">=</span> <span class="n">UDPSender</span><span class="o">.</span><span class="n">DEFAULT_PORT</span>
+
+        <span class="c1"># Initialize parent INode with configuration</span>
+        <span class="n">INode</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                       <span class="n">ip</span><span class="o">=</span><span class="n">ip</span><span class="p">,</span>
+                       <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span>
+                       <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Initialize networking components</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_socket</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># UDP socket (created on start)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_target</span> <span class="o">=</span> <span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>  <span class="c1"># Target address tuple</span></div>
+
+
+<div class="viewcode-block" id="UDPSender.start">
+<a class="viewcode-back" href="../../../../content/backend/sinks/udp_sender.html#gpype.backend.sinks.udp_sender.UDPSender.start">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start the UDP sender and initialize socket connection.</span>
+
+<span class="sd">        Creates a UDP socket and configures the target address from</span>
+<span class="sd">        the current configuration. The socket is ready for immediate</span>
+<span class="sd">        data transmission after this method completes.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            OSError: If socket creation fails or address is invalid.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The target address is read from configuration to support</span>
+<span class="sd">            dynamic address changes between start/stop cycles.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Create UDP socket for data transmission</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_socket</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_DGRAM</span><span class="p">)</span>
+
+        <span class="c1"># Update target address from current configuration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_target</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">IP</span><span class="p">],</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">PORT</span><span class="p">])</span>
+
+        <span class="c1"># Call parent start method</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="UDPSender.stop">
+<a class="viewcode-back" href="../../../../content/backend/sinks/udp_sender.html#gpype.backend.sinks.udp_sender.UDPSender.stop">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stop the UDP sender and clean up socket resources.</span>
+
+<span class="sd">        Properly closes the UDP socket if it exists and resets the</span>
+<span class="sd">        socket reference to None. This ensures clean resource cleanup</span>
+<span class="sd">        and prevents potential network resource leaks.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            Socket closure is handled gracefully - if the socket is</span>
+<span class="sd">            already closed or None, no error is raised.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Close socket and clean up resources</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_socket</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_socket</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_socket</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Call parent stop method</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="UDPSender.setup">
+<a class="viewcode-back" href="../../../../content/backend/sinks/udp_sender.html#gpype.backend.sinks.udp_sender.UDPSender.setup">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+              <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+              <span class="n">port_context_in</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Setup method called before processing begins.</span>
+
+<span class="sd">        This method is called during pipeline initialization but requires</span>
+<span class="sd">        no specific setup for UDP transmission since all configuration</span>
+<span class="sd">        is handled during start().</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: Dictionary of input data arrays from connected ports.</span>
+<span class="sd">            port_context_in: Context information from input ports.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Empty dictionary as this is a sink node with no output context.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            UDP transmission requires no data-dependent configuration,</span>
+<span class="sd">            so this method simply returns an empty context dictionary.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># No setup required for UDP transmission</span>
+        <span class="k">return</span> <span class="p">{}</span></div>
+
+
+<div class="viewcode-block" id="UDPSender.step">
+<a class="viewcode-back" href="../../../../content/backend/sinks/udp_sender.html#gpype.backend.sinks.udp_sender.UDPSender.step">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process and transmit data via UDP.</span>
+
+<span class="sd">        Retrieves data from the default input port, converts it to float64</span>
+<span class="sd">        format, serializes it to bytes, and transmits it via UDP to the</span>
+<span class="sd">        configured target address.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: Dictionary containing input data arrays. Uses the default</span>
+<span class="sd">                input port to retrieve data for transmission.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Empty dictionary as this is a sink node with no output data.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            Data is automatically converted to float64 format before</span>
+<span class="sd">            serialization to ensure consistent network representation.</span>
+<span class="sd">            Each call results in exactly one UDP packet transmission.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get data from default input port</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">Constants</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">PORT_IN</span><span class="p">]</span>
+
+        <span class="c1"># Transmit data if socket is available</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_socket</span><span class="p">:</span>
+            <span class="c1"># Convert to float64 and serialize to bytes for transmission</span>
+            <span class="n">payload</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span>
+
+            <span class="c1"># Send UDP packet to target address</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_socket</span><span class="o">.</span><span class="n">sendto</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target</span><span class="p">)</span>
+
+        <span class="c1"># No output data for sink nodes</span>
+        <span class="k">return</span> <span class="p">{}</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright g.tec medical engineering GmbH.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

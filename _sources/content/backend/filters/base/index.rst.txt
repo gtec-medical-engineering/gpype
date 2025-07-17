@@ -1,0 +1,9 @@
+Base Filter Classes
+===================
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Contents
+
+   butterworth
+   generic_filter

@@ -1,0 +1,8 @@
+g.Nautilus
+==========
+
+.. autoclass:: gpype.backend.sources.g_nautilus.GNautilus
+   :members:
+   :undoc-members:
+   :special-members: __init__
+   :show-inheritance:

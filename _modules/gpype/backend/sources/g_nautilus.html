@@ -1,0 +1,397 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gpype.backend.sources.g_nautilus &mdash; g.Pype v3.0.1  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            g.Pype v3.0.1
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">g.Pype v3.0.1</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gpype.backend.sources.g_nautilus</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gpype.backend.sources.g_nautilus</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base.amplifier_source</span><span class="w"> </span><span class="kn">import</span> <span class="n">AmplifierSource</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">Constants</span>
+
+<span class="c1"># Platform check - g.Nautilus is only supported on Windows</span>
+<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">!=</span> <span class="s2">&quot;win32&quot;</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This module is only supported on Windows.&quot;</span><span class="p">)</span>
+
+<span class="c1"># Port identifiers for data flow</span>
+<span class="n">PORT_OUT</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">PORT_OUT</span>
+<span class="n">PORT_IN</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">PORT_IN</span>
+
+
+<div class="viewcode-block" id="GNautilus">
+<a class="viewcode-back" href="../../../../content/backend/sources/g_nautilus.html#gpype.backend.sources.g_nautilus.GNautilus">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">GNautilus</span><span class="p">(</span><span class="n">AmplifierSource</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    g.Nautilus EEG amplifier interface for real-time data acquisition.</span>
+
+<span class="sd">    This class provides an interface to g.tec&#39;s g.Nautilus wireless EEG</span>
+<span class="sd">    amplifier system. It handles device initialization, data streaming,</span>
+<span class="sd">    and electrode impedance monitoring.</span>
+
+<span class="sd">    Features:</span>
+<span class="sd">        - Real-time EEG data acquisition</span>
+<span class="sd">        - Configurable sampling rates and channel counts</span>
+<span class="sd">        - Electrode impedance monitoring</span>
+<span class="sd">        - Digital input channel support</span>
+<span class="sd">        - Wireless connectivity</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Requires g.tec GDS library and Windows operating system.</span>
+<span class="sd">        The device must be paired and configured via g.tec software.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Source code fingerprint</span>
+    <span class="n">FINGERPRINT</span> <span class="o">=</span> <span class="s2">&quot;c22599a27c6adc7c8ed9f61a671ee947&quot;</span>
+
+<div class="viewcode-block" id="GNautilus.Configuration">
+<a class="viewcode-back" href="../../../../content/backend/sources/g_nautilus.html#gpype.backend.sources.g_nautilus.GNautilus.Configuration">[docs]</a>
+    <span class="k">class</span><span class="w"> </span><span class="nc">Configuration</span><span class="p">(</span><span class="n">AmplifierSource</span><span class="o">.</span><span class="n">Configuration</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Configuration class for g.Nautilus amplifier parameters.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="GNautilus.Configuration.Keys">
+<a class="viewcode-back" href="../../../../content/backend/sources/g_nautilus.html#gpype.backend.sources.g_nautilus.GNautilus.Configuration.Keys">[docs]</a>
+        <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">AmplifierSource</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Configuration key constants for the g.Nautilus amplifier.&quot;&quot;&quot;</span>
+            <span class="n">SENSITIVITY</span> <span class="o">=</span> <span class="s1">&#39;sensitivity&#39;</span></div>
+</div>
+
+
+<div class="viewcode-block" id="GNautilus.__init__">
+<a class="viewcode-back" href="../../../../content/backend/sources/g_nautilus.html#gpype.backend.sources.g_nautilus.GNautilus.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">serial</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">channel_count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">frame_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">sensitivity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">enable_di</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the g.Nautilus amplifier interface.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            serial (str, optional): Device serial number for identification.</span>
+<span class="sd">                If None, connects to first available device.</span>
+<span class="sd">            sampling_rate (float, optional): Sampling frequency in Hz.</span>
+<span class="sd">            channel_count (int, optional): Number of EEG channels to acquire.</span>
+<span class="sd">            frame_size (int, optional): Number of samples per data frame.</span>
+<span class="sd">                Affects latency and processing efficiency.</span>
+<span class="sd">            sensitivity (float, optional): Amplifier sensitivity setting.</span>
+<span class="sd">                Determines input voltage range.</span>
+<span class="sd">            enable_di (bool): Enable digital input channel for triggers.</span>
+<span class="sd">                Adds one additional channel for event markers.</span>
+<span class="sd">            **kwargs: Additional configuration parameters passed to</span>
+<span class="sd">                AmplifierSource.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RuntimeError: If GDS library is not available or device</span>
+<span class="sd">                initialization fails.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Import gtec_gds only when actually needed (lazy import)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">gtec_gds</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gds</span>
+        <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;GDS library not available: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">. &quot;</span>
+                <span class="s2">&quot;This may be expected in CI environments where the GDS &quot;</span>
+                <span class="s2">&quot;library is not installed.&quot;</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+
+        <span class="c1"># Initialize impedance values to -10 kOhm (unknown state)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">channel_count</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">)</span>
+
+        <span class="c1"># Create and configure the g.Nautilus device</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_device</span> <span class="o">=</span> <span class="n">gds</span><span class="o">.</span><span class="n">GNautilus</span><span class="p">(</span><span class="n">serial</span><span class="o">=</span><span class="n">serial</span><span class="p">,</span>
+                                     <span class="n">sampling_rate</span><span class="o">=</span><span class="n">sampling_rate</span><span class="p">,</span>
+                                     <span class="n">channel_count</span><span class="o">=</span><span class="n">channel_count</span><span class="p">,</span>
+                                     <span class="n">frame_size</span><span class="o">=</span><span class="n">frame_size</span><span class="p">,</span>
+                                     <span class="n">sensitivity</span><span class="o">=</span><span class="n">sensitivity</span><span class="p">,</span>
+                                     <span class="n">enable_di</span><span class="o">=</span><span class="n">enable_di</span><span class="p">)</span>
+
+        <span class="c1"># Update parameters with actual device configuration</span>
+        <span class="n">channel_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_device</span><span class="o">.</span><span class="n">channel_count</span>
+        <span class="n">sensitivity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_device</span><span class="o">.</span><span class="n">sensitivity</span>
+
+        <span class="c1"># Add digital input channel if enabled</span>
+        <span class="k">if</span> <span class="n">enable_di</span><span class="p">:</span>
+            <span class="n">channel_count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># Set up data callback for real-time streaming</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_device</span><span class="o">.</span><span class="n">set_data_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_callback</span><span class="p">)</span>
+
+        <span class="c1"># Initialize parent AmplifierSource with final configuration</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sampling_rate</span><span class="o">=</span><span class="n">sampling_rate</span><span class="p">,</span>
+                         <span class="n">channel_count</span><span class="o">=</span><span class="n">channel_count</span><span class="p">,</span>
+                         <span class="n">frame_size</span><span class="o">=</span><span class="n">frame_size</span><span class="p">,</span>
+                         <span class="n">sensitivity</span><span class="o">=</span><span class="n">sensitivity</span><span class="p">,</span>
+                         <span class="n">enable_di</span><span class="o">=</span><span class="n">enable_di</span><span class="p">,</span>
+                         <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Initialize impedance monitoring state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_impedance_check_running</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_impedance_fresh</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="GNautilus.start">
+<a class="viewcode-back" href="../../../../content/backend/sources/g_nautilus.html#gpype.backend.sources.g_nautilus.GNautilus.start">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Start the g.Nautilus data acquisition.</span>
+
+<span class="sd">        Initiates the hardware data streaming and activates the amplifier.</span>
+<span class="sd">        The device will begin acquiring EEG data and triggering data</span>
+<span class="sd">        callbacks for real-time processing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Start hardware data acquisition</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_device</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="c1"># Start parent source processing</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="GNautilus.stop">
+<a class="viewcode-back" href="../../../../content/backend/sources/g_nautilus.html#gpype.backend.sources.g_nautilus.GNautilus.stop">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stop the g.Nautilus data acquisition and cleanup resources.</span>
+
+<span class="sd">        Stops the hardware streaming, cleans up device resources, and</span>
+<span class="sd">        ensures proper shutdown of the amplifier connection.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Stop hardware data acquisition</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_device</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+        <span class="c1"># Stop parent source processing</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+        <span class="c1"># Clean up device resources</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_device</span></div>
+
+
+<div class="viewcode-block" id="GNautilus.start_impedance_check">
+<a class="viewcode-back" href="../../../../content/backend/sources/g_nautilus.html#gpype.backend.sources.g_nautilus.GNautilus.start_impedance_check">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">start_impedance_check</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Start electrode impedance monitoring in a background thread.</span>
+
+<span class="sd">        Initiates continuous impedance measurement for all electrodes.</span>
+<span class="sd">        This provides real-time feedback on electrode contact quality,</span>
+<span class="sd">        which is crucial for obtaining good EEG signals. Impedance values</span>
+<span class="sd">        are updated periodically and can be retrieved with get_impedance().</span>
+
+<span class="sd">        The impedance check runs in a separate daemon thread to avoid</span>
+<span class="sd">        blocking the main data acquisition process.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Start the impedance retrieval in a background thread</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_impedance_check_running</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_impedance_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_z_thread</span><span class="p">,</span>
+                                                  <span class="n">daemon</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_impedance_thread</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_impedance_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="GNautilus.stop_impedance_check">
+<a class="viewcode-back" href="../../../../content/backend/sources/g_nautilus.html#gpype.backend.sources.g_nautilus.GNautilus.stop_impedance_check">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stop_impedance_check</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stop electrode impedance monitoring and cleanup the thread.</span>
+
+<span class="sd">        Stops the background impedance measurement thread and waits for</span>
+<span class="sd">        it to complete. Call this before stopping the main data acquisition</span>
+<span class="sd">        to ensure clean shutdown.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Signal thread to stop</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_impedance_check_running</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1"># Wait for thread completion if it exists</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_impedance_thread</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_impedance_thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="GNautilus.get_impedance">
+<a class="viewcode-back" href="../../../../content/backend/sources/g_nautilus.html#gpype.backend.sources.g_nautilus.GNautilus.get_impedance">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_impedance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get current electrode impedance values and freshness status.</span>
+
+<span class="sd">        Returns the most recent impedance measurements for all electrodes.</span>
+<span class="sd">        The freshness flag indicates whether new impedance data is available</span>
+<span class="sd">        since the last call to this method.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple: (impedance_array, is_fresh)</span>
+<span class="sd">                - impedance_array (np.ndarray): Impedance values in kOhms</span>
+<span class="sd">                    for each electrode. -10 indicates unknown/disconnected.</span>
+<span class="sd">                - is_fresh (bool): True if impedance data has been updated</span>
+<span class="sd">                    since last call, False otherwise.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            Impedance values &lt; 5 kOhm are typically considered good for EEG.</span>
+<span class="sd">            Values &gt; 25 kOhm may indicate poor electrode contact.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get current freshness status and mark as read</span>
+        <span class="n">imp_fresh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_impedance_fresh</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_impedance_fresh</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_z</span><span class="p">,</span> <span class="n">imp_fresh</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_data_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Handle incoming data from the g.Nautilus device.</span>
+
+<span class="sd">        This callback is invoked by the GDS library whenever new EEG data</span>
+<span class="sd">        is available from the amplifier. It forwards the data through the</span>
+<span class="sd">        g.Pype pipeline using the cycle mechanism.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data (np.ndarray): Raw EEG data from the amplifier.</span>
+<span class="sd">                Shape: (frame_size, channel_count)</span>
+<span class="sd">                Data type typically float32 or float64.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Forward data through the pipeline using the input port</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="n">PORT_IN</span><span class="p">:</span> <span class="n">data</span><span class="p">})</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_z_thread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Background thread function for continuous impedance monitoring.</span>
+
+<span class="sd">        This function runs in a separate thread to periodically retrieve</span>
+<span class="sd">        electrode impedance values from the g.Nautilus device. The first</span>
+<span class="sd">        measurement may take longer as it initializes the impedance</span>
+<span class="sd">        measurement circuit.</span>
+
+<span class="sd">        The thread continues until _impedance_check_running is set to False.</span>
+<span class="sd">        Each measurement updates the _z array and sets the freshness flag.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># First impedance measurement requires initialization</span>
+        <span class="n">first</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_impedance_check_running</span><span class="p">:</span>
+            <span class="c1"># Get impedance values from device</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_device</span><span class="o">.</span><span class="n">get_impedance</span><span class="p">(</span><span class="n">first</span><span class="p">)</span>
+            <span class="n">first</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="c1"># Mark impedance data as fresh/updated</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_impedance_fresh</span> <span class="o">=</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="GNautilus.step">
+<a class="viewcode-back" href="../../../../content/backend/sources/g_nautilus.html#gpype.backend.sources.g_nautilus.GNautilus.step">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Process one step of data through the g.Nautilus source.</span>
+
+<span class="sd">        This method implements the core data processing step for the</span>
+<span class="sd">        AmplifierSource interface. It simply passes through the input</span>
+<span class="sd">        data from PORT_IN to PORT_OUT without modification.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data (dict): Input data dictionary with PORT_IN key containing</span>
+<span class="sd">                EEG data array from the amplifier.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Output data dictionary with PORT_OUT key containing</span>
+<span class="sd">                the same EEG data array for downstream processing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Pass through data from input to output port</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">PORT_OUT</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="n">PORT_IN</span><span class="p">]}</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright g.tec medical engineering GmbH.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

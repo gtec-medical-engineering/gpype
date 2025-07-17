@@ -1,0 +1,399 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gpype.backend.sinks.file_writer &mdash; g.Pype v3.0.1  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            g.Pype v3.0.1
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">g.Pype v3.0.1</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gpype.backend.sinks.file_writer</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gpype.backend.sinks.file_writer</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">queue</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">ioiocore</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ioc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">...common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">Constants</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..core.i_node</span><span class="w"> </span><span class="kn">import</span> <span class="n">INode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..core.i_port</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPort</span>
+
+
+<div class="viewcode-block" id="FileWriter">
+<a class="viewcode-back" href="../../../../content/backend/sinks/file_writer.html#gpype.backend.sinks.file_writer.FileWriter">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FileWriter</span><span class="p">(</span><span class="n">INode</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Threaded file writer for real-time data logging to CSV files.</span>
+
+<span class="sd">    This class implements a file writer that operates in a separate background</span>
+<span class="sd">    thread to prevent blocking the main signal processing pipeline. Data is</span>
+<span class="sd">    queued from the main thread and written asynchronously to maintain</span>
+<span class="sd">    real-time performance.</span>
+
+<span class="sd">    The writer automatically adds timestamps to filenames and includes sample</span>
+<span class="sd">    indices and channel headers in the CSV output. It supports continuous</span>
+<span class="sd">    streaming of multi-channel data with proper synchronization.</span>
+
+<span class="sd">    Features:</span>
+<span class="sd">    - Thread-safe data queuing for non-blocking operation</span>
+<span class="sd">    - Automatic timestamp addition to filenames</span>
+<span class="sd">    - CSV format with sample indices and channel headers</span>
+<span class="sd">    - Proper resource cleanup on stop</span>
+<span class="sd">    - Real-time data streaming capability</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        _file_queue: Thread-safe queue for data blocks</span>
+<span class="sd">        _stop_event: Threading event for clean shutdown</span>
+<span class="sd">        _worker_thread: Background thread for file operations</span>
+<span class="sd">        _file_handle: File handle for CSV writing</span>
+<span class="sd">        _sample_counter: Global sample index counter</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Only CSV format is currently supported. The file writer adds a</span>
+<span class="sd">        timestamp to the filename to prevent overwrites.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="FileWriter.Configuration">
+<a class="viewcode-back" href="../../../../content/backend/sinks/file_writer.html#gpype.backend.sinks.file_writer.FileWriter.Configuration">[docs]</a>
+    <span class="k">class</span><span class="w"> </span><span class="nc">Configuration</span><span class="p">(</span><span class="n">ioc</span><span class="o">.</span><span class="n">INode</span><span class="o">.</span><span class="n">Configuration</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Configuration class for FileWriter parameters.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="FileWriter.Configuration.Keys">
+<a class="viewcode-back" href="../../../../content/backend/sinks/file_writer.html#gpype.backend.sinks.file_writer.FileWriter.Configuration.Keys">[docs]</a>
+        <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">ioc</span><span class="o">.</span><span class="n">INode</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Configuration keys for file writer settings.&quot;&quot;&quot;</span>
+            <span class="n">FILE_NAME</span> <span class="o">=</span> <span class="s2">&quot;file_name&quot;</span></div>
+</div>
+
+
+<div class="viewcode-block" id="FileWriter.__init__">
+<a class="viewcode-back" href="../../../../content/backend/sinks/file_writer.html#gpype.backend.sinks.file_writer.FileWriter.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                 <span class="n">input_ports</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">IPort</span><span class="o">.</span><span class="n">Configuration</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the file writer with specified filename and ports.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            file_name: Base filename for data output. A timestamp will be</span>
+<span class="sd">                automatically appended to prevent overwrites. Must have</span>
+<span class="sd">                .csv extension or will raise ValueError.</span>
+<span class="sd">            input_ports: List of input port configurations. Defaults to</span>
+<span class="sd">                a single input port if not specified.</span>
+<span class="sd">            **kwargs: Additional arguments passed to parent INode class.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If file format is not supported (.csv required).</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            Basic file writer with default single input port::</span>
+<span class="sd">            </span>
+<span class="sd">                writer = FileWriter(file_name=&quot;data.csv&quot;)</span>
+
+<span class="sd">            Writer with multiple input ports::</span>
+<span class="sd">            </span>
+<span class="sd">                ports = [IPort.Configuration(), IPort.Configuration()]</span>
+<span class="sd">                writer = FileWriter(file_name=&quot;multichannel.csv&quot;,</span>
+<span class="sd">                                  input_ports=ports)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Set default input port configuration if none provided</span>
+        <span class="k">if</span> <span class="n">input_ports</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">input_ports</span> <span class="o">=</span> <span class="p">[</span><span class="n">IPort</span><span class="o">.</span><span class="n">Configuration</span><span class="p">()]</span>
+
+        <span class="c1"># Initialize parent INode with configuration</span>
+        <span class="n">INode</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                       <span class="n">input_ports</span><span class="o">=</span><span class="n">input_ports</span><span class="p">,</span>
+                       <span class="n">file_name</span><span class="o">=</span><span class="n">file_name</span><span class="p">,</span>
+                       <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Initialize threading components for background file operations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_file_queue</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>  <span class="c1"># Thread-safe data queue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stop_event</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>  <span class="c1"># Shutdown coordination</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_worker_thread</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Background file writer thread</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_file_handle</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># CSV file handle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sample_counter</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Global sample index counter</span></div>
+
+
+<div class="viewcode-block" id="FileWriter.start">
+<a class="viewcode-back" href="../../../../content/backend/sinks/file_writer.html#gpype.backend.sinks.file_writer.FileWriter.start">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start the file writer and initialize background thread.</span>
+
+<span class="sd">        Creates the output file with timestamp, validates the file format,</span>
+<span class="sd">        and starts the background worker thread for asynchronous writing.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If the file format is not .csv.</span>
+<span class="sd">            IOError: If the file cannot be created or opened.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The method automatically appends a timestamp to the filename</span>
+<span class="sd">            to prevent overwrites of existing data files.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get base filename from configuration</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">FILE_NAME</span><span class="p">]</span>
+
+        <span class="c1"># Split filename and extension for timestamp insertion</span>
+        <span class="n">name</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+        <span class="n">timestamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%H%M%S&quot;</span><span class="p">)</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">timestamp</span><span class="si">}{</span><span class="n">ext</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="c1"># Validate file format - only CSV is supported</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.csv&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported file format </span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Open file handle for writing</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_file_handle</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Initialize and start background worker thread</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_worker_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_file_worker</span><span class="p">,</span>
+                                               <span class="n">daemon</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stop_event</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>  <span class="c1"># Reset stop event</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_worker_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="c1"># Initialize header for CSV output</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_header</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="c1"># Call parent start method</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="FileWriter.stop">
+<a class="viewcode-back" href="../../../../content/backend/sinks/file_writer.html#gpype.backend.sinks.file_writer.FileWriter.stop">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stop the file writer and clean up resources.</span>
+
+<span class="sd">        Signals the background thread to stop, waits for it to finish</span>
+<span class="sd">        processing remaining data, and properly closes the file handle.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            This method ensures all queued data is written before stopping</span>
+<span class="sd">            and properly releases file resources to prevent data loss.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Signal background thread to stop</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stop_event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+
+        <span class="c1"># Wait for worker thread to finish processing remaining data</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_worker_thread</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_worker_thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+        <span class="c1"># Close file handle and clean up</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_handle</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_file_handle</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_file_handle</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Call parent stop method</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="FileWriter.setup">
+<a class="viewcode-back" href="../../../../content/backend/sinks/file_writer.html#gpype.backend.sinks.file_writer.FileWriter.setup">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+              <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+              <span class="n">port_context_in</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Setup method called before processing begins.</span>
+
+<span class="sd">        Validates that the file handle is properly initialized and ready</span>
+<span class="sd">        for writing operations.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: Dictionary of input data arrays from connected ports.</span>
+<span class="sd">            port_context_in: Context information from input ports.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Empty dictionary as this is a sink node with no outputs.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RuntimeError: If file handle is not initialized</span>
+<span class="sd">                (start() not called).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Verify file handle is initialized</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_handle</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;File handle is not initialized.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># No output context for sink nodes</span>
+        <span class="k">return</span> <span class="p">{}</span></div>
+
+
+<div class="viewcode-block" id="FileWriter.step">
+<a class="viewcode-back" href="../../../../content/backend/sinks/file_writer.html#gpype.backend.sinks.file_writer.FileWriter.step">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process incoming data by queuing it for background writing.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: Dictionary containing input data arrays. Uses the default</span>
+<span class="sd">                input port to retrieve data for writing.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Empty dictionary as this is a sink node with no outputs.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            Data is copied before queuing to prevent race conditions</span>
+<span class="sd">            between the main thread and background writer thread.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get data from default input port</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">Constants</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">PORT_IN</span><span class="p">]</span>
+
+        <span class="c1"># Copy data and queue for background writing (thread-safe)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_file_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+
+        <span class="c1"># No output data for sink nodes</span>
+        <span class="k">return</span> <span class="p">{}</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_file_worker</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Background worker thread for asynchronous file writing.</span>
+
+<span class="sd">        This method runs in a separate thread to handle file I/O operations</span>
+<span class="sd">        without blocking the main signal processing pipeline. It continuously</span>
+<span class="sd">        processes data blocks from the queue until stop is signaled.</span>
+
+<span class="sd">        The worker generates CSV headers on the first write and maintains</span>
+<span class="sd">        a global sample counter for proper indexing across all data blocks.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The worker ensures all remaining data is written even after</span>
+<span class="sd">            stop is signaled, preventing data loss during shutdown.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Continue processing until stop signaled AND queue is empty</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stop_event</span><span class="o">.</span><span class="n">is_set</span><span class="p">()</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_queue</span><span class="o">.</span><span class="n">empty</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_queue</span><span class="o">.</span><span class="n">empty</span><span class="p">():</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># Get next data block from queue (timeout for response)</span>
+                    <span class="n">block</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_queue</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+                    <span class="c1"># Ensure file handle is still valid</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_handle</span><span class="p">:</span>
+                        <span class="c1"># Generate CSV header only for first data block</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_counter</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">header</span> <span class="o">=</span> <span class="s2">&quot;Index, &quot;</span>
+                            <span class="n">ch_names</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;Ch</span><span class="si">{</span><span class="n">d</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">&quot;</span>
+                                        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+                            <span class="n">header</span> <span class="o">+=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ch_names</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">header</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+                        <span class="c1"># Generate sample indices for this block</span>
+                        <span class="n">start_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_counter</span>
+                        <span class="n">end_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_counter</span> <span class="o">+</span> <span class="n">block</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">start_idx</span><span class="p">,</span> <span class="n">end_idx</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_sample_counter</span> <span class="o">+=</span> <span class="n">block</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+                        <span class="c1"># Combine indices with data (indices as first column)</span>
+                        <span class="n">full_block</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">indices</span><span class="p">,</span> <span class="n">block</span><span class="p">))</span>
+
+                        <span class="c1"># Write to CSV with high precision formatting</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file_handle</span><span class="p">,</span>
+                                   <span class="n">full_block</span><span class="p">,</span>
+                                   <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%.17g</span><span class="s2">&quot;</span><span class="p">,</span>  <span class="c1"># High precision format</span>
+                                   <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">,</span>
+                                   <span class="n">header</span><span class="o">=</span><span class="n">header</span><span class="p">,</span>
+                                   <span class="n">comments</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>  <span class="c1"># No comment prefix</span>
+
+                <span class="k">except</span> <span class="n">queue</span><span class="o">.</span><span class="n">Empty</span><span class="p">:</span>
+                    <span class="c1"># Timeout occurred, continue loop to check stop condition</span>
+                    <span class="k">continue</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Queue is empty, brief sleep to prevent busy waiting</span>
+                <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
+                <span class="k">continue</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright g.tec medical engineering GmbH.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

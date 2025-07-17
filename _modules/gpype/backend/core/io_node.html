@@ -1,0 +1,306 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gpype.backend.core.io_node &mdash; g.Pype v3.0.1  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            g.Pype v3.0.1
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">g.Pype v3.0.1</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gpype.backend.core.io_node</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gpype.backend.core.io_node</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">abstractmethod</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ioiocore</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ioc</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.node</span><span class="w"> </span><span class="kn">import</span> <span class="n">Node</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">Constants</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..core.i_port</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPort</span>
+
+
+<div class="viewcode-block" id="IONode">
+<a class="viewcode-back" href="../../../../content/backend/core/io_node.html#gpype.backend.core.io_node.IONode">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">IONode</span><span class="p">(</span><span class="n">ioc</span><span class="o">.</span><span class="n">IONode</span><span class="p">,</span> <span class="n">Node</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class for input/output nodes in the g.Pype pipeline.</span>
+
+<span class="sd">    IONode combines the functionality of ioiocore.IONode and Node to provide a</span>
+<span class="sd">    base class for all signal processing nodes that have input and output</span>
+<span class="sd">    ports. This class handles the common validation and setup logic for port</span>
+<span class="sd">    contexts including sampling rates, channel counts, frame sizes, and data</span>
+<span class="sd">    types.</span>
+
+<span class="sd">    All IONode subclasses must implement the step() method to define their</span>
+<span class="sd">    specific signal processing behavior. The setup() method is called once</span>
+<span class="sd">    before processing begins to validate and configure the node based on input</span>
+<span class="sd">    port contexts.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        Input and output ports are managed by the parent ioiocore.IONode class.</span>
+<span class="sd">        Node-specific configuration is handled by the parent Node class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="IONode.__init__">
+<a class="viewcode-back" href="../../../../content/backend/core/io_node.html#gpype.backend.core.io_node.IONode.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">input_ports</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">ioc</span><span class="o">.</span><span class="n">IPort</span><span class="o">.</span><span class="n">Configuration</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">output_ports</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">ioc</span><span class="o">.</span><span class="n">OPort</span><span class="o">.</span><span class="n">Configuration</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the IONode with input and output port configurations.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            input_ports: List of input port configurations. If None, default</span>
+<span class="sd">                configuration will be used.</span>
+<span class="sd">            output_ports: List of output port configurations. If None, default</span>
+<span class="sd">                configuration will be used.</span>
+<span class="sd">            **kwargs: Additional keyword arguments passed to parent classes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ioc</span><span class="o">.</span><span class="n">IONode</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                            <span class="n">input_ports</span><span class="o">=</span><span class="n">input_ports</span><span class="p">,</span>
+                            <span class="n">output_ports</span><span class="o">=</span><span class="n">output_ports</span><span class="p">,</span>
+                            <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">Node</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="IONode.setup">
+<a class="viewcode-back" href="../../../../content/backend/core/io_node.html#gpype.backend.core.io_node.IONode.setup">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+              <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+              <span class="n">port_context_in</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Setup the node before processing begins.</span>
+
+<span class="sd">        This method is executed once right before the first step of the node.</span>
+<span class="sd">        It validates that all input ports have consistent configurations and</span>
+<span class="sd">        creates output port contexts based on the input configurations.</span>
+
+<span class="sd">        The method performs the following validations:</span>
+<span class="sd">        - All ports must have frame_size and channel_count in their context</span>
+<span class="sd">        - All ports must have the same sampling rate</span>
+<span class="sd">        - Channel counts must be compatible (either all same or broadcastable)</span>
+<span class="sd">        - All ports must have the same frame size</span>
+<span class="sd">        - Port types must be compatible</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: Dictionary mapping port names to numpy arrays containing</span>
+<span class="sd">                initial data (typically not used in setup).</span>
+<span class="sd">            port_context_in: Dictionary mapping input port names to their</span>
+<span class="sd">                context dictionaries containing metadata like sampling_rate,</span>
+<span class="sd">                channel_count, frame_size, and type.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dictionary mapping output port names to their context dictionaries.</span>
+<span class="sd">            The output contexts are derived from the validated input contexts.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If any validation fails, including missing required</span>
+<span class="sd">                keys, mismatched sampling rates, incompatible channel counts,</span>
+<span class="sd">                different frame sizes, or incompatible types.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Validate required keys are present in all input port contexts</span>
+        <span class="k">for</span> <span class="n">context</span> <span class="ow">in</span> <span class="n">port_context_in</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">FRAME_SIZE</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">context</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;frame_size must be provided in context.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">CHANNEL_COUNT</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">context</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;channel_count must be provided in context.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Validate sampling rates - all ports must have the same sampling rate</span>
+        <span class="n">sr_key</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">SAMPLING_RATE</span>
+        <span class="n">sampling_rates</span> <span class="o">=</span> <span class="p">[</span><span class="n">md</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sr_key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">md</span> <span class="ow">in</span> <span class="n">port_context_in</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>  <span class="c1"># noqa: E501</span>
+        <span class="n">sampling_rates</span> <span class="o">=</span> <span class="p">[</span><span class="n">sr</span> <span class="k">for</span> <span class="n">sr</span> <span class="ow">in</span> <span class="n">sampling_rates</span> <span class="k">if</span> <span class="n">sr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">sampling_rates</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;All ports must have the same sampling rate.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Validate and normalize channel counts</span>
+        <span class="c1"># Allow broadcasting: single-channel ports can be broadcast to</span>
+        <span class="c1"># multi-channel ports</span>
+        <span class="n">cc_key</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">CHANNEL_COUNT</span>
+        <span class="n">channel_counts</span> <span class="o">=</span> <span class="p">[</span><span class="n">md</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cc_key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">md</span> <span class="ow">in</span> <span class="n">port_context_in</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>  <span class="c1"># noqa: E501</span>
+        <span class="n">channel_counts</span> <span class="o">=</span> <span class="p">[</span><span class="n">cc</span> <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">channel_counts</span> <span class="k">if</span> <span class="n">cc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="n">channel_counts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># add single channel for comparison</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">channel_counts</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="c1"># More than 2 unique values means incompatible multi-channel ports</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;All ports must have the same channel count.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Broadcast single channels to maximum channel count</span>
+        <span class="k">for</span> <span class="n">md</span> <span class="ow">in</span> <span class="n">port_context_in</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">md</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cc_key</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">md</span><span class="p">[</span><span class="n">cc_key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">channel_counts</span><span class="p">)</span>  <span class="c1"># set single channels to max (broadcast)  # noqa: E501</span>
+
+        <span class="c1"># Validate frame sizes - all ports must have the same frame size</span>
+        <span class="n">fsz_key</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">FRAME_SIZE</span>
+        <span class="n">frame_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="n">md</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fsz_key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">md</span> <span class="ow">in</span> <span class="n">port_context_in</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>  <span class="c1"># noqa: E501</span>
+        <span class="n">frame_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="n">fsz</span> <span class="k">for</span> <span class="n">fsz</span> <span class="ow">in</span> <span class="n">frame_sizes</span> <span class="k">if</span> <span class="n">fsz</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">frame_sizes</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;All ports must have the same frame size.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Validate port types - all ports must have compatible types</span>
+        <span class="n">type_key</span> <span class="o">=</span> <span class="n">IPort</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">TYPE</span>
+        <span class="n">types</span> <span class="o">=</span> <span class="p">[</span><span class="n">md</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">type_key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">md</span> <span class="ow">in</span> <span class="n">port_context_in</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>  <span class="c1"># noqa: E501</span>
+        <span class="n">types</span> <span class="o">=</span> <span class="p">[</span><span class="n">tp</span> <span class="k">for</span> <span class="n">tp</span> <span class="ow">in</span> <span class="n">types</span> <span class="k">if</span> <span class="p">(</span><span class="n">tp</span> <span class="o">!=</span> <span class="s1">&#39;Any&#39;</span> <span class="ow">and</span> <span class="n">tp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">types</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;All ports must have the same type.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Build output port contexts by merging input port contexts</span>
+        <span class="n">port_context_out</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">op_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">OUTPUT_PORTS</span>
+        <span class="n">name_key</span> <span class="o">=</span> <span class="n">IPort</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">NAME</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Get all unique keys from all input port contexts</span>
+        <span class="n">all_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="o">*</span><span class="n">port_context_in</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+        <span class="c1"># For each key, determine how to merge values from different ports</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">all_keys</span><span class="p">:</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">port</span><span class="p">,</span> <span class="n">config</span> <span class="ow">in</span> <span class="n">port_context_in</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+                    <span class="n">values</span><span class="p">[</span><span class="n">port</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+            <span class="n">value_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+            <span class="c1"># Case 1: Key exists in only one port</span>
+            <span class="c1"># → use that value directly</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">context</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="c1"># Case 2: Key exists in multiple ports with identical values</span>
+            <span class="c1"># → use the common value</span>
+            <span class="k">elif</span> <span class="nb">all</span><span class="p">(</span><span class="n">value</span> <span class="o">==</span> <span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">value_list</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+                <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+                <span class="n">context</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+            <span class="c1"># Case 3: Key exists in multiple ports with different values</span>
+            <span class="c1"># → keep per-port mapping</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">context</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span>
+
+        <span class="c1"># Apply the merged context to all output ports</span>
+        <span class="k">for</span> <span class="n">op</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="n">op_key</span><span class="p">]:</span>
+            <span class="n">port_context_out</span><span class="p">[</span><span class="n">op</span><span class="p">[</span><span class="n">name_key</span><span class="p">]]</span> <span class="o">=</span> <span class="n">context</span>
+        <span class="k">return</span> <span class="n">port_context_out</span></div>
+
+
+<div class="viewcode-block" id="IONode.step">
+<a class="viewcode-back" href="../../../../content/backend/core/io_node.html#gpype.backend.core.io_node.IONode.step">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process data at each discrete time step.</span>
+
+<span class="sd">        This method is executed at each discrete time step during pipeline</span>
+<span class="sd">        execution. Subclasses must implement this method to define their</span>
+<span class="sd">        specific signal processing behavior.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: Dictionary mapping input port names to numpy arrays</span>
+<span class="sd">                containing the input data for this time step. The shape</span>
+<span class="sd">                and content depend on the specific node&#39;s input configuration.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dictionary mapping output port names to numpy arrays containing</span>
+<span class="sd">            the processed output data. The shape and content depend on the</span>
+<span class="sd">            specific node&#39;s processing logic. May return None if no output</span>
+<span class="sd">            is produced for this time step.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            This is an abstract method that must be implemented by all</span>
+<span class="sd">            IONode subclasses.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>  <span class="c1"># pragma: no cover</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright g.tec medical engineering GmbH.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

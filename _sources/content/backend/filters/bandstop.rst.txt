@@ -1,0 +1,8 @@
+Bandstop
+========
+
+.. autoclass:: gpype.backend.filters.bandstop.Bandstop
+   :members:
+   :undoc-members:
+   :special-members: __init__
+   :show-inheritance:

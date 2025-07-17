@@ -1,0 +1,8 @@
+INode
+=====
+
+.. autoclass:: gpype.backend.core.i_node.INode
+   :members:
+   :undoc-members:
+   :special-members: __init__
+   :show-inheritance:

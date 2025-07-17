@@ -1,0 +1,540 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gpype.backend.sources.bci_core8 &mdash; g.Pype v3.0.1  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            g.Pype v3.0.1
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">g.Pype v3.0.1</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gpype.backend.sources.bci_core8</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gpype.backend.sources.bci_core8</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">queue</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">gtec_ble</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ble</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">...common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">Constants</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..core.o_port</span><span class="w"> </span><span class="kn">import</span> <span class="n">OPort</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base.amplifier_source</span><span class="w"> </span><span class="kn">import</span> <span class="n">AmplifierSource</span>
+
+<span class="c1"># Convenience constants for default port names</span>
+<span class="n">PORT_OUT</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">PORT_OUT</span>
+<span class="n">PORT_IN</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">PORT_IN</span>
+
+
+<div class="viewcode-block" id="BCICore8">
+<a class="viewcode-back" href="../../../../content/backend/sources/bci_core8.html#gpype.backend.sources.bci_core8.BCICore8">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BCICore8</span><span class="p">(</span><span class="n">AmplifierSource</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;g.tec BCI Core-8 amplifier source for wireless EEG acquisition.</span>
+
+<span class="sd">    This class provides interface to the g.tec BCI Core-8 wireless EEG</span>
+<span class="sd">    amplifier using Bluetooth Low Energy (BLE) communication. It handles</span>
+<span class="sd">    device connection, data streaming, buffering, and real-time processing</span>
+<span class="sd">    for BCI applications.</span>
+
+<span class="sd">    The BCI Core-8 features:</span>
+<span class="sd">    - 8-channel EEG acquisition at 250 Hz sampling rate</span>
+<span class="sd">    - Wireless BLE connectivity with low latency</span>
+<span class="sd">    - Real-time data streaming with configurable buffering</span>
+<span class="sd">    - Optional buffer level monitoring for system diagnostics</span>
+
+<span class="sd">    Features:</span>
+<span class="sd">    - Automatic device discovery and connection by serial number</span>
+<span class="sd">    - Frame-based data buffering with configurable sizes</span>
+<span class="sd">    - Thread-safe data acquisition with precise timing</span>
+<span class="sd">    - Buffer level monitoring for real-time system analysis</span>
+<span class="sd">    - Automatic decimation and frame assembly</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        SAMPLING_RATE: Fixed 250 Hz sampling rate</span>
+<span class="sd">        MAX_NUM_CHANNELS: Maximum 8 channels supported</span>
+<span class="sd">        DEFAULT_BUFFER_SIZE_SAMPLES: Default buffer size (60ms at 250Hz)</span>
+<span class="sd">        PORT_BUF_LEVEL: Port name for buffer level output</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The amplifier uses a fixed 250 Hz sampling rate and supports up to</span>
+<span class="sd">        8 channels. Buffer management is crucial for real-time performance</span>
+<span class="sd">        and preventing data loss during intensive processing.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Source code fingerprint</span>
+    <span class="n">FINGERPRINT</span> <span class="o">=</span> <span class="s2">&quot;b6370ce9b4f094bfafe29be37f975ea0&quot;</span>
+
+    <span class="c1"># Optional buffer level output port</span>
+    <span class="n">PORT_BUF_LEVEL</span> <span class="o">=</span> <span class="s2">&quot;buffer_level&quot;</span>
+
+    <span class="c1"># Hardware specifications</span>
+    <span class="n">SCANNING_TIMEOUT_S</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">SAMPLING_RATE</span> <span class="o">=</span> <span class="mi">250</span>
+    <span class="n">MAX_NUM_CHANNELS</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="n">DEFAULT_BUFFER_SIZE_SAMPLES</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="mf">100e-3</span> <span class="o">*</span> <span class="n">SAMPLING_RATE</span><span class="p">))</span>
+
+<div class="viewcode-block" id="BCICore8.Configuration">
+<a class="viewcode-back" href="../../../../content/backend/sources/bci_core8.html#gpype.backend.sources.bci_core8.BCICore8.Configuration">[docs]</a>
+    <span class="k">class</span><span class="w"> </span><span class="nc">Configuration</span><span class="p">(</span><span class="n">AmplifierSource</span><span class="o">.</span><span class="n">Configuration</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Configuration class for BCI Core-8 specific parameters.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="BCICore8.Configuration.Keys">
+<a class="viewcode-back" href="../../../../content/backend/sources/bci_core8.html#gpype.backend.sources.bci_core8.BCICore8.Configuration.Keys">[docs]</a>
+        <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">AmplifierSource</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Configuration keys for BCI Core-8 settings.&quot;&quot;&quot;</span>
+            <span class="n">OUTPUT_BUFFER_LEVEL</span> <span class="o">=</span> <span class="s1">&#39;output_buffer_level&#39;</span></div>
+</div>
+
+
+    <span class="c1"># Type hints for amplifier-specific attributes</span>
+    <span class="n">_device</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ble</span><span class="o">.</span><span class="n">Amplifier</span><span class="p">]</span>
+    <span class="n">_target_sn</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+
+<div class="viewcode-block" id="BCICore8.__init__">
+<a class="viewcode-back" href="../../../../content/backend/sources/bci_core8.html#gpype.backend.sources.bci_core8.BCICore8.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">serial</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">channel_count</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">frame_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">buffer_size_samples</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">output_buffer_level</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize BCI Core-8 amplifier source.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            serial: Serial number of target BCI Core-8 device. If None,</span>
+<span class="sd">                the first discovered device will be used.</span>
+<span class="sd">            channel_count: Number of EEG channels to acquire (1-8).</span>
+<span class="sd">                Defaults to maximum 8 channels if not specified.</span>
+<span class="sd">            frame_size: Number of samples per processing frame. Affects</span>
+<span class="sd">                latency and processing efficiency.</span>
+<span class="sd">            buffer_size_samples: Size of internal buffer in samples.</span>
+<span class="sd">                Defaults to 60ms worth of samples for low latency.</span>
+<span class="sd">            output_buffer_level: If True, outputs buffer level monitoring</span>
+<span class="sd">                data on a second port for system diagnostics.</span>
+<span class="sd">            **kwargs: Additional arguments passed to parent AmplifierSource.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The amplifier automatically configures decimation and buffering</span>
+<span class="sd">            based on frame size. Buffer level monitoring helps detect</span>
+<span class="sd">            real-time performance issues.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Validate and set channel count (1-8 channels supported)</span>
+        <span class="k">if</span> <span class="n">channel_count</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">channel_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">MAX_NUM_CHANNELS</span>
+        <span class="n">channel_count</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">channel_count</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">MAX_NUM_CHANNELS</span><span class="p">))</span>
+
+        <span class="c1"># Set default buffer level monitoring</span>
+        <span class="k">if</span> <span class="n">output_buffer_level</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">output_buffer_level</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># Configure output ports based on buffer level monitoring</span>
+        <span class="n">output_ports</span> <span class="o">=</span> <span class="p">[</span><span class="n">OPort</span><span class="o">.</span><span class="n">Configuration</span><span class="p">()]</span>
+        <span class="k">if</span> <span class="n">output_buffer_level</span><span class="p">:</span>
+            <span class="n">output_ports</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">OPort</span><span class="o">.</span><span class="n">Configuration</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">PORT_BUF_LEVEL</span><span class="p">))</span>
+            <span class="n">channel_count</span> <span class="o">=</span> <span class="p">[</span><span class="n">channel_count</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>  <span class="c1"># Main data + buffer level</span>
+
+        <span class="c1"># Initialize parent amplifier source with BCI Core-8 specifications</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">channel_count</span><span class="o">=</span><span class="n">channel_count</span><span class="p">,</span>
+                         <span class="n">sampling_rate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">SAMPLING_RATE</span><span class="p">,</span>
+                         <span class="n">frame_size</span><span class="o">=</span><span class="n">frame_size</span><span class="p">,</span>
+                         <span class="n">decimation_factor</span><span class="o">=</span><span class="n">frame_size</span><span class="p">,</span>
+                         <span class="n">output_buffer_level</span><span class="o">=</span><span class="n">output_buffer_level</span><span class="p">,</span>
+                         <span class="n">output_ports</span><span class="o">=</span><span class="n">output_ports</span><span class="p">,</span>
+                         <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Calculate buffer configuration</span>
+        <span class="n">frame_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">FRAME_SIZE</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">buffer_size_samples</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">buffer_size_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_BUFFER_SIZE_SAMPLES</span>
+        <span class="n">buffer_size_frames</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">buffer_size_samples</span> <span class="o">/</span> <span class="n">frame_size</span><span class="p">))</span>
+
+        <span class="c1"># Store device configuration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_target_sn</span> <span class="o">=</span> <span class="n">serial</span>
+
+        <span class="c1"># Initialize device connection (will be established in start())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_device</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Initialize threading components for real-time processing</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_running</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_time_start</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Initialize data management components</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_sample_counter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_frame_buffer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sample_buffer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size_frames</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">buffer_size_frames</span>
+
+        <span class="c1"># Calculate and set source delay for timing synchronization</span>
+        <span class="c1"># Use 75% of buffer to allow for some safety margin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source_delay</span> <span class="o">=</span> <span class="p">(</span><span class="n">buffer_size_frames</span> <span class="o">*</span> <span class="n">frame_size</span>
+                             <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">SAMPLING_RATE</span> <span class="o">*</span> <span class="mf">0.75</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;BCI Core-8 source delay is approximately &quot;</span>
+              <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">source_delay</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">1e3</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> ms.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Initialize buffer level monitoring if enabled</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">OUTPUT_BUFFER_LEVEL</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_level_buffer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="BCICore8.start">
+<a class="viewcode-back" href="../../../../content/backend/sources/bci_core8.html#gpype.backend.sources.bci_core8.BCICore8.start">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start the BCI Core-8 amplifier and begin data acquisition.</span>
+
+<span class="sd">        Initializes data buffers, starts the background processing thread,</span>
+<span class="sd">        establishes BLE connection to the amplifier, and begins real-time</span>
+<span class="sd">        data streaming.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ConnectionError: If amplifier connection fails.</span>
+<span class="sd">            RuntimeError: If background thread creation fails.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The method first initializes internal buffers, then starts the</span>
+<span class="sd">            background thread for timing control, connects to the amplifier</span>
+<span class="sd">            hardware, and finally begins data acquisition.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get configuration parameters</span>
+        <span class="n">frame_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">FRAME_SIZE</span><span class="p">]</span>
+        <span class="n">channel_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">CHANNEL_COUNT</span><span class="p">]</span>
+
+        <span class="c1"># Initialize data buffers for frame-based processing</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_frame_buffer</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size_frames</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sample_buffer</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">frame_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">channel_count</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+        <span class="c1"># Initialize buffer level monitoring if enabled</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">OUTPUT_BUFFER_LEVEL</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_level_buffer</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">(</span>
+                <span class="n">maxsize</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size_frames</span><span class="p">)</span>
+
+        <span class="c1"># Start background thread for timing control</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_running</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_running</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_thread_function</span><span class="p">,</span>
+                                            <span class="n">daemon</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="c1"># Call parent start method</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="c1"># Initialize and connect to BCI Core-8 amplifier</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_device</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_device</span> <span class="o">=</span> <span class="n">ble</span><span class="o">.</span><span class="n">Amplifier</span><span class="p">(</span><span class="n">serial</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_sn</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_device</span><span class="o">.</span><span class="n">set_data_callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_callback</span><span class="p">)</span>
+
+        <span class="c1"># Begin data acquisition from amplifier</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_device</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="BCICore8.setup">
+<a class="viewcode-back" href="../../../../content/backend/sources/bci_core8.html#gpype.backend.sources.bci_core8.BCICore8.setup">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+              <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+              <span class="n">port_context_in</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Setup output port contexts for BCI Core-8 data streams.</span>
+
+<span class="sd">        Configures output port contexts by calling the parent setup method</span>
+<span class="sd">        which handles sampling rate and channel configuration propagation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: Dictionary of input data arrays (empty for source nodes).</span>
+<span class="sd">            port_context_in: Input port contexts (empty for source nodes).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dictionary of output port contexts with BCI Core-8 specific</span>
+<span class="sd">            configuration including 250 Hz sampling rate.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">port_context_in</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BCICore8.stop">
+<a class="viewcode-back" href="../../../../content/backend/sources/bci_core8.html#gpype.backend.sources.bci_core8.BCICore8.stop">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stop the BCI Core-8 amplifier and clean up resources.</span>
+
+<span class="sd">        Stops data acquisition, terminates the background thread, and</span>
+<span class="sd">        properly disconnects from the amplifier hardware.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The method ensures proper shutdown sequence: stop amplifier,</span>
+<span class="sd">            call parent stop, terminate background thread, and clean up</span>
+<span class="sd">            device connection.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Stop amplifier data acquisition</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_device</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_device</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+
+        <span class="c1"># Call parent stop method</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+
+        <span class="c1"># Stop background thread and wait for completion</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_running</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_running</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>  <span class="c1"># Wait up to 10 seconds</span>
+
+        <span class="c1"># Clean up device connection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_device</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="BCICore8.step">
+<a class="viewcode-back" href="../../../../content/backend/sources/bci_core8.html#gpype.backend.sources.bci_core8.BCICore8.step">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Retrieve processed data frames from the amplifier.</span>
+
+<span class="sd">        Returns data frames when decimation step is active, otherwise</span>
+<span class="sd">        returns None. Handles buffer underruns by providing zero-filled</span>
+<span class="sd">        frames to maintain pipeline continuity.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: Input data dictionary (unused for source nodes).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dictionary containing EEG data and optionally buffer level data,</span>
+<span class="sd">            or None if not a decimation step.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            Buffer underruns (empty queue) are handled by returning</span>
+<span class="sd">            zero-filled frames to prevent pipeline stalls. This should</span>
+<span class="sd">            be rare with proper buffer sizing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_decimation_step</span><span class="p">():</span>
+            <span class="n">out_data</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Retrieve processed frame from buffer</span>
+                <span class="n">out_data</span> <span class="o">=</span> <span class="p">{</span><span class="n">PORT_OUT</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frame_buffer</span><span class="o">.</span><span class="n">get_nowait</span><span class="p">()}</span>
+
+                <span class="c1"># Add buffer level data if monitoring is enabled</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">OUTPUT_BUFFER_LEVEL</span><span class="p">]:</span>
+                    <span class="n">buffer_level</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_level_buffer</span><span class="o">.</span><span class="n">get_nowait</span><span class="p">()</span>
+                    <span class="n">out_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">PORT_BUF_LEVEL</span><span class="p">]</span> <span class="o">=</span> <span class="n">buffer_level</span>
+
+            <span class="k">except</span> <span class="n">queue</span><span class="o">.</span><span class="n">Empty</span><span class="p">:</span>
+                <span class="c1"># Handle buffer underrun with zero-filled frames</span>
+                <span class="n">frame_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">FRAME_SIZE</span><span class="p">]</span>
+                <span class="n">channel_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">CHANNEL_COUNT</span><span class="p">]</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Buffer underrun - returning zero-filled frame.&quot;</span><span class="p">,</span>
+                         <span class="nb">type</span><span class="o">=</span><span class="n">Constants</span><span class="o">.</span><span class="n">LogTypes</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
+                <span class="n">out_data</span> <span class="o">=</span> <span class="p">{</span><span class="n">PORT_OUT</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">frame_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                                <span class="n">channel_count</span><span class="p">[</span><span class="mi">0</span><span class="p">]))}</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">OUTPUT_BUFFER_LEVEL</span><span class="p">]:</span>
+                    <span class="n">buf_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">frame_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="n">out_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">PORT_BUF_LEVEL</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">buf_shape</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">out_data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Not a decimation step, return None</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_data_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Callback function for incoming amplifier data.</span>
+
+<span class="sd">        Processes individual samples from the BCI Core-8 amplifier,</span>
+<span class="sd">        assembles them into frames, and manages buffer queues for</span>
+<span class="sd">        real-time processing.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: Single sample data array from amplifier with shape</span>
+<span class="sd">                (n_channels,). Only the configured number of channels</span>
+<span class="sd">                are used.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            This method runs in the amplifier&#39;s callback thread and must</span>
+<span class="sd">            be efficient to prevent data loss. Frame assembly and buffer</span>
+<span class="sd">            management are handled here to minimize processing overhead</span>
+<span class="sd">            in the main pipeline.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Safety check for buffer initialization</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_buffer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Get configuration parameters</span>
+        <span class="n">cc_key</span> <span class="o">=</span> <span class="n">AmplifierSource</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">CHANNEL_COUNT</span>
+        <span class="n">fsz_key</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">FRAME_SIZE</span>
+        <span class="n">frame_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="n">fsz_key</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Determine position within current frame</span>
+        <span class="n">idx_in_frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_sample_counter</span> <span class="o">%</span> <span class="n">frame_size</span>
+
+        <span class="c1"># Store sample data (only configured number of channels)</span>
+        <span class="n">num_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="n">cc_key</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sample_buffer</span><span class="p">[</span><span class="n">idx_in_frame</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:</span><span class="n">num_channels</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_sample_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># Check if frame is complete</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_sample_counter</span> <span class="o">%</span> <span class="n">frame_size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Queue completed frame for processing</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_frame_buffer</span><span class="o">.</span><span class="n">put_nowait</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sample_buffer</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+
+                <span class="c1"># Calculate and queue buffer level if monitoring enabled</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">OUTPUT_BUFFER_LEVEL</span><span class="p">]:</span>
+                    <span class="c1"># Buffer level: -100% (empty) to +100% (full)</span>
+                    <span class="c1"># Centered around 50% fill (0% level)</span>
+                    <span class="n">fill_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_frame_buffer</span><span class="o">.</span><span class="n">qsize</span><span class="p">()</span>
+                                  <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frame_buffer</span><span class="o">.</span><span class="n">maxsize</span><span class="p">)</span>
+                    <span class="n">buf_lvl</span> <span class="o">=</span> <span class="p">(</span><span class="n">fill_ratio</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">100</span>
+
+                    <span class="c1"># Create buffer level array for entire frame</span>
+                    <span class="n">level_data</span> <span class="o">=</span> <span class="n">buf_lvl</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">frame_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_level_buffer</span><span class="o">.</span><span class="n">put_nowait</span><span class="p">(</span><span class="n">level_data</span><span class="p">)</span>
+
+            <span class="k">except</span> <span class="n">queue</span><span class="o">.</span><span class="n">Full</span><span class="p">:</span>
+                <span class="c1"># Buffer overflow - drop oldest frame</span>
+                <span class="c1"># This indicates the processing is too slow for real-time</span>
+                <span class="k">pass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_thread_function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Background thread function for timing control and node cycles.</span>
+
+<span class="sd">        This method implements the timing control for the BCI Core-8 data</span>
+<span class="sd">        processing pipeline. It waits for the buffer to partially fill,</span>
+<span class="sd">        then maintains precise timing for node cycles.</span>
+
+<span class="sd">        The algorithm:</span>
+<span class="sd">        1. Wait for buffer to reach 50% capacity (startup phase)</span>
+<span class="sd">        2. Begin precise timing control using monotonic time</span>
+<span class="sd">        3. Calculate expected sample times to prevent drift</span>
+<span class="sd">        4. Sleep appropriately and trigger node cycles</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The startup delay ensures stable data flow before beginning</span>
+<span class="sd">            real-time processing. Precise timing prevents cumulative</span>
+<span class="sd">            drift in the processing pipeline.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get sampling rate for timing calculations</span>
+        <span class="n">rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">SAMPLING_RATE</span><span class="p">]</span>
+
+        <span class="c1"># Startup phase: wait for buffer to partially fill</span>
+        <span class="c1"># This ensures stable data flow before real-time processing begins</span>
+        <span class="n">target_fill</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size_frames</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_running</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frame_buffer</span><span class="o">.</span><span class="n">qsize</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">target_fill</span><span class="p">:</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">rate</span><span class="p">)</span>
+
+        <span class="c1"># Initialize timing for precise pipeline control</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_start</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_time_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
+
+        <span class="c1"># Initialize timing variables for drift prevention</span>
+        <span class="n">thread_sample_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">expected_next_sample_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_start</span>
+
+        <span class="c1"># Main timing loop</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_running</span><span class="p">:</span>
+            <span class="c1"># Calculate expected time for next pipeline cycle</span>
+            <span class="n">thread_sample_count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">expected_next_sample_time</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_time_start</span>
+                                         <span class="o">+</span> <span class="n">thread_sample_count</span> <span class="o">/</span> <span class="n">rate</span><span class="p">)</span>
+
+            <span class="c1"># Determine sleep time to maintain precise timing</span>
+            <span class="n">current_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
+            <span class="n">sleep_time</span> <span class="o">=</span> <span class="n">expected_next_sample_time</span> <span class="o">-</span> <span class="n">current_time</span>
+
+            <span class="c1"># Sleep only if duration is significant (avoid timing jitter)</span>
+            <span class="k">if</span> <span class="n">sleep_time</span> <span class="o">&gt;</span> <span class="mf">0.001</span><span class="p">:</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">sleep_time</span><span class="p">)</span>
+
+            <span class="c1"># Trigger pipeline processing cycle</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cycle</span><span class="p">()</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright g.tec medical engineering GmbH.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

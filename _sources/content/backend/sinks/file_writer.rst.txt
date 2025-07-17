@@ -1,0 +1,10 @@
+File Writer
+===========
+
+.. autoclass:: gpype.backend.sinks.file_writer.FileWriter
+   :members:
+   :undoc-members:
+   :special-members: __init__
+   :show-inheritance:
+
+   

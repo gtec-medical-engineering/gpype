@@ -1,0 +1,13 @@
+Widgets
+=======
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Contents
+
+   base/index
+   paradigm_presenter
+   performance_monitor
+   spectrum_scope
+   time_series_scope
+   trigger_scope

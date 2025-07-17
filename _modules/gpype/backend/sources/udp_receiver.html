@@ -1,0 +1,307 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gpype.backend.sources.udp_receiver &mdash; g.Pype v3.0.1  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            g.Pype v3.0.1
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">g.Pype v3.0.1</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gpype.backend.sources.udp_receiver</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gpype.backend.sources.udp_receiver</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">select</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">socket</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base.event_source</span><span class="w"> </span><span class="kn">import</span> <span class="n">EventSource</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">Constants</span>
+
+<span class="c1"># Output port identifier</span>
+<span class="n">PORT_OUT</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">PORT_OUT</span>
+
+
+<div class="viewcode-block" id="UDPReceiver">
+<a class="viewcode-back" href="../../../../content/backend/sources/udp_receiver.html#gpype.backend.sources.udp_receiver.UDPReceiver">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">UDPReceiver</span><span class="p">(</span><span class="n">EventSource</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    UDP network receiver for capturing remote trigger events.</span>
+
+<span class="sd">    This class provides network-based event capture for BCI applications,</span>
+<span class="sd">    enabling remote systems to send trigger signals via UDP packets. It</span>
+<span class="sd">    listens on a specified IP address and port for incoming messages,</span>
+<span class="sd">    parsing them to extract trigger values.</span>
+
+<span class="sd">    The receiver supports plain integer message format where the entire</span>
+<span class="sd">    UDP packet content should be a numeric string (e.g., &quot;123&quot;).</span>
+
+<span class="sd">    Each received trigger generates two events: first the trigger value,</span>
+<span class="sd">    then immediately a value of 0 to indicate trigger completion.</span>
+
+<span class="sd">    Features:</span>
+<span class="sd">        - UDP network communication</span>
+<span class="sd">        - Non-blocking socket operation</span>
+<span class="sd">        - Plain integer message format</span>
+<span class="sd">        - Background thread operation</span>
+<span class="sd">        - Configurable IP address and port</span>
+<span class="sd">        - Automatic trigger completion signaling</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Requires network permissions and available UDP port.</span>
+<span class="sd">        Firewall settings may need adjustment for remote connections.</span>
+<span class="sd">        Only numeric string messages are supported (e.g., &quot;123&quot;, &quot;42&quot;).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Source code fingerprint</span>
+    <span class="n">FINGERPRINT</span> <span class="o">=</span> <span class="s2">&quot;81474d85a9cb08bca9542586cce0408b&quot;</span>
+
+    <span class="c1"># Default network configuration</span>
+    <span class="n">DEFAULT_IP</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;127.0.0.1&quot;</span>  <span class="c1"># Localhost</span>
+    <span class="n">DEFAULT_PORT</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span>       <span class="c1"># Default UDP port</span>
+
+<div class="viewcode-block" id="UDPReceiver.Configuration">
+<a class="viewcode-back" href="../../../../content/backend/sources/udp_receiver.html#gpype.backend.sources.udp_receiver.UDPReceiver.Configuration">[docs]</a>
+    <span class="k">class</span><span class="w"> </span><span class="nc">Configuration</span><span class="p">(</span><span class="n">EventSource</span><span class="o">.</span><span class="n">Configuration</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Configuration class for UDP receiver network parameters.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="UDPReceiver.Configuration.Keys">
+<a class="viewcode-back" href="../../../../content/backend/sources/udp_receiver.html#gpype.backend.sources.udp_receiver.UDPReceiver.Configuration.Keys">[docs]</a>
+        <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">EventSource</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Configuration key constants for the UDP receiver.&quot;&quot;&quot;</span>
+            <span class="n">IP</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ip&quot;</span>      <span class="c1"># IP address to bind to</span>
+            <span class="n">PORT</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;port&quot;</span>  <span class="c1"># UDP port number to listen on</span></div>
+</div>
+
+
+<div class="viewcode-block" id="UDPReceiver.__init__">
+<a class="viewcode-back" href="../../../../content/backend/sources/udp_receiver.html#gpype.backend.sources.udp_receiver.UDPReceiver.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">ip</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_IP</span><span class="p">,</span>
+                 <span class="n">port</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DEFAULT_PORT</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the UDP receiver.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ip (str): IP address to bind the UDP socket to. Use &quot;0.0.0.0&quot;</span>
+<span class="sd">                to listen on all available interfaces, or &quot;127.0.0.1&quot; for</span>
+<span class="sd">                localhost only. Defaults to localhost.</span>
+<span class="sd">            port (int): UDP port number to listen on. Must be available</span>
+<span class="sd">                and not blocked by firewall. Defaults to 1000.</span>
+<span class="sd">            **kwargs: Additional configuration parameters passed to</span>
+<span class="sd">                EventSource base class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Initialize parent EventSource with network configuration</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">ip</span><span class="o">=</span><span class="n">ip</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Initialize UDP receiver state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_udp_thread_running</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_socket</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_udp_thread</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_t_start</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Start time tracking</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_udp_listener</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Background thread function for UDP message reception.</span>
+
+<span class="sd">        Creates and manages the UDP socket, continuously listening for</span>
+<span class="sd">        incoming messages. Parses received data and triggers appropriate</span>
+<span class="sd">        events in the BCI pipeline. Runs until _udp_thread_running is False.</span>
+
+<span class="sd">        Message format:</span>
+<span class="sd">        - Plain integers only: &quot;123&quot; -&gt; triggers 123, then 0</span>
+
+<span class="sd">        The method uses select() for non-blocking operation to allow</span>
+<span class="sd">        clean shutdown when requested. Only numeric string messages</span>
+<span class="sd">        are accepted; non-numeric messages are silently ignored.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Create UDP socket for receiving messages</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_socket</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_DGRAM</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_socket</span><span class="o">.</span><span class="n">setblocking</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># Non-blocking for select()</span>
+
+        <span class="c1"># Get network configuration</span>
+        <span class="n">ip_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">IP</span>
+        <span class="n">port_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">PORT</span>
+        <span class="n">ip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="n">ip_key</span><span class="p">]</span>
+        <span class="n">port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="n">port_key</span><span class="p">]</span>
+
+        <span class="c1"># Bind socket to specified address and port</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_socket</span><span class="o">.</span><span class="n">bind</span><span class="p">((</span><span class="n">ip</span><span class="p">,</span> <span class="n">port</span><span class="p">))</span>
+
+        <span class="c1"># Main reception loop</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_udp_thread_running</span><span class="p">:</span>
+            <span class="c1"># Use select with timeout for non-blocking check</span>
+            <span class="n">ready</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">select</span><span class="o">.</span><span class="n">select</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_socket</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="mf">0.01</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">ready</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_udp_thread_running</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Receive UDP packet (max 1024 bytes)</span>
+                <span class="n">data</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_socket</span><span class="o">.</span><span class="n">recvfrom</span><span class="p">(</span><span class="mi">1024</span><span class="p">)</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+                <span class="c1"># Parse message - only numeric strings are supported</span>
+                <span class="k">if</span> <span class="n">message</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+                    <span class="c1"># Valid integer format: &quot;123&quot;</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Non-numeric message, skip silently</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unsupported message format&quot;</span><span class="p">)</span>
+
+                <span class="c1"># Trigger events: first the value, then 0 for completion</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">trigger</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">trigger</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="c1"># Handle any decoding or parsing errors silently</span>
+                <span class="k">continue</span>
+
+<div class="viewcode-block" id="UDPReceiver.start">
+<a class="viewcode-back" href="../../../../content/backend/sources/udp_receiver.html#gpype.backend.sources.udp_receiver.UDPReceiver.start">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Start the UDP receiver and begin listening for messages.</span>
+
+<span class="sd">        Initializes the background UDP listener thread and starts monitoring</span>
+<span class="sd">        for incoming trigger messages. The receiver will continue operating</span>
+<span class="sd">        until stop() is called.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Start parent EventSource</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="c1"># Start UDP listener thread if not already running</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_udp_thread_running</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_udp_thread_running</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_udp_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_udp_listener</span><span class="p">,</span>
+                                                <span class="n">daemon</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_udp_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="c1"># Record start time for potential timing analysis</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_t_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="UDPReceiver.stop">
+<a class="viewcode-back" href="../../../../content/backend/sources/udp_receiver.html#gpype.backend.sources.udp_receiver.UDPReceiver.stop">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stop the UDP receiver and cleanup network resources.</span>
+
+<span class="sd">        Stops the background listener thread, closes the UDP socket, and</span>
+<span class="sd">        waits for clean thread termination. This ensures proper resource</span>
+<span class="sd">        cleanup and network port release.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Stop parent EventSource first</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+
+        <span class="c1"># Stop UDP listener thread and cleanup resources</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_udp_thread_running</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_udp_thread_running</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="c1"># Close socket to release network resources</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_socket</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_socket</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_socket</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="c1"># Wait for thread to complete</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_udp_thread</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_udp_thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_udp_thread</span> <span class="o">=</span> <span class="kc">None</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright g.tec medical engineering GmbH.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

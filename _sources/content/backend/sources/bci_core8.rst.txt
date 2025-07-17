@@ -1,0 +1,8 @@
+BCI Core-8
+==========
+
+.. autoclass:: gpype.backend.sources.bci_core8.BCICore8
+   :members:
+   :undoc-members:
+   :special-members: __init__
+   :show-inheritance:

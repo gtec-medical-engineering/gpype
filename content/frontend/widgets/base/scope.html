@@ -1,0 +1,292 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scope Widget Base &mdash; g.Pype v3.0.1  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Widget Base" href="widget.html" />
+    <link rel="prev" title="Base Widget Classes" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            g.Pype v3.0.1
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../backend/index.html">Backend</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Frontend</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Widgets</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Base Widget Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../paradigm_presenter.html">Paradigm Presenter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../performance_monitor.html">Performance Monitor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../spectrum_scope.html">Spectrum Scope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../time_series_scope.html">Time Series Scope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../trigger_scope.html">Trigger Scope</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../main_app.html">MainApp</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">g.Pype v3.0.1</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Frontend</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Widgets</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Base Widget Classes</a></li>
+      <li class="breadcrumb-item active">Scope Widget Base</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/content/frontend/widgets/base/scope.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="scope-widget-base">
+<h1>Scope Widget Base<a class="headerlink" href="#scope-widget-base" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.base.scope.Scope">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gpype.frontend.widgets.base.scope.</span></span><span class="sig-name descname"><span class="pre">Scope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_ports</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_rule</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Scope'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gpype/frontend/widgets/base/scope.html#Scope"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.frontend.widgets.base.scope.Scope" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../../../backend/core/i_node.html#gpype.backend.core.i_node.INode" title="gpype.backend.core.i_node.INode"><code class="xref py py-class docutils literal notranslate"><span class="pre">INode</span></code></a>, <a class="reference internal" href="widget.html#gpype.frontend.widgets.base.widget.Widget" title="gpype.frontend.widgets.base.widget.Widget"><code class="xref py py-class docutils literal notranslate"><span class="pre">Widget</span></code></a></p>
+<p>Base class for oscilloscope-style visualization widgets.</p>
+<p>Combines INode data processing capabilities with Widget visualization
+to create real-time plotting widgets for BCI signal visualization.
+Uses PyQtGraph for high-performance plotting with configurable
+appearance and multiple curve support.</p>
+<p>The Scope provides a foundation for creating time-series plots,
+spectrum analyzers, and other signal visualization tools. It handles
+plot setup, curve management, and integrates with the g.Pype pipeline
+for automatic data updates.</p>
+<dl class="simple">
+<dt>Features:</dt><dd><ul class="simple">
+<li><p>High-performance real-time plotting with PyQtGraph</p></li>
+<li><p>Configurable line and axis colors with theme integration</p></li>
+<li><p>Multiple curve support for multi-channel displays</p></li>
+<li><p>Grid display and mouse interaction control</p></li>
+<li><p>Automatic plot visibility management</p></li>
+<li><p>Pipeline integration for data flow</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_ports</strong> (<em>List</em><em>[</em><a class="reference internal" href="../../../backend/core/i_port.html#gpype.backend.core.i_port.IPort.Configuration" title="gpype.backend.core.i_port.IPort.Configuration"><em>IPort.Configuration</em></a><em>]</em><em>, </em><em>optional</em>) – Input port
+configurations for data connections.</p></li>
+<li><p><strong>update_rule</strong> (<em>INode.UpdateRule</em><em>, </em><em>optional</em>) – Update rule for the node.</p></li>
+<li><p><strong>line_color</strong> (<em>Tuple</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>]</em><em>, </em><em>optional</em>) – RGB color for plot lines.
+Defaults to system text color.</p></li>
+<li><p><strong>axis_color</strong> (<em>Tuple</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>]</em><em>, </em><em>optional</em>) – RGB color for plot
+background. Defaults to system window color.</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Name for the widget group box. Defaults to “Scope”.</p></li>
+<li><p><strong>**kwargs</strong> – Additional arguments passed to parent classes.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Subclasses must implement the _update() method to define specific
+plotting behavior and data handling.</p>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.base.scope.Scope.Configuration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Configuration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_ports</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gpype/frontend/widgets/base/scope.html#Scope.Configuration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.frontend.widgets.base.scope.Scope.Configuration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Configuration</span></code></p>
+<p>Configuration class for Scope parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>input_ports</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>)</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.base.scope.Scope.Configuration.Keys">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Keys</span></span><a class="reference internal" href="../../../../_modules/gpype/frontend/widgets/base/scope.html#Scope.Configuration.Keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.frontend.widgets.base.scope.Scope.Configuration.Keys" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Keys</span></code></p>
+<p>Configuration key constants for the Scope.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.base.scope.Scope.Configuration.Keys.LINE_COLOR">
+<span class="sig-name descname"><span class="pre">LINE_COLOR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'line_color'</span></em><a class="headerlink" href="#gpype.frontend.widgets.base.scope.Scope.Configuration.Keys.LINE_COLOR" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.base.scope.Scope.Configuration.Keys.AXIS_COLOR">
+<span class="sig-name descname"><span class="pre">AXIS_COLOR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'axis_color'</span></em><a class="headerlink" href="#gpype.frontend.widgets.base.scope.Scope.Configuration.Keys.AXIS_COLOR" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.base.scope.Scope.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_ports</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_rule</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Scope'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gpype/frontend/widgets/base/scope.html#Scope.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.frontend.widgets.base.scope.Scope.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize the Scope widget with plot setup and color configuration.</p>
+<p>Creates a PyQtGraph PlotWidget with configured colors, grid display,
+and mouse interaction settings. Sets up the widget layout and
+initializes plot components.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_ports</strong> (<em>List</em><em>[</em><a class="reference internal" href="../../../backend/core/i_port.html#gpype.backend.core.i_port.IPort.Configuration" title="gpype.backend.core.i_port.IPort.Configuration"><em>IPort.Configuration</em></a><em>]</em><em>, </em><em>optional</em>) – Input port
+configurations for pipeline connections.</p></li>
+<li><p><strong>update_rule</strong> (<em>INode.UpdateRule</em><em>, </em><em>optional</em>) – Node update rule.</p></li>
+<li><p><strong>line_color</strong> (<em>Tuple</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>]</em><em>, </em><em>optional</em>) – RGB values for
+plot line color. Uses system text color if None.</p></li>
+<li><p><strong>axis_color</strong> (<em>Tuple</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>]</em><em>, </em><em>optional</em>) – RGB values for
+plot background color. Uses system window color if None.</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Widget group box title.</p></li>
+<li><p><strong>**kwargs</strong> – Additional configuration passed to parent classes.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.base.scope.Scope.set_labels">
+<span class="sig-name descname"><span class="pre">set_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gpype/frontend/widgets/base/scope.html#Scope.set_labels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.frontend.widgets.base.scope.Scope.set_labels" title="Link to this definition"></a></dt>
+<dd><p>Set axis labels for the plot.</p>
+<p>Configures the text labels displayed on the plot axes to provide
+context for the displayed data (e.g., “Time (s)”, “Amplitude (µV)”).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x_label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Label text for the x-axis (horizontal).</p></li>
+<li><p><strong>y_label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Label text for the y-axis (vertical).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.base.scope.Scope.add_curve">
+<span class="sig-name descname"><span class="pre">add_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pen</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gpype/frontend/widgets/base/scope.html#Scope.add_curve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.frontend.widgets.base.scope.Scope.add_curve" title="Link to this definition"></a></dt>
+<dd><p>Add a new plot curve for displaying data.</p>
+<p>Creates and adds a new PlotCurveItem to the plot for displaying
+signal data. Each curve can represent a different channel or
+data stream with its own styling.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pen</strong> – PyQtGraph pen object for curve styling. Uses default
+pen if None.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The newly created curve item for data updates.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pg.PlotCurveItem</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Curves are optimized for real-time plotting with antialiasing
+and finite check skipping for performance.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.base.scope.Scope.setup">
+<span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port_context_in</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/gpype/frontend/widgets/base/scope.html#Scope.setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.frontend.widgets.base.scope.Scope.setup" title="Link to this definition"></a></dt>
+<dd><p>Set up the scope widget and make the plot visible.</p>
+<p>Called during pipeline initialization to prepare the widget for
+data display. Makes the plot visible and calls parent setup
+methods to complete initialization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Initial data dictionary for setup.</p></li>
+<li><p><strong>port_context_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Input port context information.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Output port context from parent setup.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Base Widget Classes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="widget.html" class="btn btn-neutral float-right" title="Widget Base" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright g.tec medical engineering GmbH.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

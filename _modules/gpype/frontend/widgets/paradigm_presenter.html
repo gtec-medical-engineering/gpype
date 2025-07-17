@@ -1,0 +1,439 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gpype.frontend.widgets.paradigm_presenter &mdash; g.Pype v3.0.1  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            g.Pype v3.0.1
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">g.Pype v3.0.1</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gpype.frontend.widgets.paradigm_presenter</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gpype.frontend.widgets.paradigm_presenter</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Standard library imports</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">glob</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+
+<span class="c1"># Platform check - this module is Windows-only</span>
+<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">!=</span> <span class="s2">&quot;win32&quot;</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This module is only supported on Windows.&quot;</span><span class="p">)</span>
+
+<span class="c1"># Third-party imports</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PySide6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">QComboBox</span><span class="p">,</span>
+    <span class="n">QFileDialog</span><span class="p">,</span>
+    <span class="n">QHBoxLayout</span><span class="p">,</span>
+    <span class="n">QLabel</span><span class="p">,</span>
+    <span class="n">QMessageBox</span><span class="p">,</span>
+    <span class="n">QPushButton</span><span class="p">,</span>
+    <span class="n">QSizePolicy</span><span class="p">,</span>
+    <span class="n">QSpacerItem</span><span class="p">,</span>
+    <span class="n">QWidget</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Local imports</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base.widget</span><span class="w"> </span><span class="kn">import</span> <span class="n">Widget</span>
+
+<span class="c1"># UI constants</span>
+<span class="n">MINIMUM_BUTTON_WIDTH</span> <span class="o">=</span> <span class="mi">120</span>
+
+
+<div class="viewcode-block" id="ParadigmPresenter">
+<a class="viewcode-back" href="../../../../content/frontend/widgets/paradigm_presenter.html#gpype.frontend.widgets.paradigm_presenter.ParadigmPresenter">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ParadigmPresenter</span><span class="p">(</span><span class="n">Widget</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Control widget for g.tec ParadigmPresenter integration.</span>
+
+<span class="sd">    Provides a user interface for loading, starting, and stopping paradigms</span>
+<span class="sd">    using the g.tec ParadigmPresenter library. Supports both folder-based</span>
+<span class="sd">    paradigm selection and manual file loading.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ParadigmPresenter.__init__">
+<a class="viewcode-back" href="../../../../content/frontend/widgets/paradigm_presenter.html#gpype.frontend.widgets.paradigm_presenter.ParadigmPresenter.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paradigm</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the ParadigmPresenter control widget.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            paradigm (str, optional): Path to paradigm file (.xml) or folder</span>
+<span class="sd">                containing paradigm files. If file, it will be loaded directly.</span>
+<span class="sd">                If folder, a dropdown will be created for paradigm selection.</span>
+<span class="sd">                If None, a file dialog will be used for loading.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Import gtec_pp here to avoid issues if not installed</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">gtec_pp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pp</span>
+
+        <span class="c1"># Initialize base widget with horizontal layout</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">widget</span><span class="o">=</span><span class="n">QWidget</span><span class="p">(),</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;ParadigmPresenter Control&quot;</span><span class="p">,</span>
+            <span class="n">layout</span><span class="o">=</span><span class="n">QHBoxLayout</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Initialize the ParadigmPresenter instance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">paradigm_presenter</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">ParadigmPresenter</span><span class="p">()</span>
+
+        <span class="c1"># Determine if paradigm is a file or folder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_paradigm_path</span> <span class="o">=</span> <span class="n">paradigm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_root_folder</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_paradigm_file</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">paradigm</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">paradigm</span><span class="p">)</span> <span class="ow">and</span> <span class="n">paradigm</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.xml&#39;</span><span class="p">):</span>
+                <span class="c1"># Single paradigm file provided</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_paradigm_file</span> <span class="o">=</span> <span class="n">paradigm</span>
+            <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">paradigm</span><span class="p">):</span>
+                <span class="c1"># Folder with paradigms provided</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_root_folder</span> <span class="o">=</span> <span class="n">paradigm</span>
+
+        <span class="c1"># Initialize UI components</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setup_ui</span><span class="p">()</span>
+
+        <span class="c1"># Open the paradigm presenter window</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_open_presenter_window</span><span class="p">()</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_ui</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up the user interface components.&quot;&quot;&quot;</span>
+        <span class="c1"># Create main control buttons</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_start_button</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_paradigm_selection</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_stop_button</span><span class="p">()</span>
+
+        <span class="c1"># Add flexible spacer to push buttons to the left</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">addSpacerItem</span><span class="p">(</span><span class="n">QSpacerItem</span><span class="p">(</span>
+            <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span> <span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Minimum</span>
+        <span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_start_button</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create and configure the start paradigm button.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_button</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&quot;Start Paradigm&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_button</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="n">MINIMUM_BUTTON_WIDTH</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_button</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_start_paradigm</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_paradigm_selection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create paradigm selection UI (dropdown, file display, or load).&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_button</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dropdown</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_paradigm_file</span><span class="p">:</span>
+            <span class="c1"># Single paradigm file provided - display filename and load it</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_create_paradigm_file_display</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_root_folder</span><span class="p">:</span>
+            <span class="c1"># Root folder provided - create dropdown for selection</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_create_paradigm_dropdown</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># No paradigm specified - use file dialog for loading</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_create_load_button</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_load_button</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create the load paradigm button for file dialog selection.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_button</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&quot;Load Paradigm...&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_button</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="n">MINIMUM_BUTTON_WIDTH</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_button</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_load_paradigm</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_button</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># Disabled until paradigm loaded</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">load_button</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_paradigm_file_display</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create display for single paradigm file and load it.&quot;&quot;&quot;</span>
+        <span class="c1"># Display the paradigm filename</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="s2">&quot;Paradigm:&quot;</span><span class="p">)</span>
+        <span class="n">filename_label</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_paradigm_file</span><span class="p">))</span>
+        <span class="n">filename_label</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">MINIMUM_BUTTON_WIDTH</span><span class="p">)</span>
+
+        <span class="c1"># Try to load the paradigm file</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">paradigm_presenter</span><span class="o">.</span><span class="n">load_paradigm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_paradigm_file</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">start_button</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Failed to load - show error and disable start</span>
+                <span class="n">QMessageBox</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span>
+                    <span class="n">QWidget</span><span class="p">(),</span>
+                    <span class="s2">&quot;Failed to Load Paradigm&quot;</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">&quot;Could not load paradigm file: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_paradigm_file</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">start_button</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1"># Exception during loading - show error and disable start</span>
+            <span class="n">QMessageBox</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span>
+                <span class="n">QWidget</span><span class="p">(),</span>
+                <span class="s2">&quot;Paradigm Load Error&quot;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">&quot;Error loading paradigm: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">start_button</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># Add components to layout</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">filename_label</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_paradigm_dropdown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create dropdown for paradigm selection from root folder.&quot;&quot;&quot;</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="s2">&quot;Select Paradigm:&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dropdown</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">()</span>
+
+        <span class="c1"># Discover available paradigms in the root folder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">paradigms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_all_paradigms</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paradigms</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Configure dropdown with found paradigms</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dropdown</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paradigms</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dropdown</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">MINIMUM_BUTTON_WIDTH</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dropdown</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_select_paradigm</span><span class="p">)</span>
+
+            <span class="c1"># Load the first paradigm by default</span>
+            <span class="n">paradigm_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_root_folder</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">paradigms</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">paradigm_presenter</span><span class="o">.</span><span class="n">load_paradigm</span><span class="p">(</span><span class="n">paradigm_file</span><span class="p">)</span>
+
+            <span class="c1"># Add components to layout</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dropdown</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># No paradigms found - show error and disable start button</span>
+            <span class="n">QMessageBox</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span>
+                <span class="n">QWidget</span><span class="p">(),</span>
+                <span class="s2">&quot;No Paradigms found&quot;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">&quot;No Paradigms found in: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_root_folder</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">start_button</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>  <span class="c1"># Add label even without dropdown</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_stop_button</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create and configure the stop paradigm button.&quot;&quot;&quot;</span>
+        <span class="c1"># Add start button to layout (positioned after paradigm selection)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_button</span><span class="p">)</span>
+
+        <span class="c1"># Create stop button</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_button</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&quot;Stop Paradigm&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_button</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="n">MINIMUM_BUTTON_WIDTH</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_button</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stop_paradigm</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_button</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># Disabled until paradigm starts</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stop_button</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_open_presenter_window</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Open the ParadigmPresenter window.&quot;&quot;&quot;</span>
+        <span class="n">window_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">paradigm_presenter</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">WINDOWTYPE_PLAIN</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">paradigm_presenter</span><span class="o">.</span><span class="n">open_window</span><span class="p">(</span><span class="n">window_type</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_start_paradigm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start the currently loaded paradigm and update UI state.&quot;&quot;&quot;</span>
+        <span class="c1"># Disable controls during paradigm execution</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropdown</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dropdown</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_button</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">load_button</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_button</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># Start the paradigm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">paradigm_presenter</span><span class="o">.</span><span class="n">start_paradigm</span><span class="p">()</span>
+
+        <span class="c1"># Enable stop button</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_button</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_stop_paradigm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stop the currently running paradigm and update UI state.&quot;&quot;&quot;</span>
+        <span class="c1"># Disable stop button immediately</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_button</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># Stop the paradigm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">paradigm_presenter</span><span class="o">.</span><span class="n">stop_paradigm</span><span class="p">()</span>
+
+        <span class="c1"># Re-enable controls</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_button</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropdown</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dropdown</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_button</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">load_button</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_select_paradigm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle paradigm selection from dropdown.&quot;&quot;&quot;</span>
+        <span class="c1"># Get selected paradigm index and construct file path</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropdown</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span>
+        <span class="n">paradigm_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_root_folder</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">paradigms</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+
+        <span class="c1"># Load the selected paradigm and enable start button if successful</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">paradigm_presenter</span><span class="o">.</span><span class="n">load_paradigm</span><span class="p">(</span><span class="n">paradigm_file</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">start_button</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_paradigm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Open file dialog to load a paradigm file.&quot;&quot;&quot;</span>
+        <span class="c1"># Configure file dialog for XML paradigm files</span>
+        <span class="n">file_dialog</span> <span class="o">=</span> <span class="n">QFileDialog</span><span class="p">()</span>
+        <span class="n">file_dialog</span><span class="o">.</span><span class="n">setFileMode</span><span class="p">(</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">ExistingFiles</span><span class="p">)</span>
+        <span class="n">file_dialog</span><span class="o">.</span><span class="n">setNameFilter</span><span class="p">(</span><span class="s2">&quot;Paradigm File (*.xml)&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Show dialog and handle file selection</span>
+        <span class="k">if</span> <span class="n">file_dialog</span><span class="o">.</span><span class="n">exec</span><span class="p">():</span>
+            <span class="n">paradigm_files</span> <span class="o">=</span> <span class="n">file_dialog</span><span class="o">.</span><span class="n">selectedFiles</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">paradigm_files</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">paradigm_files</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># Load the first selected paradigm file</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">paradigm_presenter</span><span class="o">.</span><span class="n">load_paradigm</span><span class="p">(</span><span class="n">paradigm_files</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">start_button</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_all_paradigms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Discover all paradigm files in the root folder and subfolders.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: List of relative paths to valid paradigm XML files.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">paradigms</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Recursively walk through all directories in root folder</span>
+        <span class="n">dirs</span> <span class="o">=</span> <span class="p">[</span><span class="n">root</span> <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_root_folder</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">dirs</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">paradigms</span>
+
+        <span class="c1"># Search for XML files in each directory</span>
+        <span class="k">for</span> <span class="n">dir_path</span> <span class="ow">in</span> <span class="n">dirs</span><span class="p">:</span>
+            <span class="n">xml_files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="s2">&quot;*.xml&quot;</span><span class="p">))</span>
+
+            <span class="c1"># Calculate relative path from root folder</span>
+            <span class="n">subdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_root_folder</span><span class="p">)</span>
+            <span class="n">subdir</span> <span class="o">=</span> <span class="n">subdir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="k">if</span> <span class="n">subdir</span> <span class="o">!=</span> <span class="s2">&quot;.&quot;</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+
+            <span class="c1"># Add found XML files with relative paths</span>
+            <span class="k">if</span> <span class="n">xml_files</span><span class="p">:</span>
+                <span class="n">paradigms</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">subdir</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+                    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">xml_files</span>
+                <span class="p">])</span>
+
+        <span class="c1"># Validate paradigms before returning</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_paradigms</span><span class="p">(</span><span class="n">paradigms</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_paradigms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paradigms</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validate paradigm files by attempting to load them.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            paradigms (list): List of paradigm file paths to validate.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: List of valid paradigm file paths.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">valid_paradigms</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">paradigm</span> <span class="ow">in</span> <span class="n">paradigms</span><span class="p">:</span>
+            <span class="n">paradigm_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_root_folder</span><span class="p">,</span> <span class="n">paradigm</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Attempt to load paradigm to validate it</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">paradigm_presenter</span><span class="o">.</span><span class="n">load_paradigm</span><span class="p">(</span><span class="n">paradigm_path</span><span class="p">)</span>
+                <span class="n">valid_paradigms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">paradigm</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="c1"># Silently ignore invalid paradigms</span>
+                <span class="k">pass</span>
+
+        <span class="k">return</span> <span class="n">valid_paradigms</span>
+
+<div class="viewcode-block" id="ParadigmPresenter.terminate">
+<a class="viewcode-back" href="../../../../content/frontend/widgets/paradigm_presenter.html#gpype.frontend.widgets.paradigm_presenter.ParadigmPresenter.terminate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">terminate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Clean up resources when the widget is terminated.</span>
+
+<span class="sd">        Closes ParadigmPresenter windows and shuts down the presenter</span>
+<span class="sd">        before calling the parent terminate method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Clean up ParadigmPresenter resources</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">paradigm_presenter</span><span class="o">.</span><span class="n">close_windows</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">paradigm_presenter</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+
+        <span class="c1"># Call parent cleanup</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright g.tec medical engineering GmbH.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

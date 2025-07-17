@@ -1,0 +1,9 @@
+Performance Monitor
+===================
+
+.. autoclass:: gpype.frontend.widgets.performance_monitor.PerformanceMonitor
+   :members:
+   :undoc-members:
+   :special-members: __init__
+   :show-inheritance:
+   

@@ -1,0 +1,8 @@
+Trigger
+=======
+
+.. autoclass:: gpype.backend.flow.trigger.Trigger
+   :members:
+   :undoc-members:
+   :special-members: __init__
+   :show-inheritance:

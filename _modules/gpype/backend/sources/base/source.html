@@ -1,0 +1,330 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gpype.backend.sources.base.source &mdash; g.Pype v3.0.1  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            g.Pype v3.0.1
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/backend/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/frontend/index.html">Frontend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/examples/index.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">g.Pype v3.0.1</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gpype.backend.sources.base.source</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gpype.backend.sources.base.source</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">....common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">Constants</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...core.o_node</span><span class="w"> </span><span class="kn">import</span> <span class="n">ONode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...core.o_port</span><span class="w"> </span><span class="kn">import</span> <span class="n">OPort</span>
+
+<span class="c1"># Convenience constant for default output port name</span>
+<span class="n">OUT_PORT</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">PORT_OUT</span>
+
+
+<div class="viewcode-block" id="Source">
+<a class="viewcode-back" href="../../../../../content/backend/sources/base/source.html#gpype.backend.sources.base.source.Source">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Source</span><span class="p">(</span><span class="n">ONode</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for data source nodes in the BCI pipeline.</span>
+
+<span class="sd">    This abstract base class provides the foundation for all data source</span>
+<span class="sd">    nodes that generate or acquire data in the g.Pype framework. Source</span>
+<span class="sd">    nodes have only output ports and serve as the entry points for data</span>
+<span class="sd">    into the processing pipeline.</span>
+
+<span class="sd">    The class handles validation and configuration of output ports,</span>
+<span class="sd">    channel counts, and frame sizes. It ensures that all sources provide</span>
+<span class="sd">    consistent metadata about their output data streams.</span>
+
+<span class="sd">    Features:</span>
+<span class="sd">    - Multiple output port support with individual configuration</span>
+<span class="sd">    - Channel count validation and configuration per port</span>
+<span class="sd">    - Frame size validation with consistency checks</span>
+<span class="sd">    - Delay property for timing adjustments</span>
+<span class="sd">    - Automatic context propagation to connected nodes</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        _delay: Timing delay in seconds for synchronization purposes</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Source nodes cannot have input ports by design. All data</span>
+<span class="sd">        generation must happen internally within the source implementation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Source.Configuration">
+<a class="viewcode-back" href="../../../../../content/backend/sources/base/source.html#gpype.backend.sources.base.source.Source.Configuration">[docs]</a>
+    <span class="k">class</span><span class="w"> </span><span class="nc">Configuration</span><span class="p">(</span><span class="n">ONode</span><span class="o">.</span><span class="n">Configuration</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Configuration class for Source parameters.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Source.Configuration.Keys">
+<a class="viewcode-back" href="../../../../../content/backend/sources/base/source.html#gpype.backend.sources.base.source.Source.Configuration.Keys">[docs]</a>
+        <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">ONode</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Configuration keys for source-specific settings.&quot;&quot;&quot;</span>
+            <span class="n">CHANNEL_COUNT</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">CHANNEL_COUNT</span>  <span class="c1"># &#39;channel_count&#39;</span>
+            <span class="n">FRAME_SIZE</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">FRAME_SIZE</span>  <span class="c1"># &#39;frame_size&#39;</span></div>
+</div>
+
+
+<div class="viewcode-block" id="Source.__init__">
+<a class="viewcode-back" href="../../../../../content/backend/sources/base/source.html#gpype.backend.sources.base.source.Source.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">output_ports</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">channel_count</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">frame_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the source with output port configuration.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            output_ports: List of output port configurations. Must be provided</span>
+<span class="sd">                as source nodes require at least one output port.</span>
+<span class="sd">            channel_count: Number of channels for each output port. Can be:</span>
+<span class="sd">                - None: defaults to 1 channel per port</span>
+<span class="sd">                - int: same channel count for all ports</span>
+<span class="sd">                - list: individual channel count per port</span>
+<span class="sd">                Must be &gt;= 1 or Constants.INHERITED.</span>
+<span class="sd">            frame_size: Number of samples per frame for each output port.</span>
+<span class="sd">                Can be:</span>
+<span class="sd">                - None: defaults to 1 sample per frame</span>
+<span class="sd">                - int: same frame size for all ports</span>
+<span class="sd">                - list: individual frame size per port</span>
+<span class="sd">                Must be &gt;= 1 or Constants.INHERITED, and all non-inherited</span>
+<span class="sd">                values must be equal.</span>
+<span class="sd">            **kwargs: Additional arguments passed to parent ONode class.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If output_ports is None, if channel_count or</span>
+<span class="sd">                frame_size contain invalid values, if lengths don&#39;t match,</span>
+<span class="sd">                or if input_ports is specified (sources cannot have inputs).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Validate that output_ports is provided (required for sources)</span>
+        <span class="k">if</span> <span class="n">output_ports</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;output_ports must be defined.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Validate and normalize channel_count parameter</span>
+        <span class="k">if</span> <span class="n">channel_count</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Default to 1 channel per output port</span>
+            <span class="n">channel_count</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_ports</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">channel_count</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="c1"># Convert single int to list for all ports</span>
+            <span class="n">channel_count</span> <span class="o">=</span> <span class="p">[</span><span class="n">channel_count</span><span class="p">]</span>
+
+        <span class="c1"># Validate channel_count values</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">channel_count</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;All elements of channel_count must be integers.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">c</span> <span class="o">==</span> <span class="n">Constants</span><span class="o">.</span><span class="n">INHERITED</span> <span class="ow">or</span> <span class="n">c</span> <span class="o">&gt;=</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">channel_count</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;All elements of channel_count must be greater &quot;</span>
+                             <span class="s2">&quot;or equal 1.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_ports</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">channel_count</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;output_ports and channel_count must have the &quot;</span>
+                             <span class="s2">&quot;same length.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Validate and normalize frame_size parameter</span>
+        <span class="k">if</span> <span class="n">frame_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Default to 1 sample per frame for all ports</span>
+            <span class="n">frame_size</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_ports</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame_size</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="c1"># Convert single int to list for all ports</span>
+            <span class="n">frame_size</span> <span class="o">=</span> <span class="p">[</span><span class="n">frame_size</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_ports</span><span class="p">)</span>
+
+        <span class="c1"># Validate frame_size values</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">frame_size</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;All elements of frame_size must be integers.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">f</span> <span class="o">==</span> <span class="n">Constants</span><span class="o">.</span><span class="n">INHERITED</span> <span class="ow">or</span> <span class="n">f</span> <span class="o">&gt;=</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">frame_size</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;All elements of frame_size must be greater &quot;</span>
+                             <span class="s2">&quot;or equal 1.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Check frame_size consistency (all non-inherited values must be equal)</span>
+        <span class="n">non_inherited_frames</span> <span class="o">=</span> <span class="p">[</span><span class="n">fsz</span> <span class="k">for</span> <span class="n">fsz</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">frame_size</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="n">fsz</span> <span class="o">!=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">INHERITED</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">non_inherited_frames</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;All elements of frame_size must be equal.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_ports</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame_size</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;output_ports and frame_size must have the &quot;</span>
+                             <span class="s2">&quot;same length.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Sources cannot have input ports by design</span>
+        <span class="k">if</span> <span class="s2">&quot;input_ports&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Source must not have input ports.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Initialize delay property for timing control</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_delay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># Initialize parent ONode with validated parameters</span>
+        <span class="n">ONode</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                       <span class="n">output_ports</span><span class="o">=</span><span class="n">output_ports</span><span class="p">,</span>
+                       <span class="n">channel_count</span><span class="o">=</span><span class="n">channel_count</span><span class="p">,</span>
+                       <span class="n">frame_size</span><span class="o">=</span><span class="n">frame_size</span><span class="p">,</span>
+                       <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">delay</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the timing delay in seconds.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Current delay value in seconds used for timing synchronization.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            Delay can be used to synchronize multiple sources or compensate</span>
+<span class="sd">            for processing latencies in the pipeline.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_delay</span>
+
+    <span class="nd">@delay</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">delay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the timing delay in seconds.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value: Delay value in seconds. Must be non-negative as negative</span>
+<span class="sd">                delays are not physically meaningful in real-time systems.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If value is negative.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            Changing delay during operation may affect timing consistency.</span>
+<span class="sd">            It&#39;s recommended to set delay before starting the pipeline.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Delay must be non-negative.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_delay</span> <span class="o">=</span> <span class="n">value</span>
+
+<div class="viewcode-block" id="Source.setup">
+<a class="viewcode-back" href="../../../../../content/backend/sources/base/source.html#gpype.backend.sources.base.source.Source.setup">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+              <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+              <span class="n">port_context_in</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Setup output port contexts with channel and frame information.</span>
+
+<span class="sd">        This method configures the output port contexts by propagating</span>
+<span class="sd">        channel count and frame size information to connected downstream</span>
+<span class="sd">        nodes. Each output port receives its specific configuration.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: Dictionary of input data arrays (empty for source nodes).</span>
+<span class="sd">            port_context_in: Input port contexts (empty for source nodes).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dictionary of output port contexts with channel_count and</span>
+<span class="sd">            frame_size information for each configured output port.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The setup method ensures that downstream nodes receive accurate</span>
+<span class="sd">            metadata about the data streams they will process. This includes</span>
+<span class="sd">            the number of channels and samples per frame for each port.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Call parent setup method to initialize base contexts</span>
+        <span class="n">port_context_out</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">port_context_in</span><span class="p">)</span>
+
+        <span class="c1"># Get configuration parameters</span>
+        <span class="n">channel_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">CHANNEL_COUNT</span><span class="p">]</span>
+        <span class="n">frame_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">FRAME_SIZE</span><span class="p">]</span>
+        <span class="n">out_ports</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">OUTPUT_PORTS</span><span class="p">]</span>
+
+        <span class="c1"># Configure context for each output port</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">out_ports</span><span class="p">)):</span>
+            <span class="c1"># Create context with channel and frame information</span>
+            <span class="n">context</span> <span class="o">=</span> <span class="p">{</span><span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">CHANNEL_COUNT</span><span class="p">:</span> <span class="n">channel_count</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                       <span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">FRAME_SIZE</span><span class="p">:</span> <span class="n">frame_size</span><span class="p">[</span><span class="n">i</span><span class="p">]}</span>
+
+            <span class="c1"># Get port name and update its context</span>
+            <span class="n">port_name</span> <span class="o">=</span> <span class="n">out_ports</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">OPort</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">NAME</span><span class="p">]</span>
+            <span class="n">port_context_out</span><span class="p">[</span><span class="n">port_name</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">port_context_out</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright g.tec medical engineering GmbH.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

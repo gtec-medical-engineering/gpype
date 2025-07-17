@@ -1,0 +1,369 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gpype.backend.transform.fft &mdash; g.Pype v3.0.1  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            g.Pype v3.0.1
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">g.Pype v3.0.1</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gpype.backend.transform.fft</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gpype.backend.transform.fft</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_window</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..core.io_node</span><span class="w"> </span><span class="kn">import</span> <span class="n">IONode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">Constants</span>
+
+<span class="c1"># Port name constants for convenience</span>
+<span class="n">PORT_IN</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">PORT_IN</span>
+<span class="n">PORT_OUT</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">PORT_OUT</span>
+
+
+<div class="viewcode-block" id="FFT">
+<a class="viewcode-back" href="../../../../content/backend/transform/fft.html#gpype.backend.transform.fft.FFT">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FFT</span><span class="p">(</span><span class="n">IONode</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fast Fourier Transform node for frequency domain analysis.</span>
+
+<span class="sd">    The FFT node performs windowed Fast Fourier Transform on input data</span>
+<span class="sd">    to convert time-domain signals to frequency-domain representations.</span>
+<span class="sd">    It supports overlapping windows, various window functions, and proper</span>
+<span class="sd">    amplitude scaling for spectral analysis.</span>
+
+<span class="sd">    This node is essential for BCI applications that analyze frequency</span>
+<span class="sd">    content of neural signals, such as detecting alpha rhythms, motor</span>
+<span class="sd">    imagery patterns, or steady-state visual evoked potentials (SSVEP).</span>
+
+<span class="sd">    Features:</span>
+<span class="sd">        - Configurable window size and overlap</span>
+<span class="sd">        - Multiple window functions (Hanning, Hamming, Blackman, etc.)</span>
+<span class="sd">        - Proper amplitude scaling and normalization</span>
+<span class="sd">        - Rolling buffer for continuous processing</span>
+<span class="sd">        - Decimation for overlapping windows</span>
+<span class="sd">        - FFT optimization for real-valued signals</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        window_size (int): Size of the FFT window in samples. Must be &gt; 1.</span>
+<span class="sd">        window_function (str): Window function name (default: &#39;boxcar&#39;).</span>
+<span class="sd">            Supports all scipy.signal window functions.</span>
+<span class="sd">        overlap (float): Overlap ratio between windows (0.0 to 1.0).</span>
+<span class="sd">            Default is 0.5 (50% overlap).</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Input data must have frame_size=1 for proper windowing.</span>
+<span class="sd">        Output frame rate is reduced by the step size (decimation).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Type annotation for the rolling buffer</span>
+    <span class="n">_buf</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+
+<div class="viewcode-block" id="FFT.Configuration">
+<a class="viewcode-back" href="../../../../content/backend/transform/fft.html#gpype.backend.transform.fft.FFT.Configuration">[docs]</a>
+    <span class="k">class</span><span class="w"> </span><span class="nc">Configuration</span><span class="p">(</span><span class="n">IONode</span><span class="o">.</span><span class="n">Configuration</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Configuration class for FFT parameters.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="FFT.Configuration.Keys">
+<a class="viewcode-back" href="../../../../content/backend/transform/fft.html#gpype.backend.transform.fft.FFT.Configuration.Keys">[docs]</a>
+        <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">IONode</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Configuration key constants for the FFT.&quot;&quot;&quot;</span>
+            <span class="n">WINDOW_SIZE</span> <span class="o">=</span> <span class="s1">&#39;window_size&#39;</span>
+            <span class="n">WINDOW_FUNCTION</span> <span class="o">=</span> <span class="s1">&#39;window_function&#39;</span>
+            <span class="n">OVERLAP</span> <span class="o">=</span> <span class="s1">&#39;overlap&#39;</span></div>
+</div>
+
+
+<div class="viewcode-block" id="FFT.__init__">
+<a class="viewcode-back" href="../../../../content/backend/transform/fft.html#gpype.backend.transform.fft.FFT.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">window_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">window_function</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">overlap</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the FFT node with windowing and overlap parameters.</span>
+
+<span class="sd">        Sets up the FFT node with specified window size, window function,</span>
+<span class="sd">        and overlap ratio. Calculates the step size for overlapping windows</span>
+<span class="sd">        and configures the node for decimated output.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            window_size (int): Size of the FFT window in samples. Must be</span>
+<span class="sd">                an integer greater than 1.</span>
+<span class="sd">            window_function (str, optional): Name of the window function</span>
+<span class="sd">                to apply. Defaults to &#39;boxcar&#39; (rectangular window).</span>
+<span class="sd">                Supports all scipy.signal window functions like &#39;hanning&#39;,</span>
+<span class="sd">                &#39;hamming&#39;, &#39;blackman&#39;, etc.</span>
+<span class="sd">            overlap (float, optional): Overlap ratio between consecutive</span>
+<span class="sd">                windows, ranging from 0.0 (no overlap) to 1.0 (full overlap).</span>
+<span class="sd">                Defaults to 0.5 (50% overlap).</span>
+<span class="sd">            **kwargs: Additional configuration parameters passed to IONode.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If window_size is None, not an integer, or &lt;= 1.</span>
+<span class="sd">            ValueError: If overlap is not a float or outside [0, 1] range.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Validate window size parameter</span>
+        <span class="k">if</span> <span class="n">window_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;window_size must not be None.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">window_size</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">int</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;window_size must be integer.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">window_size</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;window_size must be greater than 1.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Set default window function if not provided</span>
+        <span class="k">if</span> <span class="n">window_function</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">window_function</span> <span class="o">=</span> <span class="s1">&#39;boxcar&#39;</span>  <span class="c1"># Rectangular window (no windowing)</span>
+
+        <span class="c1"># Set default overlap if not provided</span>
+        <span class="k">if</span> <span class="n">overlap</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">overlap</span> <span class="o">=</span> <span class="mf">0.5</span>  <span class="c1"># 50% overlap is common for spectral analysis</span>
+
+        <span class="c1"># Validate overlap parameter</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">overlap</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">float</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;overlap must be float.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">overlap</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">overlap</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;overlap must be between 0 and 1.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Calculate step size for overlapping windows</span>
+        <span class="c1"># Step size determines how many samples to advance between windows</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_step_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">window_size</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">overlap</span><span class="p">)))</span>
+
+        <span class="c1"># Recalculate actual overlap based on integer step size</span>
+        <span class="n">overlap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step_size</span> <span class="o">/</span> <span class="n">window_size</span>
+
+        <span class="c1"># Initialize parent IONode with windowing configuration</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">window_size</span><span class="o">=</span><span class="n">window_size</span><span class="p">,</span>
+                         <span class="n">frame_size</span><span class="o">=</span><span class="n">window_size</span><span class="p">,</span>
+                         <span class="n">decimation_factor</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_step_size</span><span class="p">,</span>
+                         <span class="n">window_function</span><span class="o">=</span><span class="n">window_function</span><span class="p">,</span>
+                         <span class="n">overlap</span><span class="o">=</span><span class="n">overlap</span><span class="p">,</span>
+                         <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Initialize internal state variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buf</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Rolling input buffer for windowing</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_w</span> <span class="o">=</span> <span class="kc">None</span>    <span class="c1"># Precomputed window function weights</span></div>
+
+
+<div class="viewcode-block" id="FFT.setup">
+<a class="viewcode-back" href="../../../../content/backend/transform/fft.html#gpype.backend.transform.fft.FFT.setup">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+              <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+              <span class="n">port_context_in</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set up the FFT node and initialize windowing components.</span>
+
+<span class="sd">        Validates input requirements, initializes the rolling buffer for</span>
+<span class="sd">        windowing, and precomputes the window function weights for</span>
+<span class="sd">        efficient real-time processing.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data (dict): Initial data dictionary for port configuration.</span>
+<span class="sd">            port_context_in (dict): Input port context information containing</span>
+<span class="sd">                sampling rates, frame sizes, and channel counts.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Output port context with updated frame size for FFT output.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If input frame size is not 1.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Call parent setup to get base output context</span>
+        <span class="n">port_context_out</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">port_context_in</span><span class="p">)</span>
+
+        <span class="c1"># Validate input frame size requirement for windowing</span>
+        <span class="n">frame_size_in</span> <span class="o">=</span> <span class="n">port_context_in</span><span class="p">[</span><span class="n">PORT_IN</span><span class="p">][</span><span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">FRAME_SIZE</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">frame_size_in</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input frame size must be 1.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Get configuration parameters</span>
+        <span class="n">frame_size_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">FRAME_SIZE</span><span class="p">]</span>
+        <span class="n">channel_count</span> <span class="o">=</span> <span class="n">port_context_out</span><span class="p">[</span><span class="n">PORT_OUT</span><span class="p">][</span>
+            <span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">CHANNEL_COUNT</span><span class="p">]</span>
+
+        <span class="c1"># Update output context with FFT frame size</span>
+        <span class="n">port_context_out</span><span class="p">[</span><span class="n">PORT_OUT</span><span class="p">][</span><span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">FRAME_SIZE</span><span class="p">]</span> <span class="o">=</span> <span class="n">frame_size_out</span>
+
+        <span class="c1"># Initialize rolling buffer for windowing</span>
+        <span class="c1"># Shape: (window_size, channel_count)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">frame_size_out</span><span class="p">,</span> <span class="n">channel_count</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_frame_size</span> <span class="o">=</span> <span class="n">frame_size_out</span>
+
+        <span class="c1"># Get window function configuration</span>
+        <span class="n">window_function</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">WINDOW_FUNCTION</span><span class="p">]</span>
+        <span class="n">window_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">WINDOW_SIZE</span><span class="p">]</span>
+
+        <span class="c1"># Create and normalize window function</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">get_window</span><span class="p">(</span><span class="n">window_function</span><span class="p">,</span> <span class="n">window_size</span><span class="p">)</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">w</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>  <span class="c1"># Normalize to preserve signal power</span>
+
+        <span class="c1"># Reshape for broadcasting with multi-channel data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_w</span> <span class="o">=</span> <span class="n">w</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>  <span class="c1"># Shape: (window_size, 1)</span>
+
+        <span class="k">return</span> <span class="n">port_context_out</span></div>
+
+
+<div class="viewcode-block" id="FFT.step">
+<a class="viewcode-back" href="../../../../content/backend/transform/fft.html#gpype.backend.transform.fft.FFT.step">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+             <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Process one frame of data and compute FFT when ready.</span>
+
+<span class="sd">        Updates the rolling buffer with new input data and performs FFT</span>
+<span class="sd">        computation when the decimation step is reached (based on overlap</span>
+<span class="sd">        configuration). Returns frequency domain amplitude spectrum.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data (dict): Dictionary containing input data arrays. The input</span>
+<span class="sd">                data should have shape (1, channel_count) for each frame.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict or None: Dictionary containing FFT amplitude spectrum when</span>
+<span class="sd">                decimation step is reached, None otherwise. The output has</span>
+<span class="sd">                shape (frequency_bins, channel_count) where frequency_bins</span>
+<span class="sd">                is (window_size // 2 + 1) for real FFT.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The output amplitude is properly scaled and normalized for</span>
+<span class="sd">            spectral analysis. DC and Nyquist components are scaled</span>
+<span class="sd">            appropriately, while other frequencies are scaled by factor 2.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Update rolling buffer with new data sample</span>
+        <span class="c1"># Efficiently shift all samples: move rows up by one position</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buf</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buf</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buf</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">PORT_IN</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># Add newest sample at end</span>
+
+        <span class="c1"># Check if this is a decimation step (based on overlap configuration)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_decimation_step</span><span class="p">():</span>
+            <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># Skip FFT computation for this frame</span>
+
+        <span class="c1"># Apply window function to the buffered data</span>
+        <span class="c1"># Broadcasting: (window_size, channels) * (window_size, 1)</span>
+        <span class="n">windowed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buf</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_w</span>
+
+        <span class="c1"># Compute real FFT (optimized for real-valued signals)</span>
+        <span class="c1"># Transpose for FFT: (channels, window_size) -&gt; (channels, freq_bins)</span>
+        <span class="n">fft</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">rfft</span><span class="p">(</span><span class="n">windowed</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Get window size for scaling calculations</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frame_size</span>
+
+        <span class="c1"># Create scaling array for proper amplitude normalization</span>
+        <span class="n">scale_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">fft</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],))</span>
+        <span class="n">scale_arr</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2.0</span>  <span class="c1"># Scale non-DC/Nyquist frequencies by 2</span>
+        <span class="n">scale_arr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>     <span class="c1"># DC component (0 Hz) scaled by 1</span>
+
+        <span class="c1"># Handle Nyquist frequency (only exists for even N)</span>
+        <span class="k">if</span> <span class="n">N</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">scale_arr</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1"># Nyquist bin scaled by 1</span>
+
+        <span class="c1"># Calculate magnitude spectrum</span>
+        <span class="c1"># Normalize by window sum to preserve signal power</span>
+        <span class="n">magnitude</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">fft</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_w</span><span class="p">)</span>
+
+        <span class="c1"># Apply proper amplitude scaling for single-sided spectrum</span>
+        <span class="c1"># Factor of 2 accounts for negative frequencies in two-sided spectrum</span>
+        <span class="n">amplitude</span> <span class="o">=</span> <span class="n">magnitude</span> <span class="o">*</span> <span class="n">scale_arr</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="mi">2</span>
+
+        <span class="c1"># Return transposed result: (frequency_bins, channels)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">PORT_OUT</span><span class="p">:</span> <span class="n">amplitude</span><span class="o">.</span><span class="n">T</span><span class="p">}</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright g.tec medical engineering GmbH.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

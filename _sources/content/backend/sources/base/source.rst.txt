@@ -1,0 +1,8 @@
+Source Base
+===========
+
+.. autoclass:: gpype.backend.sources.base.source.Source
+   :members:
+   :undoc-members:
+   :special-members: __init__
+   :show-inheritance:
