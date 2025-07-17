@@ -1,5 +1,9 @@
 ## Changelog
 
+### [3.0.1] - 2025-07-17
+- small bugfix in examples
+- new build procedure
+
 ### [3.0.0] - 2025-07-15
 - moved from metadata to contexts
 - added various nodes (Framer, Decimator, ...)

@@ -106,7 +106,7 @@ if __name__ == '__main__':
     p.connect(key_capture, router_scope["in3"])
 
     # merge raw data
-    p.connect(notch60, router_raw["in1"])
+    p.connect(amp, router_raw["in1"])
     p.connect(trig_receiver, router_raw["in2"])
     p.connect(key_capture, router_raw["in3"])
 
