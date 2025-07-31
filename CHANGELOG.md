@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.2] - 2025-07-31
+## [3.0.3] - 2025-07-31
 - BCI Core-8 source buffering optimized
 - updated build procedure
 
