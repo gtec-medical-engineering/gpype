@@ -73,14 +73,12 @@ Prerequisites:
     - g.Pype framework with signal processing modules
     - Real-time visualization capabilities
 """
-
-
 import gpype as gp
 
 # Sampling rate configuration for realistic EEG simulation
 fs = 250  # 250 Hz - standard EEG sampling rate
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # Initialize main application for GUI event handling
     app = gp.MainApp()
@@ -90,17 +88,19 @@ if __name__ == '__main__':
 
     # === SIGNAL GENERATION STAGE ===
     # Generate 8-channel background noise simulating baseline EEG activity
-    noise = gp.Generator(sampling_rate=fs,
-                         channel_count=8,
-                         noise_amplitude=5)  # 5 µV RMS noise level
+    noise = gp.Generator(
+        sampling_rate=fs, channel_count=8, noise_amplitude=5
+    )  # 5 µV RMS noise level
 
     # Generate low-frequency modulation signal (0.5 Hz sine wave)
     # This simulates natural alpha power fluctuations
-    modulator = gp.Generator(sampling_rate=fs,
-                             channel_count=1,
-                             signal_frequency=0.5,  # 0.5 Hz modulation
-                             signal_amplitude=1,     # Modulation depth
-                             signal_shape='sine')
+    modulator = gp.Generator(
+        sampling_rate=fs,
+        channel_count=1,
+        signal_frequency=0.5,  # 0.5 Hz modulation
+        signal_amplitude=1,  # Modulation depth
+        signal_shape="sine",
+    )
 
     # === SIGNAL MODULATION STAGE ===
     # Apply amplitude modulation: noise × (1 + modulation)
@@ -133,39 +133,44 @@ if __name__ == '__main__':
     # === VISUALIZATION ROUTING STAGE ===
     # Router combines all processing stages for comparative analysis
     # Allows simultaneous viewing of raw, filtered, and processed signals
-    merger = gp.Router(input_selector={'noise': [0],           # Raw noise
-                                       'modulator': [0],       # Modulation
-                                       'multiplier': [0],      # Modulated
-                                       'alpha_filter': [0],    # Alpha-filtered
-                                       'power': [0],           # Power signal
-                                       'moving_average': [0],  # Smoothed power
-                                       'hold': [0]},           # Final output
-                       output_selector=[gp.Router.ALL])
+    merger = gp.Router(
+        input_selector={
+            "noise": [0],  # Raw noise
+            "modulator": [0],  # Modulation
+            "multiplier": [0],  # Modulated
+            "alpha_filter": [0],  # Alpha-filtered
+            "power": [0],  # Power signal
+            "moving_average": [0],  # Smoothed power
+            "hold": [0],
+        },  # Final output
+        output_selector=[gp.Router.ALL],
+    )
 
     # === REAL-TIME VISUALIZATION ===
     # Multi-channel scope for real-time signal monitoring
     # 10-second time window with ±10 µV amplitude range
-    scope = gp.TimeSeriesScope(amplitude_limit=10,  # ±10 µV display range
-                               time_window=10)       # 10-second time window
+    scope = gp.TimeSeriesScope(
+        amplitude_limit=10, time_window=10  # ±10 µV display range
+    )  # 10-second time window
 
     # === PIPELINE CONNECTIONS ===
     # Connect main processing chain: noise → modulation → filter → power
-    p.connect(noise, multiplier["n"])        # Noise input to multiplier
-    p.connect(modulator, multiplier["m"])    # Modulation input to multiplier
-    p.connect(multiplier, alpha_filter)     # Modulated signal to alpha filter
-    p.connect(alpha_filter, power)          # Filtered signal to power analysis
-    p.connect(power, moving_average)        # Power to temporal smoothing
-    p.connect(moving_average, decimator)    # Smoothed power to decimation
-    p.connect(decimator, hold)              # Decimated signal to hold buffer
+    p.connect(noise, multiplier["n"])  # Noise input to multiplier
+    p.connect(modulator, multiplier["m"])  # Modulation input to multiplier
+    p.connect(multiplier, alpha_filter)  # Modulated signal to alpha filter
+    p.connect(alpha_filter, power)  # Filtered signal to power analysis
+    p.connect(power, moving_average)  # Power to temporal smoothing
+    p.connect(moving_average, decimator)  # Smoothed power to decimation
+    p.connect(decimator, hold)  # Decimated signal to hold buffer
 
     # Connect all processing stages to router for visualization
-    p.connect(noise, merger["noise"])                    # Stage 1: Raw noise
-    p.connect(modulator, merger["modulator"])            # Stage 2: Modulation
-    p.connect(multiplier, merger["multiplier"])          # Stage 3: Modulated
-    p.connect(alpha_filter, merger["alpha_filter"])      # Stage 4: Filtered
-    p.connect(power, merger["power"])                    # Stage 5: Power
+    p.connect(noise, merger["noise"])  # Stage 1: Raw noise
+    p.connect(modulator, merger["modulator"])  # Stage 2: Modulation
+    p.connect(multiplier, merger["multiplier"])  # Stage 3: Modulated
+    p.connect(alpha_filter, merger["alpha_filter"])  # Stage 4: Filtered
+    p.connect(power, merger["power"])  # Stage 5: Power
     p.connect(moving_average, merger["moving_average"])  # Stage 6: Smoothed
-    p.connect(hold, merger["hold"])                      # Stage 7: Final
+    p.connect(hold, merger["hold"])  # Stage 7: Final
 
     # Connect router output to visualization scope
     p.connect(merger, scope)
@@ -176,6 +181,6 @@ if __name__ == '__main__':
 
     # === EXECUTION ===
     # Start pipeline processing and run application event loop
-    p.start()    # Begin real-time signal processing
-    app.run()    # Start GUI and block until window closes
-    p.stop()     # Clean shutdown of processing pipeline
+    p.start()  # Begin real-time signal processing
+    app.run()  # Start GUI and block until window closes
+    p.stop()  # Clean shutdown of processing pipeline

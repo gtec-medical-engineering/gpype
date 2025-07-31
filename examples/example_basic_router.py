@@ -53,13 +53,11 @@ Note:
     The Router is one of the most versatile nodes in g.Pype, enabling
     sophisticated data flow management essential for complex BCI systems.
 """
-
-
 import gpype as gp
 
 fs = 250  # Sampling frequency in Hz
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Create the main application window
     app = gp.MainApp()
 
@@ -67,18 +65,22 @@ if __name__ == '__main__':
     p = gp.Pipeline()
 
     # Generate first signal source: 10 Hz sine waves
-    source_sine = gp.Generator(sampling_rate=fs,
-                               channel_count=8,          # 8 channels
-                               signal_frequency=10,      # 10 Hz frequency
-                               signal_amplitude=10,      # High amplitude
-                               signal_shape='sine')      # Smooth sine waves
+    source_sine = gp.Generator(
+        sampling_rate=fs,
+        channel_count=8,  # 8 channels
+        signal_frequency=10,  # 10 Hz frequency
+        signal_amplitude=10,  # High amplitude
+        signal_shape="sine",
+    )  # Smooth sine waves
 
     # Generate second signal source: 2 Hz rectangular waves
-    source_square = gp.Generator(sampling_rate=fs,
-                                 channel_count=8,         # 8 channels
-                                 signal_frequency=2,      # 2 Hz frequency
-                                 signal_amplitude=5,      # Lower amplitude
-                                 signal_shape='rect')     # Rectangular signal
+    source_square = gp.Generator(
+        sampling_rate=fs,
+        channel_count=8,  # 8 channels
+        signal_frequency=2,  # 2 Hz frequency
+        signal_amplitude=5,  # Lower amplitude
+        signal_shape="rect",
+    )  # Rectangular signal
 
     # Router for selective channel combination
     # Input 1: Take channels 0,1 from sine generator
@@ -87,18 +89,19 @@ if __name__ == '__main__':
     router = gp.Router(input_selector=[[0, 1], [3, 4, 5]])
 
     # Real-time visualization scope
-    scope = gp.TimeSeriesScope(amplitude_limit=30,  # Y-axis range
-                               time_window=10)       # 10 seconds display
+    scope = gp.TimeSeriesScope(
+        amplitude_limit=30, time_window=10  # Y-axis range
+    )  # 10 seconds display
 
     # Connect the multi-source pipeline
-    p.connect(source_sine, router["in1"])     # Sine waves -> Router input 1
-    p.connect(source_square, router["in2"])   # Rectangular -> Router input 2
-    p.connect(router, scope)                  # Combined signals -> Display
+    p.connect(source_sine, router["in1"])  # Sine waves -> Router input 1
+    p.connect(source_square, router["in2"])  # Rectangular -> Router input 2
+    p.connect(router, scope)  # Combined signals -> Display
 
     # Add scope to application window
     app.add_widget(scope)
 
     # Start multi-source signal processing
-    p.start()      # Begin processing (observe mixed signal types)
-    app.run()      # Show GUI and start main loop
-    p.stop()       # Clean shutdown when window closes
+    p.start()  # Begin processing (observe mixed signal types)
+    app.run()  # Show GUI and start main loop
+    p.stop()  # Clean shutdown when window closes

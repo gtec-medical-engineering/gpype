@@ -31,12 +31,10 @@ Note:
     The very slow 0.01 Hz signal simulates real baseline drift that occurs
     over minutes in actual EEG recordings due to electrode impedance changes.
 """
-
-
 import gpype as gp
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Create the main application window
     app = gp.MainApp()
 
@@ -44,18 +42,21 @@ if __name__ == '__main__':
     p = gp.Pipeline()
 
     # Generate signal with slow baseline drift + noise
-    source = gp.Generator(sampling_rate=250,
-                          channel_count=8,
-                          signal_amplitude=50,      # Large slow oscillation
-                          signal_frequency=0.01,    # Very slow (60 sec period)
-                          noise_amplitude=5)        # Higher frequency noise
+    source = gp.Generator(
+        sampling_rate=250,
+        channel_count=8,
+        signal_amplitude=50,  # Large slow oscillation
+        signal_frequency=0.01,  # Very slow (60 sec period)
+        noise_amplitude=5,
+    )  # Higher frequency noise
 
     # Highpass filter to remove baseline drift
     filter = gp.Highpass(f_c=0.5)  # 0.5 Hz cutoff (removes < 0.5 Hz)
 
     # Real-time visualization scope
-    scope = gp.TimeSeriesScope(amplitude_limit=30,  # Y-axis range
-                               time_window=10)       # 10 seconds display
+    scope = gp.TimeSeriesScope(
+        amplitude_limit=30, time_window=10  # Y-axis range
+    )  # 10 seconds display
 
     # Connect processing chain: drift signal -> highpass -> display
     p.connect(source, filter)
@@ -65,6 +66,6 @@ if __name__ == '__main__':
     app.add_widget(scope)
 
     # Start baseline drift removal demonstration
-    p.start()      # Begin signal processing
-    app.run()      # Show GUI and start main loop
-    p.stop()       # Clean shutdown when window closes
+    p.start()  # Begin signal processing
+    app.run()  # Show GUI and start main loop
+    p.stop()  # Clean shutdown when window closes

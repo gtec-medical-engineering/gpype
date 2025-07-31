@@ -64,14 +64,12 @@ Note:
     This example provides the foundation for all BCI applications
     requiring real-time EEG data acquisition and processing.
 """
-
-
 import gpype as gp
 
 # Sampling rate (hardware-dependent, typically 256 Hz for BCI Core-8)
 fs = 250
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # Initialize main application for GUI and device management
     app = gp.MainApp()
@@ -90,27 +88,31 @@ if __name__ == '__main__':
     # 1-30 Hz preserves all major brain rhythms while removing:
     # - DC drift and movement artifacts (<1 Hz)
     # - EMG muscle artifacts and high-frequency noise (>30 Hz)
-    bandpass = gp.Bandpass(f_lo=1,    # High-pass: remove DC and slow drift
-                           f_hi=30)   # Low-pass: remove muscle artifacts
+    bandpass = gp.Bandpass(
+        f_lo=1, f_hi=30  # High-pass: remove DC and slow drift
+    )  # Low-pass: remove muscle artifacts
 
     # === POWER LINE INTERFERENCE REMOVAL ===
     # Notch filter for 50 Hz power line noise (European standard)
     # 48-52 Hz range accounts for slight frequency variations
-    notch50 = gp.Bandstop(f_lo=48,   # Lower bound of 50 Hz notch
-                          f_hi=52)   # Upper bound of 50 Hz notch
+    notch50 = gp.Bandstop(
+        f_lo=48, f_hi=52  # Lower bound of 50 Hz notch
+    )  # Upper bound of 50 Hz notch
 
     # Notch filter for 60 Hz power line noise (American standard)
     # 58-62 Hz range accounts for slight frequency variations
     # Both filters ensure compatibility with different power systems
-    notch60 = gp.Bandstop(f_lo=58,   # Lower bound of 60 Hz notch
-                          f_hi=62)   # Upper bound of 60 Hz notch
+    notch60 = gp.Bandstop(
+        f_lo=58, f_hi=62  # Lower bound of 60 Hz notch
+    )  # Upper bound of 60 Hz notch
 
     # === REAL-TIME VISUALIZATION ===
     # Professional EEG scope with clinical amplitude scaling
     # 50 µV range covers typical EEG signal amplitudes
     # 10-second window provides good temporal context
-    scope = gp.TimeSeriesScope(amplitude_limit=50,  # ±50 µV range
-                               time_window=10)      # 10-second display
+    scope = gp.TimeSeriesScope(
+        amplitude_limit=50, time_window=10  # ±50 µV range
+    )  # 10-second display
 
     # === PIPELINE CONNECTIONS ===
     # Create signal processing chain: Hardware → Filtering → Visualization
@@ -134,6 +136,6 @@ if __name__ == '__main__':
 
     # === EXECUTION ===
     # Start real-time data acquisition and processing
-    p.start()    # Initialize hardware and begin data flow
-    app.run()    # Start GUI event loop (blocks until window closes)
-    p.stop()     # Clean shutdown: stop hardware and close connections
+    p.start()  # Initialize hardware and begin data flow
+    app.run()  # Start GUI event loop (blocks until window closes)
+    p.stop()  # Clean shutdown: stop hardware and close connections

@@ -45,13 +45,11 @@ Usage:
     Press arrow keys to create event markers
     Close window to stop recording
 """
-
-
 import gpype as gp
 
 fs = 250  # Sampling frequency in Hz
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Create the main application window
     app = gp.MainApp()
 
@@ -59,12 +57,14 @@ if __name__ == '__main__':
     p = gp.Pipeline()
 
     # Generate synthetic 8-channel EEG-like signals
-    source = gp.Generator(sampling_rate=fs,
-                          channel_count=8,          # 8 EEG channels
-                          signal_frequency=10,      # 10 Hz alpha-like rhythm
-                          signal_amplitude=10,      # Signal strength
-                          signal_shape='sine',      # Clean sine waves
-                          noise_amplitude=10)       # Realistic noise level
+    source = gp.Generator(
+        sampling_rate=fs,
+        channel_count=8,  # 8 EEG channels
+        signal_frequency=10,  # 10 Hz alpha-like rhythm
+        signal_amplitude=10,  # Signal strength
+        signal_shape="sine",  # Clean sine waves
+        noise_amplitude=10,
+    )  # Realistic noise level
 
     # Capture keyboard input as event markers
     keyboard = gp.Keyboard()  # Arrow keys -> event codes
@@ -74,24 +74,28 @@ if __name__ == '__main__':
 
     # Define colored markers for visualization (values korrespond to arrows)
     mk = gp.TimeSeriesScope.Markers
-    markers = [mk(color='r', label='up', channel=8, value=38),
-               mk(color='g', label='right', channel=8, value=39),
-               mk(color='b', label='down', channel=8, value=40),
-               mk(color='k', label='left', channel=8, value=37)]
+    markers = [
+        mk(color="r", label="up", channel=8, value=38),
+        mk(color="g", label="right", channel=8, value=39),
+        mk(color="b", label="down", channel=8, value=40),
+        mk(color="k", label="left", channel=8, value=37),
+    ]
 
     # Real-time display with event markers
-    scope = gp.TimeSeriesScope(amplitude_limit=30,      # Y-axis range
-                               time_window=10,          # 10 seconds history
-                               markers=markers)         # Show event markers
+    scope = gp.TimeSeriesScope(
+        amplitude_limit=30,  # Y-axis range
+        time_window=10,  # 10 seconds history
+        markers=markers,
+    )  # Show event markers
 
     # CSV file writer (auto-timestamped filename)
-    writer = gp.FileWriter(file_name='example_writer.csv')
+    writer = gp.FileWriter(file_name="example_writer.csv")
 
     # Connect processing chain
-    p.connect(source, router["in1"])      # Signal data -> Router input 1
-    p.connect(keyboard, router["in2"])    # Event data -> Router input 2
-    p.connect(router, scope)              # Combined data -> Display
-    p.connect(router, writer)             # Combined data -> File
+    p.connect(source, router["in1"])  # Signal data -> Router input 1
+    p.connect(keyboard, router["in2"])  # Event data -> Router input 2
+    p.connect(router, scope)  # Combined data -> Display
+    p.connect(router, writer)  # Combined data -> File
 
     # Add scope to application window
     app.add_widget(scope)

@@ -71,9 +71,9 @@ from pylsl import StreamInlet, resolve_byprop
 import sys
 
 # Display configuration constants
-SAMPLING_RATE = 250       # Expected sampling rate in Hz
-TIME_WINDOW = 10          # Seconds of data to display
-AMPLITUDE_LIMIT = 50      # µV - amplitude scaling for display
+SAMPLING_RATE = 250  # Expected sampling rate in Hz
+TIME_WINDOW = 10  # Seconds of data to display
+AMPLITUDE_LIMIT = 50  # µV - amplitude scaling for display
 
 MAX_POINTS = int(TIME_WINDOW * SAMPLING_RATE)  # Circular buffer size
 
@@ -101,7 +101,7 @@ class LSLTimeScope(QtWidgets.QMainWindow):
         # Discover and connect to LSL stream
         print("Resolving LSL stream...")
         streams = resolve_byprop("type", "EEG")  # Find EEG-type streams
-        self.inlet = StreamInlet(streams[0])     # Connect to first available
+        self.inlet = StreamInlet(streams[0])  # Connect to first available
         info = self.inlet.info()
         self.CHANNEL_COUNT = info.channel_count()  # Dynamic channel detection
         self.FRAME_SIZE = 1  # Pull one sample at a time
@@ -111,18 +111,25 @@ class LSLTimeScope(QtWidgets.QMainWindow):
         self.plot_item.setYRange(0, self.CHANNEL_COUNT)  # Fit all channels
 
         # Create channel labels (CH1, CH2, etc.) on Y-axis
-        self.plot_item.getAxis('left').setTicks([[
-            (self.CHANNEL_COUNT - i - 0.5, f"CH{i + 1}")
-            for i in range(self.CHANNEL_COUNT)
-        ]])
+        self.plot_item.getAxis("left").setTicks(
+            [
+                [
+                    (self.CHANNEL_COUNT - i - 0.5, f"CH{i + 1}")
+                    for i in range(self.CHANNEL_COUNT)
+                ]
+            ]
+        )
         self.plot_item.setXRange(-0.5, TIME_WINDOW + 0.5)  # Time axis range
 
         # Create individual plot curves for each channel
         self.curves = []
         for i in range(self.CHANNEL_COUNT):
             # Each channel gets its own colored curve
-            curve = self.plot_item.plot(pen=pg.mkPen(QColor(self.foreground_color),  # noqa: E501
-                                                     width=1))
+            curve = self.plot_item.plot(
+                pen=pg.mkPen(
+                    QColor(self.foreground_color), width=1  # noqa: E501
+                )
+            )
             self.curves.append(curve)
 
         # Initialize data buffers for efficient circular storage
@@ -145,8 +152,9 @@ class LSLTimeScope(QtWidgets.QMainWindow):
             if sample is None:  # No more samples available
                 break
             # Convert sample to numpy array and store in circular buffer
-            frame = np.array(sample,
-                             dtype=np.float64).reshape((1, self.CHANNEL_COUNT))
+            frame = np.array(sample, dtype=np.float64).reshape(
+                (1, self.CHANNEL_COUNT)
+            )
             idx = self.sample_index % MAX_POINTS  # Circular buffer index
             self.data_buffer[idx, :] = frame
             self.sample_index += 1
@@ -157,31 +165,43 @@ class LSLTimeScope(QtWidgets.QMainWindow):
         for i, curve in enumerate(self.curves):
             # Stack channels vertically with offset for clear separation
             offset = self.CHANNEL_COUNT - i - 0.5
-            curve.setData(t_disp,
-                          self.data_buffer[::N, i] / AMPLITUDE_LIMIT / 2 + offset)  # noqa: E501
+            curve.setData(
+                t_disp, self.data_buffer[::N, i] / AMPLITUDE_LIMIT / 2 + offset
+            )  # noqa: E501
 
         # Update time axis labels for scrolling display
-        cur_second = int(np.floor((self.sample_index % MAX_POINTS) / SAMPLING_RATE))  # noqa: E501
+        cur_second = int(
+            np.floor((self.sample_index % MAX_POINTS) / SAMPLING_RATE)
+        )  # noqa: E501
         if cur_second != self._last_second:
             time_window = TIME_WINDOW
             if self.sample_index > MAX_POINTS:
                 # Scrolling mode: update time labels as data scrolls
                 ticks = []
                 for i in range(int(np.floor(time_window)) + 1):
-                    tick_val = np.mod(i - (cur_second + 1), time_window) + cur_second + 1  # noqa: E501
-                    offset = np.floor(self.sample_index / MAX_POINTS - 1) * time_window  # noqa: E501
+                    tick_val = (
+                        np.mod(i - (cur_second + 1), time_window)
+                        + cur_second
+                        + 1
+                    )  # noqa: E501
+                    offset = (
+                        np.floor(self.sample_index / MAX_POINTS - 1)
+                        * time_window
+                    )  # noqa: E501
                     tick_val += offset
-                    tick_label = f'{tick_val:.0f}'
+                    tick_label = f"{tick_val:.0f}"
                     ticks.append((i, tick_label))
             else:
                 # Initial filling mode: simple incremental time labels
-                ticks = [(i, f'{i:.0f}' if i <= cur_second else '')
-                         for i in range(int(np.floor(time_window)) + 1)]
-            self.plot_item.getAxis('bottom').setTicks([ticks])
+                ticks = [
+                    (i, f"{i:.0f}" if i <= cur_second else "")
+                    for i in range(int(np.floor(time_window)) + 1)
+                ]
+            self.plot_item.getAxis("bottom").setTicks([ticks])
             self._last_second = cur_second
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Create Qt application and LSL visualization window
     app = QtWidgets.QApplication(sys.argv)
     window = LSLTimeScope()

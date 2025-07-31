@@ -52,23 +52,23 @@ Prerequisites:
     - pylsl library installed (pip install pylsl)
     - Network connectivity for LSL discovery
 """
-
-
 import gpype as gp
 
 fs = 250  # Sampling frequency in Hz
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Create processing pipeline (no GUI needed for streaming)
     p = gp.Pipeline()
 
     # Generate synthetic 8-channel EEG-like signals
-    source = gp.Generator(sampling_rate=fs,
-                          channel_count=8,          # 8 EEG channels
-                          signal_frequency=10,      # 10 Hz alpha rhythm
-                          signal_amplitude=10,      # Signal strength
-                          signal_shape='sine',      # Clean sine waves
-                          noise_amplitude=10)       # Background noise
+    source = gp.Generator(
+        sampling_rate=fs,
+        channel_count=8,  # 8 EEG channels
+        signal_frequency=10,  # 10 Hz alpha rhythm
+        signal_amplitude=10,  # Signal strength
+        signal_shape="sine",  # Clean sine waves
+        noise_amplitude=10,
+    )  # Background noise
 
     # Capture keyboard input as event markers
     keyboard = gp.Keyboard()  # Arrow keys -> event codes
@@ -80,11 +80,11 @@ if __name__ == '__main__':
     sender = gp.LSLSender()  # Creates discoverable LSL stream
 
     # Connect processing chain: signals + events -> network stream
-    p.connect(source, router["in1"])      # Signal data -> Router input 1
-    p.connect(keyboard, router["in2"])    # Event data -> Router input 2
-    p.connect(router, sender)             # Combined data -> LSL stream
+    p.connect(source, router["in1"])  # Signal data -> Router input 1
+    p.connect(keyboard, router["in2"])  # Event data -> Router input 2
+    p.connect(router, sender)  # Combined data -> LSL stream
 
     # Start headless streaming operation
-    p.start()                             # Begin data streaming
+    p.start()  # Begin data streaming
     input("Pipeline is running. Press enter to stop.")  # Wait for user
-    p.stop()                              # Stop streaming and cleanup
+    p.stop()  # Stop streaming and cleanup

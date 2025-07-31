@@ -52,13 +52,11 @@ Note:
     This example forms the basis for more complex interactive BCI paradigms
     where user input needs to be synchronized with neural signal recording.
 """
-
-
 import gpype as gp
 
 fs = 250  # Sampling frequency in Hz
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Create the main application window
     app = gp.MainApp()
 
@@ -66,12 +64,14 @@ if __name__ == '__main__':
     p = gp.Pipeline()
 
     # Generate synthetic 8-channel EEG-like signals
-    source = gp.Generator(sampling_rate=fs,
-                          channel_count=8,          # 8 EEG channels
-                          signal_frequency=10,      # 10 Hz alpha rhythm
-                          signal_amplitude=10,      # Signal strength
-                          signal_shape='sine',      # Clean sine waves
-                          noise_amplitude=10)       # Background noise
+    source = gp.Generator(
+        sampling_rate=fs,
+        channel_count=8,  # 8 EEG channels
+        signal_frequency=10,  # 10 Hz alpha rhythm
+        signal_amplitude=10,  # Signal strength
+        signal_shape="sine",  # Clean sine waves
+        noise_amplitude=10,
+    )  # Background noise
 
     # Capture keyboard input as event markers
     keyboard = gp.Keyboard()  # Arrow keys -> numerical event codes
@@ -81,25 +81,29 @@ if __name__ == '__main__':
 
     # Define colored markers for visual feedback (values are key codes)
     mk = gp.TimeSeriesScope.Markers
-    markers = [mk(color='r', label='up', channel=8, value=38),
-               mk(color='g', label='right', channel=8, value=39),
-               mk(color='b', label='down', channel=8, value=40),
-               mk(color='k', label='left', channel=8, value=37)]
+    markers = [
+        mk(color="r", label="up", channel=8, value=38),
+        mk(color="g", label="right", channel=8, value=39),
+        mk(color="b", label="down", channel=8, value=40),
+        mk(color="k", label="left", channel=8, value=37),
+    ]
 
     # Real-time visualization with interactive markers
-    scope = gp.TimeSeriesScope(amplitude_limit=30,     # Y-axis range
-                               time_window=10,          # 10 seconds history
-                               markers=markers)         # Event visualization
+    scope = gp.TimeSeriesScope(
+        amplitude_limit=30,  # Y-axis range
+        time_window=10,  # 10 seconds history
+        markers=markers,
+    )  # Event visualization
 
     # Connect processing chain: signals + events -> combined display
-    p.connect(source, router["in1"])      # Signal data -> Router input 1
-    p.connect(keyboard, router["in2"])    # Keyboard events -> Router input 2
-    p.connect(router, scope)              # Combined data -> Display
+    p.connect(source, router["in1"])  # Signal data -> Router input 1
+    p.connect(keyboard, router["in2"])  # Keyboard events -> Router input 2
+    p.connect(router, scope)  # Combined data -> Display
 
     # Add scope to application window
     app.add_widget(scope)
 
     # Start interactive signal processing
-    p.start()      # Begin processing (press arrow keys for events)
-    app.run()      # Show GUI and start main loop
-    p.stop()       # Clean shutdown when window closes
+    p.start()  # Begin processing (press arrow keys for events)
+    app.run()  # Show GUI and start main loop
+    p.stop()  # Clean shutdown when window closes

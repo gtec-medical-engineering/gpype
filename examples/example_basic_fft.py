@@ -37,13 +37,11 @@ Technical details:
 Usage:
     python example_basic_fft.py
 """
-
-
 import gpype as gp
 
 fs = 250  # Sampling frequency in Hz
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # Create the main application window
     app = gp.MainApp()
@@ -52,17 +50,21 @@ if __name__ == '__main__':
     p = gp.Pipeline()
 
     # Generate 10 Hz rectangular wave (rich in harmonics)
-    source = gp.Generator(sampling_rate=fs,
-                          channel_count=2,          # Dual channel
-                          signal_frequency=10,      # 10 Hz fundamental
-                          signal_amplitude=10,      # Signal strength
-                          signal_shape='rect',      # Rectangle = harmonics
-                          noise_amplitude=1)        # Background noise
+    source = gp.Generator(
+        sampling_rate=fs,
+        channel_count=2,  # Dual channel
+        signal_frequency=10,  # 10 Hz fundamental
+        signal_amplitude=10,  # Signal strength
+        signal_shape="rect",  # Rectangle = harmonics
+        noise_amplitude=1,
+    )  # Background noise
 
     # FFT analysis with windowing (1 second windows, 50% overlap)
-    fft = gp.FFT(window_size=fs,          # 250 samples = 1 sec window
-                 overlap=0.5,             # 50% overlap for smooth updates
-                 window_function='hamming')  # Reduce spectral leakage
+    fft = gp.FFT(
+        window_size=fs,  # 250 samples = 1 sec window
+        overlap=0.5,  # 50% overlap for smooth updates
+        window_function="hamming",
+    )  # Reduce spectral leakage
 
     # Frequency domain visualization (spectrum analyzer)
     scope = gp.SpectrumScope(amplitude_limit=20)  # Y-axis: 0-20 dB
@@ -75,6 +77,6 @@ if __name__ == '__main__':
     app.add_widget(scope)
 
     # Start pipeline and run application
-    p.start()      # Begin signal processing
-    app.run()      # Show GUI and start main loop
-    p.stop()       # Clean shutdown
+    p.start()  # Begin signal processing
+    app.run()  # Show GUI and start main loop
+    p.stop()  # Clean shutdown

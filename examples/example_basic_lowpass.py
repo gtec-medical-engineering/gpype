@@ -47,12 +47,10 @@ Note:
     - Lowpass: removes high frequencies, keeps low frequencies
     - Highpass: removes low frequencies, keeps high frequencies
 """
-
-
 import gpype as gp
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # Create the main application window
     app = gp.MainApp()
@@ -61,17 +59,20 @@ if __name__ == '__main__':
     p = gp.Pipeline()
 
     # Generate broadband noise (all frequencies present)
-    source = gp.Generator(sampling_rate=250,     # 250 Hz sampling rate
-                          channel_count=8,       # 8 channels
-                          noise_amplitude=30)    # Pure noise
+    source = gp.Generator(
+        sampling_rate=250,  # 250 Hz sampling rate
+        channel_count=8,  # 8 channels
+        noise_amplitude=30,
+    )  # Pure noise
 
     # Lowpass filter to remove high-frequency components
-    f_c = 5                    # Cutoff frequency in Hz
+    f_c = 5  # Cutoff frequency in Hz
     filter = gp.Lowpass(f_c=f_c)  # Remove frequencies above 5 Hz
 
     # Real-time visualization scope
-    scope = gp.TimeSeriesScope(amplitude_limit=30,  # Y-axis range
-                               time_window=10)      # 10 seconds display
+    scope = gp.TimeSeriesScope(
+        amplitude_limit=30, time_window=10  # Y-axis range
+    )  # 10 seconds display
 
     # Connect processing chain: noise -> lowpass filter -> display
     p.connect(source, filter)
@@ -81,6 +82,6 @@ if __name__ == '__main__':
     app.add_widget(scope)
 
     # Start filtering and visualization
-    p.start()      # Begin signal processing (watch noise smoothing)
-    app.run()      # Show GUI and start main loop
-    p.stop()       # Clean shutdown when window closes
+    p.start()  # Begin signal processing (watch noise smoothing)
+    app.run()  # Show GUI and start main loop
+    p.stop()  # Clean shutdown when window closes

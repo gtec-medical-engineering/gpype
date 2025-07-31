@@ -6,7 +6,7 @@ parent_dir = os.path.dirname(os.path.abspath(__file__))
 paradigm_root_folder = os.path.join(parent_dir, "paradigms")
 fs = 250
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # main app
     app = gp.MainApp()
@@ -15,12 +15,14 @@ if __name__ == '__main__':
     p = gp.Pipeline()
 
     # signal generator
-    source = gp.Generator(sampling_rate=fs,
-                          channel_count=8,
-                          signal_frequency=10,
-                          signal_amplitude=10,
-                          signal_shape='sine',
-                          noise_amplitude=10)
+    source = gp.Generator(
+        sampling_rate=fs,
+        channel_count=8,
+        signal_frequency=10,
+        signal_amplitude=10,
+        signal_shape="sine",
+        noise_amplitude=10,
+    )
 
     # presenter trigger via UDP
     trigger = gp.UDPReceiver()
@@ -30,12 +32,14 @@ if __name__ == '__main__':
 
     # scope
     mk = gp.TimeSeriesScope.Markers
-    markers = [mk(color='r', label='task 1', channel=8, value=1),
-               mk(color='b', label='task 2', channel=8, value=2),
-               mk(color='k', label='task 3', channel=8, value=3)]
-    scope = gp.TimeSeriesScope(amplitude_limit=30,
-                               time_window=10,
-                               markers=markers)
+    markers = [
+        mk(color="r", label="task 1", channel=8, value=1),
+        mk(color="b", label="task 2", channel=8, value=2),
+        mk(color="k", label="task 3", channel=8, value=3),
+    ]
+    scope = gp.TimeSeriesScope(
+        amplitude_limit=30, time_window=10, markers=markers
+    )
 
     # connect nodes
     p.connect(source, router["in1"])

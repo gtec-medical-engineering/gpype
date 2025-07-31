@@ -44,8 +44,6 @@ Dependencies:
     - pandas (data loading and manipulation)
     - matplotlib (plotting and visualization)
 """
-
-
 import pandas as pd
 import matplotlib.pyplot as plt
 import glob
@@ -61,29 +59,29 @@ file_path = max(csv_files, key=os.path.getmtime)  # Most recent file
 data = pd.read_csv(file_path)
 
 # Extract time index and channel data
-index = data['Index']                    # Sample timestamps
-channels = data.columns[1:]              # All data columns (signals + events)
+index = data["Index"]  # Sample timestamps
+channels = data.columns[1:]  # All data columns (signals + events)
 
 # Create multi-channel EEG-style plot
 plt.figure(figsize=(10, 6))
 
 # Channel stacking parameters for clear visualization
-offset = -100           # Vertical spacing between channels
-yticks = []            # Y-axis tick positions
-yticklabels = []       # Y-axis tick labels
+offset = -100  # Vertical spacing between channels
+yticks = []  # Y-axis tick positions
+yticklabels = []  # Y-axis tick labels
 
 # Plot each channel with vertical offset
 for i, ch in enumerate(channels):
     channel_offset = i * offset
     plt.plot(index, data[ch] + channel_offset, label=ch)
     yticks.append(channel_offset)
-    yticklabels.append(f'Ch{i + 1}')
+    yticklabels.append(f"Ch{i + 1}")
 
 # Configure plot appearance
 plt.yticks(yticks, yticklabels)
-plt.xlabel('Sample Index')
-plt.title('EEG Recordings')
-plt.grid(True, axis='y', linestyle='--', alpha=0.6)
+plt.xlabel("Sample Index")
+plt.title("EEG Recordings")
+plt.grid(True, axis="y", linestyle="--", alpha=0.6)
 plt.ylim((len(channels)) * offset, -offset)
 
 # Display the plot

@@ -37,12 +37,10 @@ Technical details:
 - Pipeline: Generator -> Splitter -> [Path1: Direct, Path2: Delay]
             -> Merger -> Scope
 """
-
-
 import gpype as gp
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # main app
     app = gp.MainApp()
@@ -51,27 +49,30 @@ if __name__ == '__main__':
     p = gp.Pipeline()
 
     # signal generator
-    source = gp.Generator(sampling_rate=250,
-                          channel_count=2,
-                          signal_frequency=1,
-                          signal_amplitude=10,
-                          signal_shape='sine',
-                          noise_amplitude=1)
+    source = gp.Generator(
+        sampling_rate=250,
+        channel_count=2,
+        signal_frequency=1,
+        signal_amplitude=10,
+        signal_shape="sine",
+        noise_amplitude=1,
+    )
 
     # split signals
-    splitter = gp.Router(input_selector=[gp.Router.ALL],
-                         output_selector=[[0], [1]])
+    splitter = gp.Router(
+        input_selector=[gp.Router.ALL], output_selector=[[0], [1]]
+    )
 
     # delay one signal by 125 samples (0.5 seconds at 250 Hz)
     delay = gp.Delay(num_samples=125)
 
     # merge signals back together
-    merger = gp.Router(input_selector=[[0], [0]],
-                       output_selector=[gp.Router.ALL])
+    merger = gp.Router(
+        input_selector=[[0], [0]], output_selector=[gp.Router.ALL]
+    )
 
     # scope
-    scope = gp.TimeSeriesScope(amplitude_limit=30,
-                               time_window=10)
+    scope = gp.TimeSeriesScope(amplitude_limit=30, time_window=10)
 
     # connect nodes
     p.connect(source, splitter)

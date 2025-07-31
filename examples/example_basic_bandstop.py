@@ -34,11 +34,10 @@ Note:
     - Bandstop: removes specific frequencies, keeps everything else
 """
 
-
 import gpype as gp
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # main app
     app = gp.MainApp()
@@ -47,19 +46,20 @@ if __name__ == '__main__':
     p = gp.Pipeline()
 
     # signal generator
-    source = gp.Generator(sampling_rate=250,
-                          channel_count=8,
-                          signal_frequency=50,
-                          signal_amplitude=100,
-                          signal_shape='sine',
-                          noise_amplitude=10)
+    source = gp.Generator(
+        sampling_rate=250,
+        channel_count=8,
+        signal_frequency=50,
+        signal_amplitude=100,
+        signal_shape="sine",
+        noise_amplitude=10,
+    )
 
     # bandstop
     filter = gp.Bandstop(f_lo=48, f_hi=52)
 
     # scope
-    scope = gp.TimeSeriesScope(amplitude_limit=30,
-                               time_window=10)
+    scope = gp.TimeSeriesScope(amplitude_limit=30, time_window=10)
 
     # connect nodes
     p.connect(source, filter)

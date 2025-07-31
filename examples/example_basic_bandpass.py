@@ -26,10 +26,9 @@ Dependencies:
     - PyQt5/PySide for GUI visualization
 """
 
-
 import gpype as gp
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # main app
     app = gp.MainApp()
@@ -38,19 +37,20 @@ if __name__ == '__main__':
     p = gp.Pipeline()
 
     # signal generator
-    source = gp.Generator(sampling_rate=250,
-                          channel_count=8,
-                          signal_frequency=10,
-                          signal_amplitude=10,
-                          signal_shape='sine',
-                          noise_amplitude=1)
+    source = gp.Generator(
+        sampling_rate=250,
+        channel_count=8,
+        signal_frequency=10,
+        signal_amplitude=10,
+        signal_shape="sine",
+        noise_amplitude=1,
+    )
 
     # bandpass
     filter = gp.Bandpass(f_lo=9, f_hi=11)
 
     # scope
-    scope = gp.TimeSeriesScope(amplitude_limit=30,
-                               time_window=10)
+    scope = gp.TimeSeriesScope(amplitude_limit=30, time_window=10)
 
     # connect nodes
     p.connect(source, filter)

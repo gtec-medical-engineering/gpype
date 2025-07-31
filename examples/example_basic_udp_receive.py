@@ -66,17 +66,17 @@ from PySide6.QtGui import QPalette, QColor
 import sys
 
 # Network and display configuration constants
-UDP_IP = "127.0.0.1"      # Listen on localhost
-UDP_PORT = 56000          # UDP port for incoming data
-FRAME_SIZE = 1            # Samples per UDP packet
-CHANNEL_COUNT = 9         # Total channels (8 signals + 1 events)
-SAMPLING_RATE = 250       # Expected sampling rate in Hz
-TIME_WINDOW = 10          # Seconds of data to display
-AMPLITUDE_LIMIT = 50      # µV - amplitude scaling for display
+UDP_IP = "127.0.0.1"  # Listen on localhost
+UDP_PORT = 56000  # UDP port for incoming data
+FRAME_SIZE = 1  # Samples per UDP packet
+CHANNEL_COUNT = 9  # Total channels (8 signals + 1 events)
+SAMPLING_RATE = 250  # Expected sampling rate in Hz
+TIME_WINDOW = 10  # Seconds of data to display
+AMPLITUDE_LIMIT = 50  # µV - amplitude scaling for display
 
 # Calculated constants for data handling
 MAX_POINTS = int(TIME_WINDOW * SAMPLING_RATE)  # Total points in buffer
-BUFFER_SIZE = 65536       # UDP receive buffer size
+BUFFER_SIZE = 65536  # UDP receive buffer size
 
 
 class UDPTimeScope(QtWidgets.QMainWindow):
@@ -111,16 +111,23 @@ class UDPTimeScope(QtWidgets.QMainWindow):
         self.plot_item.setYRange(0, CHANNEL_COUNT)  # Stack channels vertically
 
         # Create channel labels (CH1, CH2, etc.) positioned at channel centers
-        self.plot_item.getAxis('left').setTicks([[
-            (CHANNEL_COUNT - i - 0.5, f"CH{i + 1}") for i in range(CHANNEL_COUNT)  # noqa: E501
-        ]])
+        self.plot_item.getAxis("left").setTicks(
+            [
+                [
+                    (CHANNEL_COUNT - i - 0.5, f"CH{i + 1}")
+                    for i in range(CHANNEL_COUNT)  # noqa: E501
+                ]
+            ]
+        )
         self.plot_item.setXRange(-0.5, TIME_WINDOW + 0.5)
 
         # Create individual plot curves for each channel
         self.curves = []
         for _ in range(CHANNEL_COUNT):
             # Each channel gets its own curve with consistent styling
-            curve = self.plot_item.plot(pen=pg.mkPen(QColor(self.foreground_color), width=1))  # noqa: E501
+            curve = self.plot_item.plot(
+                pen=pg.mkPen(QColor(self.foreground_color), width=1)
+            )  # noqa: E501
             self.curves.append(curve)
 
         # Initialize data buffers for circular buffering
@@ -172,7 +179,7 @@ class UDPTimeScope(QtWidgets.QMainWindow):
         # Decimate data based on window width to avoid oversampling display
         N = max(1, int(MAX_POINTS / self.width()))
         display = self.data_buffer[::N]  # Take every Nth sample
-        t_disp = self.t_vec[::N]         # Corresponding time points
+        t_disp = self.t_vec[::N]  # Corresponding time points
 
         # Update each channel curve with normalized and offset data
         for i, curve in enumerate(self.curves):
@@ -182,29 +189,40 @@ class UDPTimeScope(QtWidgets.QMainWindow):
             curve.setData(t_disp, display[:, i] / AMPLITUDE_LIMIT / 2 + offset)
 
         # Update time axis labels for scrolling display
-        cur_second = int(np.floor((self.sample_index % MAX_POINTS) / SAMPLING_RATE))  # noqa: E501
+        cur_second = int(
+            np.floor((self.sample_index % MAX_POINTS) / SAMPLING_RATE)
+        )  # noqa: E501
         if cur_second != self._last_second:
             time_window = TIME_WINDOW
             if self.sample_index > MAX_POINTS:
                 # Scrolling mode: calculate proper time labels
                 ticks = []
                 for i in range(int(np.floor(time_window)) + 1):
-                    tick_val = np.mod(i - (cur_second + 1), time_window) + cur_second + 1  # noqa: E501
-                    offset = np.floor(self.sample_index / MAX_POINTS - 1) * time_window  # noqa: E501
+                    tick_val = (
+                        np.mod(i - (cur_second + 1), time_window)
+                        + cur_second
+                        + 1
+                    )  # noqa: E501
+                    offset = (
+                        np.floor(self.sample_index / MAX_POINTS - 1)
+                        * time_window
+                    )  # noqa: E501
                     tick_val += offset
-                    tick_label = f'{tick_val:.0f}'
+                    tick_label = f"{tick_val:.0f}"
                     ticks.append((i, tick_label))
             else:
                 # Initial filling mode: simple sequential labels
-                ticks = [(i, f'{i:.0f}' if i <= cur_second else '')
-                         for i in range(int(np.floor(time_window)) + 1)]
+                ticks = [
+                    (i, f"{i:.0f}" if i <= cur_second else "")
+                    for i in range(int(np.floor(time_window)) + 1)
+                ]
 
             # Apply new tick labels to time axis
-            self.plot_item.getAxis('bottom').setTicks([ticks])
+            self.plot_item.getAxis("bottom").setTicks([ticks])
             self._last_second = cur_second
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Create Qt application for GUI event loop
     app = QtWidgets.QApplication(sys.argv)
 
