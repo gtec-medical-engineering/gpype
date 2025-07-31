@@ -36,7 +36,7 @@ class Generator(FixedRateSource):
     SHAPE_PULSE = "pulse"  # Brief pulses at specified frequency
 
     # Source code fingerprint
-    FINGERPRINT = "2da0d140403de234e30d0d16f980b4d9"
+    FINGERPRINT = "da7c08f1537b99baea5a47cfe8c1b47a"
 
     class Configuration(FixedRateSource.Configuration):
         """Configuration class for Generator signal parameters."""

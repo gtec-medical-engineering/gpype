@@ -51,7 +51,7 @@ class BCICore8(AmplifierSource):
     """
 
     # Source code fingerprint
-    FINGERPRINT = "745087da416af727fea73423e5715cbe"
+    FINGERPRINT = "332ae2b13167e57afbb6f2972ec51352"
 
     # Optional buffer level output port
     PORT_BUF_LEVEL = "buffer_level"

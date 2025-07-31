@@ -40,7 +40,7 @@ class UDPReceiver(EventSource):
     """
 
     # Source code fingerprint
-    FINGERPRINT = "231da6211faba051fd0be8a6ed6d5ed9"
+    FINGERPRINT = "16094605bf234cec0f98f6edf2392b8d"
 
     # Default network configuration
     DEFAULT_IP: str = "127.0.0.1"  # Localhost

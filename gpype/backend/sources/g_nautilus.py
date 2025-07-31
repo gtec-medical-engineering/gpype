@@ -38,7 +38,7 @@ class GNautilus(AmplifierSource):
     """
 
     # Source code fingerprint
-    FINGERPRINT = "bd38bec0d0cc19ef1249dfae047ff275"
+    FINGERPRINT = "80a8c8db4bb8a13cb4a71adeb50f310b"
 
     class Configuration(AmplifierSource.Configuration):
         """Configuration class for g.Nautilus amplifier parameters."""
