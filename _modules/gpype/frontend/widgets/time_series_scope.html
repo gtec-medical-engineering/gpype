@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.frontend.widgets.time_series_scope &mdash; g.Pype v3.0.1  documentation</title>
+  <title>gpype.frontend.widgets.time_series_scope &mdash; g.Pype v3.0.2  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
 
@@ -29,7 +29,7 @@
           
           
           <a href="../../../../index.html" class="icon icon-home">
-            g.Pype v3.0.1
+            g.Pype v3.0.2
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -44,7 +44,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Common</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
 </ul>
 
@@ -54,7 +54,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../index.html">g.Pype v3.0.1</a>
+          <a href="../../../../index.html">g.Pype v3.0.2</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -75,18 +75,16 @@
   <h1>Source code for gpype.frontend.widgets.time_series_scope</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">ioiocore</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ioc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pyqtgraph</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pg</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">PySide6.QtCore</span><span class="w"> </span><span class="kn">import</span> <span class="n">QEvent</span><span class="p">,</span> <span class="n">QObject</span><span class="p">,</span> <span class="n">Qt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">PySide6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="n">QColor</span><span class="p">,</span> <span class="n">QFont</span><span class="p">,</span> <span class="n">QPalette</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">ioiocore</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ioc</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">...backend.core.i_port</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPort</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">...common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">Constants</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base.scope</span><span class="w"> </span><span class="kn">import</span> <span class="n">Scope</span>
-
 
 <span class="c1"># Default input port for time series data</span>
 <span class="n">PORT_IN</span> <span class="o">=</span> <span class="n">ioc</span><span class="o">.</span><span class="n">Constants</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">PORT_IN</span>
@@ -125,7 +123,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Default configuration values</span>
-    <span class="n">DEFAULT_TIME_WINDOW</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>      <span class="c1"># seconds</span>
+    <span class="n">DEFAULT_TIME_WINDOW</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># seconds</span>
     <span class="n">DEFAULT_AMPLITUDE_LIMIT</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">50</span>  <span class="c1"># microvolts</span>
 
 <div class="viewcode-block" id="TimeSeriesScope.Markers">
@@ -172,16 +170,18 @@
 <a class="viewcode-back" href="../../../../content/frontend/widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Configuration.Keys">[docs]</a>
         <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">Scope</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Required configuration parameter keys.&quot;&quot;&quot;</span>
-            <span class="n">TIME_WINDOW</span> <span class="o">=</span> <span class="s1">&#39;time_window&#39;</span>          <span class="c1"># Display duration in seconds</span>
-            <span class="n">AMPLITUDE_LIMIT</span> <span class="o">=</span> <span class="s1">&#39;amplitude_limit&#39;</span>  <span class="c1"># Y-axis scale in microvolts</span></div>
+
+            <span class="n">TIME_WINDOW</span> <span class="o">=</span> <span class="s2">&quot;time_window&quot;</span>  <span class="c1"># Display duration in seconds</span>
+            <span class="n">AMPLITUDE_LIMIT</span> <span class="o">=</span> <span class="s2">&quot;amplitude_limit&quot;</span>  <span class="c1"># Y-axis scale in microvolts</span></div>
 
 
 <div class="viewcode-block" id="TimeSeriesScope.Configuration.KeysOptional">
 <a class="viewcode-back" href="../../../../content/frontend/widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Configuration.KeysOptional">[docs]</a>
         <span class="k">class</span><span class="w"> </span><span class="nc">KeysOptional</span><span class="p">:</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Optional configuration parameter keys.&quot;&quot;&quot;</span>
-            <span class="n">MARKERS</span> <span class="o">=</span> <span class="s1">&#39;markers&#39;</span>                  <span class="c1"># Event marker configurations</span>
-            <span class="n">HIDDEN_CHANNELS</span> <span class="o">=</span> <span class="s1">&#39;hidden_channels&#39;</span>  <span class="c1"># Channels to hide</span></div>
+
+            <span class="n">MARKERS</span> <span class="o">=</span> <span class="s2">&quot;markers&quot;</span>  <span class="c1"># Event marker configurations</span>
+            <span class="n">HIDDEN_CHANNELS</span> <span class="o">=</span> <span class="s2">&quot;hidden_channels&quot;</span>  <span class="c1"># Channels to hide</span></div>
 </div>
 
 
@@ -230,12 +230,14 @@
 
 <div class="viewcode-block" id="TimeSeriesScope.__init__">
 <a class="viewcode-back" href="../../../../content/frontend/widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">time_window</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">amplitude_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">markers</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">hidden_channels</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">time_window</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">amplitude_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">markers</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">hidden_channels</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the time series oscilloscope widget.</span>
 
@@ -269,9 +271,8 @@
         <span class="c1"># Validate time window parameters</span>
         <span class="k">if</span> <span class="n">time_window</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;time_window must be longer than 1 second.&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">time_window</span> <span class="o">&gt;=</span> <span class="mi">120</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;time_window must be shorter than &quot;</span>
-                             <span class="s2">&quot;120 seconds.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">time_window</span> <span class="o">&gt;=</span> <span class="mi">240</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;time_window must be shorter than 240 seconds.&quot;</span><span class="p">)</span>
         <span class="n">time_window</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">time_window</span><span class="p">)</span>
 
         <span class="c1"># Validate amplitude limit parameters</span>
@@ -289,35 +290,37 @@
         <span class="n">input_ports</span> <span class="o">=</span> <span class="p">[</span><span class="n">IPort</span><span class="o">.</span><span class="n">Configuration</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">PORT_IN</span><span class="p">)]</span>
 
         <span class="c1"># Initialize parent Scope class with configuration</span>
-        <span class="n">Scope</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                       <span class="n">input_ports</span><span class="o">=</span><span class="n">input_ports</span><span class="p">,</span>
-                       <span class="n">time_window</span><span class="o">=</span><span class="n">time_window</span><span class="p">,</span>
-                       <span class="n">amplitude_limit</span><span class="o">=</span><span class="n">amplitude_limit</span><span class="p">,</span>
-                       <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Time Series Scope&quot;</span><span class="p">,</span>
-                       <span class="n">markers</span><span class="o">=</span><span class="n">markers</span><span class="p">,</span>
-                       <span class="n">hidden_channels</span><span class="o">=</span><span class="n">hidden_channels</span><span class="p">,</span>
-                       <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">Scope</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">input_ports</span><span class="o">=</span><span class="n">input_ports</span><span class="p">,</span>
+            <span class="n">time_window</span><span class="o">=</span><span class="n">time_window</span><span class="p">,</span>
+            <span class="n">amplitude_limit</span><span class="o">=</span><span class="n">amplitude_limit</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Time Series Scope&quot;</span><span class="p">,</span>
+            <span class="n">markers</span><span class="o">=</span><span class="n">markers</span><span class="p">,</span>
+            <span class="n">hidden_channels</span><span class="o">=</span><span class="n">hidden_channels</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="c1"># Data buffer management</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_max_points</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span>           <span class="c1"># Maximum displayable points</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_data_buffer</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span>   <span class="c1"># Raw data storage buffer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_max_points</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Maximum displayable points</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_buffer</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Raw data storage buffer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_display_buffer</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Processed display data</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_plot_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>              <span class="c1"># Current plot position</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_full</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>        <span class="c1"># Buffer overflow indicator</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_sample_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>            <span class="c1"># Current sample index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_plot_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Current plot position</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_full</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># Buffer overflow indicator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sample_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Current sample index</span>
 
         <span class="c1"># Performance monitoring</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>         <span class="c1"># Widget start timestamp</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_update_counts</span> <span class="o">=</span> <span class="mi">0</span>                <span class="c1"># Display update counter</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_step_counts</span> <span class="o">=</span> <span class="mi">0</span>                  <span class="c1"># Processing step counter</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_step_rate</span> <span class="o">=</span> <span class="mi">0</span>                    <span class="c1"># Calculated step rate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>  <span class="c1"># Widget start timestamp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_counts</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Display update counter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_step_counts</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Processing step counter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_step_rate</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Calculated step rate</span>
 
         <span class="c1"># Thread synchronization</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>          <span class="c1"># Data access synchronization</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_new_data</span> <span class="o">=</span> <span class="kc">False</span>                 <span class="c1"># New data availability flag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>  <span class="c1"># Data access synchronization</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_new_data</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># New data availability flag</span>
 
         <span class="c1"># UI components</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_rate_label</span> <span class="o">=</span> <span class="kc">None</span>                <span class="c1"># Performance display label</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rate_label</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Performance display label</span>
 
         <span class="c1"># Theme and appearance setup</span>
         <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">palette</span><span class="p">()</span>
@@ -325,8 +328,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_background_color</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">color</span><span class="p">(</span><span class="n">QPalette</span><span class="o">.</span><span class="n">ColorRole</span><span class="o">.</span><span class="n">Window</span><span class="p">)</span>
 
         <span class="c1"># Interactive features</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_show_rates</span> <span class="o">=</span> <span class="kc">False</span>               <span class="c1"># Performance visibility toggle</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_cursor</span> <span class="o">=</span> <span class="kc">None</span>                    <span class="c1"># Data cursor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_show_rates</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># Performance visibility toggle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cursor</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Data cursor</span>
 
         <span class="c1"># Install keyboard event filter for shortcuts</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_key_filter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">KeyPressFilter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggle_show_rates</span><span class="p">)</span>
@@ -346,9 +349,9 @@
 
 <div class="viewcode-block" id="TimeSeriesScope.setup">
 <a class="viewcode-back" href="../../../../content/frontend/widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.setup">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-              <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-              <span class="n">port_context_in</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">port_context_in</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the widget with data stream parameters and allocate buffers.</span>
 
@@ -387,9 +390,11 @@
 
         <span class="c1"># Determine visible channels (exclude hidden ones)</span>
         <span class="n">hidden_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">KeysOptional</span><span class="o">.</span><span class="n">HIDDEN_CHANNELS</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_channel_vec</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">channel_count</span><span class="p">)</span>
-                             <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">hidden_channels</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">KeysOptional</span><span class="o">.</span><span class="n">HIDDEN_CHANNELS</span>
+        <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_channel_vec</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">channel_count</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">hidden_channels</span>
+        <span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_channel_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_channel_vec</span><span class="p">)</span>
 
         <span class="c1"># Store processing parameters</span>
@@ -401,8 +406,9 @@
         <span class="c1"># Raw data buffer holds all channels</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data_buffer</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_max_points</span><span class="p">,</span> <span class="n">channel_count</span><span class="p">))</span>
         <span class="c1"># Display buffer holds only visible channels</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_display_buffer</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_max_points</span><span class="p">,</span>
-                                         <span class="bp">self</span><span class="o">.</span><span class="n">_channel_count</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_display_buffer</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_max_points</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channel_count</span><span class="p">)</span>
+        <span class="p">)</span>
 
         <span class="c1"># Initialize state variables</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_new_data</span> <span class="o">=</span> <span class="kc">False</span>
@@ -438,14 +444,17 @@
             <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">add_curve</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_channel_count</span><span class="p">)]</span>
             <span class="n">amp_lim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">AMPLITUDE_LIMIT</span><span class="p">]</span>
             <span class="n">yl</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;EEG Amplitudes (-</span><span class="si">{</span><span class="n">amp_lim</span><span class="si">}</span><span class="s2"> ... +</span><span class="si">{</span><span class="n">amp_lim</span><span class="si">}</span><span class="s2"> µV)&quot;</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_labels</span><span class="p">(</span><span class="n">x_label</span><span class="o">=</span><span class="s2">&quot;Time (s)&quot;</span><span class="p">,</span>
-                            <span class="n">y_label</span><span class="o">=</span><span class="n">yl</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_labels</span><span class="p">(</span><span class="n">x_label</span><span class="o">=</span><span class="s2">&quot;Time (s)&quot;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="n">yl</span><span class="p">)</span>
 
             <span class="c1"># Configure channel labels on Y-axis</span>
-            <span class="n">ticks</span> <span class="o">=</span> <span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">_channel_count</span> <span class="o">-</span> <span class="n">i</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">,</span>
-                      <span class="sa">f</span><span class="s1">&#39;CH</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_channel_vec</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-                     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_channel_count</span><span class="p">)]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_plot_item</span><span class="o">.</span><span class="n">getAxis</span><span class="p">(</span><span class="s1">&#39;left&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setTicks</span><span class="p">([</span><span class="n">ticks</span><span class="p">])</span>
+            <span class="n">ticks</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_channel_count</span> <span class="o">-</span> <span class="n">i</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">&quot;CH</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_channel_vec</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_channel_count</span><span class="p">)</span>
+            <span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_plot_item</span><span class="o">.</span><span class="n">getAxis</span><span class="p">(</span><span class="s2">&quot;left&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">setTicks</span><span class="p">([</span><span class="n">ticks</span><span class="p">])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_plot_item</span><span class="o">.</span><span class="n">setYRange</span><span class="p">(</span><span class="o">*</span><span class="n">ylim</span><span class="p">)</span>
 
             <span class="c1"># Create cursor for time tracking</span>
@@ -460,21 +469,23 @@
             <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">TIME_WINDOW</span><span class="p">]</span>
             <span class="n">y</span> <span class="o">=</span> <span class="n">ylim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">font_size</span> <span class="o">=</span> <span class="mi">7</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_rate_label</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">TextItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-                                                <span class="n">color</span><span class="o">=</span><span class="n">QColor</span><span class="p">(</span><span class="n">col</span><span class="p">),</span>
-                                                <span class="n">anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rate_label</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">TextItem</span><span class="p">(</span>
+                <span class="n">text</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">QColor</span><span class="p">(</span><span class="n">col</span><span class="p">),</span> <span class="n">anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_plot_item</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rate_label</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_rate_label</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_rate_label</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">QFont</span><span class="p">(</span><span class="s2">&quot;Arial&quot;</span><span class="p">,</span> <span class="n">font_size</span><span class="p">))</span>
 
         <span class="c1"># Update data with decimation for performance optimization</span>
         <span class="c1"># Decimation factor N reduces displayed points based on widget width</span>
-        <span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span>
-                       <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_max_points</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">width</span><span class="p">())))</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span>
+            <span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_max_points</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">width</span><span class="p">()))</span>
+        <span class="p">)</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="c1"># Copy decimated data from buffer for visible channels only</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_display_buffer</span><span class="p">[::</span><span class="n">N</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_buffer</span><span class="p">[</span>
-                <span class="p">::</span><span class="n">N</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channel_vec</span><span class="p">]</span>
+                <span class="p">::</span><span class="n">N</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channel_vec</span>
+            <span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_new_data</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">sample_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_index</span> <span class="o">-</span> <span class="mi">1</span>
 
@@ -483,24 +494,32 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_cursor</span><span class="o">.</span><span class="n">setData</span><span class="p">([</span><span class="n">t_cursor</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="o">*</span><span class="n">ylim</span><span class="p">],</span> <span class="n">antialias</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="c1"># Update x-axis ticks dynamically</span>
-        <span class="n">cur_second</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">((</span><span class="n">sample_idx</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_points</span><span class="p">)</span>
-                                  <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sampling_rate</span><span class="p">))</span>
+        <span class="n">cur_second</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">((</span><span class="n">sample_idx</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_points</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sampling_rate</span><span class="p">)</span>
+        <span class="p">)</span>
         <span class="k">if</span> <span class="n">cur_second</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_second</span><span class="p">:</span>
             <span class="n">time_window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">TIME_WINDOW</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">sample_idx</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_points</span><span class="p">:</span>
                 <span class="n">ticks</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">time_window</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-                    <span class="n">tick_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="p">(</span><span class="n">cur_second</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">time_window</span><span class="p">)</span> <span class="o">+</span> \
-                        <span class="n">cur_second</span> <span class="o">+</span> <span class="mi">1</span>
-                    <span class="n">offset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">sample_idx</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_points</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> \
-                        <span class="n">time_window</span>
+                    <span class="n">tick_val</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="p">(</span><span class="n">cur_second</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">time_window</span><span class="p">)</span>
+                        <span class="o">+</span> <span class="n">cur_second</span>
+                        <span class="o">+</span> <span class="mi">1</span>
+                    <span class="p">)</span>
+                    <span class="n">offset</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">sample_idx</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_points</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                        <span class="o">*</span> <span class="n">time_window</span>
+                    <span class="p">)</span>
                     <span class="n">tick_val</span> <span class="o">+=</span> <span class="n">offset</span>
-                    <span class="n">tick_label</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">tick_val</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">&#39;</span>
+                    <span class="n">tick_label</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tick_val</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">&quot;</span>
                     <span class="n">ticks</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">tick_label</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">ticks</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">cur_second</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
-                         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">time_window</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_plot_item</span><span class="o">.</span><span class="n">getAxis</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setTicks</span><span class="p">([</span><span class="n">ticks</span><span class="p">])</span>
+                <span class="n">ticks</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">cur_second</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">time_window</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_plot_item</span><span class="o">.</span><span class="n">getAxis</span><span class="p">(</span><span class="s2">&quot;bottom&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">setTicks</span><span class="p">([</span><span class="n">ticks</span><span class="p">])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_last_second</span> <span class="o">=</span> <span class="n">cur_second</span>
 
         <span class="c1"># Plot channel data with amplitude scaling and vertical offset</span>
@@ -512,7 +531,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_curves</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_t_vec</span><span class="p">[::</span><span class="n">N</span><span class="p">],</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_display_buffer</span><span class="p">[::</span><span class="n">N</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">ch_lim</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">d</span><span class="p">,</span>
-                <span class="n">antialias</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">antialias</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="c1"># Update x-axis range with small margin</span>
         <span class="n">tw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">TIME_WINDOW</span><span class="p">]</span>
@@ -524,52 +544,66 @@
         <span class="n">mk_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">KeysOptional</span><span class="o">.</span><span class="n">MARKERS</span>
         <span class="n">markers</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="n">mk_key</span><span class="p">]:</span>
-            <span class="n">ch</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="s1">&#39;channel&#39;</span><span class="p">]</span>
-            <span class="n">val</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
+            <span class="n">ch</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="s2">&quot;channel&quot;</span><span class="p">]</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
             <span class="c1"># Find rising edges where marker value appears</span>
-            <span class="n">hit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_buffer</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="n">ch</span><span class="p">]</span> <span class="o">==</span> <span class="n">val</span><span class="p">)</span>
-                           <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_buffer</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">ch</span><span class="p">]</span> <span class="o">!=</span> <span class="n">val</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">hit</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+                    <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_buffer</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="n">ch</span><span class="p">]</span> <span class="o">==</span> <span class="n">val</span><span class="p">)</span>
+                    <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_buffer</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">ch</span><span class="p">]</span> <span class="o">!=</span> <span class="n">val</span><span class="p">)</span>
+                <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="o">+</span> <span class="mi">1</span>
+            <span class="p">)</span>
             <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">hit</span><span class="p">:</span>
                 <span class="nb">id</span> <span class="o">=</span> <span class="nb">hash</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="n">h</span><span class="p">,</span> <span class="n">ch</span><span class="p">,</span> <span class="n">val</span><span class="p">]))</span>
-                <span class="n">markers</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="n">h</span><span class="p">,</span> <span class="s1">&#39;curve&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">m</span><span class="p">}</span>
+                <span class="n">markers</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;index&quot;</span><span class="p">:</span> <span class="n">h</span><span class="p">,</span> <span class="s2">&quot;curve&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">m</span><span class="p">}</span>
 
         <span class="c1"># Add new markers to plot</span>
-        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">markers</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">markers</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
-                  <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_markers</span><span class="o">.</span><span class="n">keys</span><span class="p">()}:</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">{</span>
+            <span class="n">k</span><span class="p">:</span> <span class="n">markers</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">markers</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_markers</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="p">}:</span>
             <span class="n">m</span> <span class="o">=</span> <span class="n">markers</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
-            <span class="n">idx</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="s1">&#39;index&#39;</span><span class="p">]</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="s2">&quot;index&quot;</span><span class="p">]</span>
             <span class="c1"># Create text label for marker</span>
-            <span class="n">text</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">TextItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">m</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">],</span>
-                               <span class="n">anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-                               <span class="n">color</span><span class="o">=</span><span class="n">pg</span><span class="o">.</span><span class="n">mkColor</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">]))</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">TextItem</span><span class="p">(</span>
+                <span class="n">text</span><span class="o">=</span><span class="n">m</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">],</span> <span class="n">anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="n">pg</span><span class="o">.</span><span class="n">mkColor</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="s2">&quot;color&quot;</span><span class="p">])</span>
+            <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_plot_item</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
             <span class="n">text</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_t_vec</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channel_count</span><span class="p">)</span>
             <span class="c1"># Create vertical line for marker</span>
-            <span class="n">curve</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_item</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">pen</span><span class="o">=</span><span class="n">pg</span><span class="o">.</span><span class="n">mkPen</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">mkColor</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">])))</span>
+            <span class="n">curve</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_item</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">pen</span><span class="o">=</span><span class="n">pg</span><span class="o">.</span><span class="n">mkPen</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">mkColor</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="s2">&quot;color&quot;</span><span class="p">])))</span>
             <span class="n">curve</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_t_vec</span><span class="p">[[</span><span class="n">idx</span><span class="p">,</span> <span class="n">idx</span><span class="p">]],</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">*</span><span class="n">ylim</span><span class="p">]))</span>
-            <span class="n">markers</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="s1">&#39;curve&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">curve</span>
-            <span class="n">markers</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">text</span>
+            <span class="n">markers</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="s2">&quot;curve&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">curve</span>
+            <span class="n">markers</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">text</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_markers</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">markers</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
 
         <span class="c1"># Remove outdated markers from plot</span>
-        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_markers</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_markers</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
-                  <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">markers</span><span class="o">.</span><span class="n">keys</span><span class="p">()}:</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">{</span>
+            <span class="n">k</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_markers</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_markers</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">markers</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="p">}:</span>
             <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_markers</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_plot_item</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="s1">&#39;curve&#39;</span><span class="p">])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_plot_item</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_plot_item</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="s2">&quot;curve&quot;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_plot_item</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">])</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_markers</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
 
         <span class="c1"># Update performance monitoring display</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_counts</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_show_rates</span><span class="p">:</span>
-            <span class="n">update_rate</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_update_counts</span> <span class="o">/</span> <span class="n">sample_idx</span>
-                           <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sampling_rate</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_rate_label</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;data rate: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_step_rate</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> Hz, &quot;</span>
-                                     <span class="sa">f</span><span class="s2">&quot;refresh rate: </span><span class="si">{</span><span class="n">update_rate</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> Hz&quot;</span><span class="p">)</span>
+            <span class="n">update_rate</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_update_counts</span> <span class="o">/</span> <span class="n">sample_idx</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sampling_rate</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rate_label</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;data rate: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_step_rate</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> Hz, &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;refresh rate: </span><span class="si">{</span><span class="n">update_rate</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> Hz&quot;</span>
+            <span class="p">)</span>
 
 <div class="viewcode-block" id="TimeSeriesScope.step">
 <a class="viewcode-back" href="../../../../content/frontend/widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.step">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Process incoming data frames and store them in the circular buffer.</span>
 

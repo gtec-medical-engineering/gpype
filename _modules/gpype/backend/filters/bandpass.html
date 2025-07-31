@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.backend.filters.bandpass &mdash; g.Pype v3.0.1  documentation</title>
+  <title>gpype.backend.filters.bandpass &mdash; g.Pype v3.0.2  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
 
@@ -29,7 +29,7 @@
           
           
           <a href="../../../../index.html" class="icon icon-home">
-            g.Pype v3.0.1
+            g.Pype v3.0.2
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -44,7 +44,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Common</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
 </ul>
 
@@ -54,7 +54,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../index.html">g.Pype v3.0.1</a>
+          <a href="../../../../index.html">g.Pype v3.0.2</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -109,18 +109,15 @@
 <a class="viewcode-back" href="../../../../content/backend/filters/bandpass.html#gpype.backend.filters.bandpass.Bandpass.Configuration.Keys">[docs]</a>
         <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">Butterworth</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Configuration keys for bandpass-specific parameters.&quot;&quot;&quot;</span>
-            <span class="n">F_HI</span> <span class="o">=</span> <span class="s1">&#39;f_hi&#39;</span>  <span class="c1"># Upper cutoff frequency</span>
-            <span class="n">F_LO</span> <span class="o">=</span> <span class="s1">&#39;f_lo&#39;</span>  <span class="c1"># Lower cutoff frequency</span></div>
+
+            <span class="n">F_HI</span> <span class="o">=</span> <span class="s2">&quot;f_hi&quot;</span>  <span class="c1"># Upper cutoff frequency</span>
+            <span class="n">F_LO</span> <span class="o">=</span> <span class="s2">&quot;f_lo&quot;</span>  <span class="c1"># Lower cutoff frequency</span></div>
 </div>
 
 
 <div class="viewcode-block" id="Bandpass.__init__">
 <a class="viewcode-back" href="../../../../content/backend/filters/bandpass.html#gpype.backend.filters.bandpass.Bandpass.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">f_lo</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                 <span class="n">f_hi</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                 <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f_lo</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">f_hi</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the bandpass filter with cutoff frequencies.</span>
 
 <span class="sd">        Args:</span>
@@ -144,26 +141,25 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Validate cutoff frequency relationship</span>
         <span class="k">if</span> <span class="n">f_lo</span> <span class="o">&gt;=</span> <span class="n">f_hi</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Lower cutoff frequency must be less than &quot;</span>
-                             <span class="s2">&quot;upper cutoff frequency.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Lower cutoff frequency must be less than upper &quot;</span>
+                <span class="s2">&quot;cutoff frequency.&quot;</span>
+            <span class="p">)</span>
         <span class="k">if</span> <span class="n">f_lo</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">f_hi</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cutoff frequencies must be positive.&quot;</span><span class="p">)</span>
 
         <span class="c1"># Configure frequency list for bandpass operation</span>
         <span class="n">fn</span> <span class="o">=</span> <span class="p">[</span><span class="n">f_lo</span><span class="p">,</span> <span class="n">f_hi</span><span class="p">]</span>
-        <span class="n">btype</span> <span class="o">=</span> <span class="s1">&#39;bandpass&#39;</span>
+        <span class="n">btype</span> <span class="o">=</span> <span class="s2">&quot;bandpass&quot;</span>
 
         <span class="c1"># Use default order if not specified</span>
         <span class="k">if</span> <span class="n">order</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">order</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_ORDER</span>
 
         <span class="c1"># Initialize parent Butterworth filter with bandpass configuration</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">fn</span><span class="o">=</span><span class="n">fn</span><span class="p">,</span>
-                         <span class="n">f_lo</span><span class="o">=</span><span class="n">f_lo</span><span class="p">,</span>
-                         <span class="n">f_hi</span><span class="o">=</span><span class="n">f_hi</span><span class="p">,</span>
-                         <span class="n">btype</span><span class="o">=</span><span class="n">btype</span><span class="p">,</span>
-                         <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span>
-                         <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">fn</span><span class="o">=</span><span class="n">fn</span><span class="p">,</span> <span class="n">f_lo</span><span class="o">=</span><span class="n">f_lo</span><span class="p">,</span> <span class="n">f_hi</span><span class="o">=</span><span class="n">f_hi</span><span class="p">,</span> <span class="n">btype</span><span class="o">=</span><span class="n">btype</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span></div>
 </div>
 
 </pre></div>

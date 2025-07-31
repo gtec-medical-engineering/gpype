@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.backend.sinks.lsl_sender &mdash; g.Pype v3.0.1  documentation</title>
+  <title>gpype.backend.sinks.lsl_sender &mdash; g.Pype v3.0.2  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
 
@@ -29,7 +29,7 @@
           
           
           <a href="../../../../index.html" class="icon icon-home">
-            g.Pype v3.0.1
+            g.Pype v3.0.2
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -44,7 +44,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Common</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
 </ul>
 
@@ -54,7 +54,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../index.html">g.Pype v3.0.1</a>
+          <a href="../../../../index.html">g.Pype v3.0.2</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -74,7 +74,8 @@
              
   <h1>Source code for gpype.backend.sinks.lsl_sender</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Dict</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">ioiocore</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ioc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -126,15 +127,14 @@
 <a class="viewcode-back" href="../../../../content/backend/sinks/lsl_sender.html#gpype.backend.sinks.lsl_sender.LSLSender.Configuration.Keys">[docs]</a>
         <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">ioc</span><span class="o">.</span><span class="n">INode</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Configuration keys for LSL sender settings.&quot;&quot;&quot;</span>
+
             <span class="n">STREAM_NAME</span> <span class="o">=</span> <span class="s2">&quot;stream_name&quot;</span></div>
 </div>
 
 
 <div class="viewcode-block" id="LSLSender.__init__">
 <a class="viewcode-back" href="../../../../content/backend/sinks/lsl_sender.html#gpype.backend.sinks.lsl_sender.LSLSender.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">stream_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stream_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the LSL sender with specified stream name.</span>
 
 <span class="sd">        Args:</span>
@@ -153,9 +153,7 @@
             <span class="n">stream_name</span> <span class="o">=</span> <span class="n">LSLSender</span><span class="o">.</span><span class="n">DEFAULT_STREAM_NAME</span>
 
         <span class="c1"># Initialize parent INode with configuration</span>
-        <span class="n">INode</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                       <span class="n">stream_name</span><span class="o">=</span><span class="n">stream_name</span><span class="p">,</span>
-                       <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">INode</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stream_name</span><span class="o">=</span><span class="n">stream_name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># Initialize LSL components (created during setup)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_lsl_info</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># LSL stream metadata</span>
@@ -185,9 +183,9 @@
 
 <div class="viewcode-block" id="LSLSender.setup">
 <a class="viewcode-back" href="../../../../content/backend/sinks/lsl_sender.html#gpype.backend.sinks.lsl_sender.LSLSender.setup">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-              <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-              <span class="n">port_context_in</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">port_context_in</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Setup the LSL stream based on input port context.</span>
 
 <span class="sd">        Creates LSL StreamInfo and StreamOutlet objects using metadata</span>
@@ -214,12 +212,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_frame_size</span> <span class="o">=</span> <span class="n">context</span><span class="p">[</span><span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">FRAME_SIZE</span><span class="p">]</span>
 
         <span class="c1"># Create LSL stream info with EEG configuration</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_lsl_info</span> <span class="o">=</span> <span class="n">StreamInfo</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">stream_name</span><span class="p">,</span>
-                                    <span class="n">channel_count</span><span class="o">=</span><span class="n">channel_count</span><span class="p">,</span>
-                                    <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;EEG&quot;</span><span class="p">,</span>  <span class="c1"># Standard LSL type for EEG</span>
-                                    <span class="n">nominal_srate</span><span class="o">=</span><span class="n">sampling_rate</span><span class="p">,</span>
-                                    <span class="n">channel_format</span><span class="o">=</span><span class="n">cf_double64</span><span class="p">,</span>  <span class="c1"># Double prec</span>
-                                    <span class="n">source_id</span><span class="o">=</span><span class="n">stream_name</span><span class="p">)</span>  <span class="c1"># Unique identifier</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lsl_info</span> <span class="o">=</span> <span class="n">StreamInfo</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">stream_name</span><span class="p">,</span>
+            <span class="n">channel_count</span><span class="o">=</span><span class="n">channel_count</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;EEG&quot;</span><span class="p">,</span>  <span class="c1"># Standard LSL type for EEG</span>
+            <span class="n">nominal_srate</span><span class="o">=</span><span class="n">sampling_rate</span><span class="p">,</span>
+            <span class="n">channel_format</span><span class="o">=</span><span class="n">cf_double64</span><span class="p">,</span>  <span class="c1"># Double prec</span>
+            <span class="n">source_id</span><span class="o">=</span><span class="n">stream_name</span><span class="p">,</span>
+        <span class="p">)</span>  <span class="c1"># Unique identifier</span>
 
         <span class="c1"># Create LSL outlet for data transmission</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_lsl_outlet</span> <span class="o">=</span> <span class="n">StreamOutlet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lsl_info</span><span class="p">)</span>
@@ -230,7 +230,7 @@
 
 <div class="viewcode-block" id="LSLSender.step">
 <a class="viewcode-back" href="../../../../content/backend/sinks/lsl_sender.html#gpype.backend.sinks.lsl_sender.LSLSender.step">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Process and stream data through LSL outlet.</span>
 
 <span class="sd">        Sends incoming data to the LSL network using either single-sample</span>

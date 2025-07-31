@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.frontend.widgets.performance_monitor &mdash; g.Pype v3.0.1  documentation</title>
+  <title>gpype.frontend.widgets.performance_monitor &mdash; g.Pype v3.0.2  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
 
@@ -29,7 +29,7 @@
           
           
           <a href="../../../../index.html" class="icon icon-home">
-            g.Pype v3.0.1
+            g.Pype v3.0.2
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -44,7 +44,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Common</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
 </ul>
 
@@ -54,7 +54,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../index.html">g.Pype v3.0.1</a>
+          <a href="../../../../index.html">g.Pype v3.0.2</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -73,16 +73,11 @@
            <div itemprop="articleBody">
              
   <h1>Source code for gpype.frontend.widgets.performance_monitor</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">PySide6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">QHeaderView</span><span class="p">,</span>
-    <span class="n">QLabel</span><span class="p">,</span>
-    <span class="n">QTableWidget</span><span class="p">,</span>
-    <span class="n">QTableWidgetItem</span><span class="p">,</span>
-    <span class="n">QWidget</span><span class="p">,</span>
-<span class="p">)</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">PySide6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">QHeaderView</span><span class="p">,</span> <span class="n">QLabel</span><span class="p">,</span> <span class="n">QTableWidget</span><span class="p">,</span>
+                               <span class="n">QTableWidgetItem</span><span class="p">,</span> <span class="n">QWidget</span><span class="p">)</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.base.widget</span><span class="w"> </span><span class="kn">import</span> <span class="n">Widget</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">...backend.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pipeline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base.widget</span><span class="w"> </span><span class="kn">import</span> <span class="n">Widget</span>
 
 <span class="c1"># Update interval for performance monitoring in milliseconds</span>
 <span class="n">UPDATE_INTERVAL_MS</span> <span class="o">=</span> <span class="mi">1000</span>
@@ -129,9 +124,9 @@
 
         <span class="c1"># Create load monitoring table with three columns</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load_table</span> <span class="o">=</span> <span class="n">QTableWidget</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">load_table</span><span class="o">.</span><span class="n">setHorizontalHeaderLabels</span><span class="p">([</span>
-            <span class="s2">&quot;Class&quot;</span><span class="p">,</span> <span class="s2">&quot;Name&quot;</span><span class="p">,</span> <span class="s2">&quot;Load (%)&quot;</span>
-        <span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_table</span><span class="o">.</span><span class="n">setHorizontalHeaderLabels</span><span class="p">(</span>
+            <span class="p">[</span><span class="s2">&quot;Class&quot;</span><span class="p">,</span> <span class="s2">&quot;Name&quot;</span><span class="p">,</span> <span class="s2">&quot;Load (%)&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
 
         <span class="c1"># Configure table to stretch columns to fit available space</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load_table</span><span class="o">.</span><span class="n">horizontalHeader</span><span class="p">()</span><span class="o">.</span><span class="n">setSectionResizeMode</span><span class="p">(</span>

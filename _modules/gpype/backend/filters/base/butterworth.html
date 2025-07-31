@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.backend.filters.base.butterworth &mdash; g.Pype v3.0.1  documentation</title>
+  <title>gpype.backend.filters.base.butterworth &mdash; g.Pype v3.0.2  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
 
@@ -29,7 +29,7 @@
           
           
           <a href="../../../../../index.html" class="icon icon-home">
-            g.Pype v3.0.1
+            g.Pype v3.0.2
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
@@ -44,7 +44,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../content/introduction/index.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../content/backend/index.html">Backend</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/common/index.html">Common</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../content/examples/index.html">Examples</a></li>
 </ul>
 
@@ -54,7 +54,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../../index.html">g.Pype v3.0.1</a>
+          <a href="../../../../../index.html">g.Pype v3.0.2</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -74,13 +74,12 @@
              
   <h1>Source code for gpype.backend.filters.base.butterworth</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="kn">import</span> <span class="n">butter</span><span class="p">,</span> <span class="n">tf2sos</span><span class="p">,</span> <span class="n">sosfilt</span><span class="p">,</span> <span class="n">sosfilt_zi</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="kn">import</span> <span class="n">butter</span><span class="p">,</span> <span class="n">sosfilt</span><span class="p">,</span> <span class="n">sosfilt_zi</span><span class="p">,</span> <span class="n">tf2sos</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">...core.io_node</span><span class="w"> </span><span class="kn">import</span> <span class="n">IONode</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">....common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">Constants</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...core.io_node</span><span class="w"> </span><span class="kn">import</span> <span class="n">IONode</span>
 
 <span class="n">PORT_IN</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">PORT_IN</span>
 <span class="n">PORT_OUT</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">PORT_OUT</span>
@@ -116,19 +115,16 @@
 <a class="viewcode-back" href="../../../../../content/backend/filters/base/butterworth.html#gpype.backend.filters.base.butterworth.Butterworth.Configuration.Keys">[docs]</a>
         <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">IONode</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Configuration keys for Butterworth filter settings.&quot;&quot;&quot;</span>
-            <span class="n">FN</span> <span class="o">=</span> <span class="s1">&#39;fn&#39;</span>           <span class="c1"># Cutoff frequencies</span>
-            <span class="n">BTYPE</span> <span class="o">=</span> <span class="s1">&#39;btype&#39;</span>     <span class="c1"># Filter type</span>
-            <span class="n">ORDER</span> <span class="o">=</span> <span class="s1">&#39;order&#39;</span>     <span class="c1"># Filter order</span></div>
+
+            <span class="n">FN</span> <span class="o">=</span> <span class="s2">&quot;fn&quot;</span>  <span class="c1"># Cutoff frequencies</span>
+            <span class="n">BTYPE</span> <span class="o">=</span> <span class="s2">&quot;btype&quot;</span>  <span class="c1"># Filter type</span>
+            <span class="n">ORDER</span> <span class="o">=</span> <span class="s2">&quot;order&quot;</span>  <span class="c1"># Filter order</span></div>
 </div>
 
 
 <div class="viewcode-block" id="Butterworth.__init__">
 <a class="viewcode-back" href="../../../../../content/backend/filters/base/butterworth.html#gpype.backend.filters.base.butterworth.Butterworth.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">fn</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
-                 <span class="n">btype</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                 <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">btype</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the Butterworth filter with specified parameters.</span>
 
 <span class="sd">        Args:</span>
@@ -148,9 +144,11 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;fn must be a list.&quot;</span><span class="p">)</span>
 
         <span class="c1"># Validate filter type</span>
-        <span class="k">if</span> <span class="n">btype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;lowpass&#39;</span><span class="p">,</span> <span class="s1">&#39;highpass&#39;</span><span class="p">,</span> <span class="s1">&#39;bandpass&#39;</span><span class="p">,</span> <span class="s1">&#39;bandstop&#39;</span><span class="p">]:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;btype must be &#39;lowpass&#39;, &#39;highpass&#39;, &#39;bandpass&#39; &quot;</span>
-                             <span class="s2">&quot;or &#39;bandstop&#39;.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">btype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;lowpass&quot;</span><span class="p">,</span> <span class="s2">&quot;highpass&quot;</span><span class="p">,</span> <span class="s2">&quot;bandpass&quot;</span><span class="p">,</span> <span class="s2">&quot;bandstop&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;btype must be &#39;lowpass&#39;, &#39;highpass&#39;, &#39;bandpass&#39; &quot;</span>
+                <span class="s2">&quot;or &#39;bandstop&#39;.&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Set default order if not provided</span>
         <span class="k">if</span> <span class="n">order</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -159,17 +157,14 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Filter order must be greater than 0.&quot;</span><span class="p">)</span>
 
         <span class="c1"># Initialize parent class with filter configuration</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">fn</span><span class="o">=</span><span class="n">fn</span><span class="p">,</span>
-                         <span class="n">btype</span><span class="o">=</span><span class="n">btype</span><span class="p">,</span>
-                         <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span>
-                         <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">fn</span><span class="o">=</span><span class="n">fn</span><span class="p">,</span> <span class="n">btype</span><span class="o">=</span><span class="n">btype</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Butterworth.setup">
 <a class="viewcode-back" href="../../../../../content/backend/filters/base/butterworth.html#gpype.backend.filters.base.butterworth.Butterworth.setup">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-              <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-              <span class="n">port_context_in</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">port_context_in</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Setup the Butterworth filter before processing begins.</span>
 
 <span class="sd">        This method initializes the filter coefficients and state based on</span>
@@ -205,25 +200,23 @@
         <span class="n">Wn</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="o">/</span> <span class="n">sampling_rate</span> <span class="o">*</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fn</span><span class="p">]</span>
 
         <span class="c1"># Design Butterworth filter using scipy</span>
-        <span class="n">b</span><span class="p">,</span> <span class="n">a</span> <span class="o">=</span> <span class="n">butter</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">,</span>
-                      <span class="n">Wn</span><span class="o">=</span><span class="n">Wn</span><span class="p">,</span>
-                      <span class="n">btype</span><span class="o">=</span><span class="n">btype</span><span class="p">)</span>
+        <span class="n">b</span><span class="p">,</span> <span class="n">a</span> <span class="o">=</span> <span class="n">butter</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">,</span> <span class="n">Wn</span><span class="o">=</span><span class="n">Wn</span><span class="p">,</span> <span class="n">btype</span><span class="o">=</span><span class="n">btype</span><span class="p">)</span>
 
         <span class="c1"># Convert to second-order sections for better numerical stability</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sos</span> <span class="o">=</span> <span class="n">tf2sos</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
 
         <span class="c1"># Initialize filter state for each channel</span>
         <span class="c1"># Shape: (n_sections, n_states, n_channels)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">sosfilt_zi</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sos</span><span class="p">),</span>
-                          <span class="p">(</span><span class="n">channel_count</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span>
+            <span class="n">sosfilt_zi</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sos</span><span class="p">),</span> <span class="p">(</span><span class="n">channel_count</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">port_context_in</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Butterworth.step">
 <a class="viewcode-back" href="../../../../../content/backend/filters/base/butterworth.html#gpype.backend.filters.base.butterworth.Butterworth.step">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-             <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply Butterworth filter to input data.</span>
 
 <span class="sd">        Processes the input data through the Butterworth filter while</span>
@@ -243,14 +236,17 @@
 
         <span class="c1"># Validate input data format</span>
         <span class="k">if</span> <span class="n">data_in</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input data must be a 2D array (samples x &quot;</span>
-                             <span class="s2">&quot;channels).&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Input data must be a 2D array (samples x channels).&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Apply filter with state preservation</span>
-        <span class="n">data_out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_z</span> <span class="o">=</span> <span class="n">sosfilt</span><span class="p">(</span><span class="n">sos</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_sos</span><span class="p">,</span>
-                                    <span class="n">x</span><span class="o">=</span><span class="n">data_in</span><span class="p">,</span>
-                                    <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="c1"># Filter along time axis</span>
-                                    <span class="n">zi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_z</span><span class="p">)</span>
+        <span class="n">data_out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_z</span> <span class="o">=</span> <span class="n">sosfilt</span><span class="p">(</span>
+            <span class="n">sos</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_sos</span><span class="p">,</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">data_in</span><span class="p">,</span>
+            <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">zi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_z</span><span class="p">,</span>  <span class="c1"># Filter along time axis</span>
+        <span class="p">)</span>
 
         <span class="k">return</span> <span class="p">{</span><span class="n">PORT_OUT</span><span class="p">:</span> <span class="n">data_out</span><span class="p">}</span></div>
 </div>

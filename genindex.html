@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; g.Pype v3.0.1  documentation</title>
+  <title>Index &mdash; g.Pype v3.0.2  documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
@@ -29,7 +29,7 @@
           
           
           <a href="index.html" class="icon icon-home">
-            g.Pype v3.0.1
+            g.Pype v3.0.2
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -44,7 +44,7 @@
 <li class="toctree-l1"><a class="reference internal" href="content/introduction/index.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="content/backend/index.html">Backend</a></li>
 <li class="toctree-l1"><a class="reference internal" href="content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="content/common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="content/common/index.html">Common</a></li>
 <li class="toctree-l1"><a class="reference internal" href="content/examples/index.html">Examples</a></li>
 </ul>
 
@@ -54,7 +54,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">g.Pype v3.0.1</a>
+          <a href="index.html">g.Pype v3.0.2</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -255,6 +255,8 @@
 </li>
       <li><a href="content/backend/filters/base/butterworth.html#gpype.backend.filters.base.butterworth.Butterworth.Configuration.Keys.BTYPE">BTYPE (gpype.backend.filters.base.butterworth.Butterworth.Configuration.Keys attribute)</a>
 </li>
+      <li><a href="content/backend/sources/bci_core8.html#gpype.backend.sources.bci_core8.BCICore8.Configuration.Keys.BUFFER_DELAY_MS">BUFFER_DELAY_MS (gpype.backend.sources.bci_core8.BCICore8.Configuration.Keys attribute)</a>
+</li>
       <li><a href="content/backend/filters/base/butterworth.html#gpype.backend.filters.base.butterworth.Butterworth">Butterworth (class in gpype.backend.filters.base.butterworth)</a>
 </li>
       <li><a href="content/backend/filters/base/butterworth.html#gpype.backend.filters.base.butterworth.Butterworth.Configuration">Butterworth.Configuration (class in gpype.backend.filters.base.butterworth)</a>
@@ -301,7 +303,9 @@
         <li><a href="content/frontend/widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.DEFAULT_AMPLITUDE_LIMIT">(gpype.frontend.widgets.time_series_scope.TimeSeriesScope attribute)</a>
 </li>
       </ul></li>
-      <li><a href="content/backend/sources/bci_core8.html#gpype.backend.sources.bci_core8.BCICore8.DEFAULT_BUFFER_SIZE_SAMPLES">DEFAULT_BUFFER_SIZE_SAMPLES (gpype.backend.sources.bci_core8.BCICore8 attribute)</a>
+      <li><a href="content/backend/sources/bci_core8.html#gpype.backend.sources.bci_core8.BCICore8.DEFAULT_BUFFER_DELAY_MS">DEFAULT_BUFFER_DELAY_MS (gpype.backend.sources.bci_core8.BCICore8 attribute)</a>
+</li>
+      <li><a href="content/frontend/main_app.html#gpype.frontend.main_app.MainApp.DEFAULT_GRID_SIZE">DEFAULT_GRID_SIZE (gpype.frontend.main_app.MainApp attribute)</a>
 </li>
       <li><a href="content/backend/sinks/udp_sender.html#gpype.backend.sinks.udp_sender.UDPSender.DEFAULT_IP">DEFAULT_IP (gpype.backend.sinks.udp_sender.UDPSender attribute)</a>
 
@@ -399,11 +403,15 @@
 </li>
       <li><a href="content/backend/sinks/file_writer.html#gpype.backend.sinks.file_writer.FileWriter">FileWriter (class in gpype.backend.sinks.file_writer)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="content/backend/sinks/file_writer.html#gpype.backend.sinks.file_writer.FileWriter.Configuration">FileWriter.Configuration (class in gpype.backend.sinks.file_writer)</a>
 </li>
       <li><a href="content/backend/sinks/file_writer.html#gpype.backend.sinks.file_writer.FileWriter.Configuration.Keys">FileWriter.Configuration.Keys (class in gpype.backend.sinks.file_writer)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="content/backend/sources/bci_core8.html#gpype.backend.sources.bci_core8.BCICore8.FILL_RATIO_ALPHA">FILL_RATIO_ALPHA (gpype.backend.sources.bci_core8.BCICore8 attribute)</a>
+</li>
+      <li><a href="content/backend/sources/bci_core8.html#gpype.backend.sources.bci_core8.BCICore8.FILL_RATIO_CORRECTION_INTERVAL_S">FILL_RATIO_CORRECTION_INTERVAL_S (gpype.backend.sources.bci_core8.BCICore8 attribute)</a>
 </li>
       <li><a href="content/backend/sources/base/fixed_rate_source.html#gpype.backend.sources.base.fixed_rate_source.FixedRateSource">FixedRateSource (class in gpype.backend.sources.base.fixed_rate_source)</a>
 </li>
@@ -412,6 +420,8 @@
       <li><a href="content/backend/sources/base/fixed_rate_source.html#gpype.backend.sources.base.fixed_rate_source.FixedRateSource.Configuration.Keys">FixedRateSource.Configuration.Keys (class in gpype.backend.sources.base.fixed_rate_source)</a>
 </li>
       <li><a href="content/backend/filters/base/butterworth.html#gpype.backend.filters.base.butterworth.Butterworth.Configuration.Keys.FN">FN (gpype.backend.filters.base.butterworth.Butterworth.Configuration.Keys attribute)</a>
+</li>
+      <li><a href="content/common/constants.html#gpype.common.constants.Constants.Keys.FRAME_RATE">FRAME_RATE (gpype.common.constants.Constants.Keys attribute)</a>
 </li>
       <li><a href="content/backend/flow/framer.html#gpype.backend.flow.framer.Framer.Configuration.Keys.FRAME_SIZE">FRAME_SIZE (gpype.backend.flow.framer.Framer.Configuration.Keys attribute)</a>
 
@@ -573,11 +583,13 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="content/backend/sources/generator.html#gpype.backend.sources.generator.Generator.Configuration.Keys.NOISE_AMPLITUDE">NOISE_AMPLITUDE (gpype.backend.sources.generator.Generator.Configuration.Keys attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="content/frontend/widgets/spectrum_scope.html#gpype.frontend.widgets.spectrum_scope.SpectrumScope.Configuration.Keys.NUM_AVERAGES">NUM_AVERAGES (gpype.frontend.widgets.spectrum_scope.SpectrumScope.Configuration.Keys attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="content/backend/timing/delay.html#gpype.backend.timing.delay.Delay.Configuration.Keys.NUM_SAMPLES">NUM_SAMPLES (gpype.backend.timing.delay.Delay.Configuration.Keys attribute)</a>
+</li>
+      <li><a href="content/backend/sources/bci_core8.html#gpype.backend.sources.bci_core8.BCICore8.NUM_UNDERRUNS_ALLOWED">NUM_UNDERRUNS_ALLOWED (gpype.backend.sources.bci_core8.BCICore8 attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -863,6 +875,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="content/backend/flow/trigger.html#gpype.backend.flow.trigger.Trigger.Configuration.Keys.TARGET">TARGET (gpype.backend.flow.trigger.Trigger.Configuration.Keys attribute)</a>
 </li>
+      <li><a href="content/backend/sources/bci_core8.html#gpype.backend.sources.bci_core8.BCICore8.TARGET_FILL_RATIO">TARGET_FILL_RATIO (gpype.backend.sources.bci_core8.BCICore8 attribute)</a>
+</li>
       <li><a href="content/frontend/widgets/base/widget.html#gpype.frontend.widgets.base.widget.Widget.terminate">terminate() (gpype.frontend.widgets.base.widget.Widget method)</a>
 
       <ul>
@@ -881,10 +895,10 @@
 </li>
       <li><a href="content/frontend/widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Configuration.Keys">TimeSeriesScope.Configuration.Keys (class in gpype.frontend.widgets.time_series_scope)</a>
 </li>
-      <li><a href="content/frontend/widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Configuration.KeysOptional">TimeSeriesScope.Configuration.KeysOptional (class in gpype.frontend.widgets.time_series_scope)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="content/frontend/widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Configuration.KeysOptional">TimeSeriesScope.Configuration.KeysOptional (class in gpype.frontend.widgets.time_series_scope)</a>
+</li>
       <li><a href="content/frontend/widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.KeyPressFilter">TimeSeriesScope.KeyPressFilter (class in gpype.frontend.widgets.time_series_scope)</a>
 </li>
       <li><a href="content/frontend/widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Markers">TimeSeriesScope.Markers (class in gpype.frontend.widgets.time_series_scope)</a>

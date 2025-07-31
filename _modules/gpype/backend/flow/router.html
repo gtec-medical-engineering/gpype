@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.backend.flow.router &mdash; g.Pype v3.0.1  documentation</title>
+  <title>gpype.backend.flow.router &mdash; g.Pype v3.0.2  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
 
@@ -29,7 +29,7 @@
           
           
           <a href="../../../../index.html" class="icon icon-home">
-            g.Pype v3.0.1
+            g.Pype v3.0.2
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -44,7 +44,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Common</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
 </ul>
 
@@ -54,7 +54,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../index.html">g.Pype v3.0.1</a>
+          <a href="../../../../index.html">g.Pype v3.0.2</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -74,15 +74,16 @@
              
   <h1>Source code for gpype.backend.flow.router</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Dict</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">ioiocore</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ioc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">...common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">Constants</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..core.i_port</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPort</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..core.io_node</span><span class="w"> </span><span class="kn">import</span> <span class="n">IONode</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..core.o_port</span><span class="w"> </span><span class="kn">import</span> <span class="n">OPort</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">...common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">Constants</span>
 
 
 <div class="viewcode-block" id="Router">
@@ -129,6 +130,7 @@
 <a class="viewcode-back" href="../../../../content/backend/flow/router.html#gpype.backend.flow.router.Router.Configuration.Keys">[docs]</a>
         <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">ioc</span><span class="o">.</span><span class="n">IONode</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Configuration key constants for the Router.&quot;&quot;&quot;</span>
+
             <span class="n">INPUT_SELECTOR</span> <span class="o">=</span> <span class="s2">&quot;input_selector&quot;</span>
             <span class="n">OUTPUT_SELECTOR</span> <span class="o">=</span> <span class="s2">&quot;output_selector&quot;</span></div>
 </div>
@@ -136,10 +138,12 @@
 
 <div class="viewcode-block" id="Router.__init__">
 <a class="viewcode-back" href="../../../../content/backend/flow/router.html#gpype.backend.flow.router.Router.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">input_selector</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">output_selector</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">input_selector</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">output_selector</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the Router node with channel selection configurations.</span>
 
@@ -173,16 +177,19 @@
                 <span class="n">input_selector</span> <span class="o">=</span> <span class="p">[</span><span class="n">input_selector</span><span class="p">]</span>
             <span class="c1"># Create port mappings</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_selector</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">input_selector</span> <span class="o">=</span> <span class="p">{</span><span class="n">Constants</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">PORT_IN</span><span class="p">:</span>
-                                  <span class="n">input_selector</span><span class="p">[</span><span class="mi">0</span><span class="p">]}</span>
+                <span class="n">input_selector</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="n">Constants</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">PORT_IN</span><span class="p">:</span> <span class="n">input_selector</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="p">}</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">input_selector</span> <span class="o">=</span> <span class="p">{</span><span class="sa">f</span><span class="s1">&#39;in</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">val</span>
-                                  <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">input_selector</span><span class="p">)}</span>
+                <span class="n">input_selector</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="sa">f</span><span class="s2">&quot;in</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span> <span class="n">val</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">input_selector</span><span class="p">)</span>
+                <span class="p">}</span>
 
         <span class="c1"># Create input port configurations</span>
-        <span class="n">input_ports</span> <span class="o">=</span> <span class="p">[</span><span class="n">IPort</span><span class="o">.</span><span class="n">Configuration</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-                                           <span class="n">timing</span><span class="o">=</span><span class="n">Constants</span><span class="o">.</span><span class="n">Timing</span><span class="o">.</span><span class="n">INHERITED</span><span class="p">)</span>
-                       <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">input_selector</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
+        <span class="n">input_ports</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">IPort</span><span class="o">.</span><span class="n">Configuration</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">timing</span><span class="o">=</span><span class="n">Constants</span><span class="o">.</span><span class="n">Timing</span><span class="o">.</span><span class="n">INHERITED</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">input_selector</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="p">]</span>
 
         <span class="c1"># Set default output selector to all channels on default port</span>
         <span class="k">if</span> <span class="n">output_selector</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -197,33 +204,38 @@
                 <span class="n">output_selector</span> <span class="o">=</span> <span class="p">[</span><span class="n">output_selector</span><span class="p">]</span>
             <span class="c1"># Create port mappings</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_selector</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">output_selector</span> <span class="o">=</span> <span class="p">{</span><span class="n">Constants</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">PORT_OUT</span><span class="p">:</span>
-                                   <span class="n">output_selector</span><span class="p">[</span><span class="mi">0</span><span class="p">]}</span>
+                <span class="n">output_selector</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="n">Constants</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">PORT_OUT</span><span class="p">:</span> <span class="n">output_selector</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="p">}</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">output_selector</span> <span class="o">=</span> <span class="p">{</span><span class="sa">f</span><span class="s1">&#39;out</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">val</span>
-                                   <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">output_selector</span><span class="p">)}</span>
+                <span class="n">output_selector</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="sa">f</span><span class="s2">&quot;out</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span> <span class="n">val</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">output_selector</span><span class="p">)</span>
+                <span class="p">}</span>
 
         <span class="c1"># Create output port configurations</span>
-        <span class="n">output_ports</span> <span class="o">=</span> <span class="p">[</span><span class="n">OPort</span><span class="o">.</span><span class="n">Configuration</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
-                        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">output_selector</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
+        <span class="n">output_ports</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">OPort</span><span class="o">.</span><span class="n">Configuration</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">output_selector</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="p">]</span>
 
         <span class="c1"># Initialize internal routing map</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_map</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="c1"># Initialize parent IONode with all configurations</span>
-        <span class="n">IONode</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                        <span class="n">input_selector</span><span class="o">=</span><span class="n">input_selector</span><span class="p">,</span>
-                        <span class="n">output_selector</span><span class="o">=</span><span class="n">output_selector</span><span class="p">,</span>
-                        <span class="n">input_ports</span><span class="o">=</span><span class="n">input_ports</span><span class="p">,</span>
-                        <span class="n">output_ports</span><span class="o">=</span><span class="n">output_ports</span><span class="p">,</span>
-                        <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="n">IONode</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">input_selector</span><span class="o">=</span><span class="n">input_selector</span><span class="p">,</span>
+            <span class="n">output_selector</span><span class="o">=</span><span class="n">output_selector</span><span class="p">,</span>
+            <span class="n">input_ports</span><span class="o">=</span><span class="n">input_ports</span><span class="p">,</span>
+            <span class="n">output_ports</span><span class="o">=</span><span class="n">output_ports</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Router.setup">
 <a class="viewcode-back" href="../../../../content/backend/flow/router.html#gpype.backend.flow.router.Router.setup">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-              <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-              <span class="n">port_context_in</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">port_context_in</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set up the Router node and build the internal channel mapping.</span>
 
@@ -282,8 +294,9 @@
 
         <span class="c1"># Validate sampling rate consistency across all input ports</span>
         <span class="n">sr_key</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">SAMPLING_RATE</span>
-        <span class="n">sampling_rates</span> <span class="o">=</span> <span class="p">[</span><span class="n">md</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sr_key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-                          <span class="k">for</span> <span class="n">md</span> <span class="ow">in</span> <span class="n">port_context_in</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+        <span class="n">sampling_rates</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">md</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sr_key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">md</span> <span class="ow">in</span> <span class="n">port_context_in</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="p">]</span>
         <span class="n">sampling_rates</span> <span class="o">=</span> <span class="p">[</span><span class="n">sr</span> <span class="k">for</span> <span class="n">sr</span> <span class="ow">in</span> <span class="n">sampling_rates</span> <span class="k">if</span> <span class="n">sr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">sampling_rates</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;All ports must have the same sampling rate.&quot;</span><span class="p">)</span>
@@ -291,8 +304,9 @@
 
         <span class="c1"># Validate frame size consistency across all input ports</span>
         <span class="n">fsz_key</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">FRAME_SIZE</span>
-        <span class="n">frame_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="n">md</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fsz_key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-                       <span class="k">for</span> <span class="n">md</span> <span class="ow">in</span> <span class="n">port_context_in</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+        <span class="n">frame_sizes</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">md</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fsz_key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">md</span> <span class="ow">in</span> <span class="n">port_context_in</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="p">]</span>
         <span class="n">frame_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="n">fsz</span> <span class="k">for</span> <span class="n">fsz</span> <span class="ow">in</span> <span class="n">frame_sizes</span> <span class="k">if</span> <span class="n">fsz</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">frame_sizes</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;All ports must have the same frame size.&quot;</span><span class="p">)</span>
@@ -301,13 +315,13 @@
         <span class="c1"># Validate data type consistency across all input ports</span>
         <span class="n">type_key</span> <span class="o">=</span> <span class="n">IPort</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">TYPE</span>
         <span class="n">types</span> <span class="o">=</span> <span class="p">[</span><span class="n">md</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">type_key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">md</span> <span class="ow">in</span> <span class="n">port_context_in</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
-        <span class="n">types</span> <span class="o">=</span> <span class="p">[</span><span class="n">tp</span> <span class="k">for</span> <span class="n">tp</span> <span class="ow">in</span> <span class="n">types</span> <span class="k">if</span> <span class="p">(</span><span class="n">tp</span> <span class="o">!=</span> <span class="s1">&#39;Any&#39;</span> <span class="ow">and</span> <span class="n">tp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)]</span>
+        <span class="n">types</span> <span class="o">=</span> <span class="p">[</span><span class="n">tp</span> <span class="k">for</span> <span class="n">tp</span> <span class="ow">in</span> <span class="n">types</span> <span class="k">if</span> <span class="p">(</span><span class="n">tp</span> <span class="o">!=</span> <span class="s2">&quot;Any&quot;</span> <span class="ow">and</span> <span class="n">tp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)]</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">types</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;All ports must have the same type.&quot;</span><span class="p">)</span>
-        <span class="n">tp</span> <span class="o">=</span> <span class="n">types</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">types</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="s1">&#39;Any&#39;</span>
+        <span class="n">tp</span> <span class="o">=</span> <span class="n">types</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">types</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="s2">&quot;Any&quot;</span>
 
         <span class="c1"># Build output port context information</span>
-        <span class="n">port_context_out</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">port_context_out</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">cc_key</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">CHANNEL_COUNT</span>
         <span class="n">op_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">OUTPUT_PORTS</span>
         <span class="n">name_key</span> <span class="o">=</span> <span class="n">OPort</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">NAME</span>
@@ -323,8 +337,10 @@
                 <span class="n">context</span><span class="p">[</span><span class="n">full_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
                 <span class="k">for</span> <span class="n">key2</span> <span class="ow">in</span> <span class="n">port_context_in</span><span class="p">[</span><span class="n">key1</span><span class="p">]:</span>
                     <span class="c1"># Skip ID and NAME keys from input context</span>
-                    <span class="k">if</span> <span class="n">key2</span> <span class="ow">in</span> <span class="p">[</span><span class="n">IPort</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">ID</span><span class="p">,</span>
-                                <span class="n">IPort</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">NAME</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">key2</span> <span class="ow">in</span> <span class="p">[</span>
+                        <span class="n">IPort</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">ID</span><span class="p">,</span>
+                        <span class="n">IPort</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">NAME</span><span class="p">,</span>
+                    <span class="p">]:</span>
                         <span class="k">continue</span>
                     <span class="n">context</span><span class="p">[</span><span class="n">full_key</span><span class="p">][</span><span class="n">key2</span><span class="p">]</span> <span class="o">=</span> <span class="n">port_context_in</span><span class="p">[</span><span class="n">key1</span><span class="p">][</span><span class="n">key2</span><span class="p">]</span>
 
@@ -340,7 +356,7 @@
 
 <div class="viewcode-block" id="Router.step">
 <a class="viewcode-back" href="../../../../content/backend/flow/router.html#gpype.backend.flow.router.Router.step">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Process one frame of data by routing channels according to the mapping.</span>
 

@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.backend.sources.udp_receiver &mdash; g.Pype v3.0.1  documentation</title>
+  <title>gpype.backend.sources.udp_receiver &mdash; g.Pype v3.0.2  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
 
@@ -29,7 +29,7 @@
           
           
           <a href="../../../../index.html" class="icon icon-home">
-            g.Pype v3.0.1
+            g.Pype v3.0.2
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -44,7 +44,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Common</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
 </ul>
 
@@ -54,7 +54,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../index.html">g.Pype v3.0.1</a>
+          <a href="../../../../index.html">g.Pype v3.0.2</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -78,8 +78,8 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.base.event_source</span><span class="w"> </span><span class="kn">import</span> <span class="n">EventSource</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">...common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">Constants</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base.event_source</span><span class="w"> </span><span class="kn">import</span> <span class="n">EventSource</span>
 
 <span class="c1"># Output port identifier</span>
 <span class="n">PORT_OUT</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">PORT_OUT</span>
@@ -117,11 +117,11 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Source code fingerprint</span>
-    <span class="n">FINGERPRINT</span> <span class="o">=</span> <span class="s2">&quot;81474d85a9cb08bca9542586cce0408b&quot;</span>
+    <span class="n">FINGERPRINT</span> <span class="o">=</span> <span class="s2">&quot;16094605bf234cec0f98f6edf2392b8d&quot;</span>
 
     <span class="c1"># Default network configuration</span>
     <span class="n">DEFAULT_IP</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;127.0.0.1&quot;</span>  <span class="c1"># Localhost</span>
-    <span class="n">DEFAULT_PORT</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span>       <span class="c1"># Default UDP port</span>
+    <span class="n">DEFAULT_PORT</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span>  <span class="c1"># Default UDP port</span>
 
 <div class="viewcode-block" id="UDPReceiver.Configuration">
 <a class="viewcode-back" href="../../../../content/backend/sources/udp_receiver.html#gpype.backend.sources.udp_receiver.UDPReceiver.Configuration">[docs]</a>
@@ -132,17 +132,17 @@
 <a class="viewcode-back" href="../../../../content/backend/sources/udp_receiver.html#gpype.backend.sources.udp_receiver.UDPReceiver.Configuration.Keys">[docs]</a>
         <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">EventSource</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Configuration key constants for the UDP receiver.&quot;&quot;&quot;</span>
-            <span class="n">IP</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ip&quot;</span>      <span class="c1"># IP address to bind to</span>
+
+            <span class="n">IP</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ip&quot;</span>  <span class="c1"># IP address to bind to</span>
             <span class="n">PORT</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;port&quot;</span>  <span class="c1"># UDP port number to listen on</span></div>
 </div>
 
 
 <div class="viewcode-block" id="UDPReceiver.__init__">
 <a class="viewcode-back" href="../../../../content/backend/sources/udp_receiver.html#gpype.backend.sources.udp_receiver.UDPReceiver.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">ip</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_IP</span><span class="p">,</span>
-                 <span class="n">port</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DEFAULT_PORT</span><span class="p">,</span>
-                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">ip</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_IP</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DEFAULT_PORT</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the UDP receiver.</span>
 
@@ -239,8 +239,9 @@
         <span class="c1"># Start UDP listener thread if not already running</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_udp_thread_running</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_udp_thread_running</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_udp_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_udp_listener</span><span class="p">,</span>
-                                                <span class="n">daemon</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_udp_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span>
+                <span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_udp_listener</span><span class="p">,</span> <span class="n">daemon</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_udp_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
         <span class="c1"># Record start time for potential timing analysis</span>

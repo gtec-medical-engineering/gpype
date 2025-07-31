@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.backend.sources.base.amplifier_source &mdash; g.Pype v3.0.1  documentation</title>
+  <title>gpype.backend.sources.base.amplifier_source &mdash; g.Pype v3.0.2  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
 
@@ -29,7 +29,7 @@
           
           
           <a href="../../../../../index.html" class="icon icon-home">
-            g.Pype v3.0.1
+            g.Pype v3.0.2
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
@@ -44,7 +44,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../content/introduction/index.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../content/backend/index.html">Backend</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/common/index.html">Common</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../content/examples/index.html">Examples</a></li>
 </ul>
 
@@ -54,7 +54,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../../index.html">g.Pype v3.0.1</a>
+          <a href="../../../../../index.html">g.Pype v3.0.2</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -74,7 +74,8 @@
              
   <h1>Source code for gpype.backend.sources.base.amplifier_source</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
@@ -128,14 +129,13 @@
 <a class="viewcode-back" href="../../../../../content/backend/sources/base/amplifier_source.html#gpype.backend.sources.base.amplifier_source.AmplifierSource.Configuration.Keys">[docs]</a>
         <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">Source</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Configuration keys for amplifier source settings.&quot;&quot;&quot;</span>
+
             <span class="n">SAMPLING_RATE</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">SAMPLING_RATE</span>  <span class="c1"># &#39;sampling_rate&#39;</span></div>
 
 
 <div class="viewcode-block" id="AmplifierSource.Configuration.__init__">
 <a class="viewcode-back" href="../../../../../content/backend/sources/base/amplifier_source.html#gpype.backend.sources.base.amplifier_source.AmplifierSource.Configuration.__init__">[docs]</a>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                     <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                     <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Initialize configuration with sampling rate validation.</span>
 
 <span class="sd">            Args:</span>
@@ -154,22 +154,23 @@
             <span class="c1"># Validate sampling rate (allow INHERITED for runtime config)</span>
             <span class="k">if</span> <span class="n">sampling_rate</span> <span class="o">!=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">INHERITED</span> <span class="ow">and</span> <span class="n">sampling_rate</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;sampling_rate must be greater than zero.&quot;</span><span class="p">)</span>
-            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sampling_rate</span><span class="o">=</span><span class="n">sampling_rate</span><span class="p">,</span>
-                             <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sampling_rate</span><span class="o">=</span><span class="n">sampling_rate</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 </div>
 
 
     <span class="c1"># Class attributes for device management</span>
-    <span class="n">_devices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span>
+    <span class="n">_devices</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span>
     <span class="n">_device</span><span class="p">:</span> <span class="n">Any</span>
 
 <div class="viewcode-block" id="AmplifierSource.__init__">
 <a class="viewcode-back" href="../../../../../content/backend/sources/base/amplifier_source.html#gpype.backend.sources.base.amplifier_source.AmplifierSource.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                 <span class="n">channel_count</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                 <span class="n">frame_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">channel_count</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">frame_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the amplifier source with acquisition parameters.</span>
 
 <span class="sd">        Args:</span>
@@ -201,26 +202,29 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Extract output_ports from kwargs with default configuration</span>
         <span class="n">op_key</span> <span class="o">=</span> <span class="n">AmplifierSource</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">OUTPUT_PORTS</span>
-        <span class="n">output_ports</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">OPort</span><span class="o">.</span><span class="n">Configuration</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span>
-            <span class="n">op_key</span><span class="p">,</span> <span class="p">[</span><span class="n">OPort</span><span class="o">.</span><span class="n">Configuration</span><span class="p">()])</span>
+        <span class="n">output_ports</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">OPort</span><span class="o">.</span><span class="n">Configuration</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span>
+            <span class="n">op_key</span><span class="p">,</span> <span class="p">[</span><span class="n">OPort</span><span class="o">.</span><span class="n">Configuration</span><span class="p">()]</span>
+        <span class="p">)</span>
 
         <span class="c1"># Initialize device management</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_devices</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># List of available devices</span>
 
         <span class="c1"># Initialize parent Source with amplifier configuration</span>
-        <span class="n">Source</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                        <span class="n">output_ports</span><span class="o">=</span><span class="n">output_ports</span><span class="p">,</span>
-                        <span class="n">sampling_rate</span><span class="o">=</span><span class="n">sampling_rate</span><span class="p">,</span>
-                        <span class="n">channel_count</span><span class="o">=</span><span class="n">channel_count</span><span class="p">,</span>
-                        <span class="n">frame_size</span><span class="o">=</span><span class="n">frame_size</span><span class="p">,</span>
-                        <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="n">Source</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">output_ports</span><span class="o">=</span><span class="n">output_ports</span><span class="p">,</span>
+            <span class="n">sampling_rate</span><span class="o">=</span><span class="n">sampling_rate</span><span class="p">,</span>
+            <span class="n">channel_count</span><span class="o">=</span><span class="n">channel_count</span><span class="p">,</span>
+            <span class="n">frame_size</span><span class="o">=</span><span class="n">frame_size</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="AmplifierSource.setup">
 <a class="viewcode-back" href="../../../../../content/backend/sources/base/amplifier_source.html#gpype.backend.sources.base.amplifier_source.AmplifierSource.setup">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-              <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-              <span class="n">port_context_in</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">port_context_in</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Setup output port contexts with sampling rate information.</span>
 
 <span class="sd">        Configures output port contexts by adding sampling rate information</span>
@@ -246,12 +250,19 @@
 
         <span class="c1"># Get actual sampling rate (may have been resolved from INHERITED)</span>
         <span class="n">sampling_rate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">SAMPLING_RATE</span><span class="p">]</span>
+        <span class="n">frame_size</span> <span class="o">=</span> <span class="n">port_context_out</span><span class="p">[</span><span class="n">Constants</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">PORT_OUT</span><span class="p">][</span>
+            <span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">FRAME_SIZE</span>
+        <span class="p">]</span>
+        <span class="n">frame_rate</span> <span class="o">=</span> <span class="n">sampling_rate</span> <span class="o">/</span> <span class="n">frame_size</span>
         <span class="n">out_ports</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">OUTPUT_PORTS</span><span class="p">]</span>
 
         <span class="c1"># Add sampling rate context to each output port</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">out_ports</span><span class="p">)):</span>
             <span class="c1"># Create context with sampling rate information</span>
-            <span class="n">context</span> <span class="o">=</span> <span class="p">{</span><span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">SAMPLING_RATE</span><span class="p">:</span> <span class="n">sampling_rate</span><span class="p">}</span>
+            <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">SAMPLING_RATE</span><span class="p">:</span> <span class="n">sampling_rate</span><span class="p">,</span>
+                <span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">FRAME_RATE</span><span class="p">:</span> <span class="n">frame_rate</span><span class="p">,</span>
+            <span class="p">}</span>
 
             <span class="c1"># Get port name and update its context</span>
             <span class="n">port_name</span> <span class="o">=</span> <span class="n">out_ports</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">OPort</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">NAME</span><span class="p">]</span>

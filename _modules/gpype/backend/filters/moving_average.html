@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.backend.filters.moving_average &mdash; g.Pype v3.0.1  documentation</title>
+  <title>gpype.backend.filters.moving_average &mdash; g.Pype v3.0.2  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
 
@@ -29,7 +29,7 @@
           
           
           <a href="../../../../index.html" class="icon icon-home">
-            g.Pype v3.0.1
+            g.Pype v3.0.2
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -44,7 +44,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Common</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
 </ul>
 
@@ -54,7 +54,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../index.html">g.Pype v3.0.1</a>
+          <a href="../../../../index.html">g.Pype v3.0.2</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -74,6 +74,7 @@
              
   <h1>Source code for gpype.backend.filters.moving_average</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -117,17 +118,20 @@
 <a class="viewcode-back" href="../../../../content/backend/filters/moving_average.html#gpype.backend.filters.moving_average.MovingAverage.Configuration.Keys">[docs]</a>
         <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">GenericFilter</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Configuration keys for moving average parameters.&quot;&quot;&quot;</span>
-            <span class="n">WINDOW_SIZE</span> <span class="o">=</span> <span class="s1">&#39;window_size&#39;</span>
-            <span class="n">WINDOW_FUNCTION</span> <span class="o">=</span> <span class="s1">&#39;window_function&#39;</span></div>
+
+            <span class="n">WINDOW_SIZE</span> <span class="o">=</span> <span class="s2">&quot;window_size&quot;</span>
+            <span class="n">WINDOW_FUNCTION</span> <span class="o">=</span> <span class="s2">&quot;window_function&quot;</span></div>
 </div>
 
 
 <div class="viewcode-block" id="MovingAverage.__init__">
 <a class="viewcode-back" href="../../../../content/backend/filters/moving_average.html#gpype.backend.filters.moving_average.MovingAverage.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">window_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">window_function</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">window_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">window_function</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the moving average filter.</span>
 
 <span class="sd">        Args:</span>
@@ -153,7 +157,7 @@
 
         <span class="c1"># Set default window function</span>
         <span class="k">if</span> <span class="n">window_function</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">window_function</span> <span class="o">=</span> <span class="s1">&#39;boxcar&#39;</span>  <span class="c1"># Rectangular window</span>
+            <span class="n">window_function</span> <span class="o">=</span> <span class="s2">&quot;boxcar&quot;</span>  <span class="c1"># Rectangular window</span>
 
         <span class="c1"># Generate window coefficients using scipy</span>
         <span class="k">try</span><span class="p">:</span>
@@ -169,11 +173,13 @@
         <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">])</span>
 
         <span class="c1"># Initialize parent generic filter with computed coefficients</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">b</span><span class="o">=</span><span class="n">b</span><span class="p">,</span>
-                         <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">,</span>
-                         <span class="n">window_size</span><span class="o">=</span><span class="n">window_size</span><span class="p">,</span>
-                         <span class="n">window_function</span><span class="o">=</span><span class="n">window_function</span><span class="p">,</span>
-                         <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">b</span><span class="o">=</span><span class="n">b</span><span class="p">,</span>
+            <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">,</span>
+            <span class="n">window_size</span><span class="o">=</span><span class="n">window_size</span><span class="p">,</span>
+            <span class="n">window_function</span><span class="o">=</span><span class="n">window_function</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span></div>
 </div>
 
 </pre></div>

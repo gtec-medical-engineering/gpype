@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MainApp &mdash; g.Pype v3.0.1  documentation</title>
+  <title>MainApp &mdash; g.Pype v3.0.2  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
@@ -19,7 +19,7 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Backend" href="../common/index.html" />
+    <link rel="next" title="Common" href="../common/index.html" />
     <link rel="prev" title="Trigger Scope" href="widgets/trigger_scope.html" /> 
 </head>
 
@@ -32,7 +32,7 @@
           
           
           <a href="../../index.html" class="icon icon-home">
-            g.Pype v3.0.1
+            g.Pype v3.0.2
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -54,7 +54,7 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../common/index.html">Common</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
 </ul>
 
@@ -64,7 +64,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../index.html">g.Pype v3.0.1</a>
+          <a href="../../index.html">g.Pype v3.0.2</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -87,7 +87,7 @@
 <h1>MainApp<a class="headerlink" href="#mainapp" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="gpype.frontend.main_app.MainApp">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gpype.frontend.main_app.</span></span><span class="sig-name descname"><span class="pre">MainApp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">caption</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'g.Pype</span> <span class="pre">Application'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/gpype/frontend/main_app.html#MainApp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.frontend.main_app.MainApp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gpype.frontend.main_app.</span></span><span class="sig-name descname"><span class="pre">MainApp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">caption</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'g.Pype</span> <span class="pre">Application'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/gpype/frontend/main_app.html#MainApp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.frontend.main_app.MainApp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Main application class for g.Pype frontend applications.</p>
 <p>Provides a simple framework for creating PyQt6-based applications
@@ -102,6 +102,7 @@ and coordinates application startup and shutdown procedures.</p>
 <li><p>Widget lifecycle management (run/terminate)</p></li>
 <li><p>Graceful application shutdown handling</p></li>
 <li><p>Support for dependency injection (testing)</p></li>
+<li><p>Grid-based layout system (MATLAB subplot-style)</p></li>
 </ul>
 </dd>
 </dl>
@@ -110,12 +111,14 @@ and coordinates application startup and shutdown procedures.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>DEFAULT_POSITION</strong> – Default window geometry [x, y, width, height].</p></li>
 <li><p><strong>ICON_PATH</strong> – Path to the application icon file.</p></li>
+<li><p><strong>DEFAULT_GRID_SIZE</strong> – Default grid dimensions [rows, cols].</p></li>
 </ul>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
 <li><p><strong>caption</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p></li>
-<li><p><strong>position</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>]</em>)</p></li>
+<li><p><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>]</em>)</p></li>
+<li><p><strong>grid_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>]</em>)</p></li>
 </ul>
 </dd>
 </dl>
@@ -125,23 +128,30 @@ and coordinates application startup and shutdown procedures.</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="gpype.frontend.main_app.MainApp.DEFAULT_GRID_SIZE">
+<span class="sig-name descname"><span class="pre">DEFAULT_GRID_SIZE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[3,</span> <span class="pre">3]</span></em><a class="headerlink" href="#gpype.frontend.main_app.MainApp.DEFAULT_GRID_SIZE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="gpype.frontend.main_app.MainApp.ICON_PATH">
-<span class="sig-name descname"><span class="pre">ICON_PATH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'D:\\a\\gpype-dev\\gpype-dev\\src\\gpype\\frontend\\resources\\gtec.ico'</span></em><a class="headerlink" href="#gpype.frontend.main_app.MainApp.ICON_PATH" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ICON_PATH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'D:\\10_git\\gpype-dev\\src\\gpype\\frontend\\resources\\gtec.ico'</span></em><a class="headerlink" href="#gpype.frontend.main_app.MainApp.ICON_PATH" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gpype.frontend.main_app.MainApp.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">caption</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'g.Pype</span> <span class="pre">Application'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/gpype/frontend/main_app.html#MainApp.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.frontend.main_app.MainApp.__init__" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">caption</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'g.Pype</span> <span class="pre">Application'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/gpype/frontend/main_app.html#MainApp.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.frontend.main_app.MainApp.__init__" title="Link to this definition"></a></dt>
 <dd><p>Initialize the main application with window and widget management.</p>
-<p>Sets up the QApplication, main window, layout system, and event
+<p>Sets up the QApplication, main window, grid layout system, and event
 handling for a complete g.Pype frontend application. Supports
 dependency injection for testing purposes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>caption</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Window title text displayed in the title bar.</p></li>
-<li><p><strong>position</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</span>) – Window geometry as [x, y, width, height] list.
+<li><p><strong>position</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</span>) – Window geometry as [x, y, width, height] list.
 Uses DEFAULT_POSITION if None.</p></li>
+<li><p><strong>grid_size</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</span>) – Grid dimensions as [rows, cols] list.
+Uses DEFAULT_GRID_SIZE if None.</p></li>
 <li><p><strong>app</strong> – Existing QApplication instance for testing or integration.
 Creates new QApplication if None.</p></li>
 </ul>
@@ -151,17 +161,30 @@ Creates new QApplication if None.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gpype.frontend.main_app.MainApp.add_widget">
-<span class="sig-name descname"><span class="pre">add_widget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">widget</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/gpype/frontend/main_app.html#MainApp.add_widget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.frontend.main_app.MainApp.add_widget" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_widget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">widget</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_positions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/gpype/frontend/main_app.html#MainApp.add_widget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.frontend.main_app.MainApp.add_widget" title="Link to this definition"></a></dt>
 <dd><p>Add a widget to the application layout and management system.</p>
 <p>Registers the widget for lifecycle management and adds it to the
-main window’s vertical layout. The widget will be automatically
+main window’s grid layout. The widget will be automatically
 started during run() and terminated during shutdown.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>widget</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="widgets/base/widget.html#gpype.frontend.widgets.base.widget.Widget" title="gpype.frontend.widgets.base.widget.Widget"><code class="xref py py-class docutils literal notranslate"><span class="pre">Widget</span></code></a></span>) – Widget instance to add to the application.
-Must inherit from the base Widget class.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>widget</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="widgets/base/widget.html#gpype.frontend.widgets.base.widget.Widget" title="gpype.frontend.widgets.base.widget.Widget"><code class="xref py py-class docutils literal notranslate"><span class="pre">Widget</span></code></a></span>) – Widget instance to add to the application.
+Must inherit from the base Widget class.</p></li>
+<li><p><strong>grid_positions</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</span>) – List of grid positions (1-indexed) to span.
+For a 3x3 grid: [1,2,3] spans top row, [1,4,7] spans left col.
+If None, adds to next available position.</p></li>
+</ul>
 </dd>
 </dl>
+<p class="rubric">Example</p>
+<p>For a 3x3 grid numbered as:
+[1] [2] [3]
+[4] [5] [6]
+[7] [8] [9]</p>
+<p>app.add_widget(w, [1,2,3])  # Top row
+app.add_widget(w, [1,4])    # Top-left 2x1 rectangle
+app.add_widget(w, [5])      # Center cell only</p>
 </dd></dl>
 
 <dl class="py method">
@@ -194,7 +217,7 @@ closed by the user or programmatically terminated.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="widgets/trigger_scope.html" class="btn btn-neutral float-left" title="Trigger Scope" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../common/index.html" class="btn btn-neutral float-right" title="Backend" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../common/index.html" class="btn btn-neutral float-right" title="Common" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

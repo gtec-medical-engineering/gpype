@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Introduction &mdash; g.Pype v3.0.1  documentation</title>
+  <title>Introduction &mdash; g.Pype v3.0.2  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
@@ -32,7 +32,7 @@
           
           
           <a href="../../index.html" class="icon icon-home">
-            g.Pype v3.0.1
+            g.Pype v3.0.2
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -51,14 +51,20 @@
 <li class="toctree-l2"><a class="reference internal" href="#documentation">Documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#license">License</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#changelog">Changelog</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id1">Changelog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">[3.0.2] - 2025-07-31</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">[3.0.1] - 2025-07-17</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">[3.0.0] - 2025-07-15</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">[2.1.2] - 2025-05-05</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">[2.1.1] - 2025-04-30</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">[2.1.0] - 2025-04-30</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id7">[2.0.0] - 2025-02-26</a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../backend/index.html">Backend</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../common/index.html">Common</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/index.html">Examples</a></li>
 </ul>
 
@@ -68,7 +74,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../index.html">g.Pype v3.0.1</a>
+          <a href="../../index.html">g.Pype v3.0.2</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -92,11 +98,11 @@
 <h2>g.Pype<a class="headerlink" href="#g-pype" title="Link to this heading"></a></h2>
 <p><a class="reference external" href="http://gtec.at"><img alt="Powered by g.tec" src="https://img.shields.io/badge/powered_by-g.tec-blue" /></a>
 <a class="reference external" href="https://pypi.org/project/gpype/"><img alt="PyPI" src="https://img.shields.io/pypi/v/gpype.svg?label=PyPI%20version&amp;color=brown" /></a>
-<a class="reference external" href="https://pypi.org/project/gpype/"><img alt="python" src="https://img.shields.io/pypi/pyversions/gpype.svg" /></a>
-<img alt="tests" src="https://img.shields.io/badge/tests-all_3_passed-brightgreen.svg" />
-<img alt="coverage" src="https://img.shields.io/badge/coverage-34.6%25-red.svg" />
-<a class="reference external" href="https://github.com/gtec-medical-engineering/gpype/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/License-GNCL-red" /></a>
-<a class="reference external" href="https://gtec-medical-engineering.github.io/gpype/"><img alt="Documentation" src="https://img.shields.io/badge/docs-GitHub%20Pages-green" /></a></p>
+<a class="reference external" href="https://pypi.org/project/gpype/"><img alt="Python" src="https://img.shields.io/pypi/pyversions/gpype.svg" /></a>
+<img alt="Tests" src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fgtec-medical-engineering%2Fgpype%2Fbadges%2Ftests.json" />
+<img alt="Coverage" src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fgtec-medical-engineering%2Fgpype%2Fbadges%2Fcoverage.json" />
+<a class="reference external" href="https://github.com/gtec-medical-engineering/gpype/blob/main/LICENSE-GNCL.txt"><img alt="License" src="https://img.shields.io/badge/License-GNCL-red" /></a>
+<a class="reference external" href="https://gtec-medical-engineering.github.io/gpype/"><img alt="Documentation" src="https://img.shields.io/badge/Documentation-GitHub%20Pages-green" /></a></p>
 <p><code class="docutils literal notranslate"><span class="pre">gpype</span></code> (g.Pype) is a Python Software Development Kit (SDK) tailored for creating Brain-Computer Interface (BCI) or neuroscience applications with
 the Unicorn BCI Core-8. It features a user-friendly node-based backend interface that streamlines real-time pipelines for acquisition
 and signal processing. A Qt-based frontend interface allows quick development of responsive applications with feedback visualization
@@ -126,22 +132,26 @@ or real-time user interaction.</p>
 </section>
 <section id="license">
 <h2>License<a class="headerlink" href="#license" title="Link to this heading"></a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">gpype</span></code> is licensed under the <strong>g.tec Non-Commercial License (GNCL)</strong>. See the <a class="reference external" href="https://github.com/gtec-medical-engineering/gpype/blob/main/LICENSE">LICENSE</a> file for details.</p>
+<p><code class="docutils literal notranslate"><span class="pre">gpype</span></code> is licensed under the <strong>g.tec Non-Commercial License (GNCL)</strong>. See the <a class="reference external" href="https://github.com/gtec-medical-engineering/gpype/blob/main/LICENSE-GNCL.txt">LICENSE</a> file for details.</p>
 </section>
 <section id="changelog">
 <h2>Changelog<a class="headerlink" href="#changelog" title="Link to this heading"></a></h2>
-<p>See the <a class="reference external" href="https://gtec-medical-engineering.github.io/gpype/#changelog">Changelog</a> section in the official documentation.</p>
 <section id="id1">
-<h3>Changelog<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<h3>[3.0.2] - 2025-07-31<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>BCI Core-8 source buffering optimized</p></li>
+<li><p>updated build procedure</p></li>
+</ul>
+</section>
 <section id="id2">
-<h4>[3.0.1] - 2025-07-17<a class="headerlink" href="#id2" title="Link to this heading"></a></h4>
+<h3>[3.0.1] - 2025-07-17<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>small bugfix in examples</p></li>
 <li><p>new build procedure</p></li>
 </ul>
 </section>
 <section id="id3">
-<h4>[3.0.0] - 2025-07-15<a class="headerlink" href="#id3" title="Link to this heading"></a></h4>
+<h3>[3.0.0] - 2025-07-15<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>moved from metadata to contexts</p></li>
 <li><p>added various nodes (Framer, Decimator, …)</p></li>
@@ -150,7 +160,7 @@ or real-time user interaction.</p>
 </ul>
 </section>
 <section id="id4">
-<h4>[2.1.2] - 2025-05-05<a class="headerlink" href="#id4" title="Link to this heading"></a></h4>
+<h3>[2.1.2] - 2025-05-05<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Added support for Python 3.8-3.13</p></li>
 <li><p>Added support for macOS</p></li>
@@ -162,13 +172,13 @@ or real-time user interaction.</p>
 </ul>
 </section>
 <section id="id5">
-<h4>[2.1.1] - 2025-04-30<a class="headerlink" href="#id5" title="Link to this heading"></a></h4>
+<h3>[2.1.1] - 2025-04-30<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Minor bugfixes</p></li>
 </ul>
 </section>
 <section id="id6">
-<h4>[2.1.0] - 2025-04-30<a class="headerlink" href="#id6" title="Link to this heading"></a></h4>
+<h3>[2.1.0] - 2025-04-30<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Bugfixing</p></li>
 <li><p>g.Nautilus integrated (Win only)</p></li>
@@ -176,11 +186,10 @@ or real-time user interaction.</p>
 </ul>
 </section>
 <section id="id7">
-<h4>[2.0.0] - 2025-02-26<a class="headerlink" href="#id7" title="Link to this heading"></a></h4>
+<h3>[2.0.0] - 2025-02-26<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>First public beta release</p></li>
 </ul>
-</section>
 </section>
 </section>
 </section>

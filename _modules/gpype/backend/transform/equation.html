@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.backend.transform.equation &mdash; g.Pype v3.0.1  documentation</title>
+  <title>gpype.backend.transform.equation &mdash; g.Pype v3.0.2  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
 
@@ -29,7 +29,7 @@
           
           
           <a href="../../../../index.html" class="icon icon-home">
-            g.Pype v3.0.1
+            g.Pype v3.0.2
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -44,7 +44,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Common</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
 </ul>
 
@@ -54,7 +54,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../index.html">g.Pype v3.0.1</a>
+          <a href="../../../../index.html">g.Pype v3.0.2</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -74,16 +74,16 @@
              
   <h1>Source code for gpype.backend.transform.equation</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sympy</span><span class="w"> </span><span class="kn">import</span> <span class="n">Symbol</span><span class="p">,</span> <span class="n">lambdify</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sympy.parsing.sympy_parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_expr</span><span class="p">,</span> <span class="n">standard_transformations</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">...common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">Constants</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..core.i_port</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPort</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..core.io_node</span><span class="w"> </span><span class="kn">import</span> <span class="n">IONode</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">...common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">Constants</span>
 
 <span class="c1"># Port name constants for convenience</span>
 <span class="n">PORT_IN</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">PORT_IN</span>
@@ -126,15 +126,14 @@
 <a class="viewcode-back" href="../../../../content/backend/transform/equation.html#gpype.backend.transform.equation.Equation.Configuration.Keys">[docs]</a>
         <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">IONode</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Configuration key constants for the Equation.&quot;&quot;&quot;</span>
+
             <span class="n">EXPRESSION</span> <span class="o">=</span> <span class="s2">&quot;expression&quot;</span></div>
 </div>
 
 
 <div class="viewcode-block" id="Equation.__init__">
 <a class="viewcode-back" href="../../../../content/backend/transform/equation.html#gpype.backend.transform.equation.Equation.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">expression</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expression</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the Equation node with a mathematical expression.</span>
 
@@ -159,15 +158,17 @@
 
         <span class="c1"># Handle Python keyword &#39;in&#39; by replacing with internal alias</span>
         <span class="c1"># This allows users to use &#39;in&#39; as a variable name in expressions</span>
-        <span class="n">replaced_expr</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\bin\b&#39;</span><span class="p">,</span> <span class="s1">&#39;__in_alias__&#39;</span><span class="p">,</span> <span class="n">expression</span><span class="p">)</span>
+        <span class="n">replaced_expr</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\bin\b&quot;</span><span class="p">,</span> <span class="s2">&quot;__in_alias__&quot;</span><span class="p">,</span> <span class="n">expression</span><span class="p">)</span>
 
         <span class="c1"># Create symbol mapping for the &#39;in&#39; keyword alias</span>
-        <span class="n">local_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;__in_alias__&#39;</span><span class="p">:</span> <span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;in&#39;</span><span class="p">)}</span>
+        <span class="n">local_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;__in_alias__&quot;</span><span class="p">:</span> <span class="n">Symbol</span><span class="p">(</span><span class="s2">&quot;in&quot;</span><span class="p">)}</span>
 
         <span class="c1"># Parse the mathematical expression using SymPy</span>
-        <span class="n">expr</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span><span class="n">replaced_expr</span><span class="p">,</span>
-                          <span class="n">local_dict</span><span class="o">=</span><span class="n">local_dict</span><span class="p">,</span>
-                          <span class="n">transformations</span><span class="o">=</span><span class="n">standard_transformations</span><span class="p">)</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span>
+            <span class="n">replaced_expr</span><span class="p">,</span>
+            <span class="n">local_dict</span><span class="o">=</span><span class="n">local_dict</span><span class="p">,</span>
+            <span class="n">transformations</span><span class="o">=</span><span class="n">standard_transformations</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="c1"># Extract all variables from the expression and sort for consistency</span>
         <span class="nb">vars</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">expr</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
@@ -179,22 +180,26 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_port_names</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">]</span>
 
         <span class="c1"># Create input ports for each variable in the expression</span>
-        <span class="n">input_ports</span> <span class="o">=</span> <span class="p">[</span><span class="n">IPort</span><span class="o">.</span><span class="n">Configuration</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-                                           <span class="nb">type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
-                                           <span class="n">timing</span><span class="o">=</span><span class="n">Constants</span><span class="o">.</span><span class="n">Timing</span><span class="o">.</span><span class="n">INHERITED</span><span class="p">)</span>
-                       <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_port_names</span><span class="p">]</span>
+        <span class="n">input_ports</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">IPort</span><span class="o">.</span><span class="n">Configuration</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                <span class="nb">type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+                <span class="n">timing</span><span class="o">=</span><span class="n">Constants</span><span class="o">.</span><span class="n">Timing</span><span class="o">.</span><span class="n">INHERITED</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_port_names</span>
+        <span class="p">]</span>
 
         <span class="c1"># Initialize parent IONode with expression and input ports</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">expression</span><span class="o">=</span><span class="n">expression</span><span class="p">,</span>
-                         <span class="n">input_ports</span><span class="o">=</span><span class="n">input_ports</span><span class="p">,</span>
-                         <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">expression</span><span class="o">=</span><span class="n">expression</span><span class="p">,</span> <span class="n">input_ports</span><span class="o">=</span><span class="n">input_ports</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Equation.setup">
 <a class="viewcode-back" href="../../../../content/backend/transform/equation.html#gpype.backend.transform.equation.Equation.setup">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-              <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-              <span class="n">port_context_in</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">port_context_in</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set up the Equation node and validate input port configurations.</span>
 
@@ -215,8 +220,7 @@
 
 <div class="viewcode-block" id="Equation.step">
 <a class="viewcode-back" href="../../../../content/backend/transform/equation.html#gpype.backend.transform.equation.Equation.step">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-             <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply the mathematical expression to input data.</span>
 

@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.backend.transform.fft &mdash; g.Pype v3.0.1  documentation</title>
+  <title>gpype.backend.transform.fft &mdash; g.Pype v3.0.2  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
 
@@ -29,7 +29,7 @@
           
           
           <a href="../../../../index.html" class="icon icon-home">
-            g.Pype v3.0.1
+            g.Pype v3.0.2
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -44,7 +44,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Common</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
 </ul>
 
@@ -54,7 +54,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../index.html">g.Pype v3.0.1</a>
+          <a href="../../../../index.html">g.Pype v3.0.2</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -74,13 +74,12 @@
              
   <h1>Source code for gpype.backend.transform.fft</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_window</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">..core.io_node</span><span class="w"> </span><span class="kn">import</span> <span class="n">IONode</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">...common.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">Constants</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..core.io_node</span><span class="w"> </span><span class="kn">import</span> <span class="n">IONode</span>
 
 <span class="c1"># Port name constants for convenience</span>
 <span class="n">PORT_IN</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">PORT_IN</span>
@@ -134,19 +133,22 @@
 <a class="viewcode-back" href="../../../../content/backend/transform/fft.html#gpype.backend.transform.fft.FFT.Configuration.Keys">[docs]</a>
         <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">IONode</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Configuration key constants for the FFT.&quot;&quot;&quot;</span>
-            <span class="n">WINDOW_SIZE</span> <span class="o">=</span> <span class="s1">&#39;window_size&#39;</span>
-            <span class="n">WINDOW_FUNCTION</span> <span class="o">=</span> <span class="s1">&#39;window_function&#39;</span>
-            <span class="n">OVERLAP</span> <span class="o">=</span> <span class="s1">&#39;overlap&#39;</span></div>
+
+            <span class="n">WINDOW_SIZE</span> <span class="o">=</span> <span class="s2">&quot;window_size&quot;</span>
+            <span class="n">WINDOW_FUNCTION</span> <span class="o">=</span> <span class="s2">&quot;window_function&quot;</span>
+            <span class="n">OVERLAP</span> <span class="o">=</span> <span class="s2">&quot;overlap&quot;</span></div>
 </div>
 
 
 <div class="viewcode-block" id="FFT.__init__">
 <a class="viewcode-back" href="../../../../content/backend/transform/fft.html#gpype.backend.transform.fft.FFT.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">window_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">window_function</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">overlap</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">window_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">window_function</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">overlap</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the FFT node with windowing and overlap parameters.</span>
 
@@ -180,7 +182,7 @@
 
         <span class="c1"># Set default window function if not provided</span>
         <span class="k">if</span> <span class="n">window_function</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">window_function</span> <span class="o">=</span> <span class="s1">&#39;boxcar&#39;</span>  <span class="c1"># Rectangular window (no windowing)</span>
+            <span class="n">window_function</span> <span class="o">=</span> <span class="s2">&quot;boxcar&quot;</span>  <span class="c1"># Rectangular window (no windowing)</span>
 
         <span class="c1"># Set default overlap if not provided</span>
         <span class="k">if</span> <span class="n">overlap</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -200,23 +202,25 @@
         <span class="n">overlap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step_size</span> <span class="o">/</span> <span class="n">window_size</span>
 
         <span class="c1"># Initialize parent IONode with windowing configuration</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">window_size</span><span class="o">=</span><span class="n">window_size</span><span class="p">,</span>
-                         <span class="n">frame_size</span><span class="o">=</span><span class="n">window_size</span><span class="p">,</span>
-                         <span class="n">decimation_factor</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_step_size</span><span class="p">,</span>
-                         <span class="n">window_function</span><span class="o">=</span><span class="n">window_function</span><span class="p">,</span>
-                         <span class="n">overlap</span><span class="o">=</span><span class="n">overlap</span><span class="p">,</span>
-                         <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">window_size</span><span class="o">=</span><span class="n">window_size</span><span class="p">,</span>
+            <span class="n">frame_size</span><span class="o">=</span><span class="n">window_size</span><span class="p">,</span>
+            <span class="n">decimation_factor</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_step_size</span><span class="p">,</span>
+            <span class="n">window_function</span><span class="o">=</span><span class="n">window_function</span><span class="p">,</span>
+            <span class="n">overlap</span><span class="o">=</span><span class="n">overlap</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="c1"># Initialize internal state variables</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_buf</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Rolling input buffer for windowing</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_w</span> <span class="o">=</span> <span class="kc">None</span>    <span class="c1"># Precomputed window function weights</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_w</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Precomputed window function weights</span></div>
 
 
 <div class="viewcode-block" id="FFT.setup">
 <a class="viewcode-back" href="../../../../content/backend/transform/fft.html#gpype.backend.transform.fft.FFT.setup">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-              <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-              <span class="n">port_context_in</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">port_context_in</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set up the FFT node and initialize windowing components.</span>
 
@@ -246,15 +250,20 @@
         <span class="c1"># Get configuration parameters</span>
         <span class="n">frame_size_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">FRAME_SIZE</span><span class="p">]</span>
         <span class="n">channel_count</span> <span class="o">=</span> <span class="n">port_context_out</span><span class="p">[</span><span class="n">PORT_OUT</span><span class="p">][</span>
-            <span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">CHANNEL_COUNT</span><span class="p">]</span>
-
-        <span class="c1"># Update output context with FFT frame size</span>
-        <span class="n">port_context_out</span><span class="p">[</span><span class="n">PORT_OUT</span><span class="p">][</span><span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">FRAME_SIZE</span><span class="p">]</span> <span class="o">=</span> <span class="n">frame_size_out</span>
+            <span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">CHANNEL_COUNT</span>
+        <span class="p">]</span>
 
         <span class="c1"># Initialize rolling buffer for windowing</span>
         <span class="c1"># Shape: (window_size, channel_count)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_buf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">frame_size_out</span><span class="p">,</span> <span class="n">channel_count</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_frame_size</span> <span class="o">=</span> <span class="n">frame_size_out</span>
+
+        <span class="n">sampling_rate</span> <span class="o">=</span> <span class="n">port_context_in</span><span class="p">[</span><span class="n">PORT_IN</span><span class="p">][</span><span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">SAMPLING_RATE</span><span class="p">]</span>
+        <span class="n">frame_rate</span> <span class="o">=</span> <span class="n">sampling_rate</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step_size</span>
+
+        <span class="c1"># Update output context with FFT frame size</span>
+        <span class="n">port_context_out</span><span class="p">[</span><span class="n">PORT_OUT</span><span class="p">][</span><span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">FRAME_SIZE</span><span class="p">]</span> <span class="o">=</span> <span class="n">frame_size_out</span>
+        <span class="n">port_context_out</span><span class="p">[</span><span class="n">PORT_OUT</span><span class="p">][</span><span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">FRAME_RATE</span><span class="p">]</span> <span class="o">=</span> <span class="n">frame_rate</span>
 
         <span class="c1"># Get window function configuration</span>
         <span class="n">window_function</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">WINDOW_FUNCTION</span><span class="p">]</span>
@@ -272,8 +281,7 @@
 
 <div class="viewcode-block" id="FFT.step">
 <a class="viewcode-back" href="../../../../content/backend/transform/fft.html#gpype.backend.transform.fft.FFT.step">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-             <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Process one frame of data and compute FFT when ready.</span>
 
@@ -319,7 +327,7 @@
         <span class="c1"># Create scaling array for proper amplitude normalization</span>
         <span class="n">scale_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">fft</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],))</span>
         <span class="n">scale_arr</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2.0</span>  <span class="c1"># Scale non-DC/Nyquist frequencies by 2</span>
-        <span class="n">scale_arr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>     <span class="c1"># DC component (0 Hz) scaled by 1</span>
+        <span class="n">scale_arr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1"># DC component (0 Hz) scaled by 1</span>
 
         <span class="c1"># Handle Nyquist frequency (only exists for even N)</span>
         <span class="k">if</span> <span class="n">N</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>

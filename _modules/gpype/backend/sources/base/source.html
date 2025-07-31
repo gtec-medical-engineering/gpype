@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.backend.sources.base.source &mdash; g.Pype v3.0.1  documentation</title>
+  <title>gpype.backend.sources.base.source &mdash; g.Pype v3.0.2  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
 
@@ -29,7 +29,7 @@
           
           
           <a href="../../../../../index.html" class="icon icon-home">
-            g.Pype v3.0.1
+            g.Pype v3.0.2
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
@@ -44,7 +44,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../../content/introduction/index.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../content/backend/index.html">Backend</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/common/index.html">Common</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../content/examples/index.html">Examples</a></li>
 </ul>
 
@@ -54,7 +54,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../../index.html">g.Pype v3.0.1</a>
+          <a href="../../../../../index.html">g.Pype v3.0.2</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -74,7 +74,8 @@
              
   <h1>Source code for gpype.backend.sources.base.source</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
@@ -124,6 +125,7 @@
 <a class="viewcode-back" href="../../../../../content/backend/sources/base/source.html#gpype.backend.sources.base.source.Source.Configuration.Keys">[docs]</a>
         <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">ONode</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Configuration keys for source-specific settings.&quot;&quot;&quot;</span>
+
             <span class="n">CHANNEL_COUNT</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">CHANNEL_COUNT</span>  <span class="c1"># &#39;channel_count&#39;</span>
             <span class="n">FRAME_SIZE</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">FRAME_SIZE</span>  <span class="c1"># &#39;frame_size&#39;</span></div>
 </div>
@@ -131,11 +133,13 @@
 
 <div class="viewcode-block" id="Source.__init__">
 <a class="viewcode-back" href="../../../../../content/backend/sources/base/source.html#gpype.backend.sources.base.source.Source.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">output_ports</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">channel_count</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">frame_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">output_ports</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">channel_count</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">frame_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the source with output port configuration.</span>
 
 <span class="sd">        Args:</span>
@@ -176,11 +180,13 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">channel_count</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;All elements of channel_count must be integers.&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">c</span> <span class="o">==</span> <span class="n">Constants</span><span class="o">.</span><span class="n">INHERITED</span> <span class="ow">or</span> <span class="n">c</span> <span class="o">&gt;=</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">channel_count</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;All elements of channel_count must be greater &quot;</span>
-                             <span class="s2">&quot;or equal 1.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;All elements of channel_count must be greater &quot;</span> <span class="s2">&quot;or equal 1.&quot;</span>
+            <span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_ports</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">channel_count</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;output_ports and channel_count must have the &quot;</span>
-                             <span class="s2">&quot;same length.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;output_ports and channel_count must have the &quot;</span> <span class="s2">&quot;same length.&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Validate and normalize frame_size parameter</span>
         <span class="k">if</span> <span class="n">frame_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -194,17 +200,20 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">frame_size</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;All elements of frame_size must be integers.&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">f</span> <span class="o">==</span> <span class="n">Constants</span><span class="o">.</span><span class="n">INHERITED</span> <span class="ow">or</span> <span class="n">f</span> <span class="o">&gt;=</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">frame_size</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;All elements of frame_size must be greater &quot;</span>
-                             <span class="s2">&quot;or equal 1.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;All elements of frame_size must be greater &quot;</span> <span class="s2">&quot;or equal 1.&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Check frame_size consistency (all non-inherited values must be equal)</span>
-        <span class="n">non_inherited_frames</span> <span class="o">=</span> <span class="p">[</span><span class="n">fsz</span> <span class="k">for</span> <span class="n">fsz</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">frame_size</span><span class="p">)</span>
-                                <span class="k">if</span> <span class="n">fsz</span> <span class="o">!=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">INHERITED</span><span class="p">]</span>
+        <span class="n">non_inherited_frames</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">fsz</span> <span class="k">for</span> <span class="n">fsz</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">frame_size</span><span class="p">)</span> <span class="k">if</span> <span class="n">fsz</span> <span class="o">!=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">INHERITED</span>
+        <span class="p">]</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">non_inherited_frames</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;All elements of frame_size must be equal.&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_ports</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame_size</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;output_ports and frame_size must have the &quot;</span>
-                             <span class="s2">&quot;same length.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;output_ports and frame_size must have the &quot;</span> <span class="s2">&quot;same length.&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Sources cannot have input ports by design</span>
         <span class="k">if</span> <span class="s2">&quot;input_ports&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
@@ -214,11 +223,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_delay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="c1"># Initialize parent ONode with validated parameters</span>
-        <span class="n">ONode</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                       <span class="n">output_ports</span><span class="o">=</span><span class="n">output_ports</span><span class="p">,</span>
-                       <span class="n">channel_count</span><span class="o">=</span><span class="n">channel_count</span><span class="p">,</span>
-                       <span class="n">frame_size</span><span class="o">=</span><span class="n">frame_size</span><span class="p">,</span>
-                       <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="n">ONode</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">output_ports</span><span class="o">=</span><span class="n">output_ports</span><span class="p">,</span>
+            <span class="n">channel_count</span><span class="o">=</span><span class="n">channel_count</span><span class="p">,</span>
+            <span class="n">frame_size</span><span class="o">=</span><span class="n">frame_size</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 
     <span class="nd">@property</span>
@@ -255,9 +266,9 @@
 
 <div class="viewcode-block" id="Source.setup">
 <a class="viewcode-back" href="../../../../../content/backend/sources/base/source.html#gpype.backend.sources.base.source.Source.setup">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-              <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-              <span class="n">port_context_in</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">port_context_in</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Setup output port contexts with channel and frame information.</span>
 
 <span class="sd">        This method configures the output port contexts by propagating</span>
@@ -288,8 +299,10 @@
         <span class="c1"># Configure context for each output port</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">out_ports</span><span class="p">)):</span>
             <span class="c1"># Create context with channel and frame information</span>
-            <span class="n">context</span> <span class="o">=</span> <span class="p">{</span><span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">CHANNEL_COUNT</span><span class="p">:</span> <span class="n">channel_count</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                       <span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">FRAME_SIZE</span><span class="p">:</span> <span class="n">frame_size</span><span class="p">[</span><span class="n">i</span><span class="p">]}</span>
+            <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">CHANNEL_COUNT</span><span class="p">:</span> <span class="n">channel_count</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                <span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">FRAME_SIZE</span><span class="p">:</span> <span class="n">frame_size</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+            <span class="p">}</span>
 
             <span class="c1"># Get port name and update its context</span>
             <span class="n">port_name</span> <span class="o">=</span> <span class="n">out_ports</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">OPort</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">NAME</span><span class="p">]</span>

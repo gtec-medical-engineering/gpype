@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.frontend.widgets.paradigm_presenter &mdash; g.Pype v3.0.1  documentation</title>
+  <title>gpype.frontend.widgets.paradigm_presenter &mdash; g.Pype v3.0.2  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
 
@@ -29,7 +29,7 @@
           
           
           <a href="../../../../index.html" class="icon icon-home">
-            g.Pype v3.0.1
+            g.Pype v3.0.2
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -44,7 +44,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Common</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
 </ul>
 
@@ -54,7 +54,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../index.html">g.Pype v3.0.1</a>
+          <a href="../../../../index.html">g.Pype v3.0.2</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -83,17 +83,9 @@
     <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This module is only supported on Windows.&quot;</span><span class="p">)</span>
 
 <span class="c1"># Third-party imports</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PySide6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">QComboBox</span><span class="p">,</span>
-    <span class="n">QFileDialog</span><span class="p">,</span>
-    <span class="n">QHBoxLayout</span><span class="p">,</span>
-    <span class="n">QLabel</span><span class="p">,</span>
-    <span class="n">QMessageBox</span><span class="p">,</span>
-    <span class="n">QPushButton</span><span class="p">,</span>
-    <span class="n">QSizePolicy</span><span class="p">,</span>
-    <span class="n">QSpacerItem</span><span class="p">,</span>
-    <span class="n">QWidget</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PySide6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">QComboBox</span><span class="p">,</span> <span class="n">QFileDialog</span><span class="p">,</span> <span class="n">QHBoxLayout</span><span class="p">,</span> <span class="n">QLabel</span><span class="p">,</span>
+                               <span class="n">QMessageBox</span><span class="p">,</span> <span class="n">QPushButton</span><span class="p">,</span> <span class="n">QSizePolicy</span><span class="p">,</span>
+                               <span class="n">QSpacerItem</span><span class="p">,</span> <span class="n">QWidget</span><span class="p">)</span>
 
 <span class="c1"># Local imports</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base.widget</span><span class="w"> </span><span class="kn">import</span> <span class="n">Widget</span>
@@ -132,7 +124,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">widget</span><span class="o">=</span><span class="n">QWidget</span><span class="p">(),</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;ParadigmPresenter Control&quot;</span><span class="p">,</span>
-            <span class="n">layout</span><span class="o">=</span><span class="n">QHBoxLayout</span>
+            <span class="n">layout</span><span class="o">=</span><span class="n">QHBoxLayout</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># Initialize the ParadigmPresenter instance</span>
@@ -144,7 +136,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_paradigm_file</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="n">paradigm</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">paradigm</span><span class="p">)</span> <span class="ow">and</span> <span class="n">paradigm</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.xml&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">paradigm</span><span class="p">)</span> <span class="ow">and</span> <span class="n">paradigm</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.xml&quot;</span><span class="p">):</span>
                 <span class="c1"># Single paradigm file provided</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_paradigm_file</span> <span class="o">=</span> <span class="n">paradigm</span>
             <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">paradigm</span><span class="p">):</span>
@@ -166,9 +158,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_create_stop_button</span><span class="p">()</span>
 
         <span class="c1"># Add flexible spacer to push buttons to the left</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">addSpacerItem</span><span class="p">(</span><span class="n">QSpacerItem</span><span class="p">(</span>
-            <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span> <span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Minimum</span>
-        <span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">addSpacerItem</span><span class="p">(</span>
+            <span class="n">QSpacerItem</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span> <span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Minimum</span><span class="p">)</span>
+        <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_create_start_button</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create and configure the start paradigm button.&quot;&quot;&quot;</span>
@@ -215,7 +207,7 @@
                 <span class="n">QMessageBox</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span>
                     <span class="n">QWidget</span><span class="p">(),</span>
                     <span class="s2">&quot;Failed to Load Paradigm&quot;</span><span class="p">,</span>
-                    <span class="sa">f</span><span class="s2">&quot;Could not load paradigm file: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_paradigm_file</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Could not load paradigm file: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_paradigm_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
                 <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">start_button</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
@@ -223,7 +215,7 @@
             <span class="n">QMessageBox</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span>
                 <span class="n">QWidget</span><span class="p">(),</span>
                 <span class="s2">&quot;Paradigm Load Error&quot;</span><span class="p">,</span>
-                <span class="sa">f</span><span class="s2">&quot;Error loading paradigm: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Error loading paradigm: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">start_button</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 
@@ -257,7 +249,7 @@
             <span class="n">QMessageBox</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span>
                 <span class="n">QWidget</span><span class="p">(),</span>
                 <span class="s2">&quot;No Paradigms found&quot;</span><span class="p">,</span>
-                <span class="sa">f</span><span class="s2">&quot;No Paradigms found in: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_root_folder</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;No Paradigms found in: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_root_folder</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">start_button</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>  <span class="c1"># Add label even without dropdown</span>
@@ -358,10 +350,12 @@
 
             <span class="c1"># Add found XML files with relative paths</span>
             <span class="k">if</span> <span class="n">xml_files</span><span class="p">:</span>
-                <span class="n">paradigms</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">subdir</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
-                    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">xml_files</span>
-                <span class="p">])</span>
+                <span class="n">paradigms</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">subdir</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+                        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">xml_files</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
 
         <span class="c1"># Validate paradigms before returning</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_paradigms</span><span class="p">(</span><span class="n">paradigms</span><span class="p">)</span>

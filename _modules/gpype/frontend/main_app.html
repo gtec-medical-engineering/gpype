@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.frontend.main_app &mdash; g.Pype v3.0.1  documentation</title>
+  <title>gpype.frontend.main_app &mdash; g.Pype v3.0.2  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
@@ -29,7 +29,7 @@
           
           
           <a href="../../../index.html" class="icon icon-home">
-            g.Pype v3.0.1
+            g.Pype v3.0.2
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -44,7 +44,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../content/introduction/index.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../content/backend/index.html">Backend</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../content/common/index.html">Backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../content/common/index.html">Common</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../content/examples/index.html">Examples</a></li>
 </ul>
 
@@ -54,7 +54,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">g.Pype v3.0.1</a>
+          <a href="../../../index.html">g.Pype v3.0.2</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -77,10 +77,9 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">PySide6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="n">QIcon</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">PySide6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="n">QApplication</span><span class="p">,</span> <span class="n">QMainWindow</span><span class="p">,</span> <span class="n">QVBoxLayout</span><span class="p">,</span> <span class="n">QWidget</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PySide6.QtWidgets</span><span class="w"> </span><span class="kn">import</span> <span class="n">QApplication</span><span class="p">,</span> <span class="n">QGridLayout</span><span class="p">,</span> <span class="n">QMainWindow</span><span class="p">,</span> <span class="n">QWidget</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.widgets.base.widget</span><span class="w"> </span><span class="kn">import</span> <span class="n">Widget</span>
 
@@ -104,28 +103,36 @@
 <span class="sd">        - Widget lifecycle management (run/terminate)</span>
 <span class="sd">        - Graceful application shutdown handling</span>
 <span class="sd">        - Support for dependency injection (testing)</span>
+<span class="sd">        - Grid-based layout system (MATLAB subplot-style)</span>
 
 <span class="sd">    Attributes:</span>
 <span class="sd">        DEFAULT_POSITION: Default window geometry [x, y, width, height].</span>
 <span class="sd">        ICON_PATH: Path to the application icon file.</span>
+<span class="sd">        DEFAULT_GRID_SIZE: Default grid dimensions [rows, cols].</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Default window geometry configuration</span>
     <span class="n">DEFAULT_POSITION</span> <span class="o">=</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">800</span><span class="p">,</span> <span class="mi">600</span><span class="p">]</span>  <span class="c1"># [x, y, width, height]</span>
+
+    <span class="c1"># Default grid size (rows, cols)</span>
+    <span class="n">DEFAULT_GRID_SIZE</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
 
     <span class="c1"># Application icon path</span>
     <span class="n">ICON_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="s2">&quot;resources&quot;</span><span class="p">,</span> <span class="s2">&quot;gtec.ico&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="MainApp.__init__">
 <a class="viewcode-back" href="../../../content/frontend/main_app.html#gpype.frontend.main_app.MainApp.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="n">caption</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;g.Pype Application&quot;</span><span class="p">,</span>
-                 <span class="n">position</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">app</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">caption</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;g.Pype Application&quot;</span><span class="p">,</span>
+        <span class="n">position</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">grid_size</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">app</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the main application with window and widget management.</span>
 
-<span class="sd">        Sets up the QApplication, main window, layout system, and event</span>
+<span class="sd">        Sets up the QApplication, main window, grid layout system, and event</span>
 <span class="sd">        handling for a complete g.Pype frontend application. Supports</span>
 <span class="sd">        dependency injection for testing purposes.</span>
 
@@ -133,6 +140,8 @@
 <span class="sd">            caption: Window title text displayed in the title bar.</span>
 <span class="sd">            position: Window geometry as [x, y, width, height] list.</span>
 <span class="sd">                Uses DEFAULT_POSITION if None.</span>
+<span class="sd">            grid_size: Grid dimensions as [rows, cols] list.</span>
+<span class="sd">                Uses DEFAULT_GRID_SIZE if None.</span>
 <span class="sd">            app: Existing QApplication instance for testing or integration.</span>
 <span class="sd">                Creates new QApplication if None.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -141,7 +150,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_app</span> <span class="o">=</span> <span class="n">app</span> <span class="ow">or</span> <span class="n">QApplication</span><span class="p">([])</span>
 
         <span class="c1"># Initialize widget collection for lifecycle management</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Widget</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Widget</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Store grid configuration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_grid_size</span> <span class="o">=</span> <span class="n">grid_size</span> <span class="ow">or</span> <span class="n">MainApp</span><span class="o">.</span><span class="n">DEFAULT_GRID_SIZE</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_grid_rows</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grid_cols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grid_size</span>
 
         <span class="c1"># Create and configure main window</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_window</span> <span class="o">=</span> <span class="n">QMainWindow</span><span class="p">()</span>
@@ -162,8 +175,8 @@
         <span class="n">central_widget</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_window</span><span class="o">.</span><span class="n">setCentralWidget</span><span class="p">(</span><span class="n">central_widget</span><span class="p">)</span>
 
-        <span class="c1"># Create vertical layout for widget arrangement</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="c1"># Create grid layout for widget arrangement (MATLAB subplot-style)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span> <span class="o">=</span> <span class="n">QGridLayout</span><span class="p">()</span>
         <span class="n">central_widget</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="p">)</span>
 
         <span class="c1"># Connect cleanup handler for graceful shutdown</span>
@@ -172,23 +185,56 @@
 
 <div class="viewcode-block" id="MainApp.add_widget">
 <a class="viewcode-back" href="../../../content/frontend/main_app.html#gpype.frontend.main_app.MainApp.add_widget">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">add_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">:</span> <span class="n">Widget</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">:</span> <span class="n">Widget</span><span class="p">,</span> <span class="n">grid_positions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a widget to the application layout and management system.</span>
 
 <span class="sd">        Registers the widget for lifecycle management and adds it to the</span>
-<span class="sd">        main window&#39;s vertical layout. The widget will be automatically</span>
+<span class="sd">        main window&#39;s grid layout. The widget will be automatically</span>
 <span class="sd">        started during run() and terminated during shutdown.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            widget: Widget instance to add to the application.</span>
 <span class="sd">                Must inherit from the base Widget class.</span>
+<span class="sd">            grid_positions: List of grid positions (1-indexed) to span.</span>
+<span class="sd">                For a 3x3 grid: [1,2,3] spans top row, [1,4,7] spans left col.</span>
+<span class="sd">                If None, adds to next available position.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            For a 3x3 grid numbered as:</span>
+<span class="sd">            [1] [2] [3]</span>
+<span class="sd">            [4] [5] [6]</span>
+<span class="sd">            [7] [8] [9]</span>
+
+<span class="sd">            app.add_widget(w, [1,2,3])  # Top row</span>
+<span class="sd">            app.add_widget(w, [1,4])    # Top-left 2x1 rectangle</span>
+<span class="sd">            app.add_widget(w, [5])      # Center cell only</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Register widget for lifecycle management</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
 
-        <span class="c1"># Add widget to the vertical layout for display</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widget</span><span class="o">.</span><span class="n">widget</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="n">grid_positions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Auto-placement: find next available position</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widget</span><span class="o">.</span><span class="n">widget</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Manual placement: convert positions to grid coordinates</span>
+            <span class="n">min_pos</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">grid_positions</span><span class="p">)</span>
+            <span class="n">max_pos</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">grid_positions</span><span class="p">)</span>
+
+            <span class="c1"># Convert 1-indexed positions to 0-indexed row/col</span>
+            <span class="n">start_row</span> <span class="o">=</span> <span class="p">(</span><span class="n">min_pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grid_cols</span>
+            <span class="n">start_col</span> <span class="o">=</span> <span class="p">(</span><span class="n">min_pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grid_cols</span>
+            <span class="n">end_row</span> <span class="o">=</span> <span class="p">(</span><span class="n">max_pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grid_cols</span>
+            <span class="n">end_col</span> <span class="o">=</span> <span class="p">(</span><span class="n">max_pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grid_cols</span>
+
+            <span class="c1"># Calculate span</span>
+            <span class="n">row_span</span> <span class="o">=</span> <span class="n">end_row</span> <span class="o">-</span> <span class="n">start_row</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">col_span</span> <span class="o">=</span> <span class="n">end_col</span> <span class="o">-</span> <span class="n">start_col</span> <span class="o">+</span> <span class="mi">1</span>
+
+            <span class="c1"># Add widget to grid layout with specified span</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span>
+                <span class="n">widget</span><span class="o">.</span><span class="n">widget</span><span class="p">,</span> <span class="n">start_row</span><span class="p">,</span> <span class="n">start_col</span><span class="p">,</span> <span class="n">row_span</span><span class="p">,</span> <span class="n">col_span</span>
+            <span class="p">)</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_on_quit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
