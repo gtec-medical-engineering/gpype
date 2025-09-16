@@ -1,0 +1,35 @@
+Troubleshooting
+===============
+
+This guide will help you find answers and solutions in case you run into problems. Please note that, as g.Pype is provided as a free tool for the community, direct support from g.tec is not available. However, we are actively developing and improving g.Pype, so you can be confident that bugs will be addressed within a reasonable time frame.
+
+.. dropdown:: Check FAQ
+   :icon: question
+
+   If you have questions or are trying to implement something novel, please consult the :doc:`FAQ <../5_faq/index>`. The FAQ provides guidance on what is possible with g.Pype, and what is not. It's a great starting point before diving further into troubleshooting.
+
+.. dropdown:: Browse through Examples
+   :icon: code
+
+   If you are struggling with standard use cases or only need to make small adjustments, you may find a relevant reference implementation in the :doc:`g.Pype Training <../2_gpype_training/index>` section. The training and example scripts cover many common scenarios and can help you get started or troubleshoot typical workflows.
+
+.. dropdown:: Examine Log File
+   :icon: log
+
+   g.Pype creates a log file for each run, which can be valuable for troubleshooting. You can find the log files in ``%APPDATA%\gtec\gPype`` (Windows) or ``~/Library/Application Support/gtec/gPype`` (macOS). These logs contain detailed information about the pipeline execution, timing, involved threads, any errors or warnings encountered, and other runtime information.
+
+.. dropdown:: Set Breakpoints
+   :icon: square-fill
+
+   Within your IDE, you can set breakpoints in the g.Pype code to pause execution and inspect variables, helping you identify issues more easily. Make sure to run the script in debug mode.
+
+.. dropdown:: Ask AI
+   :icon: copilot
+
+   If the FAQ and examples don't resolve your issue, consider asking your favorite AI assistant (such as ChatGPT or Copilot) for help. Sometimes, the problem may be a subtle logical error or a usage pattern that's hard to spot. For best results, provide your AI companion with a link to this documentation. This gives it the full g.Pype context and increases the chances of a relevant, implementation-specific answer.
+
+.. dropdown:: File a Bug Report
+   :icon: bug
+
+   If you are confident you have discovered a bug, please :doc:`file a report <../8_appendix/bug_reports>` on GitHub.
+

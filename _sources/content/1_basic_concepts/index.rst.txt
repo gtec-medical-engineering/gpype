@@ -1,0 +1,104 @@
+Basic Concepts
+==============
+
+
+The g.Pype framework is built around a clear separation between backend and frontend components. At the backend, raw brain signals from an EEG device are propagated through a pipeline of connected nodes, where they are acquired, processed, and prepared for further use. The frontend then takes these processed signals and presents them in interactive applications with visualizations and controls. This structure allows researchers and developers to focus on flexible signal processing while providing decoupled, intuitive interfaces for users.
+
+.. raw:: html
+
+   <img src="../../_static/svg/concept.svg"
+        alt="g.Pype concept overview showing frontend, backend, and user interaction."
+        style="float: left; width: 500px; pointer-events: none; cursor: default;" />
+   <div style="clear: both;"></div>
+
+
+The figure above illustrates how signals propagate from the user wearing an EEG cap through the backend pipeline into the frontend where they can be explored and acted upon.
+
+
+Backend
+-------
+
+The backend implements all data processing and propagation logic that happens behind the scenes. It contains a pipeline with nodes and ports.
+
+.. grid:: 1 1 2 3
+   :gutter: 3
+
+   .. grid-item-card:: :octicon:`workflow` Pipeline
+
+      A pipeline connects individual nodes and efficiently manages data propagation between them.
+
+   .. grid-item-card:: :octicon:`package` Node
+
+      A node is a processing unit in the pipeline. It receives input and sends output data through ports.
+
+   .. grid-item-card:: :octicon:`plug` Port
+
+      A port receives input or sends output data. Ports of different nodes can be connected.
+
+
+Frontend
+--------
+
+The frontend is the part of g.Pype you interact with directly. In the main app and its widgets, it provides the graphical interface for configuring, running, and visualizing your experiments.
+
+.. grid:: 1 1 2 2
+   :gutter: 3
+
+   .. grid-item-card:: :octicon:`browser` Main App
+
+      The main app is the central, executable user interface of g.Pype. It contains an arrangement widgets for visualization and control.
+
+   .. grid-item-card:: :octicon:`graph` Widget
+
+      A widget is a visualization or control panel inside the main app, allowing you to manage your experimental workflow and show processed data in real-time.
+
+
+.. Gateway
+.. -------
+
+.. The Gateway captures data sources (such as EEG devices or keypress events) and forwards the data to the g.Pype backend. The Gateway typically runs on your local device, while the backend can run either locally or on a remote server.
+
+
+Terminology
+-----------
+
+This section introduces additional key terms in g.Pype to ensure clear and consistent usage across development, documentation, and deployment.
+
+.. grid:: 1 1 2 3
+   :gutter: 3
+
+   .. grid-item-card:: :octicon:`pulse` Channel
+
+      One scalar time-series signal, for example from an EEG electrode or keypress detector.
+
+   .. grid-item-card:: :octicon:`git-commit` Sample
+
+      Single value of a channel, representing its signal at one discrete point in time.
+
+   .. grid-item-card:: :octicon:`clock` Sampling Rate
+
+      Number of samples acquired or processed per channel per second, in Hertz (Hz).
+
+   .. grid-item-card:: :octicon:`three-bars` Channel Count
+
+      Total number of parallel channels contained in a signal.
+
+   .. grid-item-card:: :octicon:`tab` Step
+
+      Discrete processing step where nodes receive input and produce output.
+
+   .. grid-item-card:: :octicon:`stack` Frame
+
+      Block of data processed together in one step. May contain multiple samples and channels.
+
+   .. grid-item-card:: :octicon:`kebab-horizontal` Frame Size
+
+      Number of samples per channel contained in one frame.
+
+   .. grid-item-card:: :octicon:`file-moved` Context
+
+      Dynamic environment of a node, determined by upstream nodes at runtime (e.g. sampling rate).
+
+   .. grid-item-card:: :octicon:`file-code` Configuration
+
+      Static setup of a node, defined by the user. Determines behavior and remains fixed at runtime.

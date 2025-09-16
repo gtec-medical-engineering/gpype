@@ -1,0 +1,274 @@
+Episode 1: Standard Filtering
+------------------------------------
+
+.. include:: ../../../_include/substitutions.rst
+
+In this episode, you learn how to apply standard filters to your data using g.Pype.
+
+.. tab-set::
+
+   .. tab-item:: Read
+      :sync: read
+
+      g.Pype offers four standard filters commonly used in EEG processing pipelines: |Highpass|, |Lowpass|,
+      |Bandstop| (notch), and |Bandpass|. Below, we demonstrate how to use each of them in to serve
+      typical use cases. These filters are implemented as second-order
+      `Butterworth IIR filters <https://en.wikipedia.org/wiki/Butterworth_filter>`_.
+
+      .. grid:: 1 1 1 1
+         :gutter: 2
+
+         .. grid-item-card:: Highpass
+
+            The |Highpass| filter attenuates frequencies below a chosen cutoff, allowing higher-frequency
+            activity to pass while removing slow drifts and trends. In EEG processing, highpass filtering
+            is used to suppress slow baseline shifts and focus on faster brain activity. Start with the
+            script below, where the |Generator| illustrates this behavior by producing a
+            slow pseudo-drift at 0.05 Hz overlaid with white noise simulating EEG activity.
+
+            .. literalinclude:: ../../../../examples/s2e1_a_highpass_pre_.py
+               :language: python
+               :linenos:
+               :dedent: 0
+               :emphasize-lines: 8-10
+
+            Run the script and observe the slow drift in the signal.
+
+            .. figure:: ../../../_static/screenshots/s2e1_1.png
+               :alt: S2E1 example screenshot
+               :figclass: screenshot
+
+               Slow drift example.
+
+            To remove the drift while preserving higher-frequency EEG, add a
+            |Highpass| filter ``highpass`` with cutoff frequency
+            ``f_c=1`` Hz between the |Generator| and |TimeSeriesScope|:
+
+            .. literalinclude:: ../../../../examples/s2e1_a_highpass.py
+               :language: python
+               :lines: 15-18,20-21,23-24,26-28,30
+               :lineno-start: 8
+               :linenos:
+               :dedent: 0
+               :emphasize-lines: 5,9-10
+
+            Run the script again and confirm the slow drift is gone, while the higher frequencies remain.
+
+            .. figure:: ../../../_static/screenshots/s2e1_2.png
+               :alt: S2E1 example screenshot
+               :figclass: screenshot
+
+               Slow drift removed via highpass filtering.
+
+         .. grid-item-card:: Lowpass
+
+            The |Lowpass| filter attenuates frequencies above a chosen cutoff, allowing lower-frequency
+            components to pass while attenuating higher-frequency components. In EEG processing,
+            lowpass filters are commonly applied to suppress high-frequency measurement noise and
+            focus on slower brain rhythms. Use the script below to demonstrate this scenario. Here,
+            the |Generator| produces a 4 Hz sinusoid mimicking
+            `Theta <https://en.wikipedia.org/wiki/Theta_wave>`_ activity, embedded in white measurement noise.
+
+            .. literalinclude:: ../../../../examples/s2e1_b_lowpass_pre_.py
+               :language: python
+               :linenos:
+               :dedent: 0
+               :emphasize-lines: 8-10
+
+            Run the script and observe the noisy signal.
+
+            .. figure:: ../../../_static/screenshots/s2e1_3.png
+               :alt: S2E1 example screenshot
+               :figclass: screenshot
+
+               Slow waves embedded in measurement noise.
+
+            To suppress the noise while preserving the low-frequency sinusoid, add a |Lowpass| filter
+            ``lowpass`` with cutoff frequency ``f_c=6`` Hz between the |Generator| and |TimeSeriesScope|:
+
+            .. literalinclude:: ../../../../examples/s2e1_b_lowpass.py
+               :language: python
+               :lines: 15-18,20-21,23-24,26-28,30
+               :lineno-start: 8
+               :linenos:
+               :dedent: 0
+               :emphasize-lines: 5,9-10
+
+            Run the script again and confirm the noise is substantially reduced, with the low-frequency
+            component intact.
+
+            .. figure:: ../../../_static/screenshots/s2e1_4.png
+               :alt: S2E1 example screenshot
+               :figclass: screenshot
+
+               Measurement noise eliminated via lowpass filtering.
+
+         .. grid-item-card:: Bandpass
+
+            The |Bandpass| filter attenuates frequencies outside a selected range, allowing only
+            signals within that band to pass. In EEG processing, bandpass filters are commonly used
+            remove both slow drifts and high-frequency noise from EEG data simultaneously, saving
+            the need for separate highpass and lowpass filters. As well, bandpass filters are
+            typically employed to to isolate specific brain rhythms, such as the alpha band
+            (8-12 Hz), for focused analysis. The script below demonstrates such a typical use case,
+            where the |Generator| produces a composite signal resembling 10 Hz alpha activity
+            embedded in measurement noise.
+
+
+            .. literalinclude:: ../../../../examples/s2e1_c_bandpass_pre_.py
+               :language: python
+               :linenos:
+               :dedent: 0
+               :emphasize-lines: 8-10
+
+            Run the script and observe the noisy signal.
+
+            .. figure:: ../../../_static/screenshots/s2e1_5.png
+               :alt: S2E1 example screenshot
+               :figclass: screenshot
+
+               Alpha wave embedded in measurementnoise.
+
+            To isolate the alpha component, insert a |Bandpass| filter ``bandpass`` with
+            lower cutoff frequency ``f_lo=8`` Hz and upper cutoff frequency ``f_hi=12``
+            Hz between the |Generator| and |TimeSeriesScope|:
+
+            .. literalinclude:: ../../../../examples/s2e1_c_bandpass.py
+               :language: python
+               :lines: 15-18,20-21,23-24,26-28,30
+               :lineno-start: 8
+               :linenos:
+               :dedent: 0
+               :emphasize-lines: 5,9-10
+
+            Run the script and observe that only the alpha band remains visible in the output.
+
+            .. figure:: ../../../_static/screenshots/s2e1_6.png
+               :alt: S2E1 example screenshot
+               :figclass: screenshot
+
+               Alpha wave isolated via bandpass filtering.
+
+         .. grid-item-card:: Bandstop (Notch)
+
+            The |Bandstop| (notch) filter attenuates a specific frequency band while leaving other
+            frequencies unaffected. In EEG processing, bandstop filtering is essential for
+            eliminating power-line interference from recordings. In the script below,
+            the |Generator| illustrated this condition, producing a 50 Hz sinusoid combined with
+            white noise to simulate EEG data contaminated by power-line interference.
+
+            .. literalinclude:: ../../../../examples/s2e1_d_bandstop_pre_.py
+               :language: python
+               :lineno-start: 8
+               :linenos:
+               :dedent: 0
+               :emphasize-lines: 8-10
+
+            Run the script and observe the power-line interference in the signal.
+
+            .. figure:: ../../../_static/screenshots/s2e1_7.png
+               :alt: S2E1 example screenshot
+               :figclass: screenshot
+
+               Example signal with power-line interference.
+
+            To suppress power-line interference, insert a |Bandstop| filter with
+            ``f_low = 48`` Hz and ``f_high = 52`` Hz between
+            the |Generator| and |TimeSeriesScope|:
+
+            .. literalinclude:: ../../../../examples/s2e1_d_bandstop.py
+               :language: python
+               :lines: 15-18,20-21,23-24,26-28,30
+               :lineno-start: 8
+               :linenos:
+               :dedent: 0
+               :emphasize-lines: 5,9-10
+
+            Run the script and confirm that the power-line frequency is removed from the signal.
+
+            .. figure:: ../../../_static/screenshots/s2e1_8.png
+               :alt: S2E1 example screenshot
+               :figclass: screenshot
+
+               Power-line interference removed via bandstop filtering.
+
+      Completed! You can now employ typical filters to serve standard purposes in EEG processing in g.Pype.
+
+      .. grid:: 1 1 1 1
+         :gutter: 2
+
+         .. grid-item-card:: Summary
+
+            In this episode, you learned how to employ standard filters, such as
+
+            - |Highpass| to remove slow drifts
+            - |Lowpass| to attenuate high-frequency noise
+            - |Bandpass| to isolate specific frequency bands
+            - |Bandstop| (notch) to eliminate power line interference
+
+            Note that there is also a |MovingAverage| filter available, which we will
+            cover specifically in an upcoming episode.
+
+      You are now ready to proceed to episode 2, where we will begin with signal routing in g.Pype.
+
+   .. tab-item:: Code
+      :sync: code
+
+
+      .. s2e1_a_highpass.py begin
+
+
+      **File s2e1_a_highpass.py** -- `View file on GitHub <https://github.com/gtec-medical-engineering/gpype/blob/main/examples/s2e1_a_highpass.py>`_
+
+
+
+      .. literalinclude:: ../../../../examples/s2e1_a_highpass.py
+         :language: python
+         :linenos:
+         :dedent: 0
+
+      .. s2e1_a_highpass.py end
+
+      .. s2e1_b_lowpass.py begin
+
+
+      **File s2e1_b_lowpass.py** -- `View file on GitHub <https://github.com/gtec-medical-engineering/gpype/blob/main/examples/s2e1_b_lowpass.py>`_
+
+
+
+      .. literalinclude:: ../../../../examples/s2e1_b_lowpass.py
+         :language: python
+         :linenos:
+         :dedent: 0
+
+      .. s2e1_b_lowpass.py end
+
+      .. s2e1_c_bandpass.py begin
+
+
+      **File s2e1_c_bandpass.py** -- `View file on GitHub <https://github.com/gtec-medical-engineering/gpype/blob/main/examples/s2e1_c_bandpass.py>`_
+
+
+
+      .. literalinclude:: ../../../../examples/s2e1_c_bandpass.py
+         :language: python
+         :linenos:
+         :dedent: 0
+
+      .. s2e1_c_bandpass.py end
+
+
+
+      .. s2e1_d_bandstop.py begin
+
+
+      **File s2e1_d_bandstop.py** -- `View file on GitHub <https://github.com/gtec-medical-engineering/gpype/blob/main/examples/s2e1_d_bandstop.py>`_
+
+
+
+      .. literalinclude:: ../../../../examples/s2e1_d_bandstop.py
+         :language: python
+         :linenos:
+         :dedent: 0
+
+      .. s2e1_d_bandstop.py end

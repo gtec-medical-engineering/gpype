@@ -1,0 +1,8 @@
+Paradigm Presenter
+==================
+
+.. autoclass:: gpype.frontend.widgets.paradigm_presenter.ParadigmPresenter
+   :members:
+   :undoc-members:
+   :special-members: __init__
+   :show-inheritance:

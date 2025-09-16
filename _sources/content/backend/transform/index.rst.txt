@@ -1,9 +1,0 @@
-Transform
-=========
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Contents
-
-   equation
-   fft

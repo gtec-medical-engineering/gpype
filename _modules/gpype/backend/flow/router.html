@@ -5,9 +5,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.backend.flow.router &mdash; g.Pype v3.0.3  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+  <title>gpype.backend.flow.router</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=0382cca7" />
 
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
@@ -15,6 +17,10 @@
       <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../../_static/js/line_numbers.js?v=98e8ade1"></script>
+      <script src="../../../../_static/js/training_page.js?v=c174bc68"></script>
+      <script src="../../../../_static/js/external_links.js?v=613fa8ce"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -29,7 +35,8 @@
           
           
           <a href="../../../../index.html" class="icon icon-home">
-            g.Pype v3.0.3
+            g.Pype v3.0.4
+              <img src="../../../../_static/gpype-logo-sRGB.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -39,13 +46,13 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/1_basic_concepts/index.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/2_gpype_training/index.html">g.Pype Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/5_faq/index.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/6_troubleshooting/index.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/7_sdk_reference/index.html">SDK Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/8_appendix/index.html">Appendix</a></li>
 </ul>
 
         </div>
@@ -54,7 +61,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../index.html">g.Pype v3.0.3</a>
+          <a href="../../../../index.html">g.Pype v3.0.4</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -87,32 +94,14 @@
 
 
 <div class="viewcode-block" id="Router">
-<a class="viewcode-back" href="../../../../content/backend/flow/router.html#gpype.backend.flow.router.Router">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_flow/router.html#gpype.backend.flow.router.Router">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Router</span><span class="p">(</span><span class="n">IONode</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Channel routing and selection node for flexible data flow management.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Channel routing and selection node for flexible data flow management.</span>
 
-<span class="sd">    The Router node provides sophisticated channel selection and routing</span>
-<span class="sd">    capabilities for BCI data pipelines. It allows users to select specific</span>
-<span class="sd">    channels from multiple input ports and route them to multiple output</span>
-<span class="sd">    ports in flexible configurations.</span>
-
-<span class="sd">    The router supports both simple channel selection (list of indices) and</span>
-<span class="sd">    complex multi-port routing (dictionary mapping). It can aggregate</span>
-<span class="sd">    channels from multiple sources and distribute them to different outputs</span>
-<span class="sd">    based on user-defined routing rules.</span>
-
-<span class="sd">    Features:</span>
-<span class="sd">        - Multi-input, multi-output channel routing</span>
-<span class="sd">        - Flexible channel selection with index lists</span>
-<span class="sd">        - Automatic port naming for multiple inputs/outputs</span>
-<span class="sd">        - Channel aggregation and distribution</span>
-<span class="sd">        - Validation of sampling rates and frame sizes</span>
-<span class="sd">        - Support for &quot;ALL&quot; channels selection</span>
-
-<span class="sd">    Note:</span>
-<span class="sd">        All input ports must have the same sampling rate, frame size,</span>
-<span class="sd">        and data type. The router validates these constraints during setup.</span>
+<span class="sd">    Provides channel selection and routing capabilities for BCI data pipelines.</span>
+<span class="sd">    Allows selecting specific channels from multiple input ports and routing</span>
+<span class="sd">    them to multiple output ports. Supports both simple channel selection</span>
+<span class="sd">    (index lists) and complex multi-port routing (dictionary mapping).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Special constant for selecting all available channels</span>
@@ -122,12 +111,12 @@
     <span class="n">_map</span><span class="p">:</span> <span class="nb">dict</span>
 
 <div class="viewcode-block" id="Router.Configuration">
-<a class="viewcode-back" href="../../../../content/backend/flow/router.html#gpype.backend.flow.router.Router.Configuration">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_flow/router.html#gpype.backend.flow.router.Router.Configuration">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">Configuration</span><span class="p">(</span><span class="n">ioc</span><span class="o">.</span><span class="n">IONode</span><span class="o">.</span><span class="n">Configuration</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Configuration class for Router parameters.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Router.Configuration.Keys">
-<a class="viewcode-back" href="../../../../content/backend/flow/router.html#gpype.backend.flow.router.Router.Configuration.Keys">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_flow/router.html#gpype.backend.flow.router.Router.Configuration.Keys">[docs]</a>
         <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">ioc</span><span class="o">.</span><span class="n">IONode</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Configuration key constants for the Router.&quot;&quot;&quot;</span>
 
@@ -137,28 +126,21 @@
 
 
 <div class="viewcode-block" id="Router.__init__">
-<a class="viewcode-back" href="../../../../content/backend/flow/router.html#gpype.backend.flow.router.Router.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_flow/router.html#gpype.backend.flow.router.Router.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">input_selector</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">output_selector</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize the Router node with channel selection configurations.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the Router node with channel selection configurations.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            input_selector (Union[list, dict], optional): Specification for</span>
-<span class="sd">                input channel selection. Can be:</span>
-
-<span class="sd">                - None: Use all channels from default input port</span>
-<span class="sd">                - list: Channel indices for single port or list of lists for</span>
-<span class="sd">                  multiple ports. In case of multiple ports, their names</span>
-<span class="sd">                  are automatically generated as &#39;in1&#39;, &#39;in2&#39;, etc.</span>
-<span class="sd">                - dict: Port name to channel indices mapping</span>
-
-<span class="sd">            output_selector (Union[list, dict], optional): Specification for</span>
-<span class="sd">                output channel selection. Same format as input_selector.</span>
+<span class="sd">            input_selector: Specification for input channel selection. Can be</span>
+<span class="sd">                None (all channels), list (channel indices), or dict (port</span>
+<span class="sd">                name to channel indices mapping).</span>
+<span class="sd">            output_selector: Specification for output channel selection.</span>
+<span class="sd">                Same format as input_selector.</span>
 <span class="sd">            **kwargs: Additional configuration parameters passed to IONode.</span>
 
 <span class="sd">        Raises:</span>
@@ -232,29 +214,27 @@
 
 
 <div class="viewcode-block" id="Router.setup">
-<a class="viewcode-back" href="../../../../content/backend/flow/router.html#gpype.backend.flow.router.Router.setup">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_flow/router.html#gpype.backend.flow.router.Router.setup">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">port_context_in</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Set up the Router node and build the internal channel mapping.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up the Router node and build the internal channel mapping.</span>
 
 <span class="sd">        Creates the internal routing map that defines which input channels</span>
 <span class="sd">        are connected to which output channels. Validates that all input</span>
 <span class="sd">        ports have compatible sampling rates, frame sizes, and data types.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            data (dict): Initial data dictionary for port configuration.</span>
-<span class="sd">            port_context_in (dict): Input port context information containing</span>
-<span class="sd">                channel counts, sampling rates, frame sizes, and data types.</span>
+<span class="sd">            data: Initial data dictionary for port configuration.</span>
+<span class="sd">            port_context_in: Input port context information with channel</span>
+<span class="sd">                counts, sampling rates, frame sizes, and data types.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            dict: Output port context with routing information and updated</span>
-<span class="sd">                channel counts for each output port.</span>
+<span class="sd">            Output port context with routing information and updated</span>
+<span class="sd">            channel counts for each output port.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ValueError: If input ports have incompatible sampling rates,</span>
-<span class="sd">                frame sizes, or data types.</span>
+<span class="sd">            ValueError: If input ports have incompatible parameters.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Get commonly used configuration keys</span>
         <span class="n">cc_key</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">CHANNEL_COUNT</span>
@@ -355,25 +335,23 @@
 
 
 <div class="viewcode-block" id="Router.step">
-<a class="viewcode-back" href="../../../../content/backend/flow/router.html#gpype.backend.flow.router.Router.step">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_flow/router.html#gpype.backend.flow.router.Router.step">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Process one frame of data by routing channels according to the mapping.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process one frame of data by routing channels according to mapping.</span>
 
 <span class="sd">        Routes channels from input ports to output ports based on the channel</span>
 <span class="sd">        mapping established during setup. Each output port receives data from</span>
-<span class="sd">        its configured subset of input channels, maintaining frame structure</span>
-<span class="sd">        and data types.</span>
+<span class="sd">        its configured subset of input channels.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            data (dict): Dictionary containing input data arrays for each port.</span>
-<span class="sd">                Keys are port names, values are NumPy arrays with shape</span>
+<span class="sd">            data: Dictionary containing input data arrays for each port.</span>
+<span class="sd">                Keys are port names, values are arrays with shape</span>
 <span class="sd">                (frame_size, channel_count).</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            dict: Dictionary containing output data arrays for each output</span>
-<span class="sd">                port. Keys are output port names, values are NumPy arrays</span>
-<span class="sd">                with shape (frame_size, selected_channel_count).</span>
+<span class="sd">            Dictionary containing output data arrays for each output port.</span>
+<span class="sd">            Keys are output port names, values are arrays with shape</span>
+<span class="sd">            (frame_size, selected_channel_count).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">data_out</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
 

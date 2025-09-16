@@ -1,14 +1,151 @@
-g.Pype User Manual
+Welcome to g.Pype!
 ==================
 
-Please select from the menu.
+.. INSERT BEGIN
+
+.. raw:: html
+
+   <div class="badges" style="margin-bottom: 20px;">
+      <a href="http://gtec.at"><img src="https://img.shields.io/badge/powered_by-g.tec-blue" alt="Powered by g.tec" /></a>
+      <a href="https://pypi.org/project/gpype/"><img src="https://img.shields.io/pypi/v/gpype.svg?label=PyPI%20version&color=brown" alt="PyPI" /></a>
+      <a href="https://pypi.org/project/gpype/"><img src="https://img.shields.io/pypi/pyversions/gpype.svg" alt="Python" /></a>
+      <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fgtec-medical-engineering%2Fgpype%2Fbadges%2Ftests.json" alt="Tests" />
+      <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fgtec-medical-engineering%2Fgpype%2Fbadges%2Fcoverage.json" alt="Coverage" />
+      <a href="https://github.com/gtec-medical-engineering/gpype/blob/main/LICENSE-GNCL.txt"><img src="https://img.shields.io/badge/License-GNCL-red" alt="License" /></a>
+      <a href="https://gtec-medical-engineering.github.io/gpype/"><img src="https://img.shields.io/badge/Documentation-GitHub%20Pages-green" alt="Documentation" /></a>
+   </div>
+
+
+g.Pype is a Python Software Development Kit (SDK) for building neuroscience and Brain-Computer Interface (BCI) applications. It is designed to be simple to use, with a clear and well-documented coding interface with many examples that help you get started quickly. It provides essential building blocks that can be combined and adapted to your needs, while remaining open to integration with other Python packages. g.Pype runs on Windows and macOS.
+
+.. INSERT END
+
+To get started with g.Pype, first familiarize yourself with the :doc:`Basic Concepts <content/1_basic_concepts/index>` and then dive into the :doc:`g.Pype Training <content/2_gpype_training/index>`. Have fun!
+
+.. grid:: 1 1 1 2
+   :gutter: 3
+
+   .. grid-item-card:: Basic Concepts
+      :link: content/1_basic_concepts/index
+      :link-type: doc
+
+      .. container:: card-content-flex
+
+         .. container:: card-image
+
+            .. image:: _static/svg/section1.svg
+                :width: 60px
+
+         .. container:: card-text
+
+            Get familiar with nodes, ports, widgets, backend pipelines, and frontend apps.
+
+   .. grid-item-card:: g.Pype Training
+      :link: content/2_gpype_training/index
+      :link-type: doc
+
+      .. container:: card-content-flex
+
+         .. container:: card-image
+
+            .. image:: _static/svg/section2.svg
+                :width: 60px
+
+         .. container:: card-text
+
+            Learn g.Pype step by step with hands-on training episodes to build your skills.
+
+
+
+   .. grid-item-card:: Frequently Asked Questions
+      :link: content/5_faq/index
+      :link-type: doc
+
+      .. container:: card-content-flex
+
+         .. container:: card-image
+
+            .. image:: _static/svg/section5.svg
+                :width: 60px
+
+         .. container:: card-text
+
+            Find answers to common questions, clarifications, shortcuts, and useful hints.
+
+   .. grid-item-card:: Troubleshooting
+      :link: content/6_troubleshooting/index
+      :link-type: doc
+
+      .. container:: card-content-flex
+
+         .. container:: card-image
+
+            .. image:: _static/svg/section6.svg
+                :width: 60px
+
+         .. container:: card-text
+
+            Identify issues, debug pipelines, and resolve common problems with this guide.
+
+   .. grid-item-card:: SDK Reference
+      :link: content/7_sdk_reference/index
+      :link-type: doc
+
+      .. container:: card-content-flex
+
+         .. container:: card-image
+
+            .. image:: _static/svg/section7.svg
+                :width: 60px
+
+         .. container:: card-text
+
+            Explore the detailed programming reference for g.Pype's backend and frontend.
+
+   .. grid-item-card:: Appendix
+      :link: content/8_appendix/index
+      :link-type: doc
+
+      .. container:: card-content-flex
+
+         .. container:: card-image
+
+            .. image:: _static/svg/section8.svg
+                :width: 60px
+
+         .. container:: card-text
+
+            Check additional resources like the changelog, license, references, and more.
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents
+   :maxdepth: 3
+   :hidden:
 
-   content/introduction/index
-   content/backend/index
-   content/frontend/index
-   content/common/index
-   content/examples/index
+   content/1_basic_concepts/index
+   content/2_gpype_training/index
+   content/5_faq/index
+   content/6_troubleshooting/index
+   content/7_sdk_reference/index
+   content/8_appendix/index
+
+
+
+.. .. grid-item-card:: Architecture & Design
+..    :link: content/3_architecture_design/index
+..    :link-type: doc
+..    .. container:: card-content-flex
+..       .. container:: card-image
+..          .. image:: _static/svg/section3.svg
+..              :width: 60px
+..       .. container:: card-text
+..          Dive into implementation aspects to learn what makes g.Pype flexible and fast.
+
+.. .. grid-item-card:: Advanced Topics
+..    :link: content/4_advanced_topics/index
+..    :link-type: doc
+..    .. container:: card-content-flex
+..       .. container:: card-image
+..          .. image:: _static/svg/section4.svg
+..              :width: 60px
+..       .. container:: card-text
+..          Go further by customizing nodes, integrating third-party libraries, and more.

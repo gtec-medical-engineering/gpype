@@ -1,0 +1,447 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>g.Pype Training</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=0382cca7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../_static/js/line_numbers.js?v=98e8ade1"></script>
+      <script src="../../_static/js/training_page.js?v=c174bc68"></script>
+      <script src="../../_static/js/external_links.js?v=613fa8ce"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Episode 1: Environment Setup" href="season1_boarding/s1e1_environment_setup.html" />
+    <link rel="prev" title="Basic Concepts" href="../1_basic_concepts/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            g.Pype v3.0.4
+              <img src="../../_static/gpype-logo-sRGB.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../1_basic_concepts/index.html">Basic Concepts</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">g.Pype Training</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#season-1-boarding">Season 1: Boarding</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="season1_boarding/s1e1_environment_setup.html">Episode 1: Environment Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="season1_boarding/s1e2_hello_world.html">Episode 2: Hello World!</a></li>
+<li class="toctree-l3"><a class="reference internal" href="season1_boarding/s1e3_signal_generator.html">Episode 3: Generating Signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="season1_boarding/s1e4_data_visualization.html">Episode 4: Visualizing Data</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#season-2-easy-drifting">Season 2: Easy Drifting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="season2_easy_drifting/s2e1_filtering.html">Episode 1: Standard Filtering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="season2_easy_drifting/s2e2_router.html">Episode 2: Routing Signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="season2_easy_drifting/s2e3_equation.html">Episode 3: Basic Transforms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="season2_easy_drifting/s2e4_moving_average.html">Episode 4: Moving Average</a></li>
+<li class="toctree-l3"><a class="reference internal" href="season2_easy_drifting/s2e5_decimator.html">Episode 5: Decimation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="season2_easy_drifting/s2e6_fft.html">Episode 6: Spectral Analysis via FFT</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#season-3-gearing-up">Season 3: Gearing Up</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="season3_gearing_up/s3e1_bci_core8.html">Episode 1: BCI Core-8</a></li>
+<li class="toctree-l3"><a class="reference internal" href="season3_gearing_up/s3e2_gnautilus.html">Episode 2: g.Nautilus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="season3_gearing_up/s3e3_keyboard.html">Episode 3: Capturing Keystrokes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#season-4-crossing-borders">Season 4: Crossing Borders</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="season4_crossing_borders/s4e1_saving_data.html">Episode 1: Saving Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="season4_crossing_borders/s4e2_sending_lsl.html">Episode 2: Sending LSL Streams</a></li>
+<li class="toctree-l3"><a class="reference internal" href="season4_crossing_borders/s4e3_sending_udp.html">Episode 3: Sending UDP Streams</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#season-5-engaging-senses">Season 5: Engaging Senses</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="season5_engaging_senses/s5e1_paradigm_presenter.html">Episode 1: Paradigm Presenter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="season5_engaging_senses/s5e2_triggering_data.html">Episode 2: Triggering Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="season5_engaging_senses/s5e3_auditory_evoked_potentials.html">Episode 3: Auditory Evoked Potentials</a></li>
+<li class="toctree-l3"><a class="reference internal" href="season5_engaging_senses/s5e4_oddball_paradigms.html">Episode 4: Oddball Paradigms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="season5_engaging_senses/s5e5_visual_categorization.html">Episode 5: Visual Categorization</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../5_faq/index.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../6_troubleshooting/index.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../7_sdk_reference/index.html">SDK Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../8_appendix/index.html">Appendix</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">g.Pype v3.0.4</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">g.Pype Training</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="g-pype-training">
+<h1>g.Pype Training<a class="headerlink" href="#g-pype-training" title="Link to this heading"></a></h1>
+<p>Welcome to the g.Pype Training! This structured course is designed to help you
+getting started with g.Pype and progressively build your skills. Each season
+focuses on a specific theme, guiding you through practical episodes that cover
+key concepts and functionalities of g.Pype.</p>
+<p>Note that parts of the training are still under development. We are continuously adding
+new episodes and improving existing ones. Stay tuned for updates!</p>
+<section id="season-1-boarding">
+<h2>Season 1: Boarding<a class="headerlink" href="#season-1-boarding" title="Link to this heading"></a></h2>
+<div class="season-intro season1 docutils container">
+<div class="season-content docutils container">
+<p><strong>Install g.Pype, run your first script, and prepare for departure.</strong></p>
+<img alt="Season 1 Boarding" class="season-inline-image" src="../../_images/S1.jpg" style="width: 360.0px; height: 260.0px;" />
+<p>This season prepares you for your first adventures with g.Pype, with the sails set and the basics at hand.</p>
+</div>
+<div class="season-image docutils container">
+<img alt="Season 1 Boarding" src="../../_images/S1.jpg" />
+</div>
+</div>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-1 sd-row-cols-md-1 sd-row-cols-lg-1 sd-g-2 sd-g-xs-2 sd-g-sm-2 sd-g-md-2 sd-g-lg-2 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Episode 1: Environment Setup</div>
+<p class="sd-card-text">In this episode, you are setting up your development environment for g.Pype.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="season1_boarding/s1e1_environment_setup.html"><span class="doc">Episode 1: Environment Setup</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Episode 2: Hello World!</div>
+<p class="sd-card-text">In this episode, you write your first g.Pype script and run it.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="season1_boarding/s1e2_hello_world.html"><span class="doc">Episode 2: Hello World!</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Episode 3: Generating Signals</div>
+<p class="sd-card-text">In this episode, you learn how to generate test signals with g.Pype.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="season1_boarding/s1e3_signal_generator.html"><span class="doc">Episode 3: Generating Signals</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Episode 4: Visualizing Data</div>
+<p class="sd-card-text">In this episode, you learn how to adjust data visualization in g.Pype.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="season1_boarding/s1e4_data_visualization.html"><span class="doc">Episode 4: Visualizing Data</span></a></div>
+</div>
+</div>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="season-2-easy-drifting">
+<h2>Season 2: Easy Drifting<a class="headerlink" href="#season-2-easy-drifting" title="Link to this heading"></a></h2>
+<div class="season-intro season2 docutils container">
+<div class="season-content docutils container">
+<p><strong>Explore basic building blocks and practice smooth navigation.</strong></p>
+<img alt="Season 2 Easy Drifting" class="season-inline-image" src="../../_images/S2.jpg" />
+<p>In this season, you learn to use the essential library nodes of g.Pype, keeping a steady course through calm waters.</p>
+</div>
+<div class="season-image docutils container">
+<img alt="Season 2 Easy Drifting" src="../../_images/S2.jpg" />
+</div>
+</div>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-1 sd-row-cols-md-1 sd-row-cols-lg-1 sd-g-2 sd-g-xs-2 sd-g-sm-2 sd-g-md-2 sd-g-lg-2 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Episode 1: Standard Filtering</div>
+<p class="sd-card-text">In this episode, you learn how to apply standard filters to your data using g.Pype.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="season2_easy_drifting/s2e1_filtering.html"><span class="doc">Episode 1: Standard Filtering</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Episode 2: Routing Signals</div>
+<p class="sd-card-text">In this episode, you learn how to route signals between nodes in a g.Pype pipeline.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="season2_easy_drifting/s2e2_router.html"><span class="doc">Episode 2: Routing Signals</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Episode 3: Basic Transforms</div>
+<p class="sd-card-text">In this episode, you learn how to apply basic mathematical transforms to your EEG data using g.Pype.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="season2_easy_drifting/s2e3_equation.html"><span class="doc">Episode 3: Basic Transforms</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Episode 4: Moving Average</div>
+<p class="sd-card-text">In this episode, you learn how to use a moving average filter with g.Pype.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="season2_easy_drifting/s2e4_moving_average.html"><span class="doc">Episode 4: Moving Average</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Episode 5: Decimation</div>
+<p class="sd-card-text">In this episode, you learn how to decimate (downsample) your signals with g.Pype.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="season2_easy_drifting/s2e5_decimator.html"><span class="doc">Episode 5: Decimation</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Episode 6: Spectral Analysis via FFT</div>
+<p class="sd-card-text">In this episode, you learn how to perform spectral analysis using the Fast Fourier Transform (FFT) in g.Pype.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="season2_easy_drifting/s2e6_fft.html"><span class="doc">Episode 6: Spectral Analysis via FFT</span></a></div>
+</div>
+</div>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="season-3-gearing-up">
+<h2>Season 3: Gearing Up<a class="headerlink" href="#season-3-gearing-up" title="Link to this heading"></a></h2>
+<div class="season-intro season3 docutils container">
+<div class="season-content docutils container">
+<p><strong>Connect real devices and bring live signals on board.</strong></p>
+<img alt="Season 3 Gearing Up" class="season-inline-image" src="../../_images/S3.jpg" />
+<p>After Season 3, you are able to use hardware with g.Pype, your vessel fully equipped for the voyage ahead.</p>
+</div>
+<div class="season-image docutils container">
+<img alt="Season 3 Gearing Up" src="../../_images/S3.jpg" />
+</div>
+</div>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-1 sd-row-cols-md-1 sd-row-cols-lg-1 sd-g-2 sd-g-xs-2 sd-g-sm-2 sd-g-md-2 sd-g-lg-2 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Episode 1: BCI Core-8</div>
+<p class="sd-card-text">In this episode, you learn how to record EEG data with g.Pype and the BCI Core-8.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="season3_gearing_up/s3e1_bci_core8.html"><span class="doc">Episode 1: BCI Core-8</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Episode 2: g.Nautilus</div>
+<p class="sd-card-text">In this episode, you learn how to record EEG data with g.Pype and g.Nautilus.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="season3_gearing_up/s3e2_gnautilus.html"><span class="doc">Episode 2: g.Nautilus</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Episode 3: Capturing Keystrokes</div>
+<p class="sd-card-text">In this episode, you learn how to capture keystrokes with g.Pype.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="season3_gearing_up/s3e3_keyboard.html"><span class="doc">Episode 3: Capturing Keystrokes</span></a></div>
+</div>
+</div>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="season-4-crossing-borders">
+<h2>Season 4: Crossing Borders<a class="headerlink" href="#season-4-crossing-borders" title="Link to this heading"></a></h2>
+<div class="season-intro season4 docutils container">
+<div class="season-content docutils container">
+<p><strong>Learn to exchange data through different interfaces.</strong></p>
+<img alt="Season 4 Crossing Borders" class="season-inline-image" src="../../_images/S4.jpg" />
+<p>After Season 4, you can link g.Pype to external sources and sinks, opening gateways to new territories.</p>
+</div>
+<div class="season-image docutils container">
+<img alt="Season 4 Crossing Borders" src="../../_images/S4.jpg" />
+</div>
+</div>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-1 sd-row-cols-md-1 sd-row-cols-lg-1 sd-g-2 sd-g-xs-2 sd-g-sm-2 sd-g-md-2 sd-g-lg-2 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Episode 1: Saving Data</div>
+<p class="sd-card-text">In this episode, you learn how to save EEG data to a file using g.Pype.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="season4_crossing_borders/s4e1_saving_data.html"><span class="doc">Episode 1: Saving Data</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Episode 2: Sending LSL Streams</div>
+<p class="sd-card-text">In this episode, you learn how to send EEG data through an LSL (Lab Streaming Layer) interface using g.Pype.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="season4_crossing_borders/s4e2_sending_lsl.html"><span class="doc">Episode 2: Sending LSL Streams</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Episode 3: Sending UDP Streams</div>
+<p class="sd-card-text">In this episode, you learn how to send EEG data through a UDP (User Datagram Protocol) interface using g.Pype.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="season4_crossing_borders/s4e3_sending_udp.html"><span class="doc">Episode 3: Sending UDP Streams</span></a></div>
+</div>
+</div>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="season-5-engaging-senses">
+<h2>Season 5: Engaging Senses<a class="headerlink" href="#season-5-engaging-senses" title="Link to this heading"></a></h2>
+<div class="season-intro season5 docutils container">
+<div class="season-content docutils container">
+<p><strong>Use audiovisual stimuli to immerse yourself in paradigms.</strong></p>
+<img alt="Season 5 Engaging Senses" class="season-inline-image" src="../../_images/S5.jpg" />
+<p>After Season 5, you can run paradigms with ParadigmPresenter, turning your journey into a sensory experience.</p>
+</div>
+<div class="season-image docutils container">
+<img alt="Season 5 Engaging Senses" src="../../_images/S5.jpg" />
+</div>
+</div>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-1 sd-row-cols-md-1 sd-row-cols-lg-1 sd-g-2 sd-g-xs-2 sd-g-sm-2 sd-g-md-2 sd-g-lg-2 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Episode 1: Paradigm Presenter</div>
+<p class="sd-card-text">In this episode, you learn how to use Paradigm Presenter with g.Pype.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="season5_engaging_senses/s5e1_paradigm_presenter.html"><span class="doc">Episode 1: Paradigm Presenter</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Episode 2: Triggering Data</div>
+<p class="sd-card-text">In this episode, you learn how to work with triggering data in g.Pype.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="season5_engaging_senses/s5e2_triggering_data.html"><span class="doc">Episode 2: Triggering Data</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Episode 3: Auditory Evoked Potentials</div>
+<p class="sd-card-text">In this episode, you learn how to record Auditory Evoked Potentials (AEPs) using g.Pype.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="season5_engaging_senses/s5e3_auditory_evoked_potentials.html"><span class="doc">Episode 3: Auditory Evoked Potentials</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Episode 4: Oddball Paradigms</div>
+<p class="sd-card-text">In this episode, you learn how to conduct an auditory oddball paradigm experiment using g.Pype.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="season5_engaging_senses/s5e4_oddball_paradigms.html"><span class="doc">Episode 4: Oddball Paradigms</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Episode 5: Visual Categorization</div>
+<p class="sd-card-text">In this episode, you learn how to perform a visual categorization task using g.Pype.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="season5_engaging_senses/s5e5_visual_categorization.html"><span class="doc">Episode 5: Visual Categorization</span></a></div>
+</div>
+</div>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../1_basic_concepts/index.html" class="btn btn-neutral float-left" title="Basic Concepts" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="season1_boarding/s1e1_environment_setup.html" class="btn btn-neutral float-right" title="Episode 1: Environment Setup" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright g.tec medical engineering GmbH.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

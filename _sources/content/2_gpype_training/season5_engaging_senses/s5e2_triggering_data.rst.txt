@@ -1,0 +1,17 @@
+Episode 2: Triggering Data
+--------------------------
+
+In this episode, you learn how to work with triggering data in g.Pype.
+
+.. admonition:: Note
+   :class: warning
+
+   This page is still under development. Until we have the step-by-step instructions ready, please refer to the
+   code example below.
+
+**File example_basic_trigger.py** -- `View file on GitHub <https://github.com/gtec-medical-engineering/gpype/blob/main/examples/example_trigger.py>`_
+
+.. literalinclude:: ../../../../examples/example_basic_trigger.py
+   :language: python
+   :linenos:
+   :dedent: 0

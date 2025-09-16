@@ -5,9 +5,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.backend.core.i_node &mdash; g.Pype v3.0.3  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+  <title>gpype.backend.core.i_node</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=0382cca7" />
 
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
@@ -15,6 +17,10 @@
       <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../../_static/js/line_numbers.js?v=98e8ade1"></script>
+      <script src="../../../../_static/js/training_page.js?v=c174bc68"></script>
+      <script src="../../../../_static/js/external_links.js?v=613fa8ce"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -29,7 +35,8 @@
           
           
           <a href="../../../../index.html" class="icon icon-home">
-            g.Pype v3.0.3
+            g.Pype v3.0.4
+              <img src="../../../../_static/gpype-logo-sRGB.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -39,13 +46,13 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/1_basic_concepts/index.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/2_gpype_training/index.html">g.Pype Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/5_faq/index.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/6_troubleshooting/index.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/7_sdk_reference/index.html">SDK Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/8_appendix/index.html">Appendix</a></li>
 </ul>
 
         </div>
@@ -54,7 +61,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../index.html">g.Pype v3.0.3</a>
+          <a href="../../../../index.html">g.Pype v3.0.4</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -86,35 +93,25 @@
 
 
 <div class="viewcode-block" id="INode">
-<a class="viewcode-back" href="../../../../content/backend/core/i_node.html#gpype.backend.core.i_node.INode">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_core/i_node.html#gpype.backend.core.i_node.INode">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">INode</span><span class="p">(</span><span class="n">ioc</span><span class="o">.</span><span class="n">INode</span><span class="p">,</span> <span class="n">Node</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class for input-only nodes in the g.Pype pipeline.</span>
 
-<span class="sd">    INode combines the functionality of ioiocore.INode and Node to provide a</span>
-<span class="sd">    base class for nodes that only have input ports (no outputs). These are</span>
-<span class="sd">    typically sink nodes that consume data without producing output, such as</span>
-<span class="sd">    file writers, displays, or data loggers.</span>
-
-<span class="sd">    All INode subclasses must implement the step() method to define their</span>
-<span class="sd">    specific data consumption behavior. The setup() method validates input</span>
-<span class="sd">    port contexts and ensures required metadata is present.</span>
-
-<span class="sd">    Attributes:</span>
-<span class="sd">        Input ports are managed by the parent ioiocore.INode class.</span>
-<span class="sd">        Node-specific configuration is handled by the parent Node class.</span>
+<span class="sd">    Combines ioiocore.INode and Node functionality for nodes that consume</span>
+<span class="sd">    input data without producing outputs (e.g., file writers, displays).</span>
+<span class="sd">    Subclasses must implement the abstract step() method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="INode.__init__">
-<a class="viewcode-back" href="../../../../content/backend/core/i_node.html#gpype.backend.core.i_node.INode.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_core/i_node.html#gpype.backend.core.i_node.INode.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">input_ports</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">IPort</span><span class="o">.</span><span class="n">Configuration</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the INode with input port configurations.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            input_ports: List of input port configurations. If None, default</span>
-<span class="sd">                configuration will be used.</span>
-<span class="sd">            **kwargs: Additional keyword arguments passed to parent classes.</span>
+<span class="sd">            input_ports: List of input port configurations or None.</span>
+<span class="sd">            **kwargs: Additional arguments passed to parent classes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Initialize ioiocore input node functionality</span>
         <span class="n">ioc</span><span class="o">.</span><span class="n">INode</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_ports</span><span class="o">=</span><span class="n">input_ports</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -123,31 +120,24 @@
 
 
 <div class="viewcode-block" id="INode.setup">
-<a class="viewcode-back" href="../../../../content/backend/core/i_node.html#gpype.backend.core.i_node.INode.setup">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_core/i_node.html#gpype.backend.core.i_node.INode.setup">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">port_context_in</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Setup the input node before processing begins.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Setup the input node before pipeline processing begins.</span>
 
-<span class="sd">        This method validates that all input ports have the required metadata</span>
-<span class="sd">        and then delegates to the parent setup method for additional</span>
-<span class="sd">        processing.</span>
+<span class="sd">        Validates that all input ports have required metadata keys</span>
+<span class="sd">        (frame_size, channel_count) then delegates to parent setup.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            data: Dictionary mapping port names to numpy arrays containing</span>
-<span class="sd">                initial data (typically not used in setup).</span>
-<span class="sd">            port_context_in: Dictionary mapping input port names to their</span>
-<span class="sd">                context dictionaries containing metadata like sampling_rate,</span>
-<span class="sd">                channel_count, frame_size, and type.</span>
+<span class="sd">            data: Dictionary mapping port names to numpy arrays.</span>
+<span class="sd">            port_context_in: Dictionary mapping port names to context dicts.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Dictionary mapping port names to their context dictionaries.</span>
-<span class="sd">            For input-only nodes, this typically returns the input contexts</span>
-<span class="sd">            unchanged.</span>
+<span class="sd">            Dictionary mapping port names to validated context dictionaries.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ValueError: If required keys (frame_size, channel_count) are</span>
-<span class="sd">                missing from any input port context.</span>
+<span class="sd">            ValueError: If required metadata keys are missing.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Validate required metadata is present in all input contexts</span>
         <span class="k">for</span> <span class="n">context</span> <span class="ow">in</span> <span class="n">port_context_in</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
@@ -161,28 +151,20 @@
 
 
 <div class="viewcode-block" id="INode.step">
-<a class="viewcode-back" href="../../../../content/backend/core/i_node.html#gpype.backend.core.i_node.INode.step">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_core/i_node.html#gpype.backend.core.i_node.INode.step">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process input data at each discrete time step.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process input data at each pipeline time step.</span>
 
-<span class="sd">        This method is executed at each discrete time step during pipeline</span>
-<span class="sd">        execution. Input-only nodes typically consume data without producing</span>
-<span class="sd">        output (e.g., saving to file, displaying, logging).</span>
+<span class="sd">        Abstract method that must be implemented by subclasses to define</span>
+<span class="sd">        their specific data consumption behavior.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            data: Dictionary mapping input port names to numpy arrays</span>
-<span class="sd">                containing the input data for this time step.</span>
+<span class="sd">            data: Dictionary mapping input port names to numpy arrays.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Dictionary mapping output port names to numpy arrays. For</span>
-<span class="sd">            input-only nodes, this is typically None or an empty dictionary</span>
-<span class="sd">            since they don&#39;t produce output data.</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            This is an abstract method that must be implemented by all</span>
-<span class="sd">            INode subclasses to define their specific data consumption</span>
-<span class="sd">            behavior.</span>
+<span class="sd">            Dictionary mapping output port names to numpy arrays.</span>
+<span class="sd">            Typically None or empty dict for input-only nodes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span>  <span class="c1"># pragma: no cover</span></div>
 </div>

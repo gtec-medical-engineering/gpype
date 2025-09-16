@@ -1,0 +1,437 @@
+SDK Reference
+=============
+
+This SDK reference page is generated directly from the source code. Whether you are developing, troubleshooting, or exploring, use it to quickly locate and cross-reference all available g.Pype components. The information here always reflects the current implementation.
+
+backend
+-------
+
+.. grid:: 1 1 2 3
+   :gutter: 3
+
+   .. grid-item-card:: Pipeline
+      :link: backend/pipeline
+      :link-type: doc
+
+      Brain-Computer Interface pipeline for real-time data processing.
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+
+   backend/pipeline
+
+
+backend.core
+------------
+
+.. grid:: 1 1 2 3
+   :gutter: 3
+
+   .. grid-item-card:: INode
+      :link: backend_core/i_node
+      :link-type: doc
+
+      Abstract base class for input-only nodes in the g.Pype pipeline.
+
+   .. grid-item-card:: IONode
+      :link: backend_core/io_node
+      :link-type: doc
+
+      Abstract base class for input/output nodes in the g.Pype pipeline.
+
+   .. grid-item-card:: IPort
+      :link: backend_core/i_port
+      :link-type: doc
+
+      Input port class for g.Pype signal processing nodes.
+
+   .. grid-item-card:: ONode
+      :link: backend_core/o_node
+      :link-type: doc
+
+      Abstract base class for output-only nodes in the g.Pype pipeline.
+
+   .. grid-item-card:: OPort
+      :link: backend_core/o_port
+      :link-type: doc
+
+      Output port class for g.Pype signal processing nodes.
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+
+   backend_core/i_node
+   backend_core/io_node
+   backend_core/i_port
+   backend_core/o_node
+   backend_core/o_port
+
+
+backend.filters
+---------------
+
+.. grid:: 1 1 2 3
+   :gutter: 3
+
+   .. grid-item-card:: Bandpass
+      :link: backend_filters/bandpass
+      :link-type: doc
+
+      Bandpass filter implementation using Butterworth design.
+
+   .. grid-item-card:: Bandstop
+      :link: backend_filters/bandstop
+      :link-type: doc
+
+      Bandstop filter implementation using Butterworth design.
+
+   .. grid-item-card:: Butterworth
+      :link: backend_filters/butterworth
+      :link-type: doc
+
+      Butterworth filter implementation for real-time signal processing.
+
+   .. grid-item-card:: GenericFilter
+      :link: backend_filters/generic_filter
+      :link-type: doc
+
+      Generic Linear Time-Invariant (LTI) digital filter for real-time use.
+
+   .. grid-item-card:: Highpass
+      :link: backend_filters/highpass
+      :link-type: doc
+
+      Highpass filter implementation using Butterworth design.
+
+   .. grid-item-card:: Lowpass
+      :link: backend_filters/lowpass
+      :link-type: doc
+
+      Lowpass filter implementation using Butterworth design.
+
+   .. grid-item-card:: MovingAverage
+      :link: backend_filters/moving_average
+      :link-type: doc
+
+      Moving average filter for signal smoothing and noise reduction.
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+
+   backend_filters/bandpass
+   backend_filters/bandstop
+   backend_filters/butterworth
+   backend_filters/generic_filter
+   backend_filters/highpass
+   backend_filters/lowpass
+   backend_filters/moving_average
+
+
+backend.flow
+------------
+
+.. grid:: 1 1 2 3
+   :gutter: 3
+
+   .. grid-item-card:: Framer
+      :link: backend_flow/framer
+      :link-type: doc
+
+      Frame aggregation node for combining single samples into frames.
+
+   .. grid-item-card:: Router
+      :link: backend_flow/router
+      :link-type: doc
+
+      Channel routing and selection node for flexible data flow management.
+
+   .. grid-item-card:: Trigger
+      :link: backend_flow/trigger
+      :link-type: doc
+
+      Event-triggered data extraction node for BCI applications.
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+
+   backend_flow/framer
+   backend_flow/router
+   backend_flow/trigger
+
+
+backend.sinks
+-------------
+
+.. grid:: 1 1 2 3
+   :gutter: 3
+
+   .. grid-item-card:: FileWriter
+      :link: backend_sinks/file_writer
+      :link-type: doc
+
+      Threaded file writer for real-time data logging to CSV files.
+
+   .. grid-item-card:: LSLSender
+      :link: backend_sinks/lsl_sender
+      :link-type: doc
+
+      Lab Streaming Layer (LSL) sender for real-time data streaming.
+
+   .. grid-item-card:: UDPSender
+      :link: backend_sinks/udp_sender
+      :link-type: doc
+
+      UDP sink node for real-time data transmission.
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+
+   backend_sinks/file_writer
+   backend_sinks/lsl_sender
+   backend_sinks/udp_sender
+
+
+backend.sources
+---------------
+
+.. grid:: 1 1 2 3
+   :gutter: 3
+
+   .. grid-item-card:: AmplifierSource
+      :link: backend_sources/amplifier_source
+      :link-type: doc
+
+      Base class for amplifier-based data acquisition sources.
+
+   .. grid-item-card:: BCICore8
+      :link: backend_sources/bci_core8
+      :link-type: doc
+
+      g.tec BCI Core-8 amplifier source for wireless EEG acquisition.
+
+   .. grid-item-card:: EventSource
+      :link: backend_sources/event_source
+      :link-type: doc
+
+      Event-driven source for asynchronous data generation.
+
+   .. grid-item-card:: FixedRateSource
+      :link: backend_sources/fixed_rate_source
+      :link-type: doc
+
+      Fixed-rate source for continuous data generation at sampling rate.
+
+   .. grid-item-card:: GNautilus
+      :link: backend_sources/g_nautilus
+      :link-type: doc
+
+      g.Nautilus EEG amplifier interface for real-time data acquisition.
+
+   .. grid-item-card:: Generator
+      :link: backend_sources/generator
+      :link-type: doc
+
+      Signal generator source for creating synthetic test signals.
+
+   .. grid-item-card:: Keyboard
+      :link: backend_sources/keyboard
+      :link-type: doc
+
+      Keyboard input source for capturing key press and release events.
+
+   .. grid-item-card:: Source
+      :link: backend_sources/source
+      :link-type: doc
+
+      Base class for data source nodes in a pipeline.
+
+   .. grid-item-card:: UDPReceiver
+      :link: backend_sources/udp_receiver
+      :link-type: doc
+
+      UDP network receiver for capturing remote trigger events.
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+
+   backend_sources/amplifier_source
+   backend_sources/bci_core8
+   backend_sources/event_source
+   backend_sources/fixed_rate_source
+   backend_sources/g_nautilus
+   backend_sources/generator
+   backend_sources/keyboard
+   backend_sources/source
+   backend_sources/udp_receiver
+
+
+backend.timing
+--------------
+
+.. grid:: 1 1 2 3
+   :gutter: 3
+
+   .. grid-item-card:: Decimator
+      :link: backend_timing/decimator
+      :link-type: doc
+
+      Decimator node for downsampling data streams.
+
+   .. grid-item-card:: Delay
+      :link: backend_timing/delay
+      :link-type: doc
+
+      Introduces configurable N-sample delay to input signal.
+
+   .. grid-item-card:: Hold
+      :link: backend_timing/hold
+      :link-type: doc
+
+      Classical sample-and-hold node for arbitrary resampling.
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+
+   backend_timing/decimator
+   backend_timing/delay
+   backend_timing/hold
+
+
+backend.transform
+-----------------
+
+.. grid:: 1 1 2 3
+   :gutter: 3
+
+   .. grid-item-card:: Equation
+      :link: backend_transform/equation
+      :link-type: doc
+
+      Mathematical expression evaluation node for data transformation.
+
+   .. grid-item-card:: FFT
+      :link: backend_transform/fft
+      :link-type: doc
+
+      Fast Fourier Transform node for frequency domain analysis.
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+
+   backend_transform/equation
+   backend_transform/fft
+
+
+common
+------
+
+.. grid:: 1 1 2 3
+   :gutter: 3
+
+   .. grid-item-card:: Constants
+      :link: common/constants
+      :link-type: doc
+
+      Application-wide constants for g.Pype BCI framework.
+
+   .. grid-item-card:: Settings
+      :link: common/settings
+      :link-type: doc
+
+      Singleton settings manager for g.Pype application configuration.
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+
+   common/constants
+   common/settings
+
+
+frontend
+--------
+
+.. grid:: 1 1 2 3
+   :gutter: 3
+
+   .. grid-item-card:: MainApp
+      :link: frontend/main_app
+      :link-type: doc
+
+      Main application class for g.Pype frontend applications.
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+
+   frontend/main_app
+
+
+frontend.widgets
+----------------
+
+.. grid:: 1 1 2 3
+   :gutter: 3
+
+   .. grid-item-card:: ParadigmPresenter
+      :link: frontend_widgets/paradigm_presenter
+      :link-type: doc
+
+      Control widget for g.tec ParadigmPresenter integration.
+
+   .. grid-item-card:: PerformanceMonitor
+      :link: frontend_widgets/performance_monitor
+      :link-type: doc
+
+      Visualization widget for real-time pipeline performance monitoring.
+
+   .. grid-item-card:: Scope
+      :link: frontend_widgets/scope
+      :link-type: doc
+
+      Base class for oscilloscope-style visualization widgets.
+
+   .. grid-item-card:: SpectrumScope
+      :link: frontend_widgets/spectrum_scope
+      :link-type: doc
+
+      Frequency domain visualization widget for spectral analysis.
+
+   .. grid-item-card:: TimeSeriesScope
+      :link: frontend_widgets/time_series_scope
+      :link-type: doc
+
+      Real-time oscilloscope widget for multi-channel time series.
+
+   .. grid-item-card:: TriggerScope
+      :link: frontend_widgets/trigger_scope
+      :link-type: doc
+
+      Event-triggered oscilloscope widget for analyzing signal epochs.
+
+   .. grid-item-card:: Widget
+      :link: frontend_widgets/widget
+      :link-type: doc
+
+      Base class for BCI visualization widgets with automatic updates.
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+
+   frontend_widgets/paradigm_presenter
+   frontend_widgets/performance_monitor
+   frontend_widgets/scope
+   frontend_widgets/spectrum_scope
+   frontend_widgets/time_series_scope
+   frontend_widgets/trigger_scope
+   frontend_widgets/widget
+

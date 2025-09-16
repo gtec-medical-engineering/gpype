@@ -1,0 +1,212 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bandstop</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=0382cca7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../_static/js/line_numbers.js?v=98e8ade1"></script>
+      <script src="../../../_static/js/training_page.js?v=c174bc68"></script>
+      <script src="../../../_static/js/external_links.js?v=613fa8ce"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Butterworth" href="butterworth.html" />
+    <link rel="prev" title="Bandpass" href="bandpass.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            g.Pype v3.0.4
+              <img src="../../../_static/gpype-logo-sRGB.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../1_basic_concepts/index.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../2_gpype_training/index.html">g.Pype Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../5_faq/index.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../6_troubleshooting/index.html">Troubleshooting</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">SDK Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#backend">backend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#backend-core">backend.core</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#backend-filters">backend.filters</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="bandpass.html">Bandpass</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Bandstop</a></li>
+<li class="toctree-l3"><a class="reference internal" href="butterworth.html">Butterworth</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generic_filter.html">Generic Filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="highpass.html">Highpass</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lowpass.html">Lowpass</a></li>
+<li class="toctree-l3"><a class="reference internal" href="moving_average.html">Moving Average</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#backend-flow">backend.flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#backend-sinks">backend.sinks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#backend-sources">backend.sources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#backend-timing">backend.timing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#backend-transform">backend.transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#common">common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#frontend">frontend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#frontend-widgets">frontend.widgets</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../8_appendix/index.html">Appendix</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">g.Pype v3.0.4</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">SDK Reference</a></li>
+      <li class="breadcrumb-item active">Bandstop</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="bandstop">
+<h1>Bandstop<a class="headerlink" href="#bandstop" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="gpype.backend.filters.bandstop.Bandstop">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gpype.backend.filters.bandstop.</span></span><span class="sig-name descname"><span class="pre">Bandstop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f_lo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_hi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/backend/filters/bandstop.html#Bandstop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.backend.filters.bandstop.Bandstop" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="butterworth.html#gpype.backend.filters.base.butterworth.Butterworth" title="gpype.backend.filters.base.butterworth.Butterworth"><code class="xref py py-class docutils literal notranslate"><span class="pre">Butterworth</span></code></a></p>
+<p>Bandstop filter implementation using Butterworth design.</p>
+<p>Provides a convenient interface for creating bandstop (notch) filters that
+attenuate frequencies within a specific range while allowing frequencies
+outside this range to pass. Uses Butterworth design for smooth response.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>f_lo</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>)</p></li>
+<li><p><strong>f_hi</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>)</p></li>
+<li><p><strong>order</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="gpype.backend.filters.bandstop.Bandstop.Configuration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Configuration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_ports</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_ports</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/backend/filters/bandstop.html#Bandstop.Configuration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.backend.filters.bandstop.Bandstop.Configuration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="butterworth.html#gpype.backend.filters.base.butterworth.Butterworth.Configuration" title="gpype.backend.filters.base.butterworth.Butterworth.Configuration"><code class="xref py py-class docutils literal notranslate"><span class="pre">Configuration</span></code></a></p>
+<p>Configuration class for Bandstop filter parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_ports</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>)</p></li>
+<li><p><strong>output_ports</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="gpype.backend.filters.bandstop.Bandstop.Configuration.Keys">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Keys</span></span><a class="reference internal" href="../../../_modules/gpype/backend/filters/bandstop.html#Bandstop.Configuration.Keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.backend.filters.bandstop.Bandstop.Configuration.Keys" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="butterworth.html#gpype.backend.filters.base.butterworth.Butterworth.Configuration.Keys" title="gpype.backend.filters.base.butterworth.Butterworth.Configuration.Keys"><code class="xref py py-class docutils literal notranslate"><span class="pre">Keys</span></code></a></p>
+<p>Configuration keys for bandstop-specific parameters.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gpype.backend.filters.bandstop.Bandstop.Configuration.Keys.F_HI">
+<span class="sig-name descname"><span class="pre">F_HI</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'f_hi'</span></em><a class="headerlink" href="#gpype.backend.filters.bandstop.Bandstop.Configuration.Keys.F_HI" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gpype.backend.filters.bandstop.Bandstop.Configuration.Keys.F_LO">
+<span class="sig-name descname"><span class="pre">F_LO</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'f_lo'</span></em><a class="headerlink" href="#gpype.backend.filters.bandstop.Bandstop.Configuration.Keys.F_LO" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpype.backend.filters.bandstop.Bandstop.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f_lo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_hi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/backend/filters/bandstop.html#Bandstop.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.backend.filters.bandstop.Bandstop.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize the bandstop filter with cutoff frequencies.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>f_lo</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – Lower cutoff frequency in Hz (lower boundary of stopband).</p></li>
+<li><p><strong>f_hi</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – Upper cutoff frequency in Hz (upper boundary of stopband).</p></li>
+<li><p><strong>order</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Filter order. Defaults to DEFAULT_ORDER from parent class.</p></li>
+<li><p><strong>**kwargs</strong> – Additional arguments passed to parent Butterworth class.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If f_lo &gt;= f_hi or if frequencies are invalid.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="bandpass.html" class="btn btn-neutral float-left" title="Bandpass" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="butterworth.html" class="btn btn-neutral float-right" title="Butterworth" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright g.tec medical engineering GmbH.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

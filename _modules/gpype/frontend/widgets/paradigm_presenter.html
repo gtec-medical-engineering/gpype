@@ -5,9 +5,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.frontend.widgets.paradigm_presenter &mdash; g.Pype v3.0.3  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+  <title>gpype.frontend.widgets.paradigm_presenter</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=0382cca7" />
 
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
@@ -15,6 +17,10 @@
       <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../../_static/js/line_numbers.js?v=98e8ade1"></script>
+      <script src="../../../../_static/js/training_page.js?v=c174bc68"></script>
+      <script src="../../../../_static/js/external_links.js?v=613fa8ce"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -29,7 +35,8 @@
           
           
           <a href="../../../../index.html" class="icon icon-home">
-            g.Pype v3.0.3
+            g.Pype v3.0.4
+              <img src="../../../../_static/gpype-logo-sRGB.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -39,13 +46,13 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/1_basic_concepts/index.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/2_gpype_training/index.html">g.Pype Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/5_faq/index.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/6_troubleshooting/index.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/7_sdk_reference/index.html">SDK Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/8_appendix/index.html">Appendix</a></li>
 </ul>
 
         </div>
@@ -54,7 +61,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../index.html">g.Pype v3.0.3</a>
+          <a href="../../../../index.html">g.Pype v3.0.4</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -87,6 +94,7 @@
                                <span class="n">QMessageBox</span><span class="p">,</span> <span class="n">QPushButton</span><span class="p">,</span> <span class="n">QSizePolicy</span><span class="p">,</span>
                                <span class="n">QSpacerItem</span><span class="p">,</span> <span class="n">QWidget</span><span class="p">)</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">...backend.sources.udp_receiver</span><span class="w"> </span><span class="kn">import</span> <span class="n">UDPReceiver</span>
 <span class="c1"># Local imports</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base.widget</span><span class="w"> </span><span class="kn">import</span> <span class="n">Widget</span>
 
@@ -95,37 +103,44 @@
 
 
 <div class="viewcode-block" id="ParadigmPresenter">
-<a class="viewcode-back" href="../../../../content/frontend/widgets/paradigm_presenter.html#gpype.frontend.widgets.paradigm_presenter.ParadigmPresenter">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">ParadigmPresenter</span><span class="p">(</span><span class="n">Widget</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Control widget for g.tec ParadigmPresenter integration.</span>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/frontend_widgets/paradigm_presenter.html#gpype.frontend.widgets.paradigm_presenter.ParadigmPresenter">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ParadigmPresenter</span><span class="p">(</span><span class="n">Widget</span><span class="p">,</span> <span class="n">UDPReceiver</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Control widget for g.tec ParadigmPresenter integration.</span>
 
-<span class="sd">    Provides a user interface for loading, starting, and stopping paradigms</span>
-<span class="sd">    using the g.tec ParadigmPresenter library. Supports both folder-based</span>
-<span class="sd">    paradigm selection and manual file loading.</span>
+<span class="sd">    Provides interface for loading, starting, and stopping paradigms</span>
+<span class="sd">    using the g.tec ParadigmPresenter library. Inherits from UDPReceiver</span>
+<span class="sd">    to receive stimulus onset messages from ParadigmPresenter via UDP.</span>
+<span class="sd">    Supports folder-based paradigm selection and manual file loading.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="c1"># Source code fingerprint</span>
+    <span class="n">FINGERPRINT</span> <span class="o">=</span> <span class="s2">&quot;70ea1c44118f252b714c865617bfa0d5&quot;</span>
+
 <div class="viewcode-block" id="ParadigmPresenter.__init__">
-<a class="viewcode-back" href="../../../../content/frontend/widgets/paradigm_presenter.html#gpype.frontend.widgets.paradigm_presenter.ParadigmPresenter.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/frontend_widgets/paradigm_presenter.html#gpype.frontend.widgets.paradigm_presenter.ParadigmPresenter.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paradigm</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize the ParadigmPresenter control widget.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the ParadigmPresenter control widget.</span>
+
+<span class="sd">        Initializes both the Widget UI components and UDPReceiver for</span>
+<span class="sd">        receiving stimulus onset messages from ParadigmPresenter.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            paradigm (str, optional): Path to paradigm file (.xml) or folder</span>
-<span class="sd">                containing paradigm files. If file, it will be loaded directly.</span>
-<span class="sd">                If folder, a dropdown will be created for paradigm selection.</span>
-<span class="sd">                If None, a file dialog will be used for loading.</span>
+<span class="sd">                containing paradigm files. If None, uses file dialog.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Import gtec_pp here to avoid issues if not installed</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">gtec_pp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pp</span>
 
         <span class="c1"># Initialize base widget with horizontal layout</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="n">Widget</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
             <span class="n">widget</span><span class="o">=</span><span class="n">QWidget</span><span class="p">(),</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;ParadigmPresenter Control&quot;</span><span class="p">,</span>
             <span class="n">layout</span><span class="o">=</span><span class="n">QHBoxLayout</span><span class="p">,</span>
         <span class="p">)</span>
+
+        <span class="c1"># Initialize the UDP receiver</span>
+        <span class="n">UDPReceiver</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="c1"># Initialize the ParadigmPresenter instance</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">paradigm_presenter</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">ParadigmPresenter</span><span class="p">()</span>
@@ -327,8 +342,7 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">start_button</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_all_paradigms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Discover all paradigm files in the root folder and subfolders.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Discover all paradigm files in the root folder and subfolders.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            list: List of relative paths to valid paradigm XML files.</span>
@@ -361,8 +375,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_paradigms</span><span class="p">(</span><span class="n">paradigms</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate_paradigms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paradigms</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Validate paradigm files by attempting to load them.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate paradigm files by attempting to load them.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            paradigms (list): List of paradigm file paths to validate.</span>
@@ -385,10 +398,9 @@
         <span class="k">return</span> <span class="n">valid_paradigms</span>
 
 <div class="viewcode-block" id="ParadigmPresenter.terminate">
-<a class="viewcode-back" href="../../../../content/frontend/widgets/paradigm_presenter.html#gpype.frontend.widgets.paradigm_presenter.ParadigmPresenter.terminate">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/frontend_widgets/paradigm_presenter.html#gpype.frontend.widgets.paradigm_presenter.ParadigmPresenter.terminate">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">terminate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Clean up resources when the widget is terminated.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clean up resources when the widget is terminated.</span>
 
 <span class="sd">        Closes ParadigmPresenter windows and shuts down the presenter</span>
 <span class="sd">        before calling the parent terminate method.</span>

@@ -5,9 +5,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.backend.timing.delay &mdash; g.Pype v3.0.3  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+  <title>gpype.backend.timing.delay</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=0382cca7" />
 
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
@@ -15,6 +17,10 @@
       <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../../_static/js/line_numbers.js?v=98e8ade1"></script>
+      <script src="../../../../_static/js/training_page.js?v=c174bc68"></script>
+      <script src="../../../../_static/js/external_links.js?v=613fa8ce"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -29,7 +35,8 @@
           
           
           <a href="../../../../index.html" class="icon icon-home">
-            g.Pype v3.0.3
+            g.Pype v3.0.4
+              <img src="../../../../_static/gpype-logo-sRGB.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -39,13 +46,13 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/1_basic_concepts/index.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/2_gpype_training/index.html">g.Pype Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/5_faq/index.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/6_troubleshooting/index.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/7_sdk_reference/index.html">SDK Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/8_appendix/index.html">Appendix</a></li>
 </ul>
 
         </div>
@@ -54,7 +61,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../index.html">g.Pype v3.0.3</a>
+          <a href="../../../../index.html">g.Pype v3.0.4</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -87,35 +94,37 @@
 
 
 <div class="viewcode-block" id="Delay">
-<a class="viewcode-back" href="../../../../content/backend/timing/delay.html#gpype.backend.timing.delay.Delay">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_timing/delay.html#gpype.backend.timing.delay.Delay">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Delay</span><span class="p">(</span><span class="n">IONode</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Introduces a configurable N-sample delay to the input signal.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Introduces configurable N-sample delay to input signal.</span>
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    taps : int</span>
-<span class="sd">        Number of samples to delay the signal. Must be non-negative.</span>
-
-<span class="sd">    Notes</span>
-<span class="sd">    -----</span>
-<span class="sd">    - Output is zero-initialized until the buffer is filled.</span>
-<span class="sd">    - Efficient deque-based implementation with O(1) operations.</span>
+<span class="sd">    Uses efficient deque-based buffer. Output is zero-initialized until</span>
+<span class="sd">    buffer is filled with sufficient samples.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Delay.Configuration">
-<a class="viewcode-back" href="../../../../content/backend/timing/delay.html#gpype.backend.timing.delay.Delay.Configuration">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_timing/delay.html#gpype.backend.timing.delay.Delay.Configuration">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">Configuration</span><span class="p">(</span><span class="n">IONode</span><span class="o">.</span><span class="n">Configuration</span><span class="p">):</span>
 <div class="viewcode-block" id="Delay.Configuration.Keys">
-<a class="viewcode-back" href="../../../../content/backend/timing/delay.html#gpype.backend.timing.delay.Delay.Configuration.Keys">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_timing/delay.html#gpype.backend.timing.delay.Delay.Configuration.Keys">[docs]</a>
         <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">IONode</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
             <span class="n">NUM_SAMPLES</span> <span class="o">=</span> <span class="s2">&quot;num_samples&quot;</span></div>
 </div>
 
 
 <div class="viewcode-block" id="Delay.__init__">
-<a class="viewcode-back" href="../../../../content/backend/timing/delay.html#gpype.backend.timing.delay.Delay.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_timing/delay.html#gpype.backend.timing.delay.Delay.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize delay with specified number of samples.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            num_samples: Number of samples to delay signal. Must be</span>
+<span class="sd">                non-negative.</span>
+<span class="sd">            **kwargs: Additional arguments for parent IONode.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If num_samples is negative.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">num_samples</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Number of taps must be non-negative.&quot;</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">num_samples</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -125,10 +134,22 @@
 
 
 <div class="viewcode-block" id="Delay.setup">
-<a class="viewcode-back" href="../../../../content/backend/timing/delay.html#gpype.backend.timing.delay.Delay.setup">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_timing/delay.html#gpype.backend.timing.delay.Delay.setup">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">port_context_in</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Setup delay buffer and zero frame.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: Input data arrays.</span>
+<span class="sd">            port_context_in: Input port contexts containing channel count.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Output port contexts from parent setup.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If channel count is not provided in context.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">md</span> <span class="o">=</span> <span class="n">port_context_in</span><span class="p">[</span><span class="n">PORT_IN</span><span class="p">]</span>
         <span class="n">channel_count</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Constants</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">CHANNEL_COUNT</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">channel_count</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -139,8 +160,16 @@
 
 
 <div class="viewcode-block" id="Delay.step">
-<a class="viewcode-back" href="../../../../content/backend/timing/delay.html#gpype.backend.timing.delay.Delay.step">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_timing/delay.html#gpype.backend.timing.delay.Delay.step">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process one step of delay.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: Input data dictionary containing signal to delay.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dictionary with delayed signal or zero frame if buffer not full.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">data_in</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">PORT_IN</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_taps</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>

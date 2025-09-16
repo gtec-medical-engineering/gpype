@@ -5,9 +5,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.backend.filters.base.generic_filter &mdash; g.Pype v3.0.3  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
+  <title>gpype.backend.filters.base.generic_filter</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/custom.css?v=0382cca7" />
 
   
       <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
@@ -15,6 +17,10 @@
       <script src="../../../../../_static/documentation_options.js?v=5929fcd5"></script>
       <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../../../_static/js/line_numbers.js?v=98e8ade1"></script>
+      <script src="../../../../../_static/js/training_page.js?v=c174bc68"></script>
+      <script src="../../../../../_static/js/external_links.js?v=613fa8ce"></script>
     <script src="../../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" /> 
@@ -29,7 +35,8 @@
           
           
           <a href="../../../../../index.html" class="icon icon-home">
-            g.Pype v3.0.3
+            g.Pype v3.0.4
+              <img src="../../../../../_static/gpype-logo-sRGB.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
@@ -39,13 +46,13 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/introduction/index.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/backend/index.html">Backend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/common/index.html">Common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/examples/index.html">Examples</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/1_basic_concepts/index.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/2_gpype_training/index.html">g.Pype Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/5_faq/index.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/6_troubleshooting/index.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/7_sdk_reference/index.html">SDK Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/8_appendix/index.html">Appendix</a></li>
 </ul>
 
         </div>
@@ -54,7 +61,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../../index.html">g.Pype v3.0.3</a>
+          <a href="../../../../../index.html">g.Pype v3.0.4</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -86,46 +93,25 @@
 
 
 <div class="viewcode-block" id="GenericFilter">
-<a class="viewcode-back" href="../../../../../content/backend/filters/base/generic_filter.html#gpype.backend.filters.base.generic_filter.GenericFilter">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/backend_filters/generic_filter.html#gpype.backend.filters.base.generic_filter.GenericFilter">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">GenericFilter</span><span class="p">(</span><span class="n">IONode</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generic Linear Time-Invariant (LTI) digital filter for real-time use.</span>
 
-<span class="sd">    This class implements a flexible LTI filter using transfer function</span>
-<span class="sd">    coefficients (numerator &#39;b&#39; and denominator &#39;a&#39; polynomials). It</span>
-<span class="sd">    automatically converts to second-order sections (SOS) for improved</span>
-<span class="sd">    numerical stability and maintains internal state for continuous</span>
-<span class="sd">    processing of streaming data.</span>
-
-<span class="sd">    The filter supports both FIR (Finite Impulse Response) and IIR</span>
-<span class="sd">    (Infinite Impulse Response) implementations, making it suitable for</span>
-<span class="sd">    a wide range of signal processing applications in BCI and real-time</span>
-<span class="sd">    systems.</span>
-
-<span class="sd">    The transfer function is defined as:</span>
-<span class="sd">        H(z) = (b[0] + b[1]*z^-1 + ... + b[M]*z^-M) /</span>
-<span class="sd">               (a[0] + a[1]*z^-1 + ... + a[N]*z^-N)</span>
-
-<span class="sd">    This class uses second-order sections (SOS) internally instead of</span>
-<span class="sd">    direct form implementation to avoid numerical issues with high-order</span>
-<span class="sd">    filters or filters with coefficients spanning many orders of magnitude.</span>
-
-<span class="sd">    Attributes:</span>
-<span class="sd">        DEFAULT_ORDER: Default filter order (2) when not specified.</span>
-<span class="sd">        _sos: Second-order sections representation of the filter for</span>
-<span class="sd">            numerical stability.</span>
-<span class="sd">        _z: Filter state array maintaining continuity between processing</span>
-<span class="sd">            steps. Shape: (n_sections, n_states, n_channels).</span>
+<span class="sd">    Implements a flexible LTI filter using transfer function coefficients</span>
+<span class="sd">    (numerator &#39;b&#39; and denominator &#39;a&#39; polynomials). Converts to second-order</span>
+<span class="sd">    sections for numerical stability and maintains state for streaming data.</span>
+<span class="sd">    Supports both FIR and IIR implementations.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">DEFAULT_ORDER</span> <span class="o">=</span> <span class="mi">2</span>
 
 <div class="viewcode-block" id="GenericFilter.Configuration">
-<a class="viewcode-back" href="../../../../../content/backend/filters/base/generic_filter.html#gpype.backend.filters.base.generic_filter.GenericFilter.Configuration">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/backend_filters/generic_filter.html#gpype.backend.filters.base.generic_filter.GenericFilter.Configuration">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">Configuration</span><span class="p">(</span><span class="n">IONode</span><span class="o">.</span><span class="n">Configuration</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Configuration class for GenericFilter parameters.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="GenericFilter.Configuration.Keys">
-<a class="viewcode-back" href="../../../../../content/backend/filters/base/generic_filter.html#gpype.backend.filters.base.generic_filter.GenericFilter.Configuration.Keys">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/backend_filters/generic_filter.html#gpype.backend.filters.base.generic_filter.GenericFilter.Configuration.Keys">[docs]</a>
         <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">IONode</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Configuration keys for filter coefficients.&quot;&quot;&quot;</span>
 
@@ -135,15 +121,13 @@
 
 
 <div class="viewcode-block" id="GenericFilter.__init__">
-<a class="viewcode-back" href="../../../../../content/backend/filters/base/generic_filter.html#gpype.backend.filters.base.generic_filter.GenericFilter.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/backend_filters/generic_filter.html#gpype.backend.filters.base.generic_filter.GenericFilter.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the generic filter with transfer function coefficients.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            b: Numerator coefficients of the transfer function. Must be a</span>
-<span class="sd">                non-empty numpy array.</span>
-<span class="sd">            a: Denominator coefficients of the transfer function. Must be a</span>
-<span class="sd">                non-empty numpy array with non-zero first element.</span>
+<span class="sd">            b: Numerator coefficients of the transfer function.</span>
+<span class="sd">            a: Denominator coefficients of the transfer function.</span>
 <span class="sd">            **kwargs: Additional arguments passed to parent IONode class.</span>
 
 <span class="sd">        Raises:</span>
@@ -164,15 +148,14 @@
 
 
 <div class="viewcode-block" id="GenericFilter.setup">
-<a class="viewcode-back" href="../../../../../content/backend/filters/base/generic_filter.html#gpype.backend.filters.base.generic_filter.GenericFilter.setup">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/backend_filters/generic_filter.html#gpype.backend.filters.base.generic_filter.GenericFilter.setup">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">port_context_in</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Setup the generic filter before processing begins.</span>
 
-<span class="sd">        This method converts the transfer function to second-order sections</span>
-<span class="sd">        for numerical stability and initializes the filter state based on</span>
-<span class="sd">        the channel configuration.</span>
+<span class="sd">        Converts transfer function to second-order sections for numerical</span>
+<span class="sd">        stability and initializes filter state based on channel configuration.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: Initial data dictionary (not used in setup).</span>
@@ -217,16 +200,16 @@
 
 
 <div class="viewcode-block" id="GenericFilter.step">
-<a class="viewcode-back" href="../../../../../content/backend/filters/base/generic_filter.html#gpype.backend.filters.base.generic_filter.GenericFilter.step">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/backend_filters/generic_filter.html#gpype.backend.filters.base.generic_filter.GenericFilter.step">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply the generic filter to input data.</span>
 
-<span class="sd">        Processes the input data through the filter while maintaining</span>
-<span class="sd">        filter state for continuous operation across processing steps.</span>
+<span class="sd">        Processes input data through the filter while maintaining filter</span>
+<span class="sd">        state for continuous operation across processing steps.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: Dictionary containing input data with key PORT_IN.</span>
-<span class="sd">                Input data should be 2D array (samples x channels).</span>
+<span class="sd">                Input should be 2D array (samples x channels).</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Dictionary with filtered data under key PORT_OUT.</span>

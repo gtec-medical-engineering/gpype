@@ -1,0 +1,4 @@
+Acknowledgements
+----------------
+
+Big thanks to Martin Walchshofer for early prototyping, idea exchanges, and all the inspiration. And hats off to our beta testers for reporting countless bugs and helping make g.Pype better for everyone.

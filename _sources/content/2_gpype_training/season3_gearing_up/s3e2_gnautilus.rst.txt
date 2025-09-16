@@ -1,0 +1,17 @@
+Episode 2: g.Nautilus
+---------------------
+
+In this episode, you learn how to record EEG data with g.Pype and g.Nautilus.
+
+.. admonition:: Note
+   :class: warning
+
+   This page is still under development. Until we have the step-by-step instructions ready, please refer to the
+   code example below.
+
+**File example_devices_gnautilus.py** -- `View file on GitHub <https://github.com/gtec-medical-engineering/gpype/blob/main/examples/example_devices_gnautilus.py>`_
+
+.. literalinclude:: ../../../../examples/example_devices_gnautilus.py
+   :language: python
+   :linenos:
+   :dedent: 0

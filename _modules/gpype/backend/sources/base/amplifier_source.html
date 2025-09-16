@@ -5,9 +5,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.backend.sources.base.amplifier_source &mdash; g.Pype v3.0.3  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
+  <title>gpype.backend.sources.base.amplifier_source</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/custom.css?v=0382cca7" />
 
   
       <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
@@ -15,6 +17,10 @@
       <script src="../../../../../_static/documentation_options.js?v=5929fcd5"></script>
       <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../../../_static/js/line_numbers.js?v=98e8ade1"></script>
+      <script src="../../../../../_static/js/training_page.js?v=c174bc68"></script>
+      <script src="../../../../../_static/js/external_links.js?v=613fa8ce"></script>
     <script src="../../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" /> 
@@ -29,7 +35,8 @@
           
           
           <a href="../../../../../index.html" class="icon icon-home">
-            g.Pype v3.0.3
+            g.Pype v3.0.4
+              <img src="../../../../../_static/gpype-logo-sRGB.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
@@ -39,13 +46,13 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/introduction/index.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/backend/index.html">Backend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/common/index.html">Common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/examples/index.html">Examples</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/1_basic_concepts/index.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/2_gpype_training/index.html">g.Pype Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/5_faq/index.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/6_troubleshooting/index.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/7_sdk_reference/index.html">SDK Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/8_appendix/index.html">Appendix</a></li>
 </ul>
 
         </div>
@@ -54,7 +61,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../../index.html">g.Pype v3.0.3</a>
+          <a href="../../../../../index.html">g.Pype v3.0.4</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -88,45 +95,21 @@
 
 
 <div class="viewcode-block" id="AmplifierSource">
-<a class="viewcode-back" href="../../../../../content/backend/sources/base/amplifier_source.html#gpype.backend.sources.base.amplifier_source.AmplifierSource">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/backend_sources/amplifier_source.html#gpype.backend.sources.base.amplifier_source.AmplifierSource">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">AmplifierSource</span><span class="p">(</span><span class="n">Source</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for amplifier-based data acquisition sources.</span>
 
-<span class="sd">    This abstract class provides the foundation for interfacing with hardware</span>
-<span class="sd">    amplifiers and data acquisition devices in BCI applications. It extends</span>
-<span class="sd">    the basic Source functionality with amplifier-specific configuration</span>
-<span class="sd">    and device management capabilities.</span>
-
-<span class="sd">    The class handles:</span>
-<span class="sd">    - Hardware device enumeration and management</span>
-<span class="sd">    - Sampling rate configuration with inheritance support</span>
-<span class="sd">    - Multi-channel data acquisition setup</span>
-<span class="sd">    - Frame-based data buffering configuration</span>
-
-<span class="sd">    Features:</span>
-<span class="sd">    - Support for INHERITED sampling rate (determined at runtime)</span>
-<span class="sd">    - Device list management for hardware abstraction</span>
-<span class="sd">    - Automatic port configuration for amplifier data streams</span>
-<span class="sd">    - Integration with g.Pype timing and context framework</span>
-
-<span class="sd">    Attributes:</span>
-<span class="sd">        _devices: List of available amplifier devices</span>
-<span class="sd">        _device: Currently selected/connected amplifier device</span>
-
-<span class="sd">    Note:</span>
-<span class="sd">        This is an abstract base class. Concrete implementations must</span>
-<span class="sd">        provide device-specific connection and data acquisition logic.</span>
-<span class="sd">        The sampling rate can be set to Constants.INHERITED (-1) to</span>
-<span class="sd">        indicate it should be determined during device setup.</span>
+<span class="sd">    Provides hardware device management, sampling rate configuration,</span>
+<span class="sd">    and multi-channel data acquisition setup for BCI applications.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="AmplifierSource.Configuration">
-<a class="viewcode-back" href="../../../../../content/backend/sources/base/amplifier_source.html#gpype.backend.sources.base.amplifier_source.AmplifierSource.Configuration">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/backend_sources/amplifier_source.html#gpype.backend.sources.base.amplifier_source.AmplifierSource.Configuration">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">Configuration</span><span class="p">(</span><span class="n">Source</span><span class="o">.</span><span class="n">Configuration</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Configuration class for AmplifierSource parameters.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="AmplifierSource.Configuration.Keys">
-<a class="viewcode-back" href="../../../../../content/backend/sources/base/amplifier_source.html#gpype.backend.sources.base.amplifier_source.AmplifierSource.Configuration.Keys">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/backend_sources/amplifier_source.html#gpype.backend.sources.base.amplifier_source.AmplifierSource.Configuration.Keys">[docs]</a>
         <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">Source</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Configuration keys for amplifier source settings.&quot;&quot;&quot;</span>
 
@@ -134,22 +117,17 @@
 
 
 <div class="viewcode-block" id="AmplifierSource.Configuration.__init__">
-<a class="viewcode-back" href="../../../../../content/backend/sources/base/amplifier_source.html#gpype.backend.sources.base.amplifier_source.AmplifierSource.Configuration.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/backend_sources/amplifier_source.html#gpype.backend.sources.base.amplifier_source.AmplifierSource.Configuration.__init__">[docs]</a>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Initialize configuration with sampling rate validation.</span>
 
 <span class="sd">            Args:</span>
-<span class="sd">                sampling_rate: Sampling rate in Hz. Must be positive, or</span>
-<span class="sd">                    Constants.INHERITED (-1) to indicate the rate should</span>
-<span class="sd">                    be determined during device setup.</span>
+<span class="sd">                sampling_rate: Sampling rate in Hz. Must be positive or</span>
+<span class="sd">                    Constants.INHERITED for runtime determination.</span>
 <span class="sd">                **kwargs: Additional configuration parameters.</span>
 
 <span class="sd">            Raises:</span>
 <span class="sd">                ValueError: If sampling_rate is not positive and not INHERITED.</span>
-
-<span class="sd">            Note:</span>
-<span class="sd">                INHERITED sampling rate allows the amplifier hardware to</span>
-<span class="sd">                determine the optimal sampling rate during initialization.</span>
 <span class="sd">            &quot;&quot;&quot;</span>
             <span class="c1"># Validate sampling rate (allow INHERITED for runtime config)</span>
             <span class="k">if</span> <span class="n">sampling_rate</span> <span class="o">!=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">INHERITED</span> <span class="ow">and</span> <span class="n">sampling_rate</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
@@ -163,7 +141,7 @@
     <span class="n">_device</span><span class="p">:</span> <span class="n">Any</span>
 
 <div class="viewcode-block" id="AmplifierSource.__init__">
-<a class="viewcode-back" href="../../../../../content/backend/sources/base/amplifier_source.html#gpype.backend.sources.base.amplifier_source.AmplifierSource.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/backend_sources/amplifier_source.html#gpype.backend.sources.base.amplifier_source.AmplifierSource.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">sampling_rate</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -171,34 +149,14 @@
         <span class="n">frame_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the amplifier source with acquisition parameters.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize amplifier source with acquisition parameters.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            sampling_rate: Sampling rate in Hz. Must be positive or</span>
 <span class="sd">                Constants.INHERITED for runtime determination.</span>
-<span class="sd">            channel_count: Number of data channels to acquire from amplifier.</span>
-<span class="sd">                Must be positive integer.</span>
-<span class="sd">            frame_size: Number of samples per data frame. Must be positive</span>
-<span class="sd">                integer. Affects processing latency and throughput.</span>
-<span class="sd">            **kwargs: Additional arguments passed to parent Source class.</span>
-
-<span class="sd">        Example:</span>
-<span class="sd">            Standard EEG amplifier configuration::</span>
-
-<span class="sd">                amp = AmplifierSource(sampling_rate=1000.0,</span>
-<span class="sd">                                    channel_count=64,</span>
-<span class="sd">                                    frame_size=256)</span>
-
-<span class="sd">            Inherited sampling rate (determined by hardware)::</span>
-
-<span class="sd">                amp = AmplifierSource(sampling_rate=Constants.INHERITED,</span>
-<span class="sd">                                    channel_count=32,</span>
-<span class="sd">                                    frame_size=128)</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            Output ports are automatically configured if not provided.</span>
-<span class="sd">            Device list is initialized empty and should be populated</span>
-<span class="sd">            by concrete implementations during device discovery.</span>
+<span class="sd">            channel_count: Number of data channels to acquire.</span>
+<span class="sd">            frame_size: Number of samples per data frame.</span>
+<span class="sd">            **kwargs: Additional arguments for parent Source class.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Extract output_ports from kwargs with default configuration</span>
         <span class="n">op_key</span> <span class="o">=</span> <span class="n">AmplifierSource</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">OUTPUT_PORTS</span>
@@ -221,29 +179,18 @@
 
 
 <div class="viewcode-block" id="AmplifierSource.setup">
-<a class="viewcode-back" href="../../../../../content/backend/sources/base/amplifier_source.html#gpype.backend.sources.base.amplifier_source.AmplifierSource.setup">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/backend_sources/amplifier_source.html#gpype.backend.sources.base.amplifier_source.AmplifierSource.setup">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">port_context_in</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Setup output port contexts with sampling rate information.</span>
 
-<span class="sd">        Configures output port contexts by adding sampling rate information</span>
-<span class="sd">        to each configured output port. This method ensures downstream nodes</span>
-<span class="sd">        receive accurate timing information for amplifier data processing.</span>
-
 <span class="sd">        Args:</span>
-<span class="sd">            data: Dictionary of input data arrays (empty for source nodes).</span>
+<span class="sd">            data: Input data arrays (empty for source nodes).</span>
 <span class="sd">            port_context_in: Input port contexts (empty for source nodes).</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Dictionary of output port contexts with sampling_rate information</span>
-<span class="sd">            added to each configured output port.</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            The sampling rate may have been determined during device</span>
-<span class="sd">            initialization if it was set to Constants.INHERITED. All</span>
-<span class="sd">            downstream nodes will receive the actual sampling rate value</span>
-<span class="sd">            for proper signal processing configuration.</span>
+<span class="sd">            Dictionary of output port contexts with sampling_rate information.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Call parent setup to initialize base contexts</span>
         <span class="n">port_context_out</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">port_context_in</span><span class="p">)</span>

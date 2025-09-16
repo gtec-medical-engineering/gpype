@@ -1,0 +1,17 @@
+Episode 3: Auditory Evoked Potentials
+-------------------------------------
+
+In this episode, you learn how to record Auditory Evoked Potentials (AEPs) using g.Pype.
+
+.. admonition:: Note
+   :class: warning
+
+   This page is still under development. Until we have the step-by-step instructions ready, please refer to the
+   code example below.
+
+**File example_paradigm_aep_single_stim.py** -- `View file on GitHub <https://github.com/gtec-medical-engineering/gpype/blob/main/examples/example_paradigm_aep_single_stim.py>`_
+
+.. literalinclude:: ../../../../examples/example_paradigm_aep_single_stim.py
+   :language: python
+   :linenos:
+   :dedent: 0

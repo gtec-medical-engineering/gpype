@@ -1,0 +1,6 @@
+How to Cite g.Pype
+------------------
+
+A peer-reviewed publication describing g.Pype in detail is currently in preparation and will be announced once available. In the meantime, please cite g.Pype as software using the following reference:
+
+|gpype_cite|

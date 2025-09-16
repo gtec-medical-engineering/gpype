@@ -1,0 +1,25 @@
+Episode 2: Framing Data
+-----------------------
+
+In this episode, you learn how to use the Framer node to structure incoming data streams into manageable chunks for processing.
+
+.. tab-set::
+
+   .. tab-item:: Read
+      :sync: read
+
+      TBD
+
+   .. tab-item:: Watch
+      :sync: watch
+
+      TBD
+
+   .. tab-item:: Code
+      :sync: code
+
+      TBD
+
+      .. code-block:: python
+
+         TBD

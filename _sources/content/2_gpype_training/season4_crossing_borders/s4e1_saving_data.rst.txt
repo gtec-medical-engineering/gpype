@@ -1,0 +1,28 @@
+Episode 1: Saving Data
+----------------------
+
+In this episode, you learn how to save EEG data to a file using g.Pype.
+
+.. admonition:: Note
+   :class: warning
+
+   This page is still under development. Until we have the step-by-step instructions ready, please refer to the
+   code example below.
+
+**File example_basic_file_writer_record.py (write recorded data)** -- `View file on GitHub`__
+
+.. __: https://github.com/gtec-medical-engineering/gpype/blob/main/examples/example_basic_file_writer_record.py
+
+.. literalinclude:: ../../../../examples/example_basic_file_writer_record.py
+   :language: python
+   :linenos:
+   :dedent: 0
+
+**File example_basic_file_writer_plot.py (plot recorded data)** -- `View file on GitHub`__
+
+.. __: https://github.com/gtec-medical-engineering/gpype/blob/main/examples/example_basic_file_writer_plot.py
+
+.. literalinclude:: ../../../../examples/example_basic_file_writer_plot.py
+   :language: python
+   :linenos:
+   :dedent: 0

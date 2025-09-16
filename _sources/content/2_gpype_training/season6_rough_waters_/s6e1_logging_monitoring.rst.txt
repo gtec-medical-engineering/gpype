@@ -1,0 +1,25 @@
+Episode 1: Logging and Monitoring
+---------------------------------
+
+In this episode, you learn about logging and monitoring features in g.Pype.
+
+.. tab-set::
+
+   .. tab-item:: Read
+      :sync: read
+
+      TBD
+
+   .. tab-item:: Watch
+      :sync: watch
+
+      TBD
+
+   .. tab-item:: Code
+      :sync: code
+
+      TBD
+
+      .. code-block:: python
+
+         TBD

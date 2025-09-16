@@ -1,0 +1,330 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Episode 4: Moving Average</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=0382cca7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../_static/js/line_numbers.js?v=98e8ade1"></script>
+      <script src="../../../_static/js/training_page.js?v=c174bc68"></script>
+      <script src="../../../_static/js/external_links.js?v=613fa8ce"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Episode 5: Decimation" href="s2e5_decimator.html" />
+    <link rel="prev" title="Episode 3: Basic Transforms" href="s2e3_equation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            g.Pype v3.0.4
+              <img src="../../../_static/gpype-logo-sRGB.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../1_basic_concepts/index.html">Basic Concepts</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">g.Pype Training</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#season-1-boarding">Season 1: Boarding</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#season-2-easy-drifting">Season 2: Easy Drifting</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="s2e1_filtering.html">Episode 1: Standard Filtering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="s2e2_router.html">Episode 2: Routing Signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="s2e3_equation.html">Episode 3: Basic Transforms</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Episode 4: Moving Average</a></li>
+<li class="toctree-l3"><a class="reference internal" href="s2e5_decimator.html">Episode 5: Decimation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="s2e6_fft.html">Episode 6: Spectral Analysis via FFT</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#season-3-gearing-up">Season 3: Gearing Up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#season-4-crossing-borders">Season 4: Crossing Borders</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#season-5-engaging-senses">Season 5: Engaging Senses</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../5_faq/index.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../6_troubleshooting/index.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../7_sdk_reference/index.html">SDK Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../8_appendix/index.html">Appendix</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">g.Pype v3.0.4</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">g.Pype Training</a></li>
+      <li class="breadcrumb-item active">Episode 4: Moving Average</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="episode-4-moving-average">
+<h1>Episode 4: Moving Average<a class="headerlink" href="#episode-4-moving-average" title="Link to this heading"></a></h1>
+<p>In this episode, you learn how to use a moving average filter with g.Pype.</p>
+<div class="warning admonition">
+<p class="admonition-title">Note</p>
+<p>This page is still under development. Until we have the step-by-step instructions ready, please refer to the
+code example below.</p>
+</div>
+<p><strong>File example_composite_alpha_power.py</strong> – <a class="reference external" href="https://github.com/gtec-medical-engineering/gpype/blob/main/examples/example_composite_alpha_power.py">View file on GitHub</a></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos">  2</span><span class="sd">Composite Alpha Power Analysis Example - Real-time EEG Alpha Band Processing</span>
+<span class="linenos">  3</span>
+<span class="linenos">  4</span><span class="sd">This example demonstrates a complete alpha power analysis pipeline that</span>
+<span class="linenos">  5</span><span class="sd">simulates ps EEG data with modulated alpha activity and processes it</span>
+<span class="linenos">  6</span><span class="sd">through multiple signal processing stages. It showcases g.Pype features</span>
+<span class="linenos">  7</span><span class="sd">including signal generation, filtering, power computation, and multi-channel</span>
+<span class="linenos">  8</span><span class="sd">visualization.</span>
+<span class="linenos">  9</span>
+<span class="linenos"> 10</span><span class="sd">What this example shows:</span>
+<span class="linenos"> 11</span><span class="sd">- Pseudo EEG signal simulation with modulated alpha activity</span>
+<span class="linenos"> 12</span><span class="sd">- Alpha band filtering (8-12 Hz) for brain rhythm analysis</span>
+<span class="linenos"> 13</span><span class="sd">- Power extraction using signal squaring</span>
+<span class="linenos"> 14</span><span class="sd">- Temporal smoothing with moving averages</span>
+<span class="linenos"> 15</span><span class="sd">- Data decimation for computational efficiency</span>
+<span class="linenos"> 16</span><span class="sd">- Multi-stage pipeline visualization with Router node</span>
+<span class="linenos"> 17</span><span class="sd">- Real-time processing of neurophysiological signals</span>
+<span class="linenos"> 18</span>
+<span class="linenos"> 19</span><span class="sd">Pipeline architecture:</span>
+<span class="linenos"> 20</span><span class="sd">1. Signal Generation: Creates 8-channel noise + alpha modulation</span>
+<span class="linenos"> 21</span><span class="sd">2. Alpha Filtering: Extracts 8-12 Hz frequency band</span>
+<span class="linenos"> 22</span><span class="sd">3. Power Analysis: Computes instantaneous power (signal squared)</span>
+<span class="linenos"> 23</span><span class="sd">4. Temporal Smoothing: Moving average for stable power estimates</span>
+<span class="linenos"> 24</span><span class="sd">5. Data Reduction: Decimation for efficient downstream processing</span>
+<span class="linenos"> 25</span><span class="sd">6. Multi-channel Display: Router combines all processing stages</span>
+<span class="linenos"> 26</span>
+<span class="linenos"> 27</span><span class="sd">Expected behavior:</span>
+<span class="linenos"> 28</span><span class="sd">When you run this example:</span>
+<span class="linenos"> 29</span><span class="sd">- Opens time-series visualization showing 7 processing stages</span>
+<span class="linenos"> 30</span><span class="sd">- Channel 1: Raw noisy signal with modulated alpha</span>
+<span class="linenos"> 31</span><span class="sd">- Channel 2: 0.5 Hz modulation signal (low-frequency envelope)</span>
+<span class="linenos"> 32</span><span class="sd">- Channel 3: Modulated signal (noise × (1 + modulation))</span>
+<span class="linenos"> 33</span><span class="sd">- Channel 4: Alpha-filtered signal (8-12 Hz band)</span>
+<span class="linenos"> 34</span><span class="sd">- Channel 5: Instantaneous alpha power (squared signal)</span>
+<span class="linenos"> 35</span><span class="sd">- Channel 6: Smoothed alpha power (moving average)</span>
+<span class="linenos"> 36</span><span class="sd">- Channel 7: Decimated power (reduced sampling rate)</span>
+<span class="linenos"> 37</span>
+<span class="linenos"> 38</span><span class="sd">Real-world applications:</span>
+<span class="linenos"> 39</span><span class="sd">- EEG alpha rhythm analysis for neurofeedback systems</span>
+<span class="linenos"> 40</span><span class="sd">- Brain state monitoring and cognitive load assessment</span>
+<span class="linenos"> 41</span><span class="sd">- Sleep stage detection using alpha power dynamics</span>
+<span class="linenos"> 42</span><span class="sd">- Attention and relaxation state classification</span>
+<span class="linenos"> 43</span><span class="sd">- Real-time BCI applications using alpha modulation</span>
+<span class="linenos"> 44</span><span class="sd">- Clinical EEG analysis for neurological assessment</span>
+<span class="linenos"> 45</span>
+<span class="linenos"> 46</span><span class="sd">Scientific background:</span>
+<span class="linenos"> 47</span><span class="sd">Alpha waves (8-12 Hz) are prominent EEG rhythms associated with:</span>
+<span class="linenos"> 48</span><span class="sd">- Relaxed wakefulness and eyes-closed states</span>
+<span class="linenos"> 49</span><span class="sd">- Attention regulation and cognitive processing</span>
+<span class="linenos"> 50</span><span class="sd">- Sensorimotor idle states and cortical inhibition</span>
+<span class="linenos"> 51</span><span class="sd">- Individual differences in cognitive performance</span>
+<span class="linenos"> 52</span><span class="sd">- Pathological changes in neurological disorders</span>
+<span class="linenos"> 53</span>
+<span class="linenos"> 54</span><span class="sd">Technical features:</span>
+<span class="linenos"> 55</span><span class="sd">- Realistic signal modeling with controlled alpha modulation</span>
+<span class="linenos"> 56</span><span class="sd">- Multi-stage filtering and power analysis pipeline</span>
+<span class="linenos"> 57</span><span class="sd">- Efficient data processing with decimation</span>
+<span class="linenos"> 58</span><span class="sd">- Real-time parameter monitoring across processing stages</span>
+<span class="linenos"> 59</span>
+<span class="linenos"> 60</span><span class="sd">Pipeline components explained:</span>
+<span class="linenos"> 61</span><span class="sd">- Generator: Creates controllable synthetic EEG-like signals</span>
+<span class="linenos"> 62</span><span class="sd">- Equation: Performs mathematical operations (modulation, power)</span>
+<span class="linenos"> 63</span><span class="sd">- Bandpass: Implements digital filtering for frequency selection</span>
+<span class="linenos"> 64</span><span class="sd">- MovingAverage: Temporal smoothing for stable estimates</span>
+<span class="linenos"> 65</span><span class="sd">- Decimator: Reduces data rate while preserving information</span>
+<span class="linenos"> 66</span><span class="sd">- Router: Combines multiple signals for comparative visualization</span>
+<span class="linenos"> 67</span><span class="sd">- TimeSeriesScope: Real-time multi-channel display</span>
+<span class="linenos"> 68</span>
+<span class="linenos"> 69</span><span class="sd">Usage:</span>
+<span class="linenos"> 70</span><span class="sd">    python example_composite_alpha_power.py</span>
+<span class="linenos"> 71</span>
+<span class="linenos"> 72</span><span class="sd">Prerequisites:</span>
+<span class="linenos"> 73</span><span class="sd">    - g.Pype framework with signal processing modules</span>
+<span class="linenos"> 74</span><span class="sd">    - Real-time visualization capabilities</span>
+<span class="linenos"> 75</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos"> 76</span><span class="kn">import</span><span class="w"> </span><span class="nn">gpype</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gp</span>
+<span class="linenos"> 77</span>
+<span class="linenos"> 78</span><span class="c1"># Sampling rate configuration for realistic EEG simulation</span>
+<span class="linenos"> 79</span><span class="n">fs</span> <span class="o">=</span> <span class="mi">250</span>  <span class="c1"># 250 Hz - standard EEG sampling rate</span>
+<span class="linenos"> 80</span>
+<span class="linenos"> 81</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos"> 82</span>
+<span class="linenos"> 83</span>    <span class="c1"># Initialize main application for GUI event handling</span>
+<span class="linenos"> 84</span>    <span class="n">app</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">MainApp</span><span class="p">()</span>
+<span class="linenos"> 85</span>
+<span class="linenos"> 86</span>    <span class="c1"># Create processing pipeline for alpha power analysis</span>
+<span class="linenos"> 87</span>    <span class="n">p</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">()</span>
+<span class="linenos"> 88</span>
+<span class="linenos"> 89</span>    <span class="c1"># === SIGNAL GENERATION STAGE ===</span>
+<span class="linenos"> 90</span>    <span class="c1"># Generate 8-channel background noise simulating baseline EEG activity</span>
+<span class="linenos"> 91</span>    <span class="n">noise</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Generator</span><span class="p">(</span>
+<span class="linenos"> 92</span>        <span class="n">sampling_rate</span><span class="o">=</span><span class="n">fs</span><span class="p">,</span> <span class="n">channel_count</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">noise_amplitude</span><span class="o">=</span><span class="mi">5</span>
+<span class="linenos"> 93</span>    <span class="p">)</span>  <span class="c1"># 5 µV RMS noise level</span>
+<span class="linenos"> 94</span>
+<span class="linenos"> 95</span>    <span class="c1"># Generate low-frequency modulation signal (0.5 Hz sine wave)</span>
+<span class="linenos"> 96</span>    <span class="c1"># This simulates natural alpha power fluctuations</span>
+<span class="linenos"> 97</span>    <span class="n">modulator</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Generator</span><span class="p">(</span>
+<span class="linenos"> 98</span>        <span class="n">sampling_rate</span><span class="o">=</span><span class="n">fs</span><span class="p">,</span>
+<span class="linenos"> 99</span>        <span class="n">channel_count</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="linenos">100</span>        <span class="n">signal_frequency</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>  <span class="c1"># 0.5 Hz modulation</span>
+<span class="linenos">101</span>        <span class="n">signal_amplitude</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># Modulation depth</span>
+<span class="linenos">102</span>        <span class="n">signal_shape</span><span class="o">=</span><span class="s2">&quot;sine&quot;</span><span class="p">,</span>
+<span class="linenos">103</span>    <span class="p">)</span>
+<span class="linenos">104</span>
+<span class="linenos">105</span>    <span class="c1"># === SIGNAL MODULATION STAGE ===</span>
+<span class="linenos">106</span>    <span class="c1"># Apply amplitude modulation: noise × (1 + modulation)</span>
+<span class="linenos">107</span>    <span class="c1"># Creates realistic EEG with time-varying alpha power</span>
+<span class="linenos">108</span>    <span class="n">multiplier</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Equation</span><span class="p">(</span><span class="s2">&quot;n * (1 + m)&quot;</span><span class="p">)</span>
+<span class="linenos">109</span>
+<span class="linenos">110</span>    <span class="c1"># === ALPHA BAND FILTERING STAGE ===</span>
+<span class="linenos">111</span>    <span class="c1"># Extract alpha frequency band (8-12 Hz) from modulated signal</span>
+<span class="linenos">112</span>    <span class="c1"># Standard alpha band definition for EEG analysis</span>
+<span class="linenos">113</span>    <span class="n">alpha_filter</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Bandpass</span><span class="p">(</span><span class="n">f_lo</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">f_hi</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>  <span class="c1"># Upper alpha</span>
+<span class="linenos">114</span>
+<span class="linenos">115</span>    <span class="c1"># === POWER ANALYSIS STAGE ===</span>
+<span class="linenos">116</span>    <span class="c1"># Compute instantaneous power using signal squaring</span>
+<span class="linenos">117</span>    <span class="c1"># Power = signal² provides envelope of alpha activity</span>
+<span class="linenos">118</span>    <span class="n">power</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Equation</span><span class="p">(</span><span class="s2">&quot;in**2&quot;</span><span class="p">)</span>
+<span class="linenos">119</span>
+<span class="linenos">120</span>    <span class="c1"># === TEMPORAL SMOOTHING STAGE ===</span>
+<span class="linenos">121</span>    <span class="c1"># Apply moving average to stabilize power estimates</span>
+<span class="linenos">122</span>    <span class="c1"># 125 samples = 0.5 seconds at 250 Hz sampling rate</span>
+<span class="linenos">123</span>    <span class="n">moving_average</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">MovingAverage</span><span class="p">(</span><span class="n">window_size</span><span class="o">=</span><span class="mi">125</span><span class="p">)</span>
+<span class="linenos">124</span>
+<span class="linenos">125</span>    <span class="c1"># === DATA REDUCTION STAGE ===</span>
+<span class="linenos">126</span>    <span class="c1"># Reduce data rate for efficient visualization and storage</span>
+<span class="linenos">127</span>    <span class="c1"># Factor 50: 250 Hz → 5 Hz (adequate for alpha power tracking)</span>
+<span class="linenos">128</span>    <span class="n">decimator</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Decimator</span><span class="p">(</span><span class="n">decimation_factor</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+<span class="linenos">129</span>
+<span class="linenos">130</span>    <span class="c1"># Hold last value for stable display between updates</span>
+<span class="linenos">131</span>    <span class="n">hold</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Hold</span><span class="p">()</span>
+<span class="linenos">132</span>
+<span class="linenos">133</span>    <span class="c1"># === VISUALIZATION ROUTING STAGE ===</span>
+<span class="linenos">134</span>    <span class="c1"># Router combines all processing stages for comparative analysis</span>
+<span class="linenos">135</span>    <span class="c1"># Allows simultaneous viewing of raw, filtered, and processed signals</span>
+<span class="linenos">136</span>    <span class="n">merger</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Router</span><span class="p">(</span>
+<span class="linenos">137</span>        <span class="n">input_selector</span><span class="o">=</span><span class="p">{</span>
+<span class="linenos">138</span>            <span class="s2">&quot;noise&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span>  <span class="c1"># Raw noise</span>
+<span class="linenos">139</span>            <span class="s2">&quot;modulator&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span>  <span class="c1"># Modulation</span>
+<span class="linenos">140</span>            <span class="s2">&quot;multiplier&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span>  <span class="c1"># Modulated</span>
+<span class="linenos">141</span>            <span class="s2">&quot;alpha_filter&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span>  <span class="c1"># Alpha-filtered</span>
+<span class="linenos">142</span>            <span class="s2">&quot;power&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span>  <span class="c1"># Power signal</span>
+<span class="linenos">143</span>            <span class="s2">&quot;moving_average&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span>  <span class="c1"># Smoothed power</span>
+<span class="linenos">144</span>            <span class="s2">&quot;hold&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+<span class="linenos">145</span>        <span class="p">},</span>  <span class="c1"># Final output</span>
+<span class="linenos">146</span>        <span class="n">output_selector</span><span class="o">=</span><span class="p">[</span><span class="n">gp</span><span class="o">.</span><span class="n">Router</span><span class="o">.</span><span class="n">ALL</span><span class="p">],</span>
+<span class="linenos">147</span>    <span class="p">)</span>
+<span class="linenos">148</span>
+<span class="linenos">149</span>    <span class="c1"># === REAL-TIME VISUALIZATION ===</span>
+<span class="linenos">150</span>    <span class="c1"># Multi-channel scope for real-time signal monitoring</span>
+<span class="linenos">151</span>    <span class="c1"># 10-second time window with ±10 µV amplitude range</span>
+<span class="linenos">152</span>    <span class="n">scope</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">TimeSeriesScope</span><span class="p">(</span>
+<span class="linenos">153</span>        <span class="n">amplitude_limit</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">time_window</span><span class="o">=</span><span class="mi">10</span>  <span class="c1"># ±10 µV display range</span>
+<span class="linenos">154</span>    <span class="p">)</span>  <span class="c1"># 10-second time window</span>
+<span class="linenos">155</span>
+<span class="linenos">156</span>    <span class="c1"># === PIPELINE CONNECTIONS ===</span>
+<span class="linenos">157</span>    <span class="c1"># Connect main processing chain: noise → modulation → filter → power</span>
+<span class="linenos">158</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">noise</span><span class="p">,</span> <span class="n">multiplier</span><span class="p">[</span><span class="s2">&quot;n&quot;</span><span class="p">])</span>  <span class="c1"># Noise input to multiplier</span>
+<span class="linenos">159</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">modulator</span><span class="p">,</span> <span class="n">multiplier</span><span class="p">[</span><span class="s2">&quot;m&quot;</span><span class="p">])</span>  <span class="c1"># Modulation input to multiplier</span>
+<span class="linenos">160</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">multiplier</span><span class="p">,</span> <span class="n">alpha_filter</span><span class="p">)</span>  <span class="c1"># Modulated signal to alpha filter</span>
+<span class="linenos">161</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">alpha_filter</span><span class="p">,</span> <span class="n">power</span><span class="p">)</span>  <span class="c1"># Filtered signal to power analysis</span>
+<span class="linenos">162</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">power</span><span class="p">,</span> <span class="n">moving_average</span><span class="p">)</span>  <span class="c1"># Power to temporal smoothing</span>
+<span class="linenos">163</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">moving_average</span><span class="p">,</span> <span class="n">decimator</span><span class="p">)</span>  <span class="c1"># Smoothed power to decimation</span>
+<span class="linenos">164</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">decimator</span><span class="p">,</span> <span class="n">hold</span><span class="p">)</span>  <span class="c1"># Decimated signal to hold buffer</span>
+<span class="linenos">165</span>
+<span class="linenos">166</span>    <span class="c1"># Connect all processing stages to router for visualization</span>
+<span class="linenos">167</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">noise</span><span class="p">,</span> <span class="n">merger</span><span class="p">[</span><span class="s2">&quot;noise&quot;</span><span class="p">])</span>  <span class="c1"># Stage 1: Raw noise</span>
+<span class="linenos">168</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">modulator</span><span class="p">,</span> <span class="n">merger</span><span class="p">[</span><span class="s2">&quot;modulator&quot;</span><span class="p">])</span>  <span class="c1"># Stage 2: Modulation</span>
+<span class="linenos">169</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">multiplier</span><span class="p">,</span> <span class="n">merger</span><span class="p">[</span><span class="s2">&quot;multiplier&quot;</span><span class="p">])</span>  <span class="c1"># Stage 3: Modulated</span>
+<span class="linenos">170</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">alpha_filter</span><span class="p">,</span> <span class="n">merger</span><span class="p">[</span><span class="s2">&quot;alpha_filter&quot;</span><span class="p">])</span>  <span class="c1"># Stage 4: Filtered</span>
+<span class="linenos">171</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">power</span><span class="p">,</span> <span class="n">merger</span><span class="p">[</span><span class="s2">&quot;power&quot;</span><span class="p">])</span>  <span class="c1"># Stage 5: Power</span>
+<span class="linenos">172</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">moving_average</span><span class="p">,</span> <span class="n">merger</span><span class="p">[</span><span class="s2">&quot;moving_average&quot;</span><span class="p">])</span>  <span class="c1"># Stage 6: Smoothed</span>
+<span class="linenos">173</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">hold</span><span class="p">,</span> <span class="n">merger</span><span class="p">[</span><span class="s2">&quot;hold&quot;</span><span class="p">])</span>  <span class="c1"># Stage 7: Final</span>
+<span class="linenos">174</span>
+<span class="linenos">175</span>    <span class="c1"># Connect router output to visualization scope</span>
+<span class="linenos">176</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">merger</span><span class="p">,</span> <span class="n">scope</span><span class="p">)</span>
+<span class="linenos">177</span>
+<span class="linenos">178</span>    <span class="c1"># === APPLICATION SETUP ===</span>
+<span class="linenos">179</span>    <span class="c1"># Add visualization widget to main application window</span>
+<span class="linenos">180</span>    <span class="n">app</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">scope</span><span class="p">)</span>
+<span class="linenos">181</span>
+<span class="linenos">182</span>    <span class="c1"># === EXECUTION ===</span>
+<span class="linenos">183</span>    <span class="c1"># Start pipeline processing and run application event loop</span>
+<span class="linenos">184</span>    <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>  <span class="c1"># Begin real-time signal processing</span>
+<span class="linenos">185</span>    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>  <span class="c1"># Start GUI and block until window closes</span>
+<span class="linenos">186</span>    <span class="n">p</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>  <span class="c1"># Clean shutdown of processing pipeline</span>
+</pre></div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="s2e3_equation.html" class="btn btn-neutral float-left" title="Episode 3: Basic Transforms" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="s2e5_decimator.html" class="btn btn-neutral float-right" title="Episode 5: Decimation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright g.tec medical engineering GmbH.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

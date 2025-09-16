@@ -1,0 +1,25 @@
+Episode 1: Configuration & Context
+----------------------------------
+
+In this episode, you learn about configuration management and context handling in g.Pype, essential for building robust data processing pipelines.
+
+.. tab-set::
+
+   .. tab-item:: Read
+      :sync: read
+
+      TBD
+
+   .. tab-item:: Watch
+      :sync: watch
+
+      TBD
+
+   .. tab-item:: Code
+      :sync: code
+
+      TBD
+
+      .. code-block:: python
+
+         TBD

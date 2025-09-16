@@ -5,9 +5,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.backend.transform.equation &mdash; g.Pype v3.0.3  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+  <title>gpype.backend.transform.equation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=0382cca7" />
 
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
@@ -15,6 +17,10 @@
       <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../../_static/js/line_numbers.js?v=98e8ade1"></script>
+      <script src="../../../../_static/js/training_page.js?v=c174bc68"></script>
+      <script src="../../../../_static/js/external_links.js?v=613fa8ce"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -29,7 +35,8 @@
           
           
           <a href="../../../../index.html" class="icon icon-home">
-            g.Pype v3.0.3
+            g.Pype v3.0.4
+              <img src="../../../../_static/gpype-logo-sRGB.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -39,13 +46,13 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/1_basic_concepts/index.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/2_gpype_training/index.html">g.Pype Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/5_faq/index.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/6_troubleshooting/index.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/7_sdk_reference/index.html">SDK Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/8_appendix/index.html">Appendix</a></li>
 </ul>
 
         </div>
@@ -54,7 +61,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../index.html">g.Pype v3.0.3</a>
+          <a href="../../../../index.html">g.Pype v3.0.4</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -91,39 +98,22 @@
 
 
 <div class="viewcode-block" id="Equation">
-<a class="viewcode-back" href="../../../../content/backend/transform/equation.html#gpype.backend.transform.equation.Equation">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_transform/equation.html#gpype.backend.transform.equation.Equation">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Equation</span><span class="p">(</span><span class="n">IONode</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Mathematical expression evaluation node for data transformation.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mathematical expression evaluation node for data transformation.</span>
 
-<span class="sd">    The Equation node allows users to apply custom mathematical expressions</span>
-<span class="sd">    to input data using SymPy symbolic mathematics. It parses string</span>
-<span class="sd">    expressions, converts them to optimized NumPy functions, and applies</span>
-<span class="sd">    them to input data arrays in real-time.</span>
-
-<span class="sd">    The node automatically creates input ports based on variables found</span>
-<span class="sd">    in the expression and handles the special case of &#39;in&#39; as a variable</span>
-<span class="sd">    name (Python keyword) by using an internal alias.</span>
-
-<span class="sd">    Features:</span>
-<span class="sd">        - Symbolic expression parsing with SymPy</span>
-<span class="sd">        - Automatic input port generation from expression variables</span>
-<span class="sd">        - NumPy-optimized function compilation for performance</span>
-<span class="sd">        - Support for complex mathematical operations</span>
-<span class="sd">        - Handles Python keyword conflicts (e.g., &#39;in&#39; variable)</span>
-
-<span class="sd">    Note:</span>
-<span class="sd">        The expression must be a valid SymPy expression. All variables</span>
-<span class="sd">        in the expression will become input port names.</span>
+<span class="sd">    Applies custom mathematical expressions to input data using SymPy.</span>
+<span class="sd">    Automatically creates input ports from expression variables and compiles</span>
+<span class="sd">    to optimized NumPy functions. Handles &#39;in&#39; keyword via internal aliasing.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Equation.Configuration">
-<a class="viewcode-back" href="../../../../content/backend/transform/equation.html#gpype.backend.transform.equation.Equation.Configuration">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_transform/equation.html#gpype.backend.transform.equation.Equation.Configuration">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">Configuration</span><span class="p">(</span><span class="n">IONode</span><span class="o">.</span><span class="n">Configuration</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Configuration class for Equation parameters.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Equation.Configuration.Keys">
-<a class="viewcode-back" href="../../../../content/backend/transform/equation.html#gpype.backend.transform.equation.Equation.Configuration.Keys">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_transform/equation.html#gpype.backend.transform.equation.Equation.Configuration.Keys">[docs]</a>
         <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">IONode</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Configuration key constants for the Equation.&quot;&quot;&quot;</span>
 
@@ -132,21 +122,18 @@
 
 
 <div class="viewcode-block" id="Equation.__init__">
-<a class="viewcode-back" href="../../../../content/backend/transform/equation.html#gpype.backend.transform.equation.Equation.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_transform/equation.html#gpype.backend.transform.equation.Equation.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expression</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize the Equation node with a mathematical expression.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize Equation node with mathematical expression.</span>
 
-<span class="sd">        Parses the provided mathematical expression using SymPy, extracts</span>
-<span class="sd">        all variables to create input ports, and compiles the expression</span>
-<span class="sd">        into an optimized NumPy function for real-time evaluation.</span>
+<span class="sd">        Parses expression using SymPy, extracts variables to create input</span>
+<span class="sd">        ports, and compiles to optimized NumPy function.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            expression (str): Mathematical expression as a string. Must be</span>
-<span class="sd">                a valid SymPy expression. All variables in the expression</span>
-<span class="sd">                will become input port names. The special variable &#39;in&#39;</span>
-<span class="sd">                is handled by internal aliasing.</span>
-<span class="sd">            **kwargs: Additional configuration parameters passed to IONode.</span>
+<span class="sd">            expression: Mathematical expression string. Must be valid SymPy</span>
+<span class="sd">                expression. Variables become input port names. &#39;in&#39; keyword</span>
+<span class="sd">                handled via internal aliasing.</span>
+<span class="sd">            **kwargs: Additional configuration parameters for IONode.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ValueError: If expression is None or empty.</span>
@@ -196,47 +183,37 @@
 
 
 <div class="viewcode-block" id="Equation.setup">
-<a class="viewcode-back" href="../../../../content/backend/transform/equation.html#gpype.backend.transform.equation.Equation.setup">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_transform/equation.html#gpype.backend.transform.equation.Equation.setup">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">port_context_in</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Set up the Equation node and validate input port configurations.</span>
-
-<span class="sd">        Inherits the standard setup behavior from IONode, which validates</span>
-<span class="sd">        that all required input ports are connected and have compatible</span>
-<span class="sd">        configurations. No special setup is required for equation evaluation.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Setup Equation node and validate input port configurations.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            data (dict): Initial data dictionary for port configuration.</span>
-<span class="sd">            port_context_in (dict): Input port context information containing</span>
-<span class="sd">                channel counts, sampling rates, frame sizes, and data types.</span>
+<span class="sd">            data: Initial data dictionary for port configuration.</span>
+<span class="sd">            port_context_in: Input port context with channel counts,</span>
+<span class="sd">                sampling rates, and frame sizes.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            dict: Output port context with validated configuration.</span>
+<span class="sd">            Output port context with validated configuration.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">port_context_in</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Equation.step">
-<a class="viewcode-back" href="../../../../content/backend/transform/equation.html#gpype.backend.transform.equation.Equation.step">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_transform/equation.html#gpype.backend.transform.equation.Equation.step">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Apply the mathematical expression to input data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply mathematical expression to input data.</span>
 
-<span class="sd">        Evaluates the compiled mathematical function on the current frame</span>
-<span class="sd">        of input data. The function expects inputs in the same order as</span>
-<span class="sd">        the sorted variable names from the original expression.</span>
+<span class="sd">        Evaluates compiled function on current frame of input data in the</span>
+<span class="sd">        order of sorted variable names from expression.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            data (dict): Dictionary containing input data arrays for each</span>
-<span class="sd">                variable in the expression. Keys are variable names,</span>
-<span class="sd">                values are NumPy arrays with the current data frame.</span>
+<span class="sd">            data: Dictionary with input data arrays for each expression</span>
+<span class="sd">                variable. Keys are variable names, values are NumPy arrays.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            dict: Dictionary containing the result of the expression</span>
-<span class="sd">                evaluation. The output is stored under the default</span>
-<span class="sd">                output port name.</span>
+<span class="sd">            Dictionary with expression evaluation result on output port.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Collect input data in the order expected by the compiled function</span>
         <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_port_names</span><span class="p">]</span>

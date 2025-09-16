@@ -1,0 +1,40 @@
+﻿Episode 1: Environment Setup
+----------------------------
+
+In this episode, you are setting up your development environment for g.Pype.
+
+.. tab-set::
+
+   .. tab-item:: Read
+      :sync: read
+
+      Follow the steps below to set up your development environment. Note that
+      you need a desktop or laptop computer with Windows or macOS to run g.Pype.
+      Mobile environments (tablets, smartphones) are not yet supported. g.Pype does not require
+      specialized hardware, but a reasonably modern system is recommended for optimal performance.
+      Internet access is needed for downloading software but not for running g.Pype.
+
+      .. grid:: 1 1 1 1
+         :gutter: 2
+
+         .. grid-item-card:: Download Python
+
+            Go to https://www.python.org/downloads/ and download the latest stable version. Run the installer and follow the instructions.
+
+         .. grid-item-card:: Install Visual Studio Code (VS Code)
+
+            Next, we need an IDE. Visit https://code.visualstudio.com/ to download the latest stable version of VS Code. Install it following
+            the instructions for your OS. Throughout this training, VS Code will be used, but feel free to use another editor if you prefer.
+
+         .. grid-item-card:: Configure VS Code
+
+            Launch VS Code and open the Extensions view (Ctrl+Shift+X). Search for and install the following extensions (latest versions):
+            Python (by Microsoft) and Pylance (by Microsoft).
+
+         .. grid-item-card:: Install g.Pype
+
+            Open a terminal in VS Code and run ``pip install gpype``. This might take a couple of minutes, since all dependencies need to be installed
+            as well. To verify the installation, execute ``gpype --version`` in the terminal. You should see the installed version of g.Pype.
+
+      That's it! Four simple steps and you are ready to start using g.Pype. Proceed to the next episode to run your first pipeline.
+

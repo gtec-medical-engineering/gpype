@@ -1,0 +1,6 @@
+References
+----------
+
+| Main repository: https://github.com/gtec-medical-engineering/gpype
+| Public examples: https://github.com/gtec-medical-engineering/gpype/tree/main/examples
+| Bug reporting: https://github.com/gtec-medical-engineering/gpype/issues

@@ -1,0 +1,684 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SDK Reference</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=0382cca7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../_static/js/line_numbers.js?v=98e8ade1"></script>
+      <script src="../../_static/js/training_page.js?v=c174bc68"></script>
+      <script src="../../_static/js/external_links.js?v=613fa8ce"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Pipeline" href="backend/pipeline.html" />
+    <link rel="prev" title="Troubleshooting" href="../6_troubleshooting/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            g.Pype v3.0.4
+              <img src="../../_static/gpype-logo-sRGB.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../1_basic_concepts/index.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../2_gpype_training/index.html">g.Pype Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../5_faq/index.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../6_troubleshooting/index.html">Troubleshooting</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">SDK Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#backend">backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backend/pipeline.html">Pipeline</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#backend-core">backend.core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backend_core/i_node.html">INode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="backend_core/io_node.html">IONode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="backend_core/i_port.html">IPort</a></li>
+<li class="toctree-l3"><a class="reference internal" href="backend_core/o_node.html">ONode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="backend_core/o_port.html">OPort</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#backend-filters">backend.filters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backend_filters/bandpass.html">Bandpass</a></li>
+<li class="toctree-l3"><a class="reference internal" href="backend_filters/bandstop.html">Bandstop</a></li>
+<li class="toctree-l3"><a class="reference internal" href="backend_filters/butterworth.html">Butterworth</a></li>
+<li class="toctree-l3"><a class="reference internal" href="backend_filters/generic_filter.html">Generic Filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="backend_filters/highpass.html">Highpass</a></li>
+<li class="toctree-l3"><a class="reference internal" href="backend_filters/lowpass.html">Lowpass</a></li>
+<li class="toctree-l3"><a class="reference internal" href="backend_filters/moving_average.html">Moving Average</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#backend-flow">backend.flow</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backend_flow/framer.html">Framer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="backend_flow/router.html">Router</a></li>
+<li class="toctree-l3"><a class="reference internal" href="backend_flow/trigger.html">Trigger</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#backend-sinks">backend.sinks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backend_sinks/file_writer.html">File Writer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="backend_sinks/lsl_sender.html">LSL Sender</a></li>
+<li class="toctree-l3"><a class="reference internal" href="backend_sinks/udp_sender.html">UDP Sender</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#backend-sources">backend.sources</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backend_sources/amplifier_source.html">Amplifier Source</a></li>
+<li class="toctree-l3"><a class="reference internal" href="backend_sources/bci_core8.html">BCI Core-8</a></li>
+<li class="toctree-l3"><a class="reference internal" href="backend_sources/event_source.html">Event Source</a></li>
+<li class="toctree-l3"><a class="reference internal" href="backend_sources/fixed_rate_source.html">Fixed-Rate Source</a></li>
+<li class="toctree-l3"><a class="reference internal" href="backend_sources/g_nautilus.html">g.Nautilus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="backend_sources/generator.html">Generator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="backend_sources/keyboard.html">Keyboard</a></li>
+<li class="toctree-l3"><a class="reference internal" href="backend_sources/source.html">Source Base</a></li>
+<li class="toctree-l3"><a class="reference internal" href="backend_sources/udp_receiver.html">UDP Receiver</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#backend-timing">backend.timing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backend_timing/decimator.html">Decimator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="backend_timing/delay.html">Delay</a></li>
+<li class="toctree-l3"><a class="reference internal" href="backend_timing/hold.html">Hold</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#backend-transform">backend.transform</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backend_transform/equation.html">Equation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="backend_transform/fft.html">FFT</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#common">common</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="common/constants.html">Constants</a></li>
+<li class="toctree-l3"><a class="reference internal" href="common/settings.html">Settings</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#frontend">frontend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="frontend/main_app.html">MainApp</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#frontend-widgets">frontend.widgets</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="frontend_widgets/paradigm_presenter.html">Paradigm Presenter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="frontend_widgets/performance_monitor.html">Performance Monitor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="frontend_widgets/scope.html">Scope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="frontend_widgets/spectrum_scope.html">Spectrum Scope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="frontend_widgets/time_series_scope.html">Time Series Scope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="frontend_widgets/trigger_scope.html">Trigger Scope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="frontend_widgets/widget.html">Widget</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../8_appendix/index.html">Appendix</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">g.Pype v3.0.4</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">SDK Reference</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="sdk-reference">
+<h1>SDK Reference<a class="headerlink" href="#sdk-reference" title="Link to this heading"></a></h1>
+<p>This SDK reference page is generated directly from the source code. Whether you are developing, troubleshooting, or exploring, use it to quickly locate and cross-reference all available g.Pype components. The information here always reflects the current implementation.</p>
+<section id="backend">
+<h2>backend<a class="headerlink" href="#backend" title="Link to this heading"></a></h2>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-1 sd-row-cols-md-2 sd-row-cols-lg-3 sd-g-3 sd-g-xs-3 sd-g-sm-3 sd-g-md-3 sd-g-lg-3 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Pipeline</div>
+<p class="sd-card-text">Brain-Computer Interface pipeline for real-time data processing.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend/pipeline.html"><span class="doc">Pipeline</span></a></div>
+</div>
+</div>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="backend-core">
+<h2>backend.core<a class="headerlink" href="#backend-core" title="Link to this heading"></a></h2>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-1 sd-row-cols-md-2 sd-row-cols-lg-3 sd-g-3 sd-g-xs-3 sd-g-sm-3 sd-g-md-3 sd-g-lg-3 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+INode</div>
+<p class="sd-card-text">Abstract base class for input-only nodes in the g.Pype pipeline.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend_core/i_node.html"><span class="doc">INode</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+IONode</div>
+<p class="sd-card-text">Abstract base class for input/output nodes in the g.Pype pipeline.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend_core/io_node.html"><span class="doc">IONode</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+IPort</div>
+<p class="sd-card-text">Input port class for g.Pype signal processing nodes.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend_core/i_port.html"><span class="doc">IPort</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+ONode</div>
+<p class="sd-card-text">Abstract base class for output-only nodes in the g.Pype pipeline.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend_core/o_node.html"><span class="doc">ONode</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+OPort</div>
+<p class="sd-card-text">Output port class for g.Pype signal processing nodes.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend_core/o_port.html"><span class="doc">OPort</span></a></div>
+</div>
+</div>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="backend-filters">
+<h2>backend.filters<a class="headerlink" href="#backend-filters" title="Link to this heading"></a></h2>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-1 sd-row-cols-md-2 sd-row-cols-lg-3 sd-g-3 sd-g-xs-3 sd-g-sm-3 sd-g-md-3 sd-g-lg-3 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Bandpass</div>
+<p class="sd-card-text">Bandpass filter implementation using Butterworth design.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend_filters/bandpass.html"><span class="doc">Bandpass</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Bandstop</div>
+<p class="sd-card-text">Bandstop filter implementation using Butterworth design.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend_filters/bandstop.html"><span class="doc">Bandstop</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Butterworth</div>
+<p class="sd-card-text">Butterworth filter implementation for real-time signal processing.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend_filters/butterworth.html"><span class="doc">Butterworth</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+GenericFilter</div>
+<p class="sd-card-text">Generic Linear Time-Invariant (LTI) digital filter for real-time use.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend_filters/generic_filter.html"><span class="doc">Generic Filter</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Highpass</div>
+<p class="sd-card-text">Highpass filter implementation using Butterworth design.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend_filters/highpass.html"><span class="doc">Highpass</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Lowpass</div>
+<p class="sd-card-text">Lowpass filter implementation using Butterworth design.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend_filters/lowpass.html"><span class="doc">Lowpass</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+MovingAverage</div>
+<p class="sd-card-text">Moving average filter for signal smoothing and noise reduction.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend_filters/moving_average.html"><span class="doc">Moving Average</span></a></div>
+</div>
+</div>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="backend-flow">
+<h2>backend.flow<a class="headerlink" href="#backend-flow" title="Link to this heading"></a></h2>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-1 sd-row-cols-md-2 sd-row-cols-lg-3 sd-g-3 sd-g-xs-3 sd-g-sm-3 sd-g-md-3 sd-g-lg-3 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Framer</div>
+<p class="sd-card-text">Frame aggregation node for combining single samples into frames.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend_flow/framer.html"><span class="doc">Framer</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Router</div>
+<p class="sd-card-text">Channel routing and selection node for flexible data flow management.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend_flow/router.html"><span class="doc">Router</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Trigger</div>
+<p class="sd-card-text">Event-triggered data extraction node for BCI applications.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend_flow/trigger.html"><span class="doc">Trigger</span></a></div>
+</div>
+</div>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="backend-sinks">
+<h2>backend.sinks<a class="headerlink" href="#backend-sinks" title="Link to this heading"></a></h2>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-1 sd-row-cols-md-2 sd-row-cols-lg-3 sd-g-3 sd-g-xs-3 sd-g-sm-3 sd-g-md-3 sd-g-lg-3 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+FileWriter</div>
+<p class="sd-card-text">Threaded file writer for real-time data logging to CSV files.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend_sinks/file_writer.html"><span class="doc">File Writer</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+LSLSender</div>
+<p class="sd-card-text">Lab Streaming Layer (LSL) sender for real-time data streaming.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend_sinks/lsl_sender.html"><span class="doc">LSL Sender</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+UDPSender</div>
+<p class="sd-card-text">UDP sink node for real-time data transmission.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend_sinks/udp_sender.html"><span class="doc">UDP Sender</span></a></div>
+</div>
+</div>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="backend-sources">
+<h2>backend.sources<a class="headerlink" href="#backend-sources" title="Link to this heading"></a></h2>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-1 sd-row-cols-md-2 sd-row-cols-lg-3 sd-g-3 sd-g-xs-3 sd-g-sm-3 sd-g-md-3 sd-g-lg-3 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+AmplifierSource</div>
+<p class="sd-card-text">Base class for amplifier-based data acquisition sources.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend_sources/amplifier_source.html"><span class="doc">Amplifier Source</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+BCICore8</div>
+<p class="sd-card-text">g.tec BCI Core-8 amplifier source for wireless EEG acquisition.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend_sources/bci_core8.html"><span class="doc">BCI Core-8</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+EventSource</div>
+<p class="sd-card-text">Event-driven source for asynchronous data generation.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend_sources/event_source.html"><span class="doc">Event Source</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+FixedRateSource</div>
+<p class="sd-card-text">Fixed-rate source for continuous data generation at sampling rate.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend_sources/fixed_rate_source.html"><span class="doc">Fixed-Rate Source</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+GNautilus</div>
+<p class="sd-card-text">g.Nautilus EEG amplifier interface for real-time data acquisition.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend_sources/g_nautilus.html"><span class="doc">g.Nautilus</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Generator</div>
+<p class="sd-card-text">Signal generator source for creating synthetic test signals.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend_sources/generator.html"><span class="doc">Generator</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Keyboard</div>
+<p class="sd-card-text">Keyboard input source for capturing key press and release events.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend_sources/keyboard.html"><span class="doc">Keyboard</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Source</div>
+<p class="sd-card-text">Base class for data source nodes in a pipeline.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend_sources/source.html"><span class="doc">Source Base</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+UDPReceiver</div>
+<p class="sd-card-text">UDP network receiver for capturing remote trigger events.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend_sources/udp_receiver.html"><span class="doc">UDP Receiver</span></a></div>
+</div>
+</div>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="backend-timing">
+<h2>backend.timing<a class="headerlink" href="#backend-timing" title="Link to this heading"></a></h2>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-1 sd-row-cols-md-2 sd-row-cols-lg-3 sd-g-3 sd-g-xs-3 sd-g-sm-3 sd-g-md-3 sd-g-lg-3 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Decimator</div>
+<p class="sd-card-text">Decimator node for downsampling data streams.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend_timing/decimator.html"><span class="doc">Decimator</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Delay</div>
+<p class="sd-card-text">Introduces configurable N-sample delay to input signal.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend_timing/delay.html"><span class="doc">Delay</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Hold</div>
+<p class="sd-card-text">Classical sample-and-hold node for arbitrary resampling.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend_timing/hold.html"><span class="doc">Hold</span></a></div>
+</div>
+</div>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="backend-transform">
+<h2>backend.transform<a class="headerlink" href="#backend-transform" title="Link to this heading"></a></h2>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-1 sd-row-cols-md-2 sd-row-cols-lg-3 sd-g-3 sd-g-xs-3 sd-g-sm-3 sd-g-md-3 sd-g-lg-3 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Equation</div>
+<p class="sd-card-text">Mathematical expression evaluation node for data transformation.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend_transform/equation.html"><span class="doc">Equation</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+FFT</div>
+<p class="sd-card-text">Fast Fourier Transform node for frequency domain analysis.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="backend_transform/fft.html"><span class="doc">FFT</span></a></div>
+</div>
+</div>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="common">
+<h2>common<a class="headerlink" href="#common" title="Link to this heading"></a></h2>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-1 sd-row-cols-md-2 sd-row-cols-lg-3 sd-g-3 sd-g-xs-3 sd-g-sm-3 sd-g-md-3 sd-g-lg-3 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Constants</div>
+<p class="sd-card-text">Application-wide constants for g.Pype BCI framework.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="common/constants.html"><span class="doc">Constants</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Settings</div>
+<p class="sd-card-text">Singleton settings manager for g.Pype application configuration.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="common/settings.html"><span class="doc">Settings</span></a></div>
+</div>
+</div>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="frontend">
+<h2>frontend<a class="headerlink" href="#frontend" title="Link to this heading"></a></h2>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-1 sd-row-cols-md-2 sd-row-cols-lg-3 sd-g-3 sd-g-xs-3 sd-g-sm-3 sd-g-md-3 sd-g-lg-3 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+MainApp</div>
+<p class="sd-card-text">Main application class for g.Pype frontend applications.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="frontend/main_app.html"><span class="doc">MainApp</span></a></div>
+</div>
+</div>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="frontend-widgets">
+<h2>frontend.widgets<a class="headerlink" href="#frontend-widgets" title="Link to this heading"></a></h2>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-1 sd-row-cols-md-2 sd-row-cols-lg-3 sd-g-3 sd-g-xs-3 sd-g-sm-3 sd-g-md-3 sd-g-lg-3 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+ParadigmPresenter</div>
+<p class="sd-card-text">Control widget for g.tec ParadigmPresenter integration.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="frontend_widgets/paradigm_presenter.html"><span class="doc">Paradigm Presenter</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+PerformanceMonitor</div>
+<p class="sd-card-text">Visualization widget for real-time pipeline performance monitoring.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="frontend_widgets/performance_monitor.html"><span class="doc">Performance Monitor</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Scope</div>
+<p class="sd-card-text">Base class for oscilloscope-style visualization widgets.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="frontend_widgets/scope.html"><span class="doc">Scope</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+SpectrumScope</div>
+<p class="sd-card-text">Frequency domain visualization widget for spectral analysis.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="frontend_widgets/spectrum_scope.html"><span class="doc">Spectrum Scope</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+TimeSeriesScope</div>
+<p class="sd-card-text">Real-time oscilloscope widget for multi-channel time series.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="frontend_widgets/time_series_scope.html"><span class="doc">Time Series Scope</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+TriggerScope</div>
+<p class="sd-card-text">Event-triggered oscilloscope widget for analyzing signal epochs.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="frontend_widgets/trigger_scope.html"><span class="doc">Trigger Scope</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Widget</div>
+<p class="sd-card-text">Base class for BCI visualization widgets with automatic updates.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="frontend_widgets/widget.html"><span class="doc">Widget</span></a></div>
+</div>
+</div>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../6_troubleshooting/index.html" class="btn btn-neutral float-left" title="Troubleshooting" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="backend/pipeline.html" class="btn btn-neutral float-right" title="Pipeline" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright g.tec medical engineering GmbH.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

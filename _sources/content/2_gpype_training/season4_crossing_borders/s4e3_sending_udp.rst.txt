@@ -1,0 +1,29 @@
+Episode 3: Sending UDP Streams
+------------------------------
+
+In this episode, you learn how to send EEG data through a UDP (User Datagram Protocol) interface using g.Pype.
+
+.. admonition:: Note
+   :class: warning
+
+   This page is still under development. Until we have the step-by-step instructions ready, please refer to the
+   code example below.
+
+**File example_basic_udp_send.py (send UDP stream)** -- `View file on GitHub`__
+
+.. __: https://github.com/gtec-medical-engineering/gpype/blob/main/examples/example_basic_udp_send.py
+
+.. literalinclude:: ../../../../examples/example_basic_udp_send.py
+   :language: python
+   :linenos:
+   :dedent: 0
+
+**File example_basic_udp_receive.py (standalone UDP receiver)** -- `View file on GitHub`__
+
+.. __: https://github.com/gtec-medical-engineering/gpype/blob/main/examples/example_basic_udp_receive.py
+
+.. literalinclude:: ../../../../examples/example_basic_udp_receive.py
+   :language: python
+   :linenos:
+   :dedent: 0
+

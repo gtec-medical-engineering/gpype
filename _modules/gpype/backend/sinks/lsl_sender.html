@@ -5,9 +5,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.backend.sinks.lsl_sender &mdash; g.Pype v3.0.3  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+  <title>gpype.backend.sinks.lsl_sender</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=0382cca7" />
 
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
@@ -15,6 +17,10 @@
       <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../../_static/js/line_numbers.js?v=98e8ade1"></script>
+      <script src="../../../../_static/js/training_page.js?v=c174bc68"></script>
+      <script src="../../../../_static/js/external_links.js?v=613fa8ce"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -29,7 +35,8 @@
           
           
           <a href="../../../../index.html" class="icon icon-home">
-            g.Pype v3.0.3
+            g.Pype v3.0.4
+              <img src="../../../../_static/gpype-logo-sRGB.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -39,13 +46,13 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/1_basic_concepts/index.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/2_gpype_training/index.html">g.Pype Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/5_faq/index.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/6_troubleshooting/index.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/7_sdk_reference/index.html">SDK Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/8_appendix/index.html">Appendix</a></li>
 </ul>
 
         </div>
@@ -54,7 +61,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../index.html">g.Pype v3.0.3</a>
+          <a href="../../../../index.html">g.Pype v3.0.4</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -86,45 +93,25 @@
 
 
 <div class="viewcode-block" id="LSLSender">
-<a class="viewcode-back" href="../../../../content/backend/sinks/lsl_sender.html#gpype.backend.sinks.lsl_sender.LSLSender">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_sinks/lsl_sender.html#gpype.backend.sinks.lsl_sender.LSLSender">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">LSLSender</span><span class="p">(</span><span class="n">INode</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Lab Streaming Layer (LSL) sender for real-time data streaming.</span>
 
-<span class="sd">    This class implements an LSL outlet that streams multi-channel data to</span>
-<span class="sd">    the Lab Streaming Layer network. LSL is a standardized protocol for</span>
-<span class="sd">    real-time exchange of time-series data in neuroscience applications.</span>
-
-<span class="sd">    The sender automatically configures the LSL stream based on input port</span>
-<span class="sd">    context including channel count, sampling rate, and frame size. It</span>
-<span class="sd">    supports both single-sample and chunk-based streaming depending on</span>
-<span class="sd">    the frame size configuration.</span>
-
-<span class="sd">    Features:</span>
-<span class="sd">    - Automatic LSL stream configuration from input context</span>
-<span class="sd">    - Support for single-sample and chunk streaming modes</span>
-<span class="sd">    - EEG data type with double precision format</span>
-<span class="sd">    - Configurable stream name for identification</span>
-
-<span class="sd">    Attributes:</span>
-<span class="sd">        DEFAULT_STREAM_NAME: Default name for LSL streams</span>
-<span class="sd">        _lsl_info: LSL StreamInfo object containing stream metadata</span>
-<span class="sd">        _lsl_outlet: LSL StreamOutlet for data transmission</span>
-<span class="sd">        _frame_size: Number of samples per processing frame</span>
-
-<span class="sd">    Note:</span>
-<span class="sd">        The stream uses double precision (cf_double64) format and is</span>
-<span class="sd">        identified as &quot;EEG&quot; type for compatibility with LSL receivers.</span>
+<span class="sd">    Implements an LSL outlet that streams multi-channel data to the Lab</span>
+<span class="sd">    Streaming Layer network. Automatically configures the LSL stream based</span>
+<span class="sd">    on input port context including channel count, sampling rate, and frame</span>
+<span class="sd">    size. Supports both single-sample and chunk-based streaming modes.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">DEFAULT_STREAM_NAME</span> <span class="o">=</span> <span class="s2">&quot;gpype_lsl&quot;</span>
 
 <div class="viewcode-block" id="LSLSender.Configuration">
-<a class="viewcode-back" href="../../../../content/backend/sinks/lsl_sender.html#gpype.backend.sinks.lsl_sender.LSLSender.Configuration">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_sinks/lsl_sender.html#gpype.backend.sinks.lsl_sender.LSLSender.Configuration">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">Configuration</span><span class="p">(</span><span class="n">ioc</span><span class="o">.</span><span class="n">INode</span><span class="o">.</span><span class="n">Configuration</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Configuration class for LSLSender parameters.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="LSLSender.Configuration.Keys">
-<a class="viewcode-back" href="../../../../content/backend/sinks/lsl_sender.html#gpype.backend.sinks.lsl_sender.LSLSender.Configuration.Keys">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_sinks/lsl_sender.html#gpype.backend.sinks.lsl_sender.LSLSender.Configuration.Keys">[docs]</a>
         <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">ioc</span><span class="o">.</span><span class="n">INode</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Configuration keys for LSL sender settings.&quot;&quot;&quot;</span>
 
@@ -133,20 +120,14 @@
 
 
 <div class="viewcode-block" id="LSLSender.__init__">
-<a class="viewcode-back" href="../../../../content/backend/sinks/lsl_sender.html#gpype.backend.sinks.lsl_sender.LSLSender.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_sinks/lsl_sender.html#gpype.backend.sinks.lsl_sender.LSLSender.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stream_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the LSL sender with specified stream name.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            stream_name: Name for the LSL stream. If None, uses the</span>
-<span class="sd">                default stream name defined by DEFAULT_STREAM_NAME.</span>
-<span class="sd">                This name is used for stream identification on the</span>
-<span class="sd">                LSL network.</span>
+<span class="sd">            stream_name: Name for the LSL stream. If None, uses the default</span>
+<span class="sd">                stream name. Used for stream identification on the LSL network.</span>
 <span class="sd">            **kwargs: Additional arguments passed to parent INode class.</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            The stream name serves as both the LSL stream name and</span>
-<span class="sd">            source ID for unique identification on the network.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Use default stream name if none provided</span>
         <span class="k">if</span> <span class="n">stream_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -162,16 +143,12 @@
 
 
 <div class="viewcode-block" id="LSLSender.stop">
-<a class="viewcode-back" href="../../../../content/backend/sinks/lsl_sender.html#gpype.backend.sinks.lsl_sender.LSLSender.stop">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_sinks/lsl_sender.html#gpype.backend.sinks.lsl_sender.LSLSender.stop">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Stop the LSL sender and clean up resources.</span>
 
-<span class="sd">        Properly releases LSL resources by setting outlet and info</span>
-<span class="sd">        objects to None, allowing them to be garbage collected.</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            The LSL outlet automatically handles disconnection when</span>
-<span class="sd">            the object is destroyed, so explicit close is not required.</span>
+<span class="sd">        Properly releases LSL resources by setting outlet and info objects</span>
+<span class="sd">        to None, allowing them to be garbage collected.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Release LSL resources</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_lsl_outlet</span> <span class="o">=</span> <span class="kc">None</span>
@@ -182,27 +159,23 @@
 
 
 <div class="viewcode-block" id="LSLSender.setup">
-<a class="viewcode-back" href="../../../../content/backend/sinks/lsl_sender.html#gpype.backend.sinks.lsl_sender.LSLSender.setup">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_sinks/lsl_sender.html#gpype.backend.sinks.lsl_sender.LSLSender.setup">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">port_context_in</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Setup the LSL stream based on input port context.</span>
 
-<span class="sd">        Creates LSL StreamInfo and StreamOutlet objects using metadata</span>
-<span class="sd">        from the input port context. The stream is configured with</span>
-<span class="sd">        appropriate parameters for EEG data transmission.</span>
+<span class="sd">        Creates LSL StreamInfo and StreamOutlet objects using metadata from</span>
+<span class="sd">        the input port context. Stream is configured with appropriate</span>
+<span class="sd">        parameters for EEG data transmission.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: Dictionary of input data arrays from connected ports.</span>
-<span class="sd">            port_context_in: Context information from input ports containing</span>
+<span class="sd">            port_context_in: Context information from input ports with</span>
 <span class="sd">                channel count, sampling rate, and frame size.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Dictionary returned from parent setup method.</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            The LSL stream is configured as &quot;EEG&quot; type with double precision</span>
-<span class="sd">            format for compatibility with standard LSL receivers.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Extract context information from default input port</span>
         <span class="n">context</span> <span class="o">=</span> <span class="n">port_context_in</span><span class="p">[</span><span class="n">Constants</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">PORT_IN</span><span class="p">]</span>
@@ -229,13 +202,13 @@
 
 
 <div class="viewcode-block" id="LSLSender.step">
-<a class="viewcode-back" href="../../../../content/backend/sinks/lsl_sender.html#gpype.backend.sinks.lsl_sender.LSLSender.step">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_sinks/lsl_sender.html#gpype.backend.sinks.lsl_sender.LSLSender.step">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Process and stream data through LSL outlet.</span>
 
 <span class="sd">        Sends incoming data to the LSL network using either single-sample</span>
-<span class="sd">        or chunk-based transmission depending on the frame size. The method</span>
-<span class="sd">        automatically converts numpy arrays to lists for LSL compatibility.</span>
+<span class="sd">        or chunk-based transmission depending on frame size. Automatically</span>
+<span class="sd">        converts numpy arrays to lists for LSL compatibility.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: Dictionary containing input data arrays. Uses the default</span>
@@ -243,10 +216,6 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            None as this is a sink node with no output data.</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            Single-sample mode (frame_size=1) uses push_sample() for minimal</span>
-<span class="sd">            latency, while multi-sample mode uses push_chunk() for efficiency.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Get data from default input port</span>
         <span class="n">d</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">Constants</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">PORT_IN</span><span class="p">]</span>

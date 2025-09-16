@@ -1,0 +1,35 @@
+Advanced Topics
+===============
+
+
+Discover advanced features and customization options to extend what you can do with g.Pype.
+
+.. grid:: 1 1 1 1
+   :gutter: 3
+
+   .. grid-item-card:: Node Customization
+      :link: node_customization
+      :link-type: doc
+
+      Inherit from the base node class to create custom processing nodes with specialized behavior.
+
+   .. grid-item-card:: Real-Time Performance
+      :link: real_time_performance
+      :link-type: doc
+
+      Explore detailed results and insights from our real-time performance evaluations.
+
+   .. grid-item-card:: Deployment Scenarios
+      :link: deployment_scenarios
+      :link-type: doc
+
+      Learn how to deploy g.Pype in various environments, including cloud-based and edge computing scenarios.
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents
+   :hidden:
+
+   node_customization
+   real_time_performance
+   deployment_scenarios

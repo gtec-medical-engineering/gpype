@@ -5,9 +5,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.backend.pipeline &mdash; g.Pype v3.0.3  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+  <title>gpype.backend.pipeline</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=0382cca7" />
 
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
@@ -15,6 +17,10 @@
       <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../_static/js/line_numbers.js?v=98e8ade1"></script>
+      <script src="../../../_static/js/training_page.js?v=c174bc68"></script>
+      <script src="../../../_static/js/external_links.js?v=613fa8ce"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -29,7 +35,8 @@
           
           
           <a href="../../../index.html" class="icon icon-home">
-            g.Pype v3.0.3
+            g.Pype v3.0.4
+              <img src="../../../_static/gpype-logo-sRGB.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -39,13 +46,13 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../content/introduction/index.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../content/backend/index.html">Backend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../content/common/index.html">Common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../content/examples/index.html">Examples</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../content/1_basic_concepts/index.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../content/2_gpype_training/index.html">g.Pype Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../content/5_faq/index.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../content/6_troubleshooting/index.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../content/7_sdk_reference/index.html">SDK Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../content/8_appendix/index.html">Appendix</a></li>
 </ul>
 
         </div>
@@ -54,7 +61,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">g.Pype v3.0.3</a>
+          <a href="../../../index.html">g.Pype v3.0.4</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -81,40 +88,19 @@
 
 
 <div class="viewcode-block" id="Pipeline">
-<a class="viewcode-back" href="../../../content/backend/pipeline.html#gpype.backend.pipeline.Pipeline">[docs]</a>
+<a class="viewcode-back" href="../../../content/7_sdk_reference/backend/pipeline.html#gpype.backend.pipeline.Pipeline">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Pipeline</span><span class="p">(</span><span class="n">ioc</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Brain-Computer Interface pipeline for real-time data processing.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Brain-Computer Interface pipeline for real-time data processing.</span>
 
-<span class="sd">    The Pipeline class extends the ioiocore Pipeline to provide specialized</span>
-<span class="sd">    functionality for BCI applications. It manages the execution of</span>
-<span class="sd">    interconnected nodes that process neural signals in real-time.</span>
-
-<span class="sd">    The pipeline handles node lifecycle management, data flow connections,</span>
-<span class="sd">    and provides logging capabilities for debugging and analysis. It serves</span>
-<span class="sd">    as the central orchestrator for all BCI processing components.</span>
-
-<span class="sd">    Features:</span>
-<span class="sd">        - Real-time node execution and data flow</span>
-<span class="sd">        - Automatic logging to platform-specific directories</span>
-<span class="sd">        - Node connection management with port-based routing</span>
-<span class="sd">        - Start/stop lifecycle control</span>
-<span class="sd">        - Pipeline serialization</span>
-
-<span class="sd">    Note:</span>
-<span class="sd">        The pipeline automatically creates log files in platform-appropriate</span>
-<span class="sd">        directories for debugging and performance analysis.</span>
+<span class="sd">    Extends ioiocore Pipeline for BCI applications with automatic logging</span>
+<span class="sd">    to platform-specific directories. Manages node lifecycle, data flow</span>
+<span class="sd">    connections, and real-time execution of interconnected processing nodes.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Pipeline.__init__">
-<a class="viewcode-back" href="../../../content/backend/pipeline.html#gpype.backend.pipeline.Pipeline.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../content/7_sdk_reference/backend/pipeline.html#gpype.backend.pipeline.Pipeline.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize the Pipeline with platform-specific logging directory.</span>
-
-<span class="sd">        Creates a new pipeline instance configured for BCI data processing</span>
-<span class="sd">        with automatic logging enabled in the appropriate system directory.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize Pipeline with platform-specific logging directory.&quot;&quot;&quot;</span>
         <span class="c1"># Determine platform-specific log directory</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
@@ -132,48 +118,29 @@
 
 
 <div class="viewcode-block" id="Pipeline.connect">
-<a class="viewcode-back" href="../../../content/backend/pipeline.html#gpype.backend.pipeline.Pipeline.connect">[docs]</a>
+<a class="viewcode-back" href="../../../content/7_sdk_reference/backend/pipeline.html#gpype.backend.pipeline.Pipeline.connect">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Node</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span> <span class="n">target</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Node</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Connect two nodes to establish data flow in the pipeline.</span>
-
-<span class="sd">        Creates a connection between a source node and target node, allowing</span>
-<span class="sd">        data to flow from source outputs to target inputs. Supports both</span>
-<span class="sd">        simple node-to-node connections and specific port connections using</span>
-<span class="sd">        dictionary notation.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Connect two nodes to establish data flow in the pipeline.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            source (Union[Node, dict]): Source node or port specification.</span>
-<span class="sd">                - Node: Connect default output port to target</span>
-<span class="sd">                - dict: Specify source node and port (e.g., node[&quot;port_name&quot;])</span>
+<span class="sd">                Use dict for specific ports (e.g., node[&quot;port_name&quot;]).</span>
 <span class="sd">            target (Union[Node, dict]): Target node or port specification.</span>
-<span class="sd">                - Node: Connect to default input port</span>
-<span class="sd">                - dict: Specify target node and port (e.g., node[&quot;port_name&quot;])</span>
+<span class="sd">                Use dict for specific ports (e.g., node[&quot;port_name&quot;]).</span>
 
-<span class="sd">        Notes:</span>
-<span class="sd">            Port names depend on the specific node implementation.</span>
-<span class="sd">                Common port names include &quot;in&quot;, &quot;out&quot;, &quot;trigger&quot;.</span>
-<span class="sd">            When connecting nodes, these nodes are implicitly added to the</span>
-<span class="sd">                pipeline if not already present.</span>
+<span class="sd">        Note:</span>
+<span class="sd">            Nodes are automatically added to pipeline if not already present.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Pipeline.start">
-<a class="viewcode-back" href="../../../content/backend/pipeline.html#gpype.backend.pipeline.Pipeline.start">[docs]</a>
+<a class="viewcode-back" href="../../../content/7_sdk_reference/backend/pipeline.html#gpype.backend.pipeline.Pipeline.start">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Start the pipeline and begin real-time data processing.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start the pipeline and begin real-time data processing.</span>
 
-<span class="sd">        Initiates the execution of all nodes in the pipeline according to</span>
-<span class="sd">        their configured connections and timing. The pipeline will run</span>
-<span class="sd">        continuously until stop() is called.</span>
-
-<span class="sd">        The start process includes:</span>
-<span class="sd">        - Node initialization and setup</span>
-<span class="sd">        - Port connection validation</span>
-<span class="sd">        - Threading setup for real-time execution</span>
-<span class="sd">        - Data flow activation</span>
+<span class="sd">        Initiates execution of all nodes according to their configured</span>
+<span class="sd">        connections and timing. Runs continuously until stop() is called.</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            This method is non-blocking.</span>
@@ -182,20 +149,12 @@
 
 
 <div class="viewcode-block" id="Pipeline.stop">
-<a class="viewcode-back" href="../../../content/backend/pipeline.html#gpype.backend.pipeline.Pipeline.stop">[docs]</a>
+<a class="viewcode-back" href="../../../content/7_sdk_reference/backend/pipeline.html#gpype.backend.pipeline.Pipeline.stop">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Stop the pipeline and terminate all data processing.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stop the pipeline and terminate all data processing.</span>
 
-<span class="sd">        Gracefully shuts down the pipeline by stopping all nodes and</span>
-<span class="sd">        cleaning up resources. This ensures proper cleanup of threads,</span>
-<span class="sd">        file handles, hardware connections, and other resources.</span>
-
-<span class="sd">        The stop process includes:</span>
-<span class="sd">        - Signal termination to all nodes</span>
-<span class="sd">        - Thread cleanup and synchronization</span>
-<span class="sd">        - Resource deallocation</span>
-<span class="sd">        - Connection cleanup</span>
+<span class="sd">        Gracefully shuts down all nodes and cleans up resources including</span>
+<span class="sd">        threads, file handles, and hardware connections.</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            Always call stop() before program termination to ensure</span>
@@ -205,37 +164,22 @@
 
 
 <div class="viewcode-block" id="Pipeline.serialize">
-<a class="viewcode-back" href="../../../content/backend/pipeline.html#gpype.backend.pipeline.Pipeline.serialize">[docs]</a>
+<a class="viewcode-back" href="../../../content/7_sdk_reference/backend/pipeline.html#gpype.backend.pipeline.Pipeline.serialize">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Serialize the pipeline configuration to a dictionary.</span>
-
-<span class="sd">        Converts the current pipeline state, including all nodes and their</span>
-<span class="sd">        connections, into a dictionary format suitable for storage or</span>
-<span class="sd">        transmission. This enables pipeline configuration persistence</span>
-<span class="sd">        and reconstruction.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Serialize the pipeline configuration to a dictionary.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            dict: Dictionary containing the complete pipeline configuration,</span>
 <span class="sd">                including nodes, connections, parameters, and metadata.</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            The serialized configuration can be used to reconstruct an</span>
-<span class="sd">            identical pipeline with the same nodes and connections.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">serialize</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="Pipeline.deserialize">
-<a class="viewcode-back" href="../../../content/backend/pipeline.html#gpype.backend.pipeline.Pipeline.deserialize">[docs]</a>
+<a class="viewcode-back" href="../../../content/7_sdk_reference/backend/pipeline.html#gpype.backend.pipeline.Pipeline.deserialize">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">deserialize</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Pipeline&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Deserialize a pipeline configuration from a dictionary.</span>
-
-<span class="sd">        Reconstructs a Pipeline instance from a serialized configuration</span>
-<span class="sd">        dictionary. This allows for loading previously saved pipeline states</span>
-<span class="sd">        and restoring node connections and parameters.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Deserialize a pipeline configuration from a dictionary.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data (dict): Serialized pipeline configuration dictionary.</span>

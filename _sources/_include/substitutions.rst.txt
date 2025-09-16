@@ -1,0 +1,71 @@
+.. Common substitutions for g.Pype documentation
+.. This file can be included in RST files to provide shortcuts
+
+.. =================================================================
+.. AUTO-GENERATED SDK REFERENCE LINKS
+.. =================================================================
+
+.. |_Settings| replace:: :doc:`_Settings </content/7_sdk_reference/common/settings>`
+.. |AmplifierSource| replace:: :doc:`AmplifierSource </content/7_sdk_reference/backend_sources/amplifier_source>`
+.. |Bandpass| replace:: :doc:`Bandpass </content/7_sdk_reference/backend_filters/bandpass>`
+.. |Bandstop| replace:: :doc:`Bandstop </content/7_sdk_reference/backend_filters/bandstop>`
+.. |BCICore8| replace:: :doc:`BCICore8 </content/7_sdk_reference/backend_sources/bci_core8>`
+.. |Butterworth| replace:: :doc:`Butterworth </content/7_sdk_reference/backend_filters/butterworth>`
+.. |Constants| replace:: :doc:`Constants </content/7_sdk_reference/common/constants>`
+.. |Decimator| replace:: :doc:`Decimator </content/7_sdk_reference/backend_timing/decimator>`
+.. |Delay| replace:: :doc:`Delay </content/7_sdk_reference/backend_timing/delay>`
+.. |Equation| replace:: :doc:`Equation </content/7_sdk_reference/backend_transform/equation>`
+.. |EventSource| replace:: :doc:`EventSource </content/7_sdk_reference/backend_sources/event_source>`
+.. |FFT| replace:: :doc:`FFT </content/7_sdk_reference/backend_transform/fft>`
+.. |FileWriter| replace:: :doc:`FileWriter </content/7_sdk_reference/backend_sinks/file_writer>`
+.. |FixedRateSource| replace:: :doc:`FixedRateSource </content/7_sdk_reference/backend_sources/fixed_rate_source>`
+.. |Framer| replace:: :doc:`Framer </content/7_sdk_reference/backend_flow/framer>`
+.. |Generator| replace:: :doc:`Generator </content/7_sdk_reference/backend_sources/generator>`
+.. |GenericFilter| replace:: :doc:`GenericFilter </content/7_sdk_reference/backend_filters/generic_filter>`
+.. |GNautilus| replace:: :doc:`GNautilus </content/7_sdk_reference/backend_sources/g_nautilus>`
+.. |Highpass| replace:: :doc:`Highpass </content/7_sdk_reference/backend_filters/highpass>`
+.. |Hold| replace:: :doc:`Hold </content/7_sdk_reference/backend_timing/hold>`
+.. |INode| replace:: :doc:`INode </content/7_sdk_reference/backend_core/i_node>`
+.. |IONode| replace:: :doc:`IONode </content/7_sdk_reference/backend_core/io_node>`
+.. |IPort| replace:: :doc:`IPort </content/7_sdk_reference/backend_core/i_port>`
+.. |Keyboard| replace:: :doc:`Keyboard </content/7_sdk_reference/backend_sources/keyboard>`
+.. |Lowpass| replace:: :doc:`Lowpass </content/7_sdk_reference/backend_filters/lowpass>`
+.. |LSLSender| replace:: :doc:`LSLSender </content/7_sdk_reference/backend_sinks/lsl_sender>`
+.. |MainApp| replace:: :doc:`MainApp </content/7_sdk_reference/frontend/main_app>`
+.. |MovingAverage| replace:: :doc:`MovingAverage </content/7_sdk_reference/backend_filters/moving_average>`
+.. |ONode| replace:: :doc:`ONode </content/7_sdk_reference/backend_core/o_node>`
+.. |OPort| replace:: :doc:`OPort </content/7_sdk_reference/backend_core/o_port>`
+.. |ParadigmPresenter| replace:: :doc:`ParadigmPresenter </content/7_sdk_reference/frontend_widgets/paradigm_presenter>`
+.. |PerformanceMonitor| replace:: :doc:`PerformanceMonitor </content/7_sdk_reference/frontend_widgets/performance_monitor>`
+.. |Pipeline| replace:: :doc:`Pipeline </content/7_sdk_reference/backend/pipeline>`
+.. |Router| replace:: :doc:`Router </content/7_sdk_reference/backend_flow/router>`
+.. |Scope| replace:: :doc:`Scope </content/7_sdk_reference/frontend_widgets/scope>`
+.. |Source| replace:: :doc:`Source </content/7_sdk_reference/backend_sources/source>`
+.. |SpectrumScope| replace:: :doc:`SpectrumScope </content/7_sdk_reference/frontend_widgets/spectrum_scope>`
+.. |TimeSeriesScope| replace:: :doc:`TimeSeriesScope </content/7_sdk_reference/frontend_widgets/time_series_scope>`
+.. |Trigger| replace:: :doc:`Trigger </content/7_sdk_reference/backend_flow/trigger>`
+.. |TriggerScope| replace:: :doc:`TriggerScope </content/7_sdk_reference/frontend_widgets/trigger_scope>`
+.. |UDPReceiver| replace:: :doc:`UDPReceiver </content/7_sdk_reference/backend_sources/udp_receiver>`
+.. |UDPSender| replace:: :doc:`UDPSender </content/7_sdk_reference/backend_sinks/udp_sender>`
+.. |Widget| replace:: :doc:`Widget </content/7_sdk_reference/frontend_widgets/widget>`
+
+.. =================================================================
+.. TRAINING EPISODE LINKS
+.. =================================================================
+
+.. |s1e1| replace:: :doc:`Episode 1: Environment Setup </content/2_gpype_training/season1_boarding/s1e1_environment_setup>`
+.. |s1e2| replace:: :doc:`Episode 2: Hello World </content/2_gpype_training/season1_boarding/s1e2_hello_world>`
+.. |s1e3| replace:: :doc:`Episode 3: Generating Signals </content/2_gpype_training/season1_boarding/s1e3_signal_generator>`
+
+.. =================================================================
+.. COMMON CODE SNIPPETS
+.. =================================================================
+
+.. |import_gpype| replace:: ``import gpype as gp``
+.. |main_entry| replace:: ``if __name__ == "__main__":``
+
+.. =================================================================
+.. COMMON NOTES
+.. =================================================================
+
+.. |note_main_thread| replace:: .. note:: Always run g.Pype applications from the main thread to avoid threading issues.

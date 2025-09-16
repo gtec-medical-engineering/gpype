@@ -5,9 +5,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.backend.flow.framer &mdash; g.Pype v3.0.3  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+  <title>gpype.backend.flow.framer</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=0382cca7" />
 
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
@@ -15,6 +17,10 @@
       <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../../_static/js/line_numbers.js?v=98e8ade1"></script>
+      <script src="../../../../_static/js/training_page.js?v=c174bc68"></script>
+      <script src="../../../../_static/js/external_links.js?v=613fa8ce"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -29,7 +35,8 @@
           
           
           <a href="../../../../index.html" class="icon icon-home">
-            g.Pype v3.0.3
+            g.Pype v3.0.4
+              <img src="../../../../_static/gpype-logo-sRGB.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -39,13 +46,13 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/1_basic_concepts/index.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/2_gpype_training/index.html">g.Pype Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/5_faq/index.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/6_troubleshooting/index.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/7_sdk_reference/index.html">SDK Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/8_appendix/index.html">Appendix</a></li>
 </ul>
 
         </div>
@@ -54,7 +61,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../index.html">g.Pype v3.0.3</a>
+          <a href="../../../../index.html">g.Pype v3.0.4</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -86,41 +93,27 @@
 
 
 <div class="viewcode-block" id="Framer">
-<a class="viewcode-back" href="../../../../content/backend/flow/framer.html#gpype.backend.flow.framer.Framer">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_flow/framer.html#gpype.backend.flow.framer.Framer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Framer</span><span class="p">(</span><span class="n">IONode</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Frame aggregation node for combining single samples into frames.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Frame aggregation node for combining single samples into frames.</span>
 
-<span class="sd">    The Framer node collects individual samples (frame size = 1) and</span>
-<span class="sd">    aggregates them into larger frames of a specified size. This is useful</span>
-<span class="sd">    for converting sample-by-sample data streams into frame-based processing,</span>
-<span class="sd">    which can improve computational efficiency and enable block-based</span>
-<span class="sd">    algorithms.</span>
-
-<span class="sd">    The node maintains an internal buffer that accumulates incoming samples</span>
-<span class="sd">    until a complete frame is assembled. Once a frame is ready, it outputs</span>
-<span class="sd">    the entire frame and starts collecting the next frame.</span>
-
-<span class="sd">    Features:</span>
-<span class="sd">        - Single sample to frame conversion</span>
-<span class="sd">        - Configurable output frame size</span>
-<span class="sd">        - Multi-channel support</span>
-
-<span class="sd">    Note:</span>
-<span class="sd">        Input data must have frame_size = 1. The node will raise an error</span>
-<span class="sd">        if the input frame size is not 1.</span>
+<span class="sd">    Collects individual samples (frame size = 1) and aggregates them into</span>
+<span class="sd">    larger frames of a specified size. Maintains an internal buffer that</span>
+<span class="sd">    accumulates samples until a complete frame is assembled, then outputs</span>
+<span class="sd">    the entire frame. Useful for converting sample-by-sample streams into</span>
+<span class="sd">    frame-based processing.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Type annotation for the internal buffer</span>
     <span class="n">_buf</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
 
 <div class="viewcode-block" id="Framer.Configuration">
-<a class="viewcode-back" href="../../../../content/backend/flow/framer.html#gpype.backend.flow.framer.Framer.Configuration">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_flow/framer.html#gpype.backend.flow.framer.Framer.Configuration">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">Configuration</span><span class="p">(</span><span class="n">IONode</span><span class="o">.</span><span class="n">Configuration</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Configuration class for Framer parameters.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Framer.Configuration.Keys">
-<a class="viewcode-back" href="../../../../content/backend/flow/framer.html#gpype.backend.flow.framer.Framer.Configuration.Keys">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_flow/framer.html#gpype.backend.flow.framer.Framer.Configuration.Keys">[docs]</a>
         <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">IONode</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Configuration key constants for the Framer.&quot;&quot;&quot;</span>
 
@@ -129,14 +122,13 @@
 
 
 <div class="viewcode-block" id="Framer.__init__">
-<a class="viewcode-back" href="../../../../content/backend/flow/framer.html#gpype.backend.flow.framer.Framer.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_flow/framer.html#gpype.backend.flow.framer.Framer.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize the Framer node.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the Framer node.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            frame_size (int, optional): Size of output frames to generate.</span>
-<span class="sd">                Must be a positive integer. Defaults to 1 if None.</span>
+<span class="sd">            frame_size: Size of output frames to generate. Must be a positive</span>
+<span class="sd">                integer. Defaults to 1 if None.</span>
 <span class="sd">            **kwargs: Additional configuration parameters passed to IONode.</span>
 
 <span class="sd">        Raises:</span>
@@ -161,24 +153,23 @@
 
 
 <div class="viewcode-block" id="Framer.setup">
-<a class="viewcode-back" href="../../../../content/backend/flow/framer.html#gpype.backend.flow.framer.Framer.setup">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_flow/framer.html#gpype.backend.flow.framer.Framer.setup">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">port_context_in</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Set up the Framer node and allocate the internal buffer.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up the Framer node and allocate the internal buffer.</span>
 
-<span class="sd">        Validates the input port configuration and initializes the internal</span>
-<span class="sd">        buffer based on the output frame size and channel count. The input</span>
-<span class="sd">        must have frame_size = 1 for proper single-sample aggregation.</span>
+<span class="sd">        Validates input port configuration and initializes the internal buffer</span>
+<span class="sd">        based on output frame size and channel count. Input must have</span>
+<span class="sd">        frame_size = 1 for proper single-sample aggregation.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            data (dict): Initial data dictionary for port configuration.</span>
-<span class="sd">            port_context_in (dict): Input port context information containing</span>
-<span class="sd">                frame size and channel count specifications.</span>
+<span class="sd">            data: Initial data dictionary for port configuration.</span>
+<span class="sd">            port_context_in: Input port context with frame size and channel</span>
+<span class="sd">                count specifications.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            dict: Output port context with updated frame size information.</span>
+<span class="sd">            Output port context with updated frame size information.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ValueError: If input frame size is not 1.</span>
@@ -208,26 +199,21 @@
 
 
 <div class="viewcode-block" id="Framer.step">
-<a class="viewcode-back" href="../../../../content/backend/flow/framer.html#gpype.backend.flow.framer.Framer.step">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_flow/framer.html#gpype.backend.flow.framer.Framer.step">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Process one sample and add it to the internal frame buffer.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process one sample and add it to the internal frame buffer.</span>
 
-<span class="sd">        Takes a single sample from the input and stores it in the appropriate</span>
-<span class="sd">        position within the internal buffer. When a complete frame has been</span>
-<span class="sd">        assembled (every frame_size samples), outputs the complete frame.</span>
+<span class="sd">        Takes a single sample from input and stores it in the buffer. When a</span>
+<span class="sd">        complete frame has been assembled (every frame_size samples), outputs</span>
+<span class="sd">        the complete frame.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            data (dict): Input data dictionary containing a single sample</span>
-<span class="sd">                with PORT_IN key. The sample should have shape (1, channels).</span>
+<span class="sd">            data: Input data dictionary containing a single sample with</span>
+<span class="sd">                PORT_IN key. Sample should have shape (1, channels).</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            dict: Output data dictionary with PORT_OUT key containing the</span>
-<span class="sd">                complete frame when ready, or None if frame is not complete.</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            The method uses modular arithmetic to cycle through buffer</span>
-<span class="sd">            positions, ensuring proper sample placement within frames.</span>
+<span class="sd">            Output data dictionary with PORT_OUT key containing the complete</span>
+<span class="sd">            frame when ready, or None if frame is not complete.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Calculate buffer position using sample counter</span>
         <span class="n">buf_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_counter</span><span class="p">()</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frame_size</span>

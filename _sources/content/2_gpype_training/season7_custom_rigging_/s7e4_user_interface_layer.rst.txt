@@ -1,0 +1,25 @@
+Episode 4: User Interface Layer
+-------------------------------
+
+In this episode, you learn more about the user interface layer in g.Pype, enabling you to create custom interfaces for your nodes and pipelines.
+
+.. tab-set::
+
+   .. tab-item:: Read
+      :sync: read
+
+      TBD
+
+   .. tab-item:: Watch
+      :sync: watch
+
+      TBD
+
+   .. tab-item:: Code
+      :sync: code
+
+      TBD
+
+      .. code-block:: python
+
+         TBD

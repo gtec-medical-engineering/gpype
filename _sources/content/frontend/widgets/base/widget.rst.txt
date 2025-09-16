@@ -1,8 +1,0 @@
-Widget Base
-===========
-
-.. autoclass:: gpype.frontend.widgets.base.widget.Widget
-   :members:
-   :undoc-members:
-   :special-members: __init__
-   :show-inheritance:

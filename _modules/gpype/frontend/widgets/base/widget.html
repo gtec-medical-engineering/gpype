@@ -5,9 +5,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.frontend.widgets.base.widget &mdash; g.Pype v3.0.3  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
+  <title>gpype.frontend.widgets.base.widget</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/custom.css?v=0382cca7" />
 
   
       <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
@@ -15,6 +17,10 @@
       <script src="../../../../../_static/documentation_options.js?v=5929fcd5"></script>
       <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../../../_static/js/line_numbers.js?v=98e8ade1"></script>
+      <script src="../../../../../_static/js/training_page.js?v=c174bc68"></script>
+      <script src="../../../../../_static/js/external_links.js?v=613fa8ce"></script>
     <script src="../../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" /> 
@@ -29,7 +35,8 @@
           
           
           <a href="../../../../../index.html" class="icon icon-home">
-            g.Pype v3.0.3
+            g.Pype v3.0.4
+              <img src="../../../../../_static/gpype-logo-sRGB.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
@@ -39,13 +46,13 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/introduction/index.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/backend/index.html">Backend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/common/index.html">Common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/examples/index.html">Examples</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/1_basic_concepts/index.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/2_gpype_training/index.html">g.Pype Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/5_faq/index.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/6_troubleshooting/index.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/7_sdk_reference/index.html">SDK Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/8_appendix/index.html">Appendix</a></li>
 </ul>
 
         </div>
@@ -54,7 +61,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../../index.html">g.Pype v3.0.3</a>
+          <a href="../../../../../index.html">g.Pype v3.0.4</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -83,26 +90,13 @@
 
 
 <div class="viewcode-block" id="Widget">
-<a class="viewcode-back" href="../../../../../content/frontend/widgets/base/widget.html#gpype.frontend.widgets.base.widget.Widget">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/frontend_widgets/widget.html#gpype.frontend.widgets.base.widget.Widget">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Widget</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Base class for BCI visualization widgets with automatic updates.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for BCI visualization widgets with automatic updates.</span>
 
-<span class="sd">    Provides a common foundation for creating real-time visualization</span>
-<span class="sd">    widgets in the g.Pype BCI framework. Handles automatic UI updates</span>
-<span class="sd">    via a QTimer and provides a standardized layout structure with</span>
-<span class="sd">    grouped content.</span>
-
-<span class="sd">    The widget automatically wraps content in a QGroupBox with optional</span>
-<span class="sd">    naming and configurable layout direction. Subclasses implement the</span>
-<span class="sd">    _update() method to define their specific visualization logic.</span>
-
-<span class="sd">    Features:</span>
-<span class="sd">        - Automatic periodic updates for real-time visualization</span>
-<span class="sd">        - Configurable update rate (default 60 FPS)</span>
-<span class="sd">        - Standardized layout with optional grouping and naming</span>
-<span class="sd">        - Timer-based lifecycle management</span>
-<span class="sd">        - Abstract interface for custom update logic</span>
+<span class="sd">    Provides foundation for real-time visualization widgets with automatic</span>
+<span class="sd">    UI updates via QTimer and standardized layout structure with grouped</span>
+<span class="sd">    content. Wraps content in QGroupBox with configurable layout.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        widget (QWidget): The Qt widget to wrap and manage.</span>
@@ -111,8 +105,7 @@
 <span class="sd">            (default: QVBoxLayout).</span>
 
 <span class="sd">    Note:</span>
-<span class="sd">        Subclasses must implement the _update() method to define</span>
-<span class="sd">        their specific update behavior.</span>
+<span class="sd">        Subclasses must implement the _update() method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Update interval for widget refresh in milliseconds</span>
@@ -120,20 +113,14 @@
     <span class="n">UPDATE_INTERVAL_MS</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">16.67</span>
 
 <div class="viewcode-block" id="Widget.__init__">
-<a class="viewcode-back" href="../../../../../content/frontend/widgets/base/widget.html#gpype.frontend.widgets.base.widget.Widget.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/frontend_widgets/widget.html#gpype.frontend.widgets.base.widget.Widget.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">widget</span><span class="p">:</span> <span class="n">QWidget</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
         <span class="n">layout</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">QBoxLayout</span><span class="p">]</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize the widget with layout and timer setup.</span>
-
-<span class="sd">        Creates the widget structure with a group box container and</span>
-<span class="sd">        sets up the automatic update timer. The widget is wrapped in</span>
-<span class="sd">        a horizontal layout containing a named group box with the</span>
-<span class="sd">        specified content layout.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the widget with layout and timer setup.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            widget (QWidget): The Qt widget to wrap and manage.</span>
@@ -162,57 +149,37 @@
 
 
 <div class="viewcode-block" id="Widget.run">
-<a class="viewcode-back" href="../../../../../content/frontend/widgets/base/widget.html#gpype.frontend.widgets.base.widget.Widget.run">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/frontend_widgets/widget.html#gpype.frontend.widgets.base.widget.Widget.run">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Start the automatic update timer for real-time visualization.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start the automatic update timer for real-time visualization.</span>
 
 <span class="sd">        Begins periodic updates at the configured interval (default 60 FPS).</span>
-<span class="sd">        The _update() method will be called repeatedly until terminate()</span>
-<span class="sd">        is called or the widget is destroyed.</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            Should be called after the widget is fully initialized and</span>
-<span class="sd">            ready to display data.</span>
+<span class="sd">        Should be called after the widget is fully initialized.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">UPDATE_INTERVAL_MS</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Widget.terminate">
-<a class="viewcode-back" href="../../../../../content/frontend/widgets/base/widget.html#gpype.frontend.widgets.base.widget.Widget.terminate">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/frontend_widgets/widget.html#gpype.frontend.widgets.base.widget.Widget.terminate">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">terminate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Stop the automatic update timer and cleanup resources.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stop the automatic update timer and cleanup resources.</span>
 
-<span class="sd">        Stops the periodic updates and prepares the widget for cleanup.</span>
 <span class="sd">        Should be called before the widget is destroyed to ensure</span>
 <span class="sd">        proper resource management.</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            After calling terminate(), the widget will no longer update</span>
-<span class="sd">            automatically until run() is called again.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_timer</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span></div>
 
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Abstract method for implementing widget-specific update logic.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Abstract method for implementing widget-specific update logic.</span>
 
-<span class="sd">        This method is called periodically by the timer (at UPDATE_INTERVAL_MS</span>
-<span class="sd">        intervals) to refresh the widget&#39;s visual content. Subclasses must</span>
-<span class="sd">        implement this method to define their specific visualization behavior.</span>
-
-<span class="sd">        The method should:</span>
-<span class="sd">        - Update displayed data from the pipeline</span>
-<span class="sd">        - Refresh visual elements (plots, text, indicators)</span>
-<span class="sd">        - Handle any real-time visualization requirements</span>
-<span class="sd">        - Be efficient to maintain smooth frame rates</span>
+<span class="sd">        Called periodically by the timer to refresh the widget&#39;s visual</span>
+<span class="sd">        content. Subclasses must implement this method to define their</span>
+<span class="sd">        specific visualization behavior.</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            This method runs on the main Qt thread, so heavy computations</span>
-<span class="sd">            should be avoided or moved to background threads.</span>
+<span class="sd">            Runs on the main Qt thread, so avoid heavy computations.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span>  <span class="c1"># pragma: no cover</span></div>
 

@@ -1,0 +1,6 @@
+Real-Time Performance
+=====================
+
+- stimulus presentation accuaracy
+- performance Monitoring
+- performance tweaking -> framing

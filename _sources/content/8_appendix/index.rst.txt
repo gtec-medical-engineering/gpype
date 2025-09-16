@@ -1,0 +1,19 @@
+Appendix
+========
+
+.. include:: changelog.rst
+
+.. include:: license.rst
+
+.. .. include:: list_of_examples.rst
+
+.. .. include:: list_of_videos.rst
+
+.. include:: bug_reports.rst
+
+.. include:: how_to_cite.rst
+
+.. include:: acknowledgements.rst
+
+.. include:: references.rst
+

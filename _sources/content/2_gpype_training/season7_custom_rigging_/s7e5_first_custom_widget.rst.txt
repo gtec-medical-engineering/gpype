@@ -1,0 +1,25 @@
+Episode 5: First Custom Widget
+------------------------------
+
+In this episode, you create your first custom widget.
+
+.. tab-set::
+
+   .. tab-item:: Read
+      :sync: read
+
+      TBD
+
+   .. tab-item:: Watch
+      :sync: watch
+
+      TBD
+
+   .. tab-item:: Code
+      :sync: code
+
+      TBD
+
+      .. code-block:: python
+
+         TBD

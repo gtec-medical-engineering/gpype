@@ -5,9 +5,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.backend.sources.base.event_source &mdash; g.Pype v3.0.3  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
+  <title>gpype.backend.sources.base.event_source</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/custom.css?v=0382cca7" />
 
   
       <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
@@ -15,6 +17,10 @@
       <script src="../../../../../_static/documentation_options.js?v=5929fcd5"></script>
       <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../../../_static/js/line_numbers.js?v=98e8ade1"></script>
+      <script src="../../../../../_static/js/training_page.js?v=c174bc68"></script>
+      <script src="../../../../../_static/js/external_links.js?v=613fa8ce"></script>
     <script src="../../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" /> 
@@ -29,7 +35,8 @@
           
           
           <a href="../../../../../index.html" class="icon icon-home">
-            g.Pype v3.0.3
+            g.Pype v3.0.4
+              <img src="../../../../../_static/gpype-logo-sRGB.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
@@ -39,13 +46,13 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/introduction/index.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/backend/index.html">Backend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/common/index.html">Common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/examples/index.html">Examples</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/1_basic_concepts/index.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/2_gpype_training/index.html">g.Pype Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/5_faq/index.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/6_troubleshooting/index.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/7_sdk_reference/index.html">SDK Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/8_appendix/index.html">Appendix</a></li>
 </ul>
 
         </div>
@@ -54,7 +61,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../../index.html">g.Pype v3.0.3</a>
+          <a href="../../../../../index.html">g.Pype v3.0.4</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -91,57 +98,21 @@
 
 
 <div class="viewcode-block" id="EventSource">
-<a class="viewcode-back" href="../../../../../content/backend/sources/base/event_source.html#gpype.backend.sources.base.event_source.EventSource">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/backend_sources/event_source.html#gpype.backend.sources.base.event_source.EventSource">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">EventSource</span><span class="p">(</span><span class="n">Source</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Event-driven source for asynchronous data generation.</span>
 
-<span class="sd">    This class implements an event-driven source that generates data in</span>
-<span class="sd">    response to external triggers rather than continuous sampling. It</span>
-<span class="sd">    supports both immediate event processing and delayed event processing</span>
-<span class="sd">    for timing control.</span>
-
-<span class="sd">    The EventSource is particularly useful for:</span>
-<span class="sd">    - Stimulus presentation systems</span>
-<span class="sd">    - User interaction events</span>
-<span class="sd">    - External trigger processing</span>
-<span class="sd">    - Marker and annotation generation</span>
-
-<span class="sd">    Features:</span>
-<span class="sd">    - Asynchronous event triggering with configurable delay</span>
-<span class="sd">    - Thread-safe event queuing for delayed processing</span>
-<span class="sd">    - Automatic data type conversion and formatting</span>
-<span class="sd">    - Integration with g.Pype timing framework</span>
-
-<span class="sd">    Attributes:</span>
-<span class="sd">        _data: Current data to be output in the next step</span>
-<span class="sd">        _delay_thread_queue: Queue for delayed event processing</span>
-<span class="sd">        _delay_thread: Background thread for delay management</span>
-<span class="sd">        _delay_thread_running: Flag to control thread execution</span>
-
-<span class="sd">    Note:</span>
-<span class="sd">        Events can be triggered immediately or with a specified delay.</span>
-<span class="sd">        The delay mechanism uses a separate thread to maintain real-time</span>
-<span class="sd">        performance of the main processing pipeline.</span>
+<span class="sd">    Generates events in response to external triggers.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="EventSource.__init__">
-<a class="viewcode-back" href="../../../../../content/backend/sources/base/event_source.html#gpype.backend.sources.base.event_source.EventSource.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/backend_sources/event_source.html#gpype.backend.sources.base.event_source.EventSource.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the event source with asynchronous output configuration.</span>
-
-<span class="sd">        Configures the event source with default asynchronous timing and</span>
-<span class="sd">        initializes data storage for each configured output port. The source</span>
-<span class="sd">        automatically handles port configuration and data array allocation.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize event source with asynchronous output configuration.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            **kwargs: Additional arguments passed to parent Source class.</span>
-<span class="sd">                Can include channel_count, frame_size, and other source</span>
-<span class="sd">                configuration parameters.</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            Output ports are automatically configured with ASYNC timing</span>
-<span class="sd">            if not explicitly provided. Data arrays are pre-allocated</span>
-<span class="sd">            for all non-inherited channel configurations.</span>
+<span class="sd">            **kwargs: Additional arguments for parent Source class including</span>
+<span class="sd">                channel_count, frame_size, and other configuration parameters.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Extract output_ports from kwargs with default async configuration</span>
         <span class="n">op_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">OUTPUT_PORTS</span>
@@ -174,24 +145,12 @@
 
 
 <div class="viewcode-block" id="EventSource.start">
-<a class="viewcode-back" href="../../../../../content/backend/sources/base/event_source.html#gpype.backend.sources.base.event_source.EventSource.start">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/backend_sources/event_source.html#gpype.backend.sources.base.event_source.EventSource.start">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start the event source and initialize delay processing if needed.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start event source.&quot;&quot;&quot;</span>
 
-<span class="sd">        Initializes the event source by calling the parent start method,</span>
-<span class="sd">        setting the running state, and starting the delay processing thread</span>
-<span class="sd">        if source_delay is configured.</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            If source_delay &gt; 0, a background thread is started to handle</span>
-<span class="sd">            delayed event processing. The initial cycle() call ensures the</span>
-<span class="sd">            source is ready for immediate event processing.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Call parent start method first</span>
         <span class="n">Source</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-
-        <span class="c1"># Set running state</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">States</span><span class="o">.</span><span class="n">RUNNING</span>
 
         <span class="c1"># Initialize delay processing thread if needed</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_delay</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -207,20 +166,9 @@
 
 
 <div class="viewcode-block" id="EventSource.stop">
-<a class="viewcode-back" href="../../../../../content/backend/sources/base/event_source.html#gpype.backend.sources.base.event_source.EventSource.stop">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/backend_sources/event_source.html#gpype.backend.sources.base.event_source.EventSource.stop">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stop the event source and clean up delay processing thread.</span>
-
-<span class="sd">        Sets the stopped state and signals the delay processing thread</span>
-<span class="sd">        to terminate. The parent stop method handles the main cleanup.</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            The delay thread is set to daemon mode, so it will automatically</span>
-<span class="sd">            terminate when the main thread exits, but we explicitly signal</span>
-<span class="sd">            it to stop for clean shutdown.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Set stopped state</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">States</span><span class="o">.</span><span class="n">STOPPED</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stop event source.&quot;&quot;&quot;</span>
 
         <span class="c1"># Signal delay thread to stop</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_delay_thread_running&quot;</span><span class="p">):</span>
@@ -231,23 +179,13 @@
 
 
 <div class="viewcode-block" id="EventSource.trigger">
-<a class="viewcode-back" href="../../../../../content/backend/sources/base/event_source.html#gpype.backend.sources.base.event_source.EventSource.trigger">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/backend_sources/event_source.html#gpype.backend.sources.base.event_source.EventSource.trigger">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">trigger</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Trigger an event with the specified value.</span>
 
-<span class="sd">        Creates an event with the given value and either processes it</span>
-<span class="sd">        immediately or queues it for delayed processing based on the</span>
-<span class="sd">        configured source_delay.</span>
-
 <span class="sd">        Args:</span>
-<span class="sd">            value: The event value to be transmitted. Will be converted</span>
-<span class="sd">                to the appropriate data type and formatted as a single-sample</span>
-<span class="sd">                array for output.</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            If source_delay &gt; 0, the event is queued with a timestamp for</span>
-<span class="sd">            delayed processing. Otherwise, it&#39;s processed immediately with</span>
-<span class="sd">            a cycle() call.</span>
+<span class="sd">            value: Event value to be transmitted. Converted to appropriate</span>
+<span class="sd">                data type and formatted as single-sample array.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Create data array with the event value</span>
         <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="n">PORT_OUT</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">value</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">Constants</span><span class="o">.</span><span class="n">DATA_TYPE</span><span class="p">)}</span>
@@ -266,18 +204,8 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_timer_loop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Background thread loop for delayed event processing.</span>
 
-<span class="sd">        Continuously monitors the delay queue for events that have reached</span>
-<span class="sd">        their delay time. When an event&#39;s delay period has elapsed, it</span>
-<span class="sd">        processes the event by triggering a pipeline cycle.</span>
-
-<span class="sd">        This method runs in a separate daemon thread to avoid blocking</span>
-<span class="sd">        the main processing pipeline while waiting for delay periods</span>
-<span class="sd">        to complete.</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            Uses brief sleep periods (1ms) to prevent excessive CPU usage</span>
-<span class="sd">            while maintaining responsive timing. The thread terminates when</span>
-<span class="sd">            _delay_thread_running is set to False.</span>
+<span class="sd">        Monitors delay queue for events that have reached their delay time</span>
+<span class="sd">        and processes them by triggering pipeline cycles.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_delay_thread_running</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
@@ -299,26 +227,16 @@
                 <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.001</span><span class="p">)</span>
 
 <div class="viewcode-block" id="EventSource.step">
-<a class="viewcode-back" href="../../../../../content/backend/sources/base/event_source.html#gpype.backend.sources.base.event_source.EventSource.step">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/backend_sources/event_source.html#gpype.backend.sources.base.event_source.EventSource.step">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return current event data if available.</span>
-
-<span class="sd">        This method is called by the pipeline framework to retrieve data</span>
-<span class="sd">        from the event source. It returns the current event data if an</span>
-<span class="sd">        event has been triggered, or an empty dictionary if no event</span>
-<span class="sd">        is pending.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: Input data dictionary (unused for source nodes).</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Dictionary containing event data if an event is active,</span>
-<span class="sd">            empty dictionary otherwise.</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            The returned data is only available for one step cycle after</span>
-<span class="sd">            an event is triggered. This ensures events are processed</span>
-<span class="sd">            exactly once by the pipeline.</span>
+<span class="sd">            Dictionary containing event data if event is active, empty dict</span>
+<span class="sd">            otherwise.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{}</span></div>
 </div>

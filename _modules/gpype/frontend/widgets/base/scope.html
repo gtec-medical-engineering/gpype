@@ -5,9 +5,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.frontend.widgets.base.scope &mdash; g.Pype v3.0.3  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
+  <title>gpype.frontend.widgets.base.scope</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/custom.css?v=0382cca7" />
 
   
       <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
@@ -15,6 +17,10 @@
       <script src="../../../../../_static/documentation_options.js?v=5929fcd5"></script>
       <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../../../_static/js/line_numbers.js?v=98e8ade1"></script>
+      <script src="../../../../../_static/js/training_page.js?v=c174bc68"></script>
+      <script src="../../../../../_static/js/external_links.js?v=613fa8ce"></script>
     <script src="../../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" /> 
@@ -29,7 +35,8 @@
           
           
           <a href="../../../../../index.html" class="icon icon-home">
-            g.Pype v3.0.3
+            g.Pype v3.0.4
+              <img src="../../../../../_static/gpype-logo-sRGB.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
@@ -39,13 +46,13 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/introduction/index.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/backend/index.html">Backend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/common/index.html">Common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/examples/index.html">Examples</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/1_basic_concepts/index.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/2_gpype_training/index.html">g.Pype Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/5_faq/index.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/6_troubleshooting/index.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/7_sdk_reference/index.html">SDK Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/8_appendix/index.html">Appendix</a></li>
 </ul>
 
         </div>
@@ -54,7 +61,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../../index.html">g.Pype v3.0.3</a>
+          <a href="../../../../../index.html">g.Pype v3.0.4</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -87,28 +94,13 @@
 
 
 <div class="viewcode-block" id="Scope">
-<a class="viewcode-back" href="../../../../../content/frontend/widgets/base/scope.html#gpype.frontend.widgets.base.scope.Scope">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/frontend_widgets/scope.html#gpype.frontend.widgets.base.scope.Scope">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Scope</span><span class="p">(</span><span class="n">INode</span><span class="p">,</span> <span class="n">Widget</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Base class for oscilloscope-style visualization widgets.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for oscilloscope-style visualization widgets.</span>
 
-<span class="sd">    Combines INode data processing capabilities with Widget visualization</span>
-<span class="sd">    to create real-time plotting widgets for BCI signal visualization.</span>
-<span class="sd">    Uses PyQtGraph for high-performance plotting with configurable</span>
-<span class="sd">    appearance and multiple curve support.</span>
-
-<span class="sd">    The Scope provides a foundation for creating time-series plots,</span>
-<span class="sd">    spectrum analyzers, and other signal visualization tools. It handles</span>
-<span class="sd">    plot setup, curve management, and integrates with the g.Pype pipeline</span>
-<span class="sd">    for automatic data updates.</span>
-
-<span class="sd">    Features:</span>
-<span class="sd">        - High-performance real-time plotting with PyQtGraph</span>
-<span class="sd">        - Configurable line and axis colors with theme integration</span>
-<span class="sd">        - Multiple curve support for multi-channel displays</span>
-<span class="sd">        - Grid display and mouse interaction control</span>
-<span class="sd">        - Automatic plot visibility management</span>
-<span class="sd">        - Pipeline integration for data flow</span>
+<span class="sd">    Combines INode data processing with Widget visualization for real-time</span>
+<span class="sd">    plotting of BCI signals. Uses PyQtGraph for high-performance plotting</span>
+<span class="sd">    with configurable appearance and multiple curve support.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        input_ports (list[IPort.Configuration], optional): Input port</span>
@@ -122,8 +114,7 @@
 <span class="sd">        **kwargs: Additional arguments passed to parent classes.</span>
 
 <span class="sd">    Note:</span>
-<span class="sd">        Subclasses must implement the _update() method to define specific</span>
-<span class="sd">        plotting behavior and data handling.</span>
+<span class="sd">        Subclasses must implement the _update() method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Type annotations for plot components</span>
@@ -131,12 +122,12 @@
     <span class="n">_plot_item</span><span class="p">:</span> <span class="n">pg</span><span class="o">.</span><span class="n">PlotItem</span>
 
 <div class="viewcode-block" id="Scope.Configuration">
-<a class="viewcode-back" href="../../../../../content/frontend/widgets/base/scope.html#gpype.frontend.widgets.base.scope.Scope.Configuration">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/frontend_widgets/scope.html#gpype.frontend.widgets.base.scope.Scope.Configuration">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">Configuration</span><span class="p">(</span><span class="n">INode</span><span class="o">.</span><span class="n">Configuration</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Configuration class for Scope parameters.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Scope.Configuration.Keys">
-<a class="viewcode-back" href="../../../../../content/frontend/widgets/base/scope.html#gpype.frontend.widgets.base.scope.Scope.Configuration.Keys">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/frontend_widgets/scope.html#gpype.frontend.widgets.base.scope.Scope.Configuration.Keys">[docs]</a>
         <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">INode</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Configuration key constants for the Scope.&quot;&quot;&quot;</span>
 
@@ -146,7 +137,7 @@
 
 
 <div class="viewcode-block" id="Scope.__init__">
-<a class="viewcode-back" href="../../../../../content/frontend/widgets/base/scope.html#gpype.frontend.widgets.base.scope.Scope.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/frontend_widgets/scope.html#gpype.frontend.widgets.base.scope.Scope.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">input_ports</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">IPort</span><span class="o">.</span><span class="n">Configuration</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -156,12 +147,7 @@
         <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Scope&quot;</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize the Scope widget with plot setup and color configuration.</span>
-
-<span class="sd">        Creates a PyQtGraph PlotWidget with configured colors, grid display,</span>
-<span class="sd">        and mouse interaction settings. Sets up the widget layout and</span>
-<span class="sd">        initializes plot components.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the Scope widget with plot setup and color configuration.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            input_ports (list[IPort.Configuration], optional): Input port</span>
@@ -227,13 +213,9 @@
 
 
 <div class="viewcode-block" id="Scope.set_labels">
-<a class="viewcode-back" href="../../../../../content/frontend/widgets/base/scope.html#gpype.frontend.widgets.base.scope.Scope.set_labels">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/frontend_widgets/scope.html#gpype.frontend.widgets.base.scope.Scope.set_labels">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">y_label</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Set axis labels for the plot.</span>
-
-<span class="sd">        Configures the text labels displayed on the plot axes to provide</span>
-<span class="sd">        context for the displayed data (e.g., &quot;Time (s)&quot;, &quot;Amplitude (µV)&quot;).</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set axis labels for the plot.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            x_label (str): Label text for the x-axis (horizontal).</span>
@@ -244,14 +226,9 @@
 
 
 <div class="viewcode-block" id="Scope.add_curve">
-<a class="viewcode-back" href="../../../../../content/frontend/widgets/base/scope.html#gpype.frontend.widgets.base.scope.Scope.add_curve">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/frontend_widgets/scope.html#gpype.frontend.widgets.base.scope.Scope.add_curve">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_curve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Add a new plot curve for displaying data.</span>
-
-<span class="sd">        Creates and adds a new PlotCurveItem to the plot for displaying</span>
-<span class="sd">        signal data. Each curve can represent a different channel or</span>
-<span class="sd">        data stream with its own styling.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a new plot curve for displaying data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            pen: PyQtGraph pen object for curve styling. Uses default</span>
@@ -259,10 +236,6 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            pg.PlotCurveItem: The newly created curve item for data updates.</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            Curves are optimized for real-time plotting with antialiasing</span>
-<span class="sd">            and finite check skipping for performance.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Use default pen if none provided</span>
         <span class="k">if</span> <span class="n">pen</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -287,14 +260,9 @@
 
 
 <div class="viewcode-block" id="Scope.setup">
-<a class="viewcode-back" href="../../../../../content/frontend/widgets/base/scope.html#gpype.frontend.widgets.base.scope.Scope.setup">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/frontend_widgets/scope.html#gpype.frontend.widgets.base.scope.Scope.setup">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">port_context_in</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Set up the scope widget and make the plot visible.</span>
-
-<span class="sd">        Called during pipeline initialization to prepare the widget for</span>
-<span class="sd">        data display. Makes the plot visible and calls parent setup</span>
-<span class="sd">        methods to complete initialization.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up the scope widget and make the plot visible.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data (dict): Initial data dictionary for setup.</span>
@@ -312,22 +280,11 @@
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Abstract method for implementing scope-specific update logic.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Abstract method for implementing scope-specific update logic.</span>
 
-<span class="sd">        This method is called periodically by the widget timer to update</span>
-<span class="sd">        the displayed data. Subclasses must implement this method to define</span>
-<span class="sd">        how data is retrieved from the pipeline and displayed on the plot.</span>
-
-<span class="sd">        Typical implementations should:</span>
-<span class="sd">        - Retrieve current data from the pipeline or buffer</span>
-<span class="sd">        - Update curve data using setData() methods</span>
-<span class="sd">        - Handle any scope-specific visualization logic</span>
-<span class="sd">        - Manage plot scaling and axis ranges if needed</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            This method runs on the main Qt thread at high frequency,</span>
-<span class="sd">            so performance is critical for smooth real-time display.</span>
+<span class="sd">        Subclasses must implement this method to define how data is retrieved</span>
+<span class="sd">        from the pipeline and displayed on the plot. Called periodically by</span>
+<span class="sd">        the widget timer for real-time updates.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span>  <span class="c1"># pragma: no cover</span></div>
 

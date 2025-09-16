@@ -1,0 +1,232 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pipeline</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=0382cca7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../_static/js/line_numbers.js?v=98e8ade1"></script>
+      <script src="../../../_static/js/training_page.js?v=c174bc68"></script>
+      <script src="../../../_static/js/external_links.js?v=613fa8ce"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="INode" href="../backend_core/i_node.html" />
+    <link rel="prev" title="SDK Reference" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            g.Pype v3.0.4
+              <img src="../../../_static/gpype-logo-sRGB.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../1_basic_concepts/index.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../2_gpype_training/index.html">g.Pype Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../5_faq/index.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../6_troubleshooting/index.html">Troubleshooting</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">SDK Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#backend">backend</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Pipeline</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#backend-core">backend.core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#backend-filters">backend.filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#backend-flow">backend.flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#backend-sinks">backend.sinks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#backend-sources">backend.sources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#backend-timing">backend.timing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#backend-transform">backend.transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#common">common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#frontend">frontend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#frontend-widgets">frontend.widgets</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../8_appendix/index.html">Appendix</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">g.Pype v3.0.4</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">SDK Reference</a></li>
+      <li class="breadcrumb-item active">Pipeline</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pipeline">
+<h1>Pipeline<a class="headerlink" href="#pipeline" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="gpype.backend.pipeline.Pipeline">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gpype.backend.pipeline.</span></span><span class="sig-name descname"><span class="pre">Pipeline</span></span><a class="reference internal" href="../../../_modules/gpype/backend/pipeline.html#Pipeline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.backend.pipeline.Pipeline" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code></p>
+<p>Brain-Computer Interface pipeline for real-time data processing.</p>
+<p>Extends ioiocore Pipeline for BCI applications with automatic logging
+to platform-specific directories. Manages node lifecycle, data flow
+connections, and real-time execution of interconnected processing nodes.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="gpype.backend.pipeline.Pipeline.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/backend/pipeline.html#Pipeline.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.backend.pipeline.Pipeline.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize Pipeline with platform-specific logging directory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpype.backend.pipeline.Pipeline.connect">
+<span class="sig-name descname"><span class="pre">connect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/backend/pipeline.html#Pipeline.connect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.backend.pipeline.Pipeline.connect" title="Link to this definition"></a></dt>
+<dd><p>Connect two nodes to establish data flow in the pipeline.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source</strong> (<em>Union</em><em>[</em><em>Node</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>]</em>) – Source node or port specification.
+Use dict for specific ports (e.g., node[“port_name”]).</p></li>
+<li><p><strong>target</strong> (<em>Union</em><em>[</em><em>Node</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>]</em>) – Target node or port specification.
+Use dict for specific ports (e.g., node[“port_name”]).</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Nodes are automatically added to pipeline if not already present.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpype.backend.pipeline.Pipeline.start">
+<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/backend/pipeline.html#Pipeline.start"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.backend.pipeline.Pipeline.start" title="Link to this definition"></a></dt>
+<dd><p>Start the pipeline and begin real-time data processing.</p>
+<p>Initiates execution of all nodes according to their configured
+connections and timing. Runs continuously until stop() is called.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This method is non-blocking.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpype.backend.pipeline.Pipeline.stop">
+<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/backend/pipeline.html#Pipeline.stop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.backend.pipeline.Pipeline.stop" title="Link to this definition"></a></dt>
+<dd><p>Stop the pipeline and terminate all data processing.</p>
+<p>Gracefully shuts down all nodes and cleans up resources including
+threads, file handles, and hardware connections.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Always call stop() before program termination to ensure
+proper cleanup, especially when using hardware interfaces.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpype.backend.pipeline.Pipeline.serialize">
+<span class="sig-name descname"><span class="pre">serialize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/backend/pipeline.html#Pipeline.serialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.backend.pipeline.Pipeline.serialize" title="Link to this definition"></a></dt>
+<dd><p>Serialize the pipeline configuration to a dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>Dictionary containing the complete pipeline configuration,</dt><dd><p>including nodes, connections, parameters, and metadata.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpype.backend.pipeline.Pipeline.deserialize">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">deserialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/backend/pipeline.html#Pipeline.deserialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.backend.pipeline.Pipeline.deserialize" title="Link to this definition"></a></dt>
+<dd><p>Deserialize a pipeline configuration from a dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Serialized pipeline configuration dictionary.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new Pipeline instance with the specified configuration.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#gpype.backend.pipeline.Pipeline" title="gpype.backend.pipeline.Pipeline">Pipeline</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="SDK Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../backend_core/i_node.html" class="btn btn-neutral float-right" title="INode" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright g.tec medical engineering GmbH.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

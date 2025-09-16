@@ -5,9 +5,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.frontend.widgets.time_series_scope &mdash; g.Pype v3.0.3  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+  <title>gpype.frontend.widgets.time_series_scope</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=0382cca7" />
 
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
@@ -15,6 +17,10 @@
       <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../../_static/js/line_numbers.js?v=98e8ade1"></script>
+      <script src="../../../../_static/js/training_page.js?v=c174bc68"></script>
+      <script src="../../../../_static/js/external_links.js?v=613fa8ce"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -29,7 +35,8 @@
           
           
           <a href="../../../../index.html" class="icon icon-home">
-            g.Pype v3.0.3
+            g.Pype v3.0.4
+              <img src="../../../../_static/gpype-logo-sRGB.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -39,13 +46,13 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/1_basic_concepts/index.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/2_gpype_training/index.html">g.Pype Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/5_faq/index.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/6_troubleshooting/index.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/7_sdk_reference/index.html">SDK Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/8_appendix/index.html">Appendix</a></li>
 </ul>
 
         </div>
@@ -54,7 +61,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../index.html">g.Pype v3.0.3</a>
+          <a href="../../../../index.html">g.Pype v3.0.4</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -79,6 +86,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">ioiocore</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ioc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pyqtgraph</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pg</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">PySide6</span><span class="w"> </span><span class="kn">import</span> <span class="n">QtWidgets</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">PySide6.QtCore</span><span class="w"> </span><span class="kn">import</span> <span class="n">QEvent</span><span class="p">,</span> <span class="n">QObject</span><span class="p">,</span> <span class="n">Qt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">PySide6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="n">QColor</span><span class="p">,</span> <span class="n">QFont</span><span class="p">,</span> <span class="n">QPalette</span>
 
@@ -91,28 +99,12 @@
 
 
 <div class="viewcode-block" id="TimeSeriesScope">
-<a class="viewcode-back" href="../../../../content/frontend/widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/frontend_widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TimeSeriesScope</span><span class="p">(</span><span class="n">Scope</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Real-time oscilloscope widget for multi-channel time series visualization.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Real-time oscilloscope widget for multi-channel time series.</span>
 
-<span class="sd">    Displays continuous time-series data from BCI pipelines with multiple</span>
-<span class="sd">    channels in a stationary oscilloscope-style view. Features include</span>
-<span class="sd">    configurable time windows, amplitude scaling, channel hiding, event</span>
-<span class="sd">    markers, and real-time performance monitoring.</span>
-
-<span class="sd">    The widget automatically handles data buffering, display scaling,</span>
-<span class="sd">    time axis management, and provides interactive features like keyboard</span>
-<span class="sd">    shortcuts for toggling performance information.</span>
-
-<span class="sd">    Features:</span>
-<span class="sd">        - Multi-channel time series visualization</span>
-<span class="sd">        - Configurable time window and amplitude limits</span>
-<span class="sd">        - Channel selection and hiding capabilities</span>
-<span class="sd">        - Event marker support with custom colors and labels</span>
-<span class="sd">        - Real-time performance monitoring (Alt+R)</span>
-<span class="sd">        - Automated, internal data decimation for performance</span>
-<span class="sd">        - Thread-safe data handling</span>
+<span class="sd">    Displays continuous time-series data from BCI pipelines with configurable</span>
+<span class="sd">    time windows, amplitude scaling, channel hiding, and event markers.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        time_window (int): Display window duration in seconds (1-120).</span>
@@ -127,14 +119,12 @@
     <span class="n">DEFAULT_AMPLITUDE_LIMIT</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">50</span>  <span class="c1"># microvolts</span>
 
 <div class="viewcode-block" id="TimeSeriesScope.Markers">
-<a class="viewcode-back" href="../../../../content/frontend/widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Markers">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/frontend_widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Markers">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">Markers</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Container for event marker configuration.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Container for event marker configuration.</span>
 
-<span class="sd">        Stores marker properties including visual appearance (color),</span>
-<span class="sd">        identification (label), channel association, and trigger value</span>
-<span class="sd">        for event-based visualization in the time series plot.</span>
+<span class="sd">        Stores marker properties including color, label, channel association,</span>
+<span class="sd">        and trigger value for event-based visualization.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            color: Hex color code or color name for marker visualization.</span>
@@ -144,7 +134,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="TimeSeriesScope.Markers.__init__">
-<a class="viewcode-back" href="../../../../content/frontend/widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Markers.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/frontend_widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Markers.__init__">[docs]</a>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">channel</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Initialize marker configuration with display properties.&quot;&quot;&quot;</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -156,10 +146,9 @@
 
 
 <div class="viewcode-block" id="TimeSeriesScope.Configuration">
-<a class="viewcode-back" href="../../../../content/frontend/widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Configuration">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/frontend_widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Configuration">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">Configuration</span><span class="p">(</span><span class="n">Scope</span><span class="o">.</span><span class="n">Configuration</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Configuration keys for TimeSeriesScope widget settings.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Configuration keys for TimeSeriesScope widget settings.</span>
 
 <span class="sd">        Extends the base Scope configuration with time series specific</span>
 <span class="sd">        parameters for display window, amplitude scaling, event markers,</span>
@@ -167,7 +156,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="TimeSeriesScope.Configuration.Keys">
-<a class="viewcode-back" href="../../../../content/frontend/widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Configuration.Keys">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/frontend_widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Configuration.Keys">[docs]</a>
         <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">Scope</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Required configuration parameter keys.&quot;&quot;&quot;</span>
 
@@ -176,7 +165,7 @@
 
 
 <div class="viewcode-block" id="TimeSeriesScope.Configuration.KeysOptional">
-<a class="viewcode-back" href="../../../../content/frontend/widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Configuration.KeysOptional">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/frontend_widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.Configuration.KeysOptional">[docs]</a>
         <span class="k">class</span><span class="w"> </span><span class="nc">KeysOptional</span><span class="p">:</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Optional configuration parameter keys.&quot;&quot;&quot;</span>
 
@@ -186,13 +175,11 @@
 
 
 <div class="viewcode-block" id="TimeSeriesScope.KeyPressFilter">
-<a class="viewcode-back" href="../../../../content/frontend/widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.KeyPressFilter">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/frontend_widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.KeyPressFilter">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">KeyPressFilter</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Event filter for keyboard shortcuts in the time series scope.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Event filter for keyboard shortcuts in the time series scope.</span>
 
-<span class="sd">        Captures and processes keyboard events to provide interactive</span>
-<span class="sd">        functionality like toggling performance information display.</span>
+<span class="sd">        Captures keyboard events to provide interactive functionality.</span>
 <span class="sd">        Currently handles Alt+R for performance monitoring toggle.</span>
 
 <span class="sd">        Args:</span>
@@ -200,7 +187,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="TimeSeriesScope.KeyPressFilter.__init__">
-<a class="viewcode-back" href="../../../../content/frontend/widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.KeyPressFilter.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/frontend_widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.KeyPressFilter.__init__">[docs]</a>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Initialize key press filter with callback function.&quot;&quot;&quot;</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -208,10 +195,9 @@
 
 
 <div class="viewcode-block" id="TimeSeriesScope.KeyPressFilter.eventFilter">
-<a class="viewcode-back" href="../../../../content/frontend/widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.KeyPressFilter.eventFilter">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/frontend_widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.KeyPressFilter.eventFilter">[docs]</a>
         <span class="k">def</span><span class="w"> </span><span class="nf">eventFilter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
-<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            Filter keyboard events and trigger callbacks for shortcuts.</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Filter keyboard events and trigger callbacks for shortcuts.</span>
 
 <span class="sd">            Args:</span>
 <span class="sd">                obj: Qt object that received the event.</span>
@@ -229,7 +215,7 @@
 
 
 <div class="viewcode-block" id="TimeSeriesScope.__init__">
-<a class="viewcode-back" href="../../../../content/frontend/widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/frontend_widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">time_window</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -238,13 +224,7 @@
         <span class="n">hidden_channels</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize the time series oscilloscope widget.</span>
-
-<span class="sd">        Sets up the plotting area, data buffers, timer configurations,</span>
-<span class="sd">        and user interface elements for real-time time series visualization.</span>
-<span class="sd">        Validates input parameters and configures the widget for optimal</span>
-<span class="sd">        performance with multi-channel BCI data streams.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the time series oscilloscope widget.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            time_window: Display window duration in seconds (1-120).</span>
@@ -337,27 +317,20 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_toggle_show_rates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Toggle visibility of performance monitoring information.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Toggle visibility of performance monitoring information.</span>
 
-<span class="sd">        Shows or hides the performance statistics display that includes</span>
-<span class="sd">        frame rates, processing rates, and timing information. This method</span>
-<span class="sd">        is triggered by the Alt+R keyboard shortcut.</span>
+<span class="sd">        Shows or hides performance statistics including frame rates and</span>
+<span class="sd">        processing rates. Triggered by the Alt+R keyboard shortcut.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_show_rates</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_show_rates</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_rate_label</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_show_rates</span><span class="p">)</span>
 
 <div class="viewcode-block" id="TimeSeriesScope.setup">
-<a class="viewcode-back" href="../../../../content/frontend/widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.setup">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/frontend_widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.setup">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">port_context_in</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize the widget with data stream parameters and allocate buffers.</span>
-
-<span class="sd">        Sets up the time series scope based on incoming data characteristics</span>
-<span class="sd">        including sampling rate, channel count, and frame size. Allocates</span>
-<span class="sd">        appropriate buffer sizes and initializes display parameters.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the widget with data stream parameters and buffers.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: Input data dictionary (not used in setup phase).</span>
@@ -419,18 +392,11 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Update the visual display with new data from the buffer.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the visual display with new data from the buffer.</span>
 
-<span class="sd">        This method is called by the Qt timer to refresh the plot with</span>
-<span class="sd">        the latest data. It handles curve creation, data plotting,</span>
-<span class="sd">        performance monitoring, and marker visualization. The method</span>
-<span class="sd">        operates in the main Qt thread for UI safety.</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            This method only updates when new data is available</span>
-<span class="sd">            (_new_data flag). UI elements are created lazily on first</span>
-<span class="sd">            update call.</span>
+<span class="sd">        Called by the Qt timer to refresh the plot with latest data.</span>
+<span class="sd">        Handles curve creation, data plotting, performance monitoring,</span>
+<span class="sd">        and marker visualization. Only updates when new data is available.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_new_data</span><span class="p">:</span>
             <span class="k">return</span>
@@ -601,15 +567,17 @@
                 <span class="sa">f</span><span class="s2">&quot;refresh rate: </span><span class="si">{</span><span class="n">update_rate</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> Hz&quot;</span>
             <span class="p">)</span>
 
-<div class="viewcode-block" id="TimeSeriesScope.step">
-<a class="viewcode-back" href="../../../../content/frontend/widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.step">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Process incoming data frames and store them in the circular buffer.</span>
+        <span class="c1"># Mark all layers dirty to force redraw</span>
+        <span class="n">scene</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_item</span><span class="o">.</span><span class="n">scene</span><span class="p">()</span>
+        <span class="n">scene</span><span class="o">.</span><span class="n">invalidate</span><span class="p">(</span><span class="n">scene</span><span class="o">.</span><span class="n">sceneRect</span><span class="p">(),</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QGraphicsScene</span><span class="o">.</span><span class="n">AllLayers</span><span class="p">)</span>
 
-<span class="sd">        This method is called by the pipeline for each new data frame.</span>
-<span class="sd">        It handles performance monitoring, circular buffer management,</span>
-<span class="sd">        and thread-safe data storage for real-time visualization.</span>
+<div class="viewcode-block" id="TimeSeriesScope.step">
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/frontend_widgets/time_series_scope.html#gpype.frontend.widgets.time_series_scope.TimeSeriesScope.step">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process incoming data frames and store them in the circular buffer.</span>
+
+<span class="sd">        Called by the pipeline for each new data frame. Handles performance</span>
+<span class="sd">        monitoring, circular buffer management, and thread-safe data storage.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: Dictionary containing input data arrays from connected ports.</span>

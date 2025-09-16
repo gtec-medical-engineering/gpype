@@ -1,0 +1,114 @@
+Episode 4: Visualizing Data
+---------------------------
+
+.. include:: ../../../_include/substitutions.rst
+
+In this episode, you learn how to adjust data visualization in g.Pype.
+
+.. tab-set::
+
+   .. tab-item:: Read
+      :sync: read
+
+      Let's begin with the code from the previous episode. Notice that the |Generator| constructor
+      is compact again, while the |TimeSeriesScope| constructor now includes three new parameters:
+      ``time_window``, ``amplitude_limit``, and ``hidden_channels``, all set to their default values.
+
+      .. literalinclude:: ../../../../examples/s1e4_time_series_scope.py
+         :language: python
+         :lines: 6-9,11-13,15-16,18-21,23-24,26-27,29-31
+         :lineno-start: 1
+         :linenos:
+         :dedent: 0
+         :emphasize-lines: 10-12
+
+      Again, first run the script to ensure the output is as expected.
+
+      .. figure:: ../../../_static/screenshots/s1e4_1.png
+         :alt: S1E4 example screenshot
+         :figclass: screenshot
+
+         Minimal g.Pype application with a signal generator and time series scope.
+
+      Now, let's customize the time |TimeSeriesScope| visualization using its parameters.
+
+      .. grid:: 1 1 1 1
+         :gutter: 2
+
+         .. grid-item-card:: Time Window
+
+            The time window determines how many seconds of data are displayed in the scope. By default, it's 10 seconds.
+            Change the time window to 5 seconds by changing ``time_window=5`` in the parameter list. Run the script
+            and observe that only 5 seconds of data are now visible. Let it run for a while to see how the scope
+            cursor overwrites older data. The x-axis automatically adjusts to the displayed segment.
+
+            .. figure:: ../../../_static/screenshots/s1e4_2.png
+               :alt: S1E4 example screenshot
+               :figclass: screenshot
+
+               Time window reduced to 5 seconds.
+
+         .. grid-item-card:: Amplitude Limit
+
+            The amplitude limit sets the y-axis range in microvolts (µV), controlling how much vertical space each channel receives.
+            By default, each channel is allocated 25 µV above and below its center line, for a total height of 50 µV per channel.
+            The scope's grid lines are spaced accordingly, making it easy to estimate signal amplitudes. Change the amplitude limit to 25 µV
+            by changing ``amplitude_limit=25`` in the parameter list. Run the script and notice how the sinusoids (with amplitude 25 µV)
+            now touch each other in the scope.
+
+            .. figure:: ../../../_static/screenshots/s1e4_3.png
+               :alt: S1E4 example screenshot
+               :figclass: screenshot
+
+               Amplitude limit set to 25 µV.
+
+         .. grid-item-card:: Hide Channels
+
+            Sometimes, you may want to hide specific channels from the scope view, especially if you have many channels or want to focus on a subset.
+            For example, you might exclude trigger channels that aren't relevant for your analysis. By default, all channels are shown.
+            To hide the first and last channel, set ``hidden_channels=[0, 7]`` in the parameter list (note: Python uses zero-based indexing).
+            Run the script and observe that only six channels are now displayed, with the channel labels reflecting that
+            channel 1 and 8 have been excluded.
+
+            .. figure:: ../../../_static/screenshots/s1e4_4.png
+               :alt: S1E4 example screenshot
+               :figclass: screenshot
+
+               First and last channel hidden.
+
+      All set! You can now control |TimeSeriesScope| with its most important parameters to adjust the visualization to your needs.
+
+      .. grid:: 1 1 1 1
+         :gutter: 2
+
+         .. grid-item-card:: Summary
+
+            In this episode, you learned how to adjust the |TimeSeriesScope| parameters to:
+
+            - Change the time window
+            - Set the amplitude limit
+            - Hide specific channels
+
+            Note that there are additional parameters available for advanced use cases. We will cover them in upcoming episodes.
+
+      Now, you have successfully completed Season 1 of the g.Pype training. You are ready to proceed to Season 2,
+      where we will discover g.Pype's library building blocks for standard processing pipelines.
+
+
+   .. tab-item:: Code
+      :sync: code
+
+      .. s1e4_time_series_scope.py begin
+
+
+      **File s1e4_time_series_scope.py** -- `View file on GitHub <https://github.com/gtec-medical-engineering/gpype/blob/main/examples/s1e4_time_series_scope.py>`_
+
+
+
+      .. literalinclude:: ../../../../examples/s1e4_time_series_scope.py
+         :language: python
+         :linenos:
+         :dedent: 0
+
+      .. s1e4_time_series_scope.py end
+

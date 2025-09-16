@@ -5,9 +5,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.backend.filters.bandstop &mdash; g.Pype v3.0.3  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+  <title>gpype.backend.filters.bandstop</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=0382cca7" />
 
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
@@ -15,6 +17,10 @@
       <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../../_static/js/line_numbers.js?v=98e8ade1"></script>
+      <script src="../../../../_static/js/training_page.js?v=c174bc68"></script>
+      <script src="../../../../_static/js/external_links.js?v=613fa8ce"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -29,7 +35,8 @@
           
           
           <a href="../../../../index.html" class="icon icon-home">
-            g.Pype v3.0.3
+            g.Pype v3.0.4
+              <img src="../../../../_static/gpype-logo-sRGB.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -39,13 +46,13 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/1_basic_concepts/index.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/2_gpype_training/index.html">g.Pype Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/5_faq/index.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/6_troubleshooting/index.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/7_sdk_reference/index.html">SDK Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/8_appendix/index.html">Appendix</a></li>
 </ul>
 
         </div>
@@ -54,7 +61,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../index.html">g.Pype v3.0.3</a>
+          <a href="../../../../index.html">g.Pype v3.0.4</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -81,32 +88,22 @@
 
 
 <div class="viewcode-block" id="Bandstop">
-<a class="viewcode-back" href="../../../../content/backend/filters/bandstop.html#gpype.backend.filters.bandstop.Bandstop">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_filters/bandstop.html#gpype.backend.filters.bandstop.Bandstop">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Bandstop</span><span class="p">(</span><span class="n">Butterworth</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Bandstop filter implementation using Butterworth design.</span>
 
-<span class="sd">    This class provides a convenient interface for creating bandstop (notch)</span>
-<span class="sd">    filters by extending the Butterworth filter implementation. It</span>
-<span class="sd">    automatically configures the filter for bandstop operation with specified</span>
-<span class="sd">    lower and upper cutoff frequencies.</span>
-
-<span class="sd">    Bandstop filters attenuate frequencies within a specific range while</span>
-<span class="sd">    allowing frequencies outside this range to pass through. This is commonly</span>
-<span class="sd">    used in BCI applications to remove specific interference frequencies</span>
-<span class="sd">    (e.g., 50/60 Hz power line noise, or specific artifact frequencies).</span>
-
-<span class="sd">    The filter uses Butterworth design characteristics, providing maximally</span>
-<span class="sd">    flat response in the passband with no ripples, making it suitable for</span>
-<span class="sd">    applications requiring smooth frequency response outside the stopband.</span>
+<span class="sd">    Provides a convenient interface for creating bandstop (notch) filters that</span>
+<span class="sd">    attenuate frequencies within a specific range while allowing frequencies</span>
+<span class="sd">    outside this range to pass. Uses Butterworth design for smooth response.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Bandstop.Configuration">
-<a class="viewcode-back" href="../../../../content/backend/filters/bandstop.html#gpype.backend.filters.bandstop.Bandstop.Configuration">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_filters/bandstop.html#gpype.backend.filters.bandstop.Bandstop.Configuration">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">Configuration</span><span class="p">(</span><span class="n">Butterworth</span><span class="o">.</span><span class="n">Configuration</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Configuration class for Bandstop filter parameters.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Bandstop.Configuration.Keys">
-<a class="viewcode-back" href="../../../../content/backend/filters/bandstop.html#gpype.backend.filters.bandstop.Bandstop.Configuration.Keys">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_filters/bandstop.html#gpype.backend.filters.bandstop.Bandstop.Configuration.Keys">[docs]</a>
         <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">Butterworth</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Configuration keys for bandstop-specific parameters.&quot;&quot;&quot;</span>
 
@@ -116,28 +113,18 @@
 
 
 <div class="viewcode-block" id="Bandstop.__init__">
-<a class="viewcode-back" href="../../../../content/backend/filters/bandstop.html#gpype.backend.filters.bandstop.Bandstop.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_filters/bandstop.html#gpype.backend.filters.bandstop.Bandstop.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f_lo</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">f_hi</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the bandstop filter with cutoff frequencies.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            f_lo: Lower cutoff frequency in Hz. This defines the lower</span>
-<span class="sd">                boundary of the stopband.</span>
-<span class="sd">            f_hi: Upper cutoff frequency in Hz. This defines the upper</span>
-<span class="sd">                boundary of the stopband.</span>
-<span class="sd">            order: Filter order. Higher orders provide steeper rolloff</span>
-<span class="sd">                but may introduce more phase distortion. Defaults to</span>
-<span class="sd">                DEFAULT_ORDER from parent class.</span>
+<span class="sd">            f_lo: Lower cutoff frequency in Hz (lower boundary of stopband).</span>
+<span class="sd">            f_hi: Upper cutoff frequency in Hz (upper boundary of stopband).</span>
+<span class="sd">            order: Filter order. Defaults to DEFAULT_ORDER from parent class.</span>
 <span class="sd">            **kwargs: Additional arguments passed to parent Butterworth class.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ValueError: If f_lo &gt;= f_hi or if frequencies are invalid.</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            The stopband is defined as [f_lo, f_hi]. Frequencies within</span>
-<span class="sd">            this range will be attenuated, while frequencies outside will</span>
-<span class="sd">            pass through with minimal attenuation according to the filter</span>
-<span class="sd">            characteristics.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Validate cutoff frequency relationship</span>
         <span class="k">if</span> <span class="n">f_lo</span> <span class="o">&gt;=</span> <span class="n">f_hi</span><span class="p">:</span>

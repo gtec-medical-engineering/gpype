@@ -1,0 +1,25 @@
+Episode 3: Debugging
+-------------------------------------
+
+In this episode, you learn how to use g.Pype's debugging tools to identify and resolve issues in your data processing pipelines.
+
+.. tab-set::
+
+   .. tab-item:: Read
+      :sync: read
+
+      TBD
+
+   .. tab-item:: Watch
+      :sync: watch
+
+      TBD
+
+   .. tab-item:: Code
+      :sync: code
+
+      TBD
+
+      .. code-block:: python
+
+         TBD

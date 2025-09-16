@@ -1,0 +1,5 @@
+Configuration & Context
+-----------------------
+
+configuration = serializable, static, fully defines a node
+context = dynamic

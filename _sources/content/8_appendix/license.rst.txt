@@ -1,0 +1,46 @@
+License
+-------
+
+.. code-block:: text
+
+   g.tec Non-Commercial License (GNCL) v1.0
+
+   Copyright (c) 2025 g.tec medical engineering GmbH
+
+   1. License Grant
+   Permission is hereby granted, free of charge, to any individual or
+   organization (the "Licensee") to use this software (the "Software")
+   solely for private or educational purposes, subject to the following
+   conditions.
+
+   2. Permitted Uses
+   The Licensee may use the Software:
+   - For private or educational purposes (e.g., academic research,
+     teaching).
+   - In combination with a biosignal amplifier manufactured by g.tec
+     medical engineering GmbH.
+
+   3. Prohibited Uses
+   The Licensee may not:
+   - Use the Software for any commercial purpose.
+   - Modify, distribute, or sublicense the Software in any form.
+   - Compile the Software into standalone executables for use outside
+     an integrated development environment (IDE).
+   - Remove or alter any copyright, trademark, or attribution notices.
+   - Use the Software with third-party hardware (e.g., biosignal
+     amplifiers not manufactured by g.tec medical engineering GmbH).
+
+   4. Commercial Licensing
+   To use the Software for commercial purposes, including but not
+   limited to:
+   - Integrating it into a product or service sold or offered for a fee.
+   - Deploying it as part of a commercial SaaS or cloud-based service.
+   A separate commercial license must be obtained from the copyright
+   holder. For licensing inquiries, please contact g.tec medical
+   engineering GmbH.
+
+   5. No Warranty
+   THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND,
+   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT.
+

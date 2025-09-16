@@ -5,9 +5,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.frontend.widgets.trigger_scope &mdash; g.Pype v3.0.3  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+  <title>gpype.frontend.widgets.trigger_scope</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=0382cca7" />
 
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
@@ -15,6 +17,10 @@
       <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../../_static/js/line_numbers.js?v=98e8ade1"></script>
+      <script src="../../../../_static/js/training_page.js?v=c174bc68"></script>
+      <script src="../../../../_static/js/external_links.js?v=613fa8ce"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -29,7 +35,8 @@
           
           
           <a href="../../../../index.html" class="icon icon-home">
-            g.Pype v3.0.3
+            g.Pype v3.0.4
+              <img src="../../../../_static/gpype-logo-sRGB.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -39,13 +46,13 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/1_basic_concepts/index.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/2_gpype_training/index.html">g.Pype Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/5_faq/index.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/6_troubleshooting/index.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/7_sdk_reference/index.html">SDK Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/8_appendix/index.html">Appendix</a></li>
 </ul>
 
         </div>
@@ -54,7 +61,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../index.html">g.Pype v3.0.3</a>
+          <a href="../../../../index.html">g.Pype v3.0.4</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -95,29 +102,14 @@
 
 
 <div class="viewcode-block" id="TriggerScope">
-<a class="viewcode-back" href="../../../../content/frontend/widgets/trigger_scope.html#gpype.frontend.widgets.trigger_scope.TriggerScope">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/frontend_widgets/trigger_scope.html#gpype.frontend.widgets.trigger_scope.TriggerScope">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TriggerScope</span><span class="p">(</span><span class="n">Scope</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Event-triggered oscilloscope widget for analyzing signal epochs.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Event-triggered oscilloscope widget for analyzing signal epochs.</span>
 
 <span class="sd">    Displays triggered signal epochs based on events detected by upstream</span>
-<span class="sd">    trigger nodes. Unlike TimeSeriesScope which shows continuous data,</span>
-<span class="sd">    TriggerScope visualizes fixed-duration signal segments around trigger</span>
-<span class="sd">    events, making it ideal for analyzing event-related potentials (ERPs),</span>
-<span class="sd">    stimulus responses, and other event-locked brain activity.</span>
-
-<span class="sd">    The widget supports multiple mathematical expressions to compute</span>
-<span class="sd">    derived signals and can overlay multiple plots with color-coded</span>
-<span class="sd">    legends for comparative analysis.</span>
-
-<span class="sd">    Features:</span>
-<span class="sd">        - Event-triggered signal visualization</span>
-<span class="sd">        - Mathematical expression evaluation for signal processing</span>
-<span class="sd">        - Multi-plot overlay with automatic color coding</span>
-<span class="sd">        - Channel selection and hiding capabilities</span>
-<span class="sd">        - Automatic signal averaging across trigger epochs</span>
-<span class="sd">        - Interactive legend for multi-plot identification</span>
-<span class="sd">        - Pre/post trigger time window display</span>
+<span class="sd">    trigger nodes. Visualizes fixed-duration signal segments around trigger</span>
+<span class="sd">    events, ideal for analyzing ERPs and event-locked brain activity.</span>
+<span class="sd">    Supports mathematical expressions and multi-plot overlay with legends.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        amplitude_limit (float): Y-axis scale limit in microvolts (1-5000).</span>
@@ -128,17 +120,16 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="TriggerScope.Configuration">
-<a class="viewcode-back" href="../../../../content/frontend/widgets/trigger_scope.html#gpype.frontend.widgets.trigger_scope.TriggerScope.Configuration">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/frontend_widgets/trigger_scope.html#gpype.frontend.widgets.trigger_scope.TriggerScope.Configuration">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">Configuration</span><span class="p">(</span><span class="n">Scope</span><span class="o">.</span><span class="n">Configuration</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Configuration keys for TriggerScope widget settings.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Configuration keys for TriggerScope widget settings.</span>
 
 <span class="sd">        Extends the base Scope configuration with trigger-specific</span>
 <span class="sd">        parameters for amplitude scaling and mathematical plot expressions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="TriggerScope.Configuration.Keys">
-<a class="viewcode-back" href="../../../../content/frontend/widgets/trigger_scope.html#gpype.frontend.widgets.trigger_scope.TriggerScope.Configuration.Keys">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/frontend_widgets/trigger_scope.html#gpype.frontend.widgets.trigger_scope.TriggerScope.Configuration.Keys">[docs]</a>
         <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">Scope</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Required configuration parameter keys.&quot;&quot;&quot;</span>
 
@@ -147,7 +138,7 @@
 
 
 <div class="viewcode-block" id="TriggerScope.Configuration.KeysOptional">
-<a class="viewcode-back" href="../../../../content/frontend/widgets/trigger_scope.html#gpype.frontend.widgets.trigger_scope.TriggerScope.Configuration.KeysOptional">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/frontend_widgets/trigger_scope.html#gpype.frontend.widgets.trigger_scope.TriggerScope.Configuration.KeysOptional">[docs]</a>
         <span class="k">class</span><span class="w"> </span><span class="nc">KeysOptional</span><span class="p">:</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Optional configuration parameter keys.&quot;&quot;&quot;</span>
 
@@ -156,7 +147,7 @@
 
 
 <div class="viewcode-block" id="TriggerScope.__init__">
-<a class="viewcode-back" href="../../../../content/frontend/widgets/trigger_scope.html#gpype.frontend.widgets.trigger_scope.TriggerScope.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/frontend_widgets/trigger_scope.html#gpype.frontend.widgets.trigger_scope.TriggerScope.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">amplitude_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
@@ -164,13 +155,10 @@
         <span class="n">hidden_channels</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize the trigger scope widget.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the trigger scope widget.</span>
 
 <span class="sd">        Sets up mathematical expression parsing, input port configuration,</span>
 <span class="sd">        and display parameters for event-triggered signal visualization.</span>
-<span class="sd">        Parses mathematical expressions to create lambda functions for</span>
-<span class="sd">        real-time signal computation.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            amplitude_limit: Y-axis scale limit in microvolts (1-5000).</span>
@@ -289,17 +277,14 @@
 
 
 <div class="viewcode-block" id="TriggerScope.setup">
-<a class="viewcode-back" href="../../../../content/frontend/widgets/trigger_scope.html#gpype.frontend.widgets.trigger_scope.TriggerScope.setup">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/frontend_widgets/trigger_scope.html#gpype.frontend.widgets.trigger_scope.TriggerScope.setup">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">port_context_in</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize the widget with trigger parameters and allocate buffers.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the widget with trigger parameters and allocate buffers.</span>
 
 <span class="sd">        Sets up the trigger scope based on upstream trigger node configuration</span>
-<span class="sd">        including sampling rate, channel count, frame size, and pre/post</span>
-<span class="sd">        trigger timing. Validates that all input ports have consistent</span>
-<span class="sd">        parameters and allocates appropriate data structures.</span>
+<span class="sd">        including timing, sampling parameters, and channel configuration.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: Input data dictionary (not used in setup phase).</span>
@@ -400,19 +385,12 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Update the visual display with new trigger epoch data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the visual display with new trigger epoch data.</span>
 
-<span class="sd">        This method is called by the Qt timer to refresh the plot with</span>
-<span class="sd">        the latest trigger epochs. It handles curve creation, mathematical</span>
-<span class="sd">        expression evaluation, signal averaging, and multi-plot visualization</span>
-<span class="sd">        with color-coded legends. The method operates in the main Qt thread</span>
-<span class="sd">        for UI safety.</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            This method only updates when new data is available</span>
-<span class="sd">            (_new_data flag). UI elements are created lazily on first</span>
-<span class="sd">            update call.</span>
+<span class="sd">        Called by the Qt timer to refresh the plot with latest trigger epochs.</span>
+<span class="sd">        Handles curve creation, mathematical expression evaluation, signal</span>
+<span class="sd">        averaging, and multi-plot visualization with color-coded legends.</span>
+<span class="sd">        Only updates when new data is available.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_new_data</span><span class="p">:</span>
             <span class="k">return</span>
@@ -502,16 +480,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_plot_item</span><span class="o">.</span><span class="n">setXRange</span><span class="p">(</span><span class="o">*</span><span class="n">xlim</span><span class="p">)</span>
 
 <div class="viewcode-block" id="TriggerScope.step">
-<a class="viewcode-back" href="../../../../content/frontend/widgets/trigger_scope.html#gpype.frontend.widgets.trigger_scope.TriggerScope.step">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/frontend_widgets/trigger_scope.html#gpype.frontend.widgets.trigger_scope.TriggerScope.step">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Process incoming trigger epoch data and store for visualization.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process incoming trigger epoch data and store for visualization.</span>
 
-<span class="sd">        This method is called by the pipeline for each new trigger epoch.</span>
-<span class="sd">        It accumulates trigger epochs in buffers for averaging and</span>
-<span class="sd">        mathematical expression evaluation. Unlike continuous data streams,</span>
-<span class="sd">        trigger epochs represent fixed-duration signal segments around</span>
-<span class="sd">        detected events.</span>
+<span class="sd">        Called by the pipeline for each new trigger epoch. Accumulates</span>
+<span class="sd">        trigger epochs in buffers for averaging and mathematical expression</span>
+<span class="sd">        evaluation.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: Dictionary containing trigger epoch arrays from connected</span>

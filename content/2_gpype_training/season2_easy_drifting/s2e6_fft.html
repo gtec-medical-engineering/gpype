@@ -1,0 +1,226 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Episode 6: Spectral Analysis via FFT</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=0382cca7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../_static/js/line_numbers.js?v=98e8ade1"></script>
+      <script src="../../../_static/js/training_page.js?v=c174bc68"></script>
+      <script src="../../../_static/js/external_links.js?v=613fa8ce"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Episode 1: BCI Core-8" href="../season3_gearing_up/s3e1_bci_core8.html" />
+    <link rel="prev" title="Episode 5: Decimation" href="s2e5_decimator.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            g.Pype v3.0.4
+              <img src="../../../_static/gpype-logo-sRGB.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../1_basic_concepts/index.html">Basic Concepts</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">g.Pype Training</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#season-1-boarding">Season 1: Boarding</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#season-2-easy-drifting">Season 2: Easy Drifting</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="s2e1_filtering.html">Episode 1: Standard Filtering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="s2e2_router.html">Episode 2: Routing Signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="s2e3_equation.html">Episode 3: Basic Transforms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="s2e4_moving_average.html">Episode 4: Moving Average</a></li>
+<li class="toctree-l3"><a class="reference internal" href="s2e5_decimator.html">Episode 5: Decimation</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Episode 6: Spectral Analysis via FFT</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#season-3-gearing-up">Season 3: Gearing Up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#season-4-crossing-borders">Season 4: Crossing Borders</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#season-5-engaging-senses">Season 5: Engaging Senses</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../5_faq/index.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../6_troubleshooting/index.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../7_sdk_reference/index.html">SDK Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../8_appendix/index.html">Appendix</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">g.Pype v3.0.4</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">g.Pype Training</a></li>
+      <li class="breadcrumb-item active">Episode 6: Spectral Analysis via FFT</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="episode-6-spectral-analysis-via-fft">
+<h1>Episode 6: Spectral Analysis via FFT<a class="headerlink" href="#episode-6-spectral-analysis-via-fft" title="Link to this heading"></a></h1>
+<p>In this episode, you learn how to perform spectral analysis using the Fast Fourier Transform (FFT) in g.Pype.</p>
+<div class="warning admonition">
+<p class="admonition-title">Note</p>
+<p>This page is still under development. Until we have the step-by-step instructions ready, please refer to the
+code example below.</p>
+</div>
+<p><strong>File example_basic_fft.py</strong> – <a class="reference external" href="https://github.com/gtec-medical-engineering/gpype/blob/main/examples/example_basic_fft.py">View file on GitHub</a></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos"> 2</span><span class="sd">Basic FFT (Fast Fourier Transform) Example - Frequency Domain Analysis</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="sd">This example demonstrates how to perform frequency domain analysis using FFT</span>
+<span class="linenos"> 5</span><span class="sd">to convert time-domain signals into their frequency components. This is</span>
+<span class="linenos"> 6</span><span class="sd">fundamental for BCI applications that analyze spectral content of neural</span>
+<span class="linenos"> 7</span><span class="sd">signals.</span>
+<span class="linenos"> 8</span>
+<span class="linenos"> 9</span><span class="sd">What this example shows:</span>
+<span class="linenos">10</span><span class="sd">- Generating a 10 Hz rectangular wave signal with noise</span>
+<span class="linenos">11</span><span class="sd">- Applying FFT with windowing to convert to frequency domain</span>
+<span class="linenos">12</span><span class="sd">- Real-time spectrum visualization showing frequency peaks</span>
+<span class="linenos">13</span><span class="sd">- Pipeline: Generator -&gt; FFT -&gt; Spectrum Scope</span>
+<span class="linenos">14</span>
+<span class="linenos">15</span><span class="sd">Expected output:</span>
+<span class="linenos">16</span><span class="sd">The spectrum scope will display:</span>
+<span class="linenos">17</span><span class="sd">- Strong peak at 10 Hz (fundamental frequency)</span>
+<span class="linenos">18</span><span class="sd">- Additional peaks at 30, 50, 70 Hz... (odd harmonics of rectangular wave)</span>
+<span class="linenos">19</span><span class="sd">- Background noise floor across all frequencies</span>
+<span class="linenos">20</span>
+<span class="linenos">21</span><span class="sd">This demonstrates how rectangular waves contain multiple frequency components</span>
+<span class="linenos">22</span><span class="sd">(harmonics), unlike pure sine waves which show only a single peak.</span>
+<span class="linenos">23</span>
+<span class="linenos">24</span><span class="sd">Real-world applications:</span>
+<span class="linenos">25</span><span class="sd">- EEG rhythm analysis (alpha, beta, gamma bands)</span>
+<span class="linenos">26</span><span class="sd">- Motor imagery classification (mu/beta suppression)</span>
+<span class="linenos">27</span><span class="sd">- SSVEP detection (steady-state visual evoked potentials)</span>
+<span class="linenos">28</span><span class="sd">- Artifact identification in frequency domain</span>
+<span class="linenos">29</span><span class="sd">- Power spectral density analysis</span>
+<span class="linenos">30</span>
+<span class="linenos">31</span><span class="sd">Technical details:</span>
+<span class="linenos">32</span><span class="sd">- Window size: 250 samples (1 second at 250 Hz)</span>
+<span class="linenos">33</span><span class="sd">- Overlap: 50% (smooth spectral updates)</span>
+<span class="linenos">34</span><span class="sd">- Window function: Hamming (reduces spectral leakage)</span>
+<span class="linenos">35</span><span class="sd">- Frequency resolution: 1 Hz (250 Hz / 250 samples)</span>
+<span class="linenos">36</span>
+<span class="linenos">37</span><span class="sd">Usage:</span>
+<span class="linenos">38</span><span class="sd">    python example_basic_fft.py</span>
+<span class="linenos">39</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos">40</span><span class="kn">import</span><span class="w"> </span><span class="nn">gpype</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gp</span>
+<span class="linenos">41</span>
+<span class="linenos">42</span><span class="n">fs</span> <span class="o">=</span> <span class="mi">250</span>  <span class="c1"># Sampling frequency in Hz</span>
+<span class="linenos">43</span>
+<span class="linenos">44</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">45</span>
+<span class="linenos">46</span>    <span class="c1"># Create the main application window</span>
+<span class="linenos">47</span>    <span class="n">app</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">MainApp</span><span class="p">()</span>
+<span class="linenos">48</span>
+<span class="linenos">49</span>    <span class="c1"># Create processing pipeline</span>
+<span class="linenos">50</span>    <span class="n">p</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">()</span>
+<span class="linenos">51</span>
+<span class="linenos">52</span>    <span class="c1"># Generate 10 Hz rectangular wave (rich in harmonics)</span>
+<span class="linenos">53</span>    <span class="n">source</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Generator</span><span class="p">(</span>
+<span class="linenos">54</span>        <span class="n">sampling_rate</span><span class="o">=</span><span class="n">fs</span><span class="p">,</span>
+<span class="linenos">55</span>        <span class="n">channel_count</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>  <span class="c1"># Dual channel</span>
+<span class="linenos">56</span>        <span class="n">signal_frequency</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>  <span class="c1"># 10 Hz fundamental</span>
+<span class="linenos">57</span>        <span class="n">signal_amplitude</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>  <span class="c1"># Signal strength</span>
+<span class="linenos">58</span>        <span class="n">signal_shape</span><span class="o">=</span><span class="s2">&quot;rect&quot;</span><span class="p">,</span>  <span class="c1"># Rectangle = harmonics</span>
+<span class="linenos">59</span>        <span class="n">noise_amplitude</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="linenos">60</span>    <span class="p">)</span>  <span class="c1"># Background noise</span>
+<span class="linenos">61</span>
+<span class="linenos">62</span>    <span class="c1"># FFT analysis with windowing (1 second windows, 50% overlap)</span>
+<span class="linenos">63</span>    <span class="n">fft</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">FFT</span><span class="p">(</span>
+<span class="linenos">64</span>        <span class="n">window_size</span><span class="o">=</span><span class="n">fs</span><span class="p">,</span>  <span class="c1"># 250 samples = 1 sec window</span>
+<span class="linenos">65</span>        <span class="n">overlap</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>  <span class="c1"># 50% overlap for smooth updates</span>
+<span class="linenos">66</span>        <span class="n">window_function</span><span class="o">=</span><span class="s2">&quot;hamming&quot;</span><span class="p">,</span>
+<span class="linenos">67</span>    <span class="p">)</span>  <span class="c1"># Reduce spectral leakage</span>
+<span class="linenos">68</span>
+<span class="linenos">69</span>    <span class="c1"># Frequency domain visualization (spectrum analyzer)</span>
+<span class="linenos">70</span>    <span class="n">scope</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">SpectrumScope</span><span class="p">(</span><span class="n">amplitude_limit</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>  <span class="c1"># Y-axis: 0-20 dB</span>
+<span class="linenos">71</span>
+<span class="linenos">72</span>    <span class="c1"># Connect processing chain: source -&gt; FFT -&gt; spectrum display</span>
+<span class="linenos">73</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">fft</span><span class="p">)</span>
+<span class="linenos">74</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">fft</span><span class="p">,</span> <span class="n">scope</span><span class="p">)</span>
+<span class="linenos">75</span>
+<span class="linenos">76</span>    <span class="c1"># Add spectrum scope to application window</span>
+<span class="linenos">77</span>    <span class="n">app</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">scope</span><span class="p">)</span>
+<span class="linenos">78</span>
+<span class="linenos">79</span>    <span class="c1"># Start pipeline and run application</span>
+<span class="linenos">80</span>    <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>  <span class="c1"># Begin signal processing</span>
+<span class="linenos">81</span>    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>  <span class="c1"># Show GUI and start main loop</span>
+<span class="linenos">82</span>    <span class="n">p</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>  <span class="c1"># Clean shutdown</span>
+</pre></div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="s2e5_decimator.html" class="btn btn-neutral float-left" title="Episode 5: Decimation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../season3_gearing_up/s3e1_bci_core8.html" class="btn btn-neutral float-right" title="Episode 1: BCI Core-8" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright g.tec medical engineering GmbH.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,142 @@
+Episode 2: Hello World!
+-----------------------
+
+.. include:: ../../../_include/substitutions.rst
+
+In this episode, you write your first g.Pype script and run it.
+
+.. tab-set::
+
+   .. tab-item:: Read
+      :sync: read
+
+      Start with a blank Python file in VS Code and follow the steps below to create a minimal g.Pype application.
+
+      .. grid:: 1 1 1 1
+         :gutter: 2
+
+         .. grid-item-card:: Package Import
+
+            Every g.Pype script starts with importing the ``gpype`` library.
+            Use the short alias ``gp`` for convenience.
+
+            .. literalinclude:: ../../../../examples/s1e2_hello_world.py
+               :language: python
+               :lines: 6
+               :lineno-start: 1
+               :linenos:
+               :dedent: 0
+               :class: compact
+
+
+         .. grid-item-card:: MainApp & Pipeline
+
+            Inside the entry point, create g.Pype's |MainApp| and |Pipeline| objects, which are the heart of any g.Pype application.
+
+            .. literalinclude:: ../../../../examples/s1e2_hello_world.py
+               :language: python
+               :lines: 8,11-12
+               :lineno-start: 2
+               :linenos:
+               :dedent: 0
+               :class: compact
+
+         .. grid-item-card:: Generator & TimeSeriesScope
+
+            Create a signal source using a |Generator| with parameter ``signal_amplitude=25``, which will produce a
+            sinusoidal test signal with amplitude 25 and default frequency of 10 Hz for your pipeline.
+            Also, set up a |TimeSeriesScope|, a visualization widget that will display the generated signal in real time.
+
+            .. literalinclude:: ../../../../examples/s1e2_hello_world.py
+               :language: python
+               :lines: 15-16
+               :lineno-start: 5
+               :linenos:
+               :dedent: 0
+               :class: compact
+
+         .. grid-item-card:: Connect Nodes
+
+            Connect the source to the scope using the pipeline's connect method. This step ensures that the data produced by
+            the Generator will be sent directly to the TimeSeriesScope, so you can observe the signal in real time once
+            the pipeline is running. Note that connecting the nodes implicity adds them to the pipeline.
+
+            .. literalinclude:: ../../../../examples/s1e2_hello_world.py
+               :language: python
+               :lines: 19
+               :lineno-start: 7
+               :linenos:
+               :dedent: 0
+               :class: compact
+
+         .. grid-item-card:: Add Widgets
+
+            By adding the scope to the MainApp, it will become visible in the user
+            interface window when the MainApp runs.
+
+            .. literalinclude:: ../../../../examples/s1e2_hello_world.py
+               :language: python
+               :lines: 22
+               :lineno-start: 8
+               :linenos:
+               :dedent: 0
+               :class: compact
+
+         .. grid-item-card:: Start Pipeline and Run MainApp
+
+            Finally, tell the Pipeline to start and the MainApp to run. This ensures that data
+            processing begins and the user interface window opens. Once the MainApp window is closed,
+            the Pipeline is stopped gracefully, cleaning up all resources.
+
+            .. literalinclude:: ../../../../examples/s1e2_hello_world.py
+               :language: python
+               :lines: 25-27
+               :lineno-start: 9
+               :linenos:
+               :dedent: 0
+
+      Eleven lines of code to create a simple g.Pype application. You are now ready to run it.
+
+      .. grid:: 1 1 1 1
+         :gutter: 2
+
+         .. grid-item-card:: Result
+
+            Execute your Python script in VS Code by pressing the F5 key or navigating to the Run and Debug panel (CTRL+Shift+D),
+            followed by clicking the play button. The g.Pype application will now start, and you should see the time series scope
+            displaying the generated signal in real time.
+
+            .. figure:: ../../../_static/screenshots/s1e2.png
+               :alt: S1E2 example screenshot
+               :figclass: screenshot
+
+               Hello World! A minimal g.Pype application running with a signal generator and time series scope.
+
+         .. grid-item-card:: Summary
+
+            In this episode, you learned how to:
+
+            - Set up a minimal g.Pype application
+            - Create a signal source and a real-time scope
+            - Connect components and run the app
+
+            This forms the foundation for all future g.Pype scripts.
+
+      Done! Proceed to the next episode to explore signal generation with |Generator| in more detail.
+
+   .. tab-item:: Code
+      :sync: code
+
+      .. s1e2_hello_world.py begin
+
+
+      **File s1e2_hello_world.py** -- `View file on GitHub <https://github.com/gtec-medical-engineering/gpype/blob/main/examples/s1e2_hello_world.py>`_
+
+
+
+      .. literalinclude:: ../../../../examples/s1e2_hello_world.py
+         :language: python
+         :linenos:
+         :dedent: 0
+
+      .. s1e2_hello_world.py end

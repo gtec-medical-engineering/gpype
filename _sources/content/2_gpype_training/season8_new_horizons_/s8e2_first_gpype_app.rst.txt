@@ -1,0 +1,25 @@
+Episode 2: Your First g.Pype App
+--------------------------------
+
+In this episode, we guide you through creating your first g.Pype application, demonstrating how to set up a basic project structure and implement core functionalities.
+
+.. tab-set::
+
+   .. tab-item:: Read
+      :sync: read
+
+      TBD
+
+   .. tab-item:: Watch
+      :sync: watch
+
+      TBD
+
+   .. tab-item:: Code
+      :sync: code
+
+      TBD
+
+      .. code-block:: python
+
+         TBD

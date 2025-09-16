@@ -1,0 +1,17 @@
+Bug Reports
+-----------
+
+To help us improve g.Pype, please file bug reports at:
+
+  https://github.com/gtec-medical-engineering/gpype/issues
+
+When reporting a bug, include the following details for the best chance of a quick fix:
+
+- A clear, descriptive title
+- Steps to reproduce the issue (what you did, what you expected, what happened)
+- Your operating system and Python version
+- Any error messages or screenshots
+- (Optional) Example code or files that trigger the problem
+
+Thanks for helping make g.Pype better!
+

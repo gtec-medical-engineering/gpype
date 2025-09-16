@@ -1,0 +1,25 @@
+Episode 1: g.Pype Architecture Revisited
+----------------------------------------
+
+In this episode, wevisit the g.Pype architecture, exploring its core components and how they interact to create a powerful data processing framework.
+
+.. tab-set::
+
+   .. tab-item:: Read
+      :sync: read
+
+      TBD
+
+   .. tab-item:: Watch
+      :sync: watch
+
+      TBD
+
+   .. tab-item:: Code
+      :sync: code
+
+      TBD
+
+      .. code-block:: python
+
+         TBD

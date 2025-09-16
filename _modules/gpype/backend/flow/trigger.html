@@ -5,9 +5,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.backend.flow.trigger &mdash; g.Pype v3.0.3  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+  <title>gpype.backend.flow.trigger</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=0382cca7" />
 
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
@@ -15,6 +17,10 @@
       <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../../_static/js/line_numbers.js?v=98e8ade1"></script>
+      <script src="../../../../_static/js/training_page.js?v=c174bc68"></script>
+      <script src="../../../../_static/js/external_links.js?v=613fa8ce"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -29,7 +35,8 @@
           
           
           <a href="../../../../index.html" class="icon icon-home">
-            g.Pype v3.0.3
+            g.Pype v3.0.4
+              <img src="../../../../_static/gpype-logo-sRGB.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -39,13 +46,13 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/1_basic_concepts/index.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/2_gpype_training/index.html">g.Pype Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/5_faq/index.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/6_troubleshooting/index.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/7_sdk_reference/index.html">SDK Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/8_appendix/index.html">Appendix</a></li>
 </ul>
 
         </div>
@@ -54,7 +61,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../index.html">g.Pype v3.0.3</a>
+          <a href="../../../../index.html">g.Pype v3.0.4</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -88,37 +95,14 @@
 
 
 <div class="viewcode-block" id="Trigger">
-<a class="viewcode-back" href="../../../../content/backend/flow/trigger.html#gpype.backend.flow.trigger.Trigger">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_flow/trigger.html#gpype.backend.flow.trigger.Trigger">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Trigger</span><span class="p">(</span><span class="n">IONode</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Event-triggered data extraction node for BCI applications.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Event-triggered data extraction node for BCI applications.</span>
 
-<span class="sd">    The Trigger node monitors trigger events and extracts time-locked data</span>
-<span class="sd">    segments around trigger occurrences. It maintains a rolling buffer of</span>
-<span class="sd">    input data and outputs complete data epochs when target trigger values</span>
-<span class="sd">    are detected.</span>
-
-<span class="sd">    This node is commonly used in event-related potential (ERP) analysis,</span>
-<span class="sd">    where specific stimuli or responses trigger the extraction of neural</span>
-<span class="sd">    data segments for averaging and analysis.</span>
-
-<span class="sd">    Features:</span>
-<span class="sd">        - Configurable pre- and post-trigger time windows</span>
-<span class="sd">        - Multiple target trigger values support</span>
-<span class="sd">        - Asynchronous output timing (only when triggered)</span>
-<span class="sd">        - Single-sample input frame requirement for precise timing</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        time_pre (float): Time in seconds before trigger to include in epoch.</span>
-<span class="sd">            Default is 0.7 seconds.</span>
-<span class="sd">        time_post (float): Time in seconds after trigger to include in epoch.</span>
-<span class="sd">            Default is 0.2 seconds.</span>
-<span class="sd">        target (list or float): Trigger value(s) that cause epoch extraction.</span>
-<span class="sd">            Can be a single value or list of values. Default is [1].</span>
-
-<span class="sd">    Note:</span>
-<span class="sd">        Input data must have frame_size=1 for accurate trigger timing.</span>
-<span class="sd">        The node requires two input ports: data and trigger.</span>
+<span class="sd">    Monitors trigger events and extracts time-locked data segments around</span>
+<span class="sd">    trigger occurrences. Maintains a rolling buffer of input data and outputs</span>
+<span class="sd">    complete data epochs when target trigger values are detected. Commonly</span>
+<span class="sd">    used in event-related potential (ERP) analysis.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Default time window values in seconds</span>
@@ -129,12 +113,12 @@
     <span class="n">PORT_TRIGGER</span> <span class="o">=</span> <span class="s2">&quot;trigger&quot;</span>
 
 <div class="viewcode-block" id="Trigger.Configuration">
-<a class="viewcode-back" href="../../../../content/backend/flow/trigger.html#gpype.backend.flow.trigger.Trigger.Configuration">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_flow/trigger.html#gpype.backend.flow.trigger.Trigger.Configuration">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">Configuration</span><span class="p">(</span><span class="n">IONode</span><span class="o">.</span><span class="n">Configuration</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Configuration class for Trigger parameters.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Trigger.Configuration.Keys">
-<a class="viewcode-back" href="../../../../content/backend/flow/trigger.html#gpype.backend.flow.trigger.Trigger.Configuration.Keys">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_flow/trigger.html#gpype.backend.flow.trigger.Trigger.Configuration.Keys">[docs]</a>
         <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">IONode</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Configuration key constants for the Trigger.&quot;&quot;&quot;</span>
 
@@ -145,7 +129,7 @@
 
 
 <div class="viewcode-block" id="Trigger.__init__">
-<a class="viewcode-back" href="../../../../content/backend/flow/trigger.html#gpype.backend.flow.trigger.Trigger.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_flow/trigger.html#gpype.backend.flow.trigger.Trigger.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">time_pre</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -153,19 +137,15 @@
         <span class="n">target</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize the Trigger node with timing and target configurations.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the Trigger node with timing and target configurations.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            time_pre (float, optional): Time in seconds before trigger to</span>
-<span class="sd">                include in the extracted epoch. Must be &gt; 0.</span>
-<span class="sd">                Defaults to DEFAULT_TIME_PRE (0.7 seconds).</span>
-<span class="sd">            time_post (float, optional): Time in seconds after trigger to</span>
-<span class="sd">                include in the extracted epoch. Must be &gt; 0.</span>
-<span class="sd">                Defaults to DEFAULT_TIME_POST (0.2 seconds).</span>
-<span class="sd">            target (float or list, optional): Trigger value(s) that will</span>
-<span class="sd">                cause epoch extraction. Can be a single value or list of</span>
-<span class="sd">                values. Defaults to [1].</span>
+<span class="sd">            time_pre: Time in seconds before trigger to include in epoch.</span>
+<span class="sd">                Must be &gt; 0. Defaults to 0.7 seconds.</span>
+<span class="sd">            time_post: Time in seconds after trigger to include in epoch.</span>
+<span class="sd">                Must be &gt; 0. Defaults to 0.2 seconds.</span>
+<span class="sd">            target: Trigger value(s) that cause epoch extraction. Can be</span>
+<span class="sd">                single value or list. Defaults to [1].</span>
 <span class="sd">            **kwargs: Additional configuration parameters passed to IONode.</span>
 
 <span class="sd">        Raises:</span>
@@ -222,29 +202,28 @@
 
 
 <div class="viewcode-block" id="Trigger.setup">
-<a class="viewcode-back" href="../../../../content/backend/flow/trigger.html#gpype.backend.flow.trigger.Trigger.setup">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_flow/trigger.html#gpype.backend.flow.trigger.Trigger.setup">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">port_context_in</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Set up the Trigger node and initialize internal buffers.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up the Trigger node and initialize internal buffers.</span>
 
 <span class="sd">        Validates input requirements, calculates buffer sizes based on</span>
 <span class="sd">        sampling rate and timing parameters, and initializes the rolling</span>
 <span class="sd">        input buffer for data collection.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            data (dict): Initial data dictionary for port configuration.</span>
-<span class="sd">            port_context_in (dict): Input port context information containing</span>
-<span class="sd">                sampling rates, frame sizes, and channel counts.</span>
+<span class="sd">            data: Initial data dictionary for port configuration.</span>
+<span class="sd">            port_context_in: Input port context with sampling rates, frame</span>
+<span class="sd">                sizes, and channel counts.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            dict: Output port context with updated frame size and timing</span>
-<span class="sd">                information for the extracted epochs.</span>
+<span class="sd">            Output port context with updated frame size and timing</span>
+<span class="sd">            information for the extracted epochs.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ValueError: If input frame size is not 1 or sampling rate is</span>
-<span class="sd">                not provided in the context.</span>
+<span class="sd">                not provided.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Call parent setup to get base output context</span>
         <span class="n">port_context_out</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">port_context_in</span><span class="p">)</span>
@@ -300,28 +279,22 @@
 
 
 <div class="viewcode-block" id="Trigger.step">
-<a class="viewcode-back" href="../../../../content/backend/flow/trigger.html#gpype.backend.flow.trigger.Trigger.step">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_flow/trigger.html#gpype.backend.flow.trigger.Trigger.step">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Process one frame of data and check for trigger events.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process one frame of data and check for trigger events.</span>
 
 <span class="sd">        Updates the rolling input buffer with new data, monitors trigger</span>
 <span class="sd">        changes, and extracts complete epochs when countdown timers expire.</span>
-<span class="sd">        Multiple triggers can be active simultaneously, each with its own</span>
-<span class="sd">        countdown timer.</span>
+<span class="sd">        Multiple triggers can be active simultaneously.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            data (dict): Dictionary containing input data arrays. Must include</span>
+<span class="sd">            data: Dictionary containing input data arrays. Must include</span>
 <span class="sd">                both the main data port and trigger port data.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            dict or None: Dictionary containing extracted epoch data when a</span>
-<span class="sd">                trigger countdown completes, None otherwise. The returned</span>
-<span class="sd">                epoch has shape (samples_pre + samples_post, channel_count).</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            The function returns data only when a trigger countdown reaches</span>
-<span class="sd">            zero, making this an asynchronous output node.</span>
+<span class="sd">            Dictionary containing extracted epoch data when a trigger</span>
+<span class="sd">            countdown completes, None otherwise. Epoch has shape</span>
+<span class="sd">            (samples_pre + samples_post, channel_count).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Update rolling buffer with new data sample</span>
         <span class="c1"># Efficiently shift buffer: move all rows up by one position</span>

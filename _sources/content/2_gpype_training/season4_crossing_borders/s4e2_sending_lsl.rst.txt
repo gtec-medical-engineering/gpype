@@ -1,0 +1,29 @@
+Episode 2: Sending LSL Streams
+------------------------------
+
+In this episode, you learn how to send EEG data through an LSL (Lab Streaming Layer) interface using g.Pype.
+
+.. admonition:: Note
+   :class: warning
+
+   This page is still under development. Until we have the step-by-step instructions ready, please refer to the
+   code example below.
+
+**File example_basic_lsl_send.py (send LSL stream)** -- `View file on GitHub`__
+
+.. __: https://github.com/gtec-medical-engineering/gpype/blob/main/examples/example_basic_lsl_send.py
+
+.. literalinclude:: ../../../../examples/example_basic_lsl_send.py
+   :language: python
+   :linenos:
+   :dedent: 0
+
+**File example_basic_lsl_receive.py (standalone LSL receiver)** -- `View file on GitHub`__
+
+.. __: https://github.com/gtec-medical-engineering/gpype/blob/main/examples/example_basic_lsl_receive.py
+
+.. literalinclude:: ../../../../examples/example_basic_lsl_receive.py
+   :language: python
+   :linenos:
+   :dedent: 0
+

@@ -1,0 +1,597 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Episode 1: Standard Filtering</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=0382cca7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../_static/js/line_numbers.js?v=98e8ade1"></script>
+      <script src="../../../_static/js/training_page.js?v=c174bc68"></script>
+      <script src="../../../_static/js/external_links.js?v=613fa8ce"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Episode 2: Routing Signals" href="s2e2_router.html" />
+    <link rel="prev" title="Episode 4: Visualizing Data" href="../season1_boarding/s1e4_data_visualization.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            g.Pype v3.0.4
+              <img src="../../../_static/gpype-logo-sRGB.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../1_basic_concepts/index.html">Basic Concepts</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">g.Pype Training</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#season-1-boarding">Season 1: Boarding</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#season-2-easy-drifting">Season 2: Easy Drifting</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Episode 1: Standard Filtering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="s2e2_router.html">Episode 2: Routing Signals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="s2e3_equation.html">Episode 3: Basic Transforms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="s2e4_moving_average.html">Episode 4: Moving Average</a></li>
+<li class="toctree-l3"><a class="reference internal" href="s2e5_decimator.html">Episode 5: Decimation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="s2e6_fft.html">Episode 6: Spectral Analysis via FFT</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#season-3-gearing-up">Season 3: Gearing Up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#season-4-crossing-borders">Season 4: Crossing Borders</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#season-5-engaging-senses">Season 5: Engaging Senses</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../5_faq/index.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../6_troubleshooting/index.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../7_sdk_reference/index.html">SDK Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../8_appendix/index.html">Appendix</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">g.Pype v3.0.4</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">g.Pype Training</a></li>
+      <li class="breadcrumb-item active">Episode 1: Standard Filtering</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="episode-1-standard-filtering">
+<h1>Episode 1: Standard Filtering<a class="headerlink" href="#episode-1-standard-filtering" title="Link to this heading"></a></h1>
+<p>In this episode, you learn how to apply standard filters to your data using g.Pype.</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="read" for="sd-tab-item-0">
+Read</label><div class="sd-tab-content docutils">
+<p>g.Pype offers four standard filters commonly used in EEG processing pipelines: <a class="reference internal" href="../../7_sdk_reference/backend_filters/highpass.html"><span class="doc">Highpass</span></a>, <a class="reference internal" href="../../7_sdk_reference/backend_filters/lowpass.html"><span class="doc">Lowpass</span></a>,
+<a class="reference internal" href="../../7_sdk_reference/backend_filters/bandstop.html"><span class="doc">Bandstop</span></a> (notch), and <a class="reference internal" href="../../7_sdk_reference/backend_filters/bandpass.html"><span class="doc">Bandpass</span></a>. Below, we demonstrate how to use each of them in to serve
+typical use cases. These filters are implemented as second-order
+<a class="reference external" href="https://en.wikipedia.org/wiki/Butterworth_filter">Butterworth IIR filters</a>.</p>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-1 sd-row-cols-md-1 sd-row-cols-lg-1 sd-g-2 sd-g-xs-2 sd-g-sm-2 sd-g-md-2 sd-g-lg-2 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Highpass</div>
+<p class="sd-card-text">The <a class="reference internal" href="../../7_sdk_reference/backend_filters/highpass.html"><span class="doc">Highpass</span></a> filter attenuates frequencies below a chosen cutoff, allowing higher-frequency
+activity to pass while removing slow drifts and trends. In EEG processing, highpass filtering
+is used to suppress slow baseline shifts and focus on faster brain activity. Start with the
+script below, where the <a class="reference internal" href="../../7_sdk_reference/backend_sources/generator.html"><span class="doc">Generator</span></a> illustrates this behavior by producing a
+slow pseudo-drift at 0.05 Hz overlaid with white noise simulating EEG activity.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span><span class="w"> </span><span class="nn">gpype</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gp</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span>    <span class="n">app</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">MainApp</span><span class="p">()</span>
+<span class="linenos"> 6</span>    <span class="n">p</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">()</span>
+<span class="linenos"> 7</span>
+<span class="hll"><span class="linenos"> 8</span>    <span class="n">source</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Generator</span><span class="p">(</span><span class="n">signal_frequency</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+</span><span class="hll"><span class="linenos"> 9</span>                          <span class="n">signal_amplitude</span><span class="o">=</span><span class="mi">75</span><span class="p">,</span>
+</span><span class="hll"><span class="linenos">10</span>                          <span class="n">noise_amplitude</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+</span><span class="linenos">11</span>
+<span class="linenos">12</span>    <span class="n">scope</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">TimeSeriesScope</span><span class="p">()</span>
+<span class="linenos">13</span>
+<span class="linenos">14</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">scope</span><span class="p">)</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span>    <span class="n">app</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">scope</span><span class="p">)</span>
+<span class="linenos">17</span>
+<span class="linenos">18</span>    <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="linenos">19</span>    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>  <span class="c1"># blocking until window is closed</span>
+<span class="linenos">20</span>    <span class="n">p</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sd-card-text">Run the script and observe the slow drift in the signal.</p>
+<figure class="screenshot align-default" id="id4">
+<img alt="S2E1 example screenshot" src="../../../_images/s2e1_1.png" />
+<figcaption>
+<p><span class="caption-number">Figure 13: </span><span class="caption-text">Slow drift example.</span><a class="headerlink" href="#id4" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p class="sd-card-text">To remove the drift while preserving higher-frequency EEG, add a
+<a class="reference internal" href="../../7_sdk_reference/backend_filters/highpass.html"><span class="doc">Highpass</span></a> filter <code class="docutils literal notranslate"><span class="pre">highpass</span></code> with cutoff frequency
+<code class="docutils literal notranslate"><span class="pre">f_c=1</span></code> Hz between the <a class="reference internal" href="../../7_sdk_reference/backend_sources/generator.html"><span class="doc">Generator</span></a> and <a class="reference internal" href="../../7_sdk_reference/frontend_widgets/time_series_scope.html"><span class="doc">TimeSeriesScope</span></a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 8</span>    <span class="n">source</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Generator</span><span class="p">(</span><span class="n">signal_frequency</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+<span class="linenos"> 9</span>                          <span class="n">signal_amplitude</span><span class="o">=</span><span class="mi">75</span><span class="p">,</span>
+<span class="linenos">10</span>                          <span class="n">noise_amplitude</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+<span class="linenos">11</span>
+<span class="hll"><span class="linenos">12</span>    <span class="n">highpass</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Highpass</span><span class="p">(</span><span class="n">f_c</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</span><span class="linenos">13</span>
+<span class="linenos">14</span>    <span class="n">scope</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">TimeSeriesScope</span><span class="p">()</span>
+<span class="linenos">15</span>
+<span class="hll"><span class="linenos">16</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">highpass</span><span class="p">)</span>
+</span><span class="hll"><span class="linenos">17</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">highpass</span><span class="p">,</span> <span class="n">scope</span><span class="p">)</span>
+</span><span class="linenos">18</span>
+<span class="linenos">19</span>    <span class="n">app</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">scope</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sd-card-text">Run the script again and confirm the slow drift is gone, while the higher frequencies remain.</p>
+<figure class="screenshot align-default" id="id5">
+<img alt="S2E1 example screenshot" src="../../../_images/s2e1_2.png" />
+<figcaption>
+<p><span class="caption-number">Figure 14: </span><span class="caption-text">Slow drift removed via highpass filtering.</span><a class="headerlink" href="#id5" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Lowpass</div>
+<p class="sd-card-text">The <a class="reference internal" href="../../7_sdk_reference/backend_filters/lowpass.html"><span class="doc">Lowpass</span></a> filter attenuates frequencies above a chosen cutoff, allowing lower-frequency
+components to pass while attenuating higher-frequency components. In EEG processing,
+lowpass filters are commonly applied to suppress high-frequency measurement noise and
+focus on slower brain rhythms. Use the script below to demonstrate this scenario. Here,
+the <a class="reference internal" href="../../7_sdk_reference/backend_sources/generator.html"><span class="doc">Generator</span></a> produces a 4 Hz sinusoid mimicking
+<a class="reference external" href="https://en.wikipedia.org/wiki/Theta_wave">Theta</a> activity, embedded in white measurement noise.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span><span class="w"> </span><span class="nn">gpype</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gp</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span>    <span class="n">app</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">MainApp</span><span class="p">()</span>
+<span class="linenos"> 6</span>    <span class="n">p</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">()</span>
+<span class="linenos"> 7</span>
+<span class="hll"><span class="linenos"> 8</span>    <span class="n">source</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Generator</span><span class="p">(</span><span class="n">signal_frequency</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+</span><span class="hll"><span class="linenos"> 9</span>                          <span class="n">signal_amplitude</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
+</span><span class="hll"><span class="linenos">10</span>                          <span class="n">noise_amplitude</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
+</span><span class="linenos">11</span>
+<span class="linenos">12</span>    <span class="n">scope</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">TimeSeriesScope</span><span class="p">()</span>
+<span class="linenos">13</span>
+<span class="linenos">14</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">scope</span><span class="p">)</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span>    <span class="n">app</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">scope</span><span class="p">)</span>
+<span class="linenos">17</span>
+<span class="linenos">18</span>    <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="linenos">19</span>    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>  <span class="c1"># blocking until window is closed</span>
+<span class="linenos">20</span>    <span class="n">p</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sd-card-text">Run the script and observe the noisy signal.</p>
+<figure class="screenshot align-default" id="id6">
+<img alt="S2E1 example screenshot" src="../../../_images/s2e1_3.png" />
+<figcaption>
+<p><span class="caption-number">Figure 15: </span><span class="caption-text">Slow waves embedded in measurement noise.</span><a class="headerlink" href="#id6" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p class="sd-card-text">To suppress the noise while preserving the low-frequency sinusoid, add a <a class="reference internal" href="../../7_sdk_reference/backend_filters/lowpass.html"><span class="doc">Lowpass</span></a> filter
+<code class="docutils literal notranslate"><span class="pre">lowpass</span></code> with cutoff frequency <code class="docutils literal notranslate"><span class="pre">f_c=6</span></code> Hz between the <a class="reference internal" href="../../7_sdk_reference/backend_sources/generator.html"><span class="doc">Generator</span></a> and <a class="reference internal" href="../../7_sdk_reference/frontend_widgets/time_series_scope.html"><span class="doc">TimeSeriesScope</span></a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 8</span>    <span class="n">source</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Generator</span><span class="p">(</span><span class="n">signal_frequency</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+<span class="linenos"> 9</span>                          <span class="n">signal_amplitude</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
+<span class="linenos">10</span>                          <span class="n">noise_amplitude</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
+<span class="linenos">11</span>
+<span class="hll"><span class="linenos">12</span>    <span class="n">lowpass</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Lowpass</span><span class="p">(</span><span class="n">f_c</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+</span><span class="linenos">13</span>
+<span class="linenos">14</span>    <span class="n">scope</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">TimeSeriesScope</span><span class="p">()</span>
+<span class="linenos">15</span>
+<span class="hll"><span class="linenos">16</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">lowpass</span><span class="p">)</span>
+</span><span class="hll"><span class="linenos">17</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">lowpass</span><span class="p">,</span> <span class="n">scope</span><span class="p">)</span>
+</span><span class="linenos">18</span>
+<span class="linenos">19</span>    <span class="n">app</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">scope</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sd-card-text">Run the script again and confirm the noise is substantially reduced, with the low-frequency
+component intact.</p>
+<figure class="screenshot align-default" id="id7">
+<img alt="S2E1 example screenshot" src="../../../_images/s2e1_4.png" />
+<figcaption>
+<p><span class="caption-number">Figure 16: </span><span class="caption-text">Measurement noise eliminated via lowpass filtering.</span><a class="headerlink" href="#id7" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Bandpass</div>
+<p class="sd-card-text">The <a class="reference internal" href="../../7_sdk_reference/backend_filters/bandpass.html"><span class="doc">Bandpass</span></a> filter attenuates frequencies outside a selected range, allowing only
+signals within that band to pass. In EEG processing, bandpass filters are commonly used
+remove both slow drifts and high-frequency noise from EEG data simultaneously, saving
+the need for separate highpass and lowpass filters. As well, bandpass filters are
+typically employed to to isolate specific brain rhythms, such as the alpha band
+(8-12 Hz), for focused analysis. The script below demonstrates such a typical use case,
+where the <a class="reference internal" href="../../7_sdk_reference/backend_sources/generator.html"><span class="doc">Generator</span></a> produces a composite signal resembling 10 Hz alpha activity
+embedded in measurement noise.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span><span class="w"> </span><span class="nn">gpype</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gp</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span>    <span class="n">app</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">MainApp</span><span class="p">()</span>
+<span class="linenos"> 6</span>    <span class="n">p</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">()</span>
+<span class="linenos"> 7</span>
+<span class="hll"><span class="linenos"> 8</span>    <span class="n">source</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Generator</span><span class="p">(</span><span class="n">signal_frequency</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+</span><span class="hll"><span class="linenos"> 9</span>                          <span class="n">signal_amplitude</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
+</span><span class="hll"><span class="linenos">10</span>                          <span class="n">noise_amplitude</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
+</span><span class="linenos">11</span>
+<span class="linenos">12</span>    <span class="n">scope</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">TimeSeriesScope</span><span class="p">()</span>
+<span class="linenos">13</span>
+<span class="linenos">14</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">scope</span><span class="p">)</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span>    <span class="n">app</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">scope</span><span class="p">)</span>
+<span class="linenos">17</span>
+<span class="linenos">18</span>    <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="linenos">19</span>    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>  <span class="c1"># blocking until window is closed</span>
+<span class="linenos">20</span>    <span class="n">p</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sd-card-text">Run the script and observe the noisy signal.</p>
+<figure class="screenshot align-default" id="id8">
+<img alt="S2E1 example screenshot" src="../../../_images/s2e1_5.png" />
+<figcaption>
+<p><span class="caption-number">Figure 17: </span><span class="caption-text">Alpha wave embedded in measurementnoise.</span><a class="headerlink" href="#id8" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p class="sd-card-text">To isolate the alpha component, insert a <a class="reference internal" href="../../7_sdk_reference/backend_filters/bandpass.html"><span class="doc">Bandpass</span></a> filter <code class="docutils literal notranslate"><span class="pre">bandpass</span></code> with
+lower cutoff frequency <code class="docutils literal notranslate"><span class="pre">f_lo=8</span></code> Hz and upper cutoff frequency <code class="docutils literal notranslate"><span class="pre">f_hi=12</span></code>
+Hz between the <a class="reference internal" href="../../7_sdk_reference/backend_sources/generator.html"><span class="doc">Generator</span></a> and <a class="reference internal" href="../../7_sdk_reference/frontend_widgets/time_series_scope.html"><span class="doc">TimeSeriesScope</span></a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 8</span>    <span class="n">source</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Generator</span><span class="p">(</span><span class="n">signal_frequency</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+<span class="linenos"> 9</span>                          <span class="n">signal_amplitude</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
+<span class="linenos">10</span>                          <span class="n">noise_amplitude</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
+<span class="linenos">11</span>
+<span class="hll"><span class="linenos">12</span>    <span class="n">bandpass</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Bandpass</span><span class="p">(</span><span class="n">f_lo</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">f_hi</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+</span><span class="linenos">13</span>
+<span class="linenos">14</span>    <span class="n">scope</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">TimeSeriesScope</span><span class="p">()</span>
+<span class="linenos">15</span>
+<span class="hll"><span class="linenos">16</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">bandpass</span><span class="p">)</span>
+</span><span class="hll"><span class="linenos">17</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">bandpass</span><span class="p">,</span> <span class="n">scope</span><span class="p">)</span>
+</span><span class="linenos">18</span>
+<span class="linenos">19</span>    <span class="n">app</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">scope</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sd-card-text">Run the script and observe that only the alpha band remains visible in the output.</p>
+<figure class="screenshot align-default" id="id9">
+<img alt="S2E1 example screenshot" src="../../../_images/s2e1_6.png" />
+<figcaption>
+<p><span class="caption-number">Figure 18: </span><span class="caption-text">Alpha wave isolated via bandpass filtering.</span><a class="headerlink" href="#id9" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Bandstop (Notch)</div>
+<p class="sd-card-text">The <a class="reference internal" href="../../7_sdk_reference/backend_filters/bandstop.html"><span class="doc">Bandstop</span></a> (notch) filter attenuates a specific frequency band while leaving other
+frequencies unaffected. In EEG processing, bandstop filtering is essential for
+eliminating power-line interference from recordings. In the script below,
+the <a class="reference internal" href="../../7_sdk_reference/backend_sources/generator.html"><span class="doc">Generator</span></a> illustrated this condition, producing a 50 Hz sinusoid combined with
+white noise to simulate EEG data contaminated by power-line interference.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 8</span><span class="kn">import</span><span class="w"> </span><span class="nn">gpype</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gp</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">11</span>
+<span class="linenos">12</span>    <span class="n">app</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">MainApp</span><span class="p">()</span>
+<span class="linenos">13</span>    <span class="n">p</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">()</span>
+<span class="linenos">14</span>
+<span class="hll"><span class="linenos">15</span>    <span class="n">source</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Generator</span><span class="p">(</span><span class="n">signal_frequency</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+</span><span class="hll"><span class="linenos">16</span>                          <span class="n">signal_amplitude</span><span class="o">=</span><span class="mi">75</span><span class="p">,</span>
+</span><span class="hll"><span class="linenos">17</span>                          <span class="n">noise_amplitude</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+</span><span class="linenos">18</span>
+<span class="linenos">19</span>    <span class="n">scope</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">TimeSeriesScope</span><span class="p">()</span>
+<span class="linenos">20</span>
+<span class="linenos">21</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">scope</span><span class="p">)</span>
+<span class="linenos">22</span>
+<span class="linenos">23</span>    <span class="n">app</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">scope</span><span class="p">)</span>
+<span class="linenos">24</span>
+<span class="linenos">25</span>    <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="linenos">26</span>    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>  <span class="c1"># blocking until window is closed</span>
+<span class="linenos">27</span>    <span class="n">p</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sd-card-text">Run the script and observe the power-line interference in the signal.</p>
+<figure class="screenshot align-default" id="id10">
+<img alt="S2E1 example screenshot" src="../../../_images/s2e1_7.png" />
+<figcaption>
+<p><span class="caption-number">Figure 19: </span><span class="caption-text">Example signal with power-line interference.</span><a class="headerlink" href="#id10" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p class="sd-card-text">To suppress power-line interference, insert a <a class="reference internal" href="../../7_sdk_reference/backend_filters/bandstop.html"><span class="doc">Bandstop</span></a> filter with
+<code class="docutils literal notranslate"><span class="pre">f_low</span> <span class="pre">=</span> <span class="pre">48</span></code> Hz and <code class="docutils literal notranslate"><span class="pre">f_high</span> <span class="pre">=</span> <span class="pre">52</span></code> Hz between
+the <a class="reference internal" href="../../7_sdk_reference/backend_sources/generator.html"><span class="doc">Generator</span></a> and <a class="reference internal" href="../../7_sdk_reference/frontend_widgets/time_series_scope.html"><span class="doc">TimeSeriesScope</span></a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 8</span>    <span class="n">source</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Generator</span><span class="p">(</span><span class="n">signal_frequency</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+<span class="linenos"> 9</span>                          <span class="n">signal_amplitude</span><span class="o">=</span><span class="mi">75</span><span class="p">,</span>
+<span class="linenos">10</span>                          <span class="n">noise_amplitude</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+<span class="linenos">11</span>
+<span class="hll"><span class="linenos">12</span>    <span class="n">bandstop</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Bandstop</span><span class="p">(</span><span class="n">f_lo</span><span class="o">=</span><span class="mi">48</span><span class="p">,</span> <span class="n">f_hi</span><span class="o">=</span><span class="mi">52</span><span class="p">)</span>
+</span><span class="linenos">13</span>
+<span class="linenos">14</span>    <span class="n">scope</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">TimeSeriesScope</span><span class="p">()</span>
+<span class="linenos">15</span>
+<span class="hll"><span class="linenos">16</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">bandstop</span><span class="p">)</span>
+</span><span class="hll"><span class="linenos">17</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">bandstop</span><span class="p">,</span> <span class="n">scope</span><span class="p">)</span>
+</span><span class="linenos">18</span>
+<span class="linenos">19</span>    <span class="n">app</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">scope</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sd-card-text">Run the script and confirm that the power-line frequency is removed from the signal.</p>
+<figure class="screenshot align-default" id="id11">
+<img alt="S2E1 example screenshot" src="../../../_images/s2e1_8.png" />
+<figcaption>
+<p><span class="caption-number">Figure 20: </span><span class="caption-text">Power-line interference removed via bandstop filtering.</span><a class="headerlink" href="#id11" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>Completed! You can now employ typical filters to serve standard purposes in EEG processing in g.Pype.</p>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-1 sd-row-cols-md-1 sd-row-cols-lg-1 sd-g-2 sd-g-xs-2 sd-g-sm-2 sd-g-md-2 sd-g-lg-2 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Summary</div>
+<p class="sd-card-text">In this episode, you learned how to employ standard filters, such as</p>
+<ul class="simple">
+<li><p class="sd-card-text"><a class="reference internal" href="../../7_sdk_reference/backend_filters/highpass.html"><span class="doc">Highpass</span></a> to remove slow drifts</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="../../7_sdk_reference/backend_filters/lowpass.html"><span class="doc">Lowpass</span></a> to attenuate high-frequency noise</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="../../7_sdk_reference/backend_filters/bandpass.html"><span class="doc">Bandpass</span></a> to isolate specific frequency bands</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="../../7_sdk_reference/backend_filters/bandstop.html"><span class="doc">Bandstop</span></a> (notch) to eliminate power line interference</p></li>
+</ul>
+<p class="sd-card-text">Note that there is also a <a class="reference internal" href="../../7_sdk_reference/backend_filters/moving_average.html"><span class="doc">MovingAverage</span></a> filter available, which we will
+cover specifically in an upcoming episode.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>You are now ready to proceed to episode 2, where we will begin with signal routing in g.Pype.</p>
+</div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="code" for="sd-tab-item-1">
+Code</label><div class="sd-tab-content docutils">
+<p><strong>File s2e1_a_highpass.py</strong> – <a class="reference external" href="https://github.com/gtec-medical-engineering/gpype/blob/main/examples/s2e1_a_highpass.py">View file on GitHub</a></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># --------------------------------------------------------------</span>
+<span class="linenos"> 2</span><span class="c1"># Example file s2e1_a_highpass.py</span>
+<span class="linenos"> 3</span><span class="c1"># For details and usage, see g.Pype Training Season 2, Episode 1</span>
+<span class="linenos"> 4</span><span class="c1"># --------------------------------------------------------------</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="kn">import</span><span class="w"> </span><span class="nn">gpype</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gp</span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span>    <span class="c1"># Create main app and pipeline</span>
+<span class="linenos">11</span>    <span class="n">app</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">MainApp</span><span class="p">()</span>
+<span class="linenos">12</span>    <span class="n">p</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">()</span>
+<span class="linenos">13</span>
+<span class="linenos">14</span>    <span class="c1"># Create signal source</span>
+<span class="linenos">15</span>    <span class="n">source</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Generator</span><span class="p">(</span><span class="n">signal_frequency</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+<span class="linenos">16</span>                          <span class="n">signal_amplitude</span><span class="o">=</span><span class="mi">75</span><span class="p">,</span>
+<span class="linenos">17</span>                          <span class="n">noise_amplitude</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+<span class="linenos">18</span>
+<span class="linenos">19</span>    <span class="c1"># Create highpass filter</span>
+<span class="linenos">20</span>    <span class="n">highpass</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Highpass</span><span class="p">(</span><span class="n">f_c</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">21</span>
+<span class="linenos">22</span>    <span class="c1"># Create scope</span>
+<span class="linenos">23</span>    <span class="n">scope</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">TimeSeriesScope</span><span class="p">()</span>
+<span class="linenos">24</span>
+<span class="linenos">25</span>    <span class="c1"># Connect nodes</span>
+<span class="linenos">26</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">highpass</span><span class="p">)</span>
+<span class="linenos">27</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">highpass</span><span class="p">,</span> <span class="n">scope</span><span class="p">)</span>
+<span class="linenos">28</span>
+<span class="linenos">29</span>    <span class="c1"># Add widget to main app</span>
+<span class="linenos">30</span>    <span class="n">app</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">scope</span><span class="p">)</span>
+<span class="linenos">31</span>
+<span class="linenos">32</span>    <span class="c1"># Start pipeline and run application</span>
+<span class="linenos">33</span>    <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="linenos">34</span>    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>  <span class="c1"># blocking until window is closed</span>
+<span class="linenos">35</span>    <span class="n">p</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><strong>File s2e1_b_lowpass.py</strong> – <a class="reference external" href="https://github.com/gtec-medical-engineering/gpype/blob/main/examples/s2e1_b_lowpass.py">View file on GitHub</a></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># --------------------------------------------------------------</span>
+<span class="linenos"> 2</span><span class="c1"># Example file s2e1_b_lowpass.py</span>
+<span class="linenos"> 3</span><span class="c1"># For details and usage, see g.Pype Training Season 2, Episode 1</span>
+<span class="linenos"> 4</span><span class="c1"># --------------------------------------------------------------</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="kn">import</span><span class="w"> </span><span class="nn">gpype</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gp</span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span>    <span class="c1"># Create main app and pipeline</span>
+<span class="linenos">11</span>    <span class="n">app</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">MainApp</span><span class="p">()</span>
+<span class="linenos">12</span>    <span class="n">p</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">()</span>
+<span class="linenos">13</span>
+<span class="linenos">14</span>    <span class="c1"># Create signal source</span>
+<span class="linenos">15</span>    <span class="n">source</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Generator</span><span class="p">(</span><span class="n">signal_frequency</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+<span class="linenos">16</span>                          <span class="n">signal_amplitude</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
+<span class="linenos">17</span>                          <span class="n">noise_amplitude</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
+<span class="linenos">18</span>
+<span class="linenos">19</span>    <span class="c1"># Create lowpass filter</span>
+<span class="linenos">20</span>    <span class="n">lowpass</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Lowpass</span><span class="p">(</span><span class="n">f_c</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+<span class="linenos">21</span>
+<span class="linenos">22</span>    <span class="c1"># Create scope</span>
+<span class="linenos">23</span>    <span class="n">scope</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">TimeSeriesScope</span><span class="p">()</span>
+<span class="linenos">24</span>
+<span class="linenos">25</span>    <span class="c1"># Connect nodes</span>
+<span class="linenos">26</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">lowpass</span><span class="p">)</span>
+<span class="linenos">27</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">lowpass</span><span class="p">,</span> <span class="n">scope</span><span class="p">)</span>
+<span class="linenos">28</span>
+<span class="linenos">29</span>    <span class="c1"># Add widget to main app</span>
+<span class="linenos">30</span>    <span class="n">app</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">scope</span><span class="p">)</span>
+<span class="linenos">31</span>
+<span class="linenos">32</span>    <span class="c1"># Start pipeline and run application</span>
+<span class="linenos">33</span>    <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="linenos">34</span>    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>  <span class="c1"># blocking until window is closed</span>
+<span class="linenos">35</span>    <span class="n">p</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><strong>File s2e1_c_bandpass.py</strong> – <a class="reference external" href="https://github.com/gtec-medical-engineering/gpype/blob/main/examples/s2e1_c_bandpass.py">View file on GitHub</a></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># --------------------------------------------------------------</span>
+<span class="linenos"> 2</span><span class="c1"># Example file s2e1_c_bandpass.py</span>
+<span class="linenos"> 3</span><span class="c1"># For details and usage, see g.Pype Training Season 2, Episode 1</span>
+<span class="linenos"> 4</span><span class="c1"># --------------------------------------------------------------</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="kn">import</span><span class="w"> </span><span class="nn">gpype</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gp</span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span>    <span class="c1"># Create main app and pipeline</span>
+<span class="linenos">11</span>    <span class="n">app</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">MainApp</span><span class="p">()</span>
+<span class="linenos">12</span>    <span class="n">p</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">()</span>
+<span class="linenos">13</span>
+<span class="linenos">14</span>    <span class="c1"># Create signal source</span>
+<span class="linenos">15</span>    <span class="n">source</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Generator</span><span class="p">(</span><span class="n">signal_frequency</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+<span class="linenos">16</span>                          <span class="n">signal_amplitude</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
+<span class="linenos">17</span>                          <span class="n">noise_amplitude</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
+<span class="linenos">18</span>
+<span class="linenos">19</span>    <span class="c1"># Create bandpass filter</span>
+<span class="linenos">20</span>    <span class="n">bandpass</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Bandpass</span><span class="p">(</span><span class="n">f_lo</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">f_hi</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="linenos">21</span>
+<span class="linenos">22</span>    <span class="c1"># Create scope</span>
+<span class="linenos">23</span>    <span class="n">scope</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">TimeSeriesScope</span><span class="p">()</span>
+<span class="linenos">24</span>
+<span class="linenos">25</span>    <span class="c1"># Connect nodes</span>
+<span class="linenos">26</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">bandpass</span><span class="p">)</span>
+<span class="linenos">27</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">bandpass</span><span class="p">,</span> <span class="n">scope</span><span class="p">)</span>
+<span class="linenos">28</span>
+<span class="linenos">29</span>    <span class="c1"># Add widget to main app</span>
+<span class="linenos">30</span>    <span class="n">app</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">scope</span><span class="p">)</span>
+<span class="linenos">31</span>
+<span class="linenos">32</span>    <span class="c1"># Start pipeline and run application</span>
+<span class="linenos">33</span>    <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="linenos">34</span>    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>  <span class="c1"># blocking until window is closed</span>
+<span class="linenos">35</span>    <span class="n">p</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><strong>File s2e1_d_bandstop.py</strong> – <a class="reference external" href="https://github.com/gtec-medical-engineering/gpype/blob/main/examples/s2e1_d_bandstop.py">View file on GitHub</a></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># --------------------------------------------------------------</span>
+<span class="linenos"> 2</span><span class="c1"># Example file s2e1_d_bandstop.py</span>
+<span class="linenos"> 3</span><span class="c1"># For details and usage, see g.Pype Training Season 2, Episode 1</span>
+<span class="linenos"> 4</span><span class="c1"># --------------------------------------------------------------</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="kn">import</span><span class="w"> </span><span class="nn">gpype</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gp</span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span>    <span class="c1"># Create main app and pipeline</span>
+<span class="linenos">11</span>    <span class="n">app</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">MainApp</span><span class="p">()</span>
+<span class="linenos">12</span>    <span class="n">p</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">()</span>
+<span class="linenos">13</span>
+<span class="linenos">14</span>    <span class="c1"># Create signal source</span>
+<span class="linenos">15</span>    <span class="n">source</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Generator</span><span class="p">(</span><span class="n">signal_frequency</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+<span class="linenos">16</span>                          <span class="n">signal_amplitude</span><span class="o">=</span><span class="mi">75</span><span class="p">,</span>
+<span class="linenos">17</span>                          <span class="n">noise_amplitude</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+<span class="linenos">18</span>
+<span class="linenos">19</span>    <span class="c1"># Create bandstop filter</span>
+<span class="linenos">20</span>    <span class="n">bandstop</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Bandstop</span><span class="p">(</span><span class="n">f_lo</span><span class="o">=</span><span class="mi">48</span><span class="p">,</span> <span class="n">f_hi</span><span class="o">=</span><span class="mi">52</span><span class="p">)</span>
+<span class="linenos">21</span>
+<span class="linenos">22</span>    <span class="c1"># Create scope</span>
+<span class="linenos">23</span>    <span class="n">scope</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">TimeSeriesScope</span><span class="p">()</span>
+<span class="linenos">24</span>
+<span class="linenos">25</span>    <span class="c1"># Connect nodes</span>
+<span class="linenos">26</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">bandstop</span><span class="p">)</span>
+<span class="linenos">27</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">bandstop</span><span class="p">,</span> <span class="n">scope</span><span class="p">)</span>
+<span class="linenos">28</span>
+<span class="linenos">29</span>    <span class="c1"># Add widget to main app</span>
+<span class="linenos">30</span>    <span class="n">app</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">scope</span><span class="p">)</span>
+<span class="linenos">31</span>
+<span class="linenos">32</span>    <span class="c1"># Start pipeline and run application</span>
+<span class="linenos">33</span>    <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="linenos">34</span>    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>  <span class="c1"># blocking until window is closed</span>
+<span class="linenos">35</span>    <span class="n">p</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../season1_boarding/s1e4_data_visualization.html" class="btn btn-neutral float-left" title="Episode 4: Visualizing Data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="s2e2_router.html" class="btn btn-neutral float-right" title="Episode 2: Routing Signals" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright g.tec medical engineering GmbH.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

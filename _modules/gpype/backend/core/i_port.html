@@ -5,9 +5,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.backend.core.i_port &mdash; g.Pype v3.0.3  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+  <title>gpype.backend.core.i_port</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=0382cca7" />
 
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
@@ -15,6 +17,10 @@
       <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../../_static/js/line_numbers.js?v=98e8ade1"></script>
+      <script src="../../../../_static/js/training_page.js?v=c174bc68"></script>
+      <script src="../../../../_static/js/external_links.js?v=613fa8ce"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -29,7 +35,8 @@
           
           
           <a href="../../../../index.html" class="icon icon-home">
-            g.Pype v3.0.3
+            g.Pype v3.0.4
+              <img src="../../../../_static/gpype-logo-sRGB.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -39,13 +46,13 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/1_basic_concepts/index.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/2_gpype_training/index.html">g.Pype Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/5_faq/index.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/6_troubleshooting/index.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/7_sdk_reference/index.html">SDK Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/8_appendix/index.html">Appendix</a></li>
 </ul>
 
         </div>
@@ -54,7 +61,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../index.html">g.Pype v3.0.3</a>
+          <a href="../../../../index.html">g.Pype v3.0.4</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -82,35 +89,30 @@
 
 
 <div class="viewcode-block" id="IPort">
-<a class="viewcode-back" href="../../../../content/backend/core/i_port.html#gpype.backend.core.i_port.IPort">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_core/i_port.html#gpype.backend.core.i_port.IPort">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">IPort</span><span class="p">(</span><span class="n">ioc</span><span class="o">.</span><span class="n">IPort</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Input port class for g.Pype signal processing nodes.</span>
 
-<span class="sd">    IPort extends the ioiocore.IPort to provide g.Pype-specific functionality</span>
-<span class="sd">    for input ports. It handles data input with configurable timing modes and</span>
-<span class="sd">    type validation for signal processing pipelines.</span>
-
-<span class="sd">    The port supports different timing modes (synchronous/asynchronous) and</span>
-<span class="sd">    automatic type inference for numpy arrays, making it suitable for</span>
-<span class="sd">    real-time signal processing applications.</span>
+<span class="sd">    Extends ioiocore.IPort with g.Pype-specific functionality for handling</span>
+<span class="sd">    data input with configurable timing modes and type validation.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="IPort.Configuration">
-<a class="viewcode-back" href="../../../../content/backend/core/i_port.html#gpype.backend.core.i_port.IPort.Configuration">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_core/i_port.html#gpype.backend.core.i_port.IPort.Configuration">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">Configuration</span><span class="p">(</span><span class="n">ioc</span><span class="o">.</span><span class="n">IPort</span><span class="o">.</span><span class="n">Configuration</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Configuration class for IPort with g.Pype-specific extensions.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="IPort.Configuration.Keys">
-<a class="viewcode-back" href="../../../../content/backend/core/i_port.html#gpype.backend.core.i_port.IPort.Configuration.Keys">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_core/i_port.html#gpype.backend.core.i_port.IPort.Configuration.Keys">[docs]</a>
         <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">ioc</span><span class="o">.</span><span class="n">IPort</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
-<span class="w">            </span><span class="sd">&quot;&quot;&quot;Configuration keys inherited from ioiocore with extensions.&quot;&quot;&quot;</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Configuration keys inherited from ioiocore.&quot;&quot;&quot;</span>
 
             <span class="k">pass</span></div>
 </div>
 
 
 <div class="viewcode-block" id="IPort.__init__">
-<a class="viewcode-back" href="../../../../content/backend/core/i_port.html#gpype.backend.core.i_port.IPort.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_core/i_port.html#gpype.backend.core.i_port.IPort.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">PORT_IN</span><span class="p">,</span>
@@ -120,16 +122,10 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the input port with g.Pype-specific defaults.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            name: Name of the input port. Defaults to the standard input port</span>
-<span class="sd">                name defined in Constants.Defaults.PORT_IN.</span>
-<span class="sd">            timing: Timing mode for the port (SYNC or ASYNC). Defaults to</span>
-<span class="sd">                synchronous timing for real-time processing.</span>
-<span class="sd">            **kwargs: Additional configuration parameters passed to the parent</span>
-<span class="sd">                class, including &#39;type&#39; for data type specification.</span>
-
-<span class="sd">        Note:</span>
-<span class="sd">            If no &#39;type&#39; is specified in kwargs, it defaults to np.ndarray</span>
-<span class="sd">            which is the standard data type for signal processing in g.Pype.</span>
+<span class="sd">            name: Name of the input port.</span>
+<span class="sd">            timing: Timing mode (SYNC or ASYNC). Defaults to SYNC.</span>
+<span class="sd">            **kwargs: Additional configuration parameters including &#39;type&#39;.</span>
+<span class="sd">                Defaults to np.ndarray if not specified.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Extract and set default type for signal processing</span>
         <span class="n">type_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="o">.</span><span class="n">TYPE</span>

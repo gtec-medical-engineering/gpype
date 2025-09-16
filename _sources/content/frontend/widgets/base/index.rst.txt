@@ -1,9 +1,0 @@
-Base Widget Classes
-===================
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Contents
-
-   scope
-   widget

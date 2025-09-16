@@ -1,0 +1,465 @@
+g.Pype Training
+===============
+
+Welcome to the g.Pype Training! This structured course is designed to help you
+getting started with g.Pype and progressively build your skills. Each season
+focuses on a specific theme, guiding you through practical episodes that cover
+key concepts and functionalities of g.Pype.
+
+Note that parts of the training are still under development. We are continuously adding
+new episodes and improving existing ones. Stay tuned for updates!
+
+Season 1: Boarding
+------------------
+
+.. container:: season-intro season1
+
+   .. container:: season-content
+
+      **Install g.Pype, run your first script, and prepare for departure.**
+
+      .. image:: ../../_static/jpg/S1.jpg
+         :alt: Season 1 Boarding
+         :class: season-inline-image
+         :width: 360px
+         :height: 260px
+         :scale: 100%
+
+      This season prepares you for your first adventures with g.Pype, with the sails set and the basics at hand.
+
+
+   .. container:: season-image
+
+      .. image:: ../../_static/jpg/S1.jpg
+         :alt: Season 1 Boarding
+
+.. season1_boarding
+.. grid:: 1 1 1 1
+   :gutter: 2
+
+   .. grid-item-card:: Episode 1: Environment Setup
+      :link: season1_boarding/s1e1_environment_setup
+      :link-type: doc
+
+      In this episode, you are setting up your development environment for g.Pype.
+   .. grid-item-card:: Episode 2: Hello World!
+      :link: season1_boarding/s1e2_hello_world
+      :link-type: doc
+
+      In this episode, you write your first g.Pype script and run it.
+   .. grid-item-card:: Episode 3: Generating Signals
+      :link: season1_boarding/s1e3_signal_generator
+      :link-type: doc
+
+      In this episode, you learn how to generate test signals with g.Pype.
+   .. grid-item-card:: Episode 4: Visualizing Data
+      :link: season1_boarding/s1e4_data_visualization
+      :link-type: doc
+
+      In this episode, you learn how to adjust data visualization in g.Pype.
+
+
+.. season1_boarding
+.. toctree::
+   :maxdepth: 3
+   :hidden:
+
+   season1_boarding/s1e1_environment_setup
+   season1_boarding/s1e2_hello_world
+   season1_boarding/s1e3_signal_generator
+   season1_boarding/s1e4_data_visualization
+
+
+Season 2: Easy Drifting
+-----------------------
+
+.. container:: season-intro season2
+
+   .. container:: season-content
+
+      **Explore basic building blocks and practice smooth navigation.**
+
+      .. image:: ../../_static/jpg/S2.jpg
+         :alt: Season 2 Easy Drifting
+         :class: season-inline-image
+
+      In this season, you learn to use the essential library nodes of g.Pype, keeping a steady course through calm waters.
+
+   .. container:: season-image
+
+      .. image:: ../../_static/jpg/S2.jpg
+         :alt: Season 2 Easy Drifting
+
+.. season2_easy_drifting
+.. grid:: 1 1 1 1
+   :gutter: 2
+
+   .. grid-item-card:: Episode 1: Standard Filtering
+      :link: season2_easy_drifting/s2e1_filtering
+      :link-type: doc
+
+      In this episode, you learn how to apply standard filters to your data using g.Pype.
+   .. grid-item-card:: Episode 2: Routing Signals
+      :link: season2_easy_drifting/s2e2_router
+      :link-type: doc
+
+      In this episode, you learn how to route signals between nodes in a g.Pype pipeline.
+   .. grid-item-card:: Episode 3: Basic Transforms
+      :link: season2_easy_drifting/s2e3_equation
+      :link-type: doc
+
+      In this episode, you learn how to apply basic mathematical transforms to your EEG data using g.Pype.
+   .. grid-item-card:: Episode 4: Moving Average
+      :link: season2_easy_drifting/s2e4_moving_average
+      :link-type: doc
+
+      In this episode, you learn how to use a moving average filter with g.Pype.
+   .. grid-item-card:: Episode 5: Decimation
+      :link: season2_easy_drifting/s2e5_decimator
+      :link-type: doc
+
+      In this episode, you learn how to decimate (downsample) your signals with g.Pype.
+   .. grid-item-card:: Episode 6: Spectral Analysis via FFT
+      :link: season2_easy_drifting/s2e6_fft
+      :link-type: doc
+
+      In this episode, you learn how to perform spectral analysis using the Fast Fourier Transform (FFT) in g.Pype.
+
+
+.. season2_easy_drifting
+.. toctree::
+   :maxdepth: 3
+   :hidden:
+
+   season2_easy_drifting/s2e1_filtering
+   season2_easy_drifting/s2e2_router
+   season2_easy_drifting/s2e3_equation
+   season2_easy_drifting/s2e4_moving_average
+   season2_easy_drifting/s2e5_decimator
+   season2_easy_drifting/s2e6_fft
+
+
+Season 3: Gearing Up
+--------------------
+
+.. container:: season-intro season3
+
+   .. container:: season-content
+
+      **Connect real devices and bring live signals on board.**
+
+      .. image:: ../../_static/jpg/S3.jpg
+         :alt: Season 3 Gearing Up
+         :class: season-inline-image
+
+      After Season 3, you are able to use hardware with g.Pype, your vessel fully equipped for the voyage ahead.
+
+   .. container:: season-image
+
+      .. image:: ../../_static/jpg/S3.jpg
+         :alt: Season 3 Gearing Up
+
+.. season3_gearing_up
+.. grid:: 1 1 1 1
+   :gutter: 2
+
+   .. grid-item-card:: Episode 1: BCI Core-8
+      :link: season3_gearing_up/s3e1_bci_core8
+      :link-type: doc
+
+      In this episode, you learn how to record EEG data with g.Pype and the BCI Core-8.
+   .. grid-item-card:: Episode 2: g.Nautilus
+      :link: season3_gearing_up/s3e2_gnautilus
+      :link-type: doc
+
+      In this episode, you learn how to record EEG data with g.Pype and g.Nautilus.
+   .. grid-item-card:: Episode 3: Capturing Keystrokes
+      :link: season3_gearing_up/s3e3_keyboard
+      :link-type: doc
+
+      In this episode, you learn how to capture keystrokes with g.Pype.
+
+
+.. season3_gearing_up
+.. toctree::
+   :maxdepth: 3
+   :hidden:
+
+   season3_gearing_up/s3e1_bci_core8
+   season3_gearing_up/s3e2_gnautilus
+   season3_gearing_up/s3e3_keyboard
+
+
+Season 4: Crossing Borders
+--------------------------
+
+.. container:: season-intro season4
+
+   .. container:: season-content
+
+      **Learn to exchange data through different interfaces.**
+
+      .. image:: ../../_static/jpg/S4.jpg
+         :alt: Season 4 Crossing Borders
+         :class: season-inline-image
+
+      After Season 4, you can link g.Pype to external sources and sinks, opening gateways to new territories.
+
+   .. container:: season-image
+
+      .. image:: ../../_static/jpg/S4.jpg
+         :alt: Season 4 Crossing Borders
+
+.. season4_crossing_borders
+.. grid:: 1 1 1 1
+   :gutter: 2
+
+   .. grid-item-card:: Episode 1: Saving Data
+      :link: season4_crossing_borders/s4e1_saving_data
+      :link-type: doc
+
+      In this episode, you learn how to save EEG data to a file using g.Pype.
+   .. grid-item-card:: Episode 2: Sending LSL Streams
+      :link: season4_crossing_borders/s4e2_sending_lsl
+      :link-type: doc
+
+      In this episode, you learn how to send EEG data through an LSL (Lab Streaming Layer) interface using g.Pype.
+   .. grid-item-card:: Episode 3: Sending UDP Streams
+      :link: season4_crossing_borders/s4e3_sending_udp
+      :link-type: doc
+
+      In this episode, you learn how to send EEG data through a UDP (User Datagram Protocol) interface using g.Pype.
+
+
+.. season4_crossing_borders
+.. toctree::
+   :maxdepth: 3
+   :hidden:
+
+   season4_crossing_borders/s4e1_saving_data
+   season4_crossing_borders/s4e2_sending_lsl
+   season4_crossing_borders/s4e3_sending_udp
+
+
+Season 5: Engaging Senses
+-------------------------
+
+.. container:: season-intro season5
+
+   .. container:: season-content
+
+      **Use audiovisual stimuli to immerse yourself in paradigms.**
+
+      .. image:: ../../_static/jpg/S5.jpg
+         :alt: Season 5 Engaging Senses
+         :class: season-inline-image
+
+      After Season 5, you can run paradigms with ParadigmPresenter, turning your journey into a sensory experience.
+
+   .. container:: season-image
+
+      .. image:: ../../_static/jpg/S5.jpg
+         :alt: Season 5 Engaging Senses
+
+.. season5_engaging_senses
+.. grid:: 1 1 1 1
+   :gutter: 2
+
+   .. grid-item-card:: Episode 1: Paradigm Presenter
+      :link: season5_engaging_senses/s5e1_paradigm_presenter
+      :link-type: doc
+
+      In this episode, you learn how to use Paradigm Presenter with g.Pype.
+   .. grid-item-card:: Episode 2: Triggering Data
+      :link: season5_engaging_senses/s5e2_triggering_data
+      :link-type: doc
+
+      In this episode, you learn how to work with triggering data in g.Pype.
+   .. grid-item-card:: Episode 3: Auditory Evoked Potentials
+      :link: season5_engaging_senses/s5e3_auditory_evoked_potentials
+      :link-type: doc
+
+      In this episode, you learn how to record Auditory Evoked Potentials (AEPs) using g.Pype.
+   .. grid-item-card:: Episode 4: Oddball Paradigms
+      :link: season5_engaging_senses/s5e4_oddball_paradigms
+      :link-type: doc
+
+      In this episode, you learn how to conduct an auditory oddball paradigm experiment using g.Pype.
+   .. grid-item-card:: Episode 5: Visual Categorization
+      :link: season5_engaging_senses/s5e5_visual_categorization
+      :link-type: doc
+
+      In this episode, you learn how to perform a visual categorization task using g.Pype.
+
+
+.. season5_engaging_senses
+.. toctree::
+   :maxdepth: 3
+   :hidden:
+
+   season5_engaging_senses/s5e1_paradigm_presenter
+   season5_engaging_senses/s5e2_triggering_data
+   season5_engaging_senses/s5e3_auditory_evoked_potentials
+   season5_engaging_senses/s5e4_oddball_paradigms
+   season5_engaging_senses/s5e5_visual_categorization
+
+
+..
+   Season 6: Rough Waters
+   ----------------------
+
+   .. container:: season-intro season6
+
+      .. container:: season-content
+
+         **Practice troubleshooting and learn steering under pressure.**
+
+         .. image:: ../../_static/jpg/S6.jpg
+            :alt: Season 6 Rough Waters
+            :class: season-inline-image
+
+         After Season 6, you can monitor, debug, and optimize pipelines, keeping control even in heavy seas.
+
+      .. container:: season-image
+
+         .. image:: ../../_static/jpg/S6.jpg
+            :alt: Season 6 Rough Waters
+
+   .. season6_rough_waters_
+   .. grid:: 1 1 1 1
+      :gutter: 2
+
+      .. grid-item-card:: Episode 1: Logging and Monitoring
+         :link: season6_rough_waters/s6e1_logging_monitoring
+         :link-type: doc
+
+         In this episode, you learn about logging and monitoring features in g.Pype.
+      .. grid-item-card:: Episode 2: Framing Data
+         :link: season6_rough_waters/s6e2_framing_data
+         :link-type: doc
+
+         In this episode, you learn how to use the Framer node to structure incoming data streams into manageable chunks for processing.
+      .. grid-item-card:: Episode 3: Debugging
+         :link: season6_rough_waters/s6e3_debugging
+         :link-type: doc
+
+         In this episode, you learn how to use g.Pype's debugging tools to identify and resolve issues in your data processing pipelines.
+
+
+   .. season6_rough_waters_
+   .. toctree::
+      :maxdepth: 3
+      :hidden:
+
+      season6_rough_waters/s6e1_logging_monitoring
+      season6_rough_waters/s6e2_framing_data
+      season6_rough_waters/s6e3_debugging
+
+
+   Season 7: Custom Rigging
+   ------------------------
+
+   .. container:: season-intro season7
+
+      .. container:: season-content
+
+         **Tailor g.Pype to your needs by customizing nodes and widgets.**
+
+         .. image:: ../../_static/jpg/S7.jpg
+            :alt: Season 7 Rough Waters
+            :class: season-inline-image
+
+         After Season 7, you can shape pipelines to your needs, your rigging adjusted for your specific course.
+
+      .. container:: season-image
+
+         .. image:: ../../_static/jpg/S7.jpg
+            :alt: Season 7 Rough Waters
+
+   .. season7_custom_rigging_
+   .. grid:: 1 1 1 1
+      :gutter: 2
+
+      .. grid-item-card:: Episode 1: Configuration & Context
+         :link: season7_custom_rigging/s7e1_configuration_context
+         :link-type: doc
+
+         In this episode, you learn about configuration management and context handling in g.Pype, essential for building robust data processing pipelines.
+      .. grid-item-card:: Episode 2: Node Design Pattern
+         :link: season7_custom_rigging/s7e2_node_design_pattern
+         :link-type: doc
+
+         In this episode, you learn the Node Design Pattern, a fundamental concept for creating custom nodes in g.Pype.
+      .. grid-item-card:: Episode 3: First Custom Node
+         :link: season7_custom_rigging/s7e3_first_custom_node
+         :link-type: doc
+
+         In this episode, you create your first custom node.
+      .. grid-item-card:: Episode 4: User Interface Layer
+         :link: season7_custom_rigging/s7e4_user_interface_layer
+         :link-type: doc
+
+         In this episode, you learn more about the user interface layer in g.Pype, enabling you to create custom interfaces for your nodes and pipelines.
+      .. grid-item-card:: Episode 5: First Custom Widget
+         :link: season7_custom_rigging/s7e5_first_custom_widget
+         :link-type: doc
+
+         In this episode, you create your first custom widget.
+
+
+   .. season7_custom_rigging_
+   .. toctree::
+      :maxdepth: 3
+      :hidden:
+
+      season7_custom_rigging/s7e1_configuration_context
+      season7_custom_rigging/s7e2_node_design_pattern
+      season7_custom_rigging/s7e3_first_custom_node
+      season7_custom_rigging/s7e4_user_interface_layer
+      season7_custom_rigging/s7e5_first_custom_widget
+
+
+   Season 8: New Horizons
+   ----------------------
+
+   .. container:: season-intro season8
+
+      .. container:: season-content
+
+         **Bring your apps to new environments with g.Pype Runtime.**
+
+         .. image:: ../../_static/jpg/S8.jpg
+            :alt: Season 8 New Horizons
+            :class: season-inline-image
+
+         After Season 8, you can deploy customized applications, reaching new shores and expanding your map.
+
+      .. container:: season-image
+
+         .. image:: ../../_static/jpg/S8.jpg
+            :alt: Season 8 New Horizons
+
+   .. season8_new_horizons_
+   .. grid:: 1 1 1 1
+      :gutter: 2
+
+      .. grid-item-card:: Episode 1: g.Pype Architecture Revisited
+         :link: season8_new_horizons/s8e1_architecture_revisited
+         :link-type: doc
+
+         In this episode, wevisit the g.Pype architecture, exploring its core components and how they interact to create a powerful data processing framework.
+      .. grid-item-card:: Episode 2: Your First g.Pype App
+         :link: season8_new_horizons/s8e2_first_gpype_app
+         :link-type: doc
+
+         In this episode, we guide you through creating your first g.Pype application, demonstrating how to set up a basic project structure and implement core functionalities.
+
+
+   .. season8_new_horizons_
+   .. toctree::
+      :maxdepth: 3
+      :hidden:
+
+      season8_new_horizons/s8e1_architecture_revisited
+      season8_new_horizons/s8e2_first_gpype_app
+

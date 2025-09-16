@@ -1,0 +1,268 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spectrum Scope</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=0382cca7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../_static/js/line_numbers.js?v=98e8ade1"></script>
+      <script src="../../../_static/js/training_page.js?v=c174bc68"></script>
+      <script src="../../../_static/js/external_links.js?v=613fa8ce"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Time Series Scope" href="time_series_scope.html" />
+    <link rel="prev" title="Scope" href="scope.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            g.Pype v3.0.4
+              <img src="../../../_static/gpype-logo-sRGB.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../1_basic_concepts/index.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../2_gpype_training/index.html">g.Pype Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../5_faq/index.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../6_troubleshooting/index.html">Troubleshooting</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">SDK Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#backend">backend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#backend-core">backend.core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#backend-filters">backend.filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#backend-flow">backend.flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#backend-sinks">backend.sinks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#backend-sources">backend.sources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#backend-timing">backend.timing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#backend-transform">backend.transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#common">common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#frontend">frontend</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#frontend-widgets">frontend.widgets</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="paradigm_presenter.html">Paradigm Presenter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="performance_monitor.html">Performance Monitor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="scope.html">Scope</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Spectrum Scope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="time_series_scope.html">Time Series Scope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="trigger_scope.html">Trigger Scope</a></li>
+<li class="toctree-l3"><a class="reference internal" href="widget.html">Widget</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../8_appendix/index.html">Appendix</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">g.Pype v3.0.4</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">SDK Reference</a></li>
+      <li class="breadcrumb-item active">Spectrum Scope</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="spectrum-scope">
+<h1>Spectrum Scope<a class="headerlink" href="#spectrum-scope" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.spectrum_scope.SpectrumScope">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">gpype.frontend.widgets.spectrum_scope.</span></span><span class="sig-name descname"><span class="pre">SpectrumScope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amplitude_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_averages</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/frontend/widgets/spectrum_scope.html#SpectrumScope"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.frontend.widgets.spectrum_scope.SpectrumScope" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="scope.html#gpype.frontend.widgets.base.scope.Scope" title="gpype.frontend.widgets.base.scope.Scope"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scope</span></code></a></p>
+<p>Frequency domain visualization widget for spectral analysis.</p>
+<p>Displays real-time frequency spectrum of input signals with configurable
+amplitude limits and averaging. Shows multiple channels with automatic
+scaling and frequency axis labeling.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>amplitude_limit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>)</p></li>
+<li><p><strong>num_averages</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>)</p></li>
+<li><p><strong>hidden_channels</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.spectrum_scope.SpectrumScope.DEFAULT_AMPLITUDE_LIMIT">
+<span class="sig-name descname"><span class="pre">DEFAULT_AMPLITUDE_LIMIT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">50</span></em><a class="headerlink" href="#gpype.frontend.widgets.spectrum_scope.SpectrumScope.DEFAULT_AMPLITUDE_LIMIT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.spectrum_scope.SpectrumScope.DEFAULT_NUM_AVERAGES">
+<span class="sig-name descname"><span class="pre">DEFAULT_NUM_AVERAGES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#gpype.frontend.widgets.spectrum_scope.SpectrumScope.DEFAULT_NUM_AVERAGES" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.spectrum_scope.SpectrumScope.Configuration">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Configuration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_ports</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/frontend/widgets/spectrum_scope.html#SpectrumScope.Configuration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.frontend.widgets.spectrum_scope.SpectrumScope.Configuration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="scope.html#gpype.frontend.widgets.base.scope.Scope.Configuration" title="gpype.frontend.widgets.base.scope.Scope.Configuration"><code class="xref py py-class docutils literal notranslate"><span class="pre">Configuration</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>input_ports</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a>)</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.spectrum_scope.SpectrumScope.Configuration.Keys">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Keys</span></span><a class="reference internal" href="../../../_modules/gpype/frontend/widgets/spectrum_scope.html#SpectrumScope.Configuration.Keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.frontend.widgets.spectrum_scope.SpectrumScope.Configuration.Keys" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="scope.html#gpype.frontend.widgets.base.scope.Scope.Configuration.Keys" title="gpype.frontend.widgets.base.scope.Scope.Configuration.Keys"><code class="xref py py-class docutils literal notranslate"><span class="pre">Keys</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.spectrum_scope.SpectrumScope.Configuration.Keys.AMPLITUDE_LIMIT">
+<span class="sig-name descname"><span class="pre">AMPLITUDE_LIMIT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'amplitude_limit'</span></em><a class="headerlink" href="#gpype.frontend.widgets.spectrum_scope.SpectrumScope.Configuration.Keys.AMPLITUDE_LIMIT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.spectrum_scope.SpectrumScope.Configuration.Keys.NUM_AVERAGES">
+<span class="sig-name descname"><span class="pre">NUM_AVERAGES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'num_averages'</span></em><a class="headerlink" href="#gpype.frontend.widgets.spectrum_scope.SpectrumScope.Configuration.Keys.NUM_AVERAGES" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.spectrum_scope.SpectrumScope.Configuration.KeysOptional">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">KeysOptional</span></span><a class="reference internal" href="../../../_modules/gpype/frontend/widgets/spectrum_scope.html#SpectrumScope.Configuration.KeysOptional"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.frontend.widgets.spectrum_scope.SpectrumScope.Configuration.KeysOptional" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.spectrum_scope.SpectrumScope.Configuration.KeysOptional.HIDDEN_CHANNELS">
+<span class="sig-name descname"><span class="pre">HIDDEN_CHANNELS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'hidden_channels'</span></em><a class="headerlink" href="#gpype.frontend.widgets.spectrum_scope.SpectrumScope.Configuration.KeysOptional.HIDDEN_CHANNELS" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.spectrum_scope.SpectrumScope.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amplitude_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_averages</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/frontend/widgets/spectrum_scope.html#SpectrumScope.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.frontend.widgets.spectrum_scope.SpectrumScope.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize the SpectrumScope widget.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>amplitude_limit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Maximum amplitude for display
+scaling. Defaults to 50.</p></li>
+<li><p><strong>num_averages</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Number of spectra to average.
+Defaults to 10.</p></li>
+<li><p><strong>hidden_channels</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em>, </em><em>optional</em>) – List of channel indices to hide.
+Defaults to empty list.</p></li>
+<li><p><strong>**kwargs</strong> – Additional arguments passed to parent classes.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.spectrum_scope.SpectrumScope.setup">
+<span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port_context_in</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/frontend/widgets/spectrum_scope.html#SpectrumScope.setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.frontend.widgets.spectrum_scope.SpectrumScope.setup" title="Link to this definition"></a></dt>
+<dd><p>Set up the spectrum scope with frequency vector and channels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Initial data dictionary.</p></li>
+<li><p><strong>port_context_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Input port context information.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Output port context from parent setup.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If required parameters are missing or invalid.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gpype.frontend.widgets.spectrum_scope.SpectrumScope.step">
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/gpype/frontend/widgets/spectrum_scope.html#SpectrumScope.step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gpype.frontend.widgets.spectrum_scope.SpectrumScope.step" title="Link to this definition"></a></dt>
+<dd><p>Process incoming FFT data and update buffer for averaging.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Dictionary containing FFT amplitude data.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Unchanged input data (pass-through).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="scope.html" class="btn btn-neutral float-left" title="Scope" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="time_series_scope.html" class="btn btn-neutral float-right" title="Time Series Scope" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright g.tec medical engineering GmbH.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

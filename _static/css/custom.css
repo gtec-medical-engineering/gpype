@@ -1,0 +1,735 @@
+/* g.Pype documentation custom styles */
+
+/* ====================================================================== */
+/* COLOR PALETTE & VARIABLES                                             */
+/* ====================================================================== */
+
+:root {
+  --gpype-blue: #00578F;
+  --gpype-red: #E02300;
+  --gpype-green: #00A437;
+  --gpype-orange: #E07D00;
+  --gpype-blue-background: #f3f7fb;
+  --gpype-blue-background-dark: #dce6ef;
+  --gpype-blue-light: #0066A3;
+  --gpype-blue-dark: #004570;
+  --gpype-gray-light: #f5f5f5;
+  --gpype-gray-semilight: #e0e0e0;
+  --gpype-white: #ffffff;
+  --gpype-gray: #a0a0a0;
+  --gpype-gray-semidark: #404040;
+  --gpype-gray-dark: #303030;
+  --gpype-shadow: 0 2px 4px rgba(0, 87, 143, 0.1);
+  --gpype-shadow-hover: 0 4px 8px rgba(0, 87, 143, 0.2);
+  
+  /* Season-specific background colors */
+  --season1-background: #ebf4e0; /* Light blue for boarding/getting started */
+  --season2-background: #e9f4e8; /* Light green for easy drifting */
+  --season3-background: #f3f2d6; /* Light orange for gearing up */
+  --season4-background: #eaf4e5; /* Light orange for gearing up */
+  --season5-background: #f4f1e8; /* Light orange for gearing up */
+  --season6-background: #e9f4eb; /* Light orange for gearing up */
+  --season7-background: #eef3d6; /* Light orange for gearing up */
+  --season8-background: #e5f4eb; /* Light orange for gearing up */
+}
+
+/* ====================================================================== */
+/* GLOBAL TYPOGRAPHY & RENDERING                                         */
+/* ====================================================================== */
+
+/* Improve font rendering across all browsers */
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Base typography for main content areas */
+body,
+.wy-nav-content,
+.rst-content,
+.wy-menu-vertical,
+.wy-side-nav-search {
+  font-family: "Segoe UI", "SegoeUI", -apple-system, BlinkMacSystemFont,
+               "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* Heading typography */
+h1, h2, h3, h4, h5, h6,
+.wy-side-nav-search > a,
+.wy-side-nav-search .wy-input {
+  font-family: "Segoe UI", "SegoeUI", -apple-system, BlinkMacSystemFont,
+               "Helvetica Neue", Arial, sans-serif !important;
+  font-weight: 600 !important;
+}
+
+/* Keep headings in default dark gray color like body text */
+h1, h2, h3, h4, h5, h6 {
+  color: inherit !important;
+  font-weight: 600 !important;
+}
+
+h2 {
+  margin-top: 32px !important;
+  margin-bottom: 8px !important;
+}
+
+h3 {
+  margin-top: 12px !important;
+  margin-bottom: 6px !important;
+}
+
+/* Monospace font stack for code elements */
+code, pre, tt {
+  font-family: "Cascadia Code", "Consolas", "Segoe UI Mono",
+               "Courier New", monospace !important;
+}
+
+/* Bold text styling - use font-weight 600 instead of default bold */
+strong, b {
+  font-weight: 600 !important;
+}
+
+/* ====================================================================== */
+/* PAGE LAYOUT & BACKGROUNDS                                             */
+/* ====================================================================== */
+
+/* Main content area width */
+.wy-nav-content {
+  max-width: 1000px;
+}
+
+/* Overall page background colors */
+body,
+.wy-grid-for-nav {
+  background-color: var(--gpype-white) !important;
+}
+
+.wy-nav-content-wrap {
+  background-color: var(--gpype-blue-background) !important;
+}
+
+.wy-nav-content {
+  background-color: var(--gpype-white) !important;
+}
+
+.rst-content {
+  background-color: var(--gpype-white) !important;
+}
+
+/* ====================================================================== */
+/* SIDEBAR NAVIGATION                                                    */
+/* ====================================================================== */
+
+/* Main sidebar background */
+.wy-nav-side {
+  background-color: var(--gpype-blue-background) !important;
+}
+
+/* Search area at top of sidebar */
+.wy-side-nav-search {
+  background-color: var(--gpype-blue-background) !important;
+}
+
+/* Logo area - hide text, show only logo image */
+.wy-side-nav-search > a {
+  color: transparent !important;
+  display: block !important;
+  padding: 10px !important;
+  text-align: center !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+}
+
+/* Logo image styling */
+.wy-side-nav-search .wy-dropdown > a img.logo,
+.wy-side-nav-search > a img.logo {
+  max-width: 100% !important;
+  height: auto !important;
+  max-height: 96px !important;
+  display: block !important;
+  margin: 0 auto !important;
+  padding: 10px !important;
+}
+
+/* Logo hover effect */
+.wy-side-nav-search > a:hover {
+  color: var(--gpype-gray-dark) !important;
+  background-color: var(--gpype-blue-background-dark) !important;
+  text-decoration: none !important;
+}
+
+/* Search input field styling */
+.wy-side-nav-search input[type=text] {
+  border-color: var(--gpype-gray-semidark) !important;
+  margin-top: 10px !important;
+}
+
+/* ====================================================================== */
+/* SIDEBAR MENU                                                          */
+/* ====================================================================== */
+
+/* Default menu item styling */
+.wy-menu-vertical a {
+  color: var(--gpype-gray-dark) !important;
+  background-color: var(--gpype-blue-background) !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+}
+
+/* Menu item hover state */
+.wy-menu-vertical a:hover {
+  color: var(--gpype-gray-dark) !important;
+  background-color: var(--gpype-blue-background-dark) !important;
+  text-decoration: none !important;
+}
+
+/* Second level menu items (lighter font weight) */
+.wy-menu-vertical li.toctree-l2 a {
+  font-weight: normal !important;
+}
+
+/* Submenu hover styling */
+.wy-menu-vertical li.toctree-l2 a:hover,
+.wy-menu-vertical li.toctree-l3 a:hover,
+.wy-menu-vertical li.toctree-l4 a:hover {
+  background-color: var(--gpype-blue-background-dark) !important;
+  color: var(--gpype-gray-dark) !important;
+}
+
+/* Current/active menu item */
+.wy-menu-vertical li.current a {
+  background-color: var(--gpype-blue-background) !important;
+  color: var(--gpype-gray-dark) !important;
+}
+
+/* Selected/active menu items (various levels) */
+.wy-menu-vertical li.current > a,
+.wy-menu-vertical li.toctree-l1.current > a,
+.wy-menu-vertical li.toctree-l2.current > a,
+.wy-menu-vertical .current {
+  background-color: var(--gpype-blue-background-dark) !important;
+  color: var(--gpype-gray-dark) !important;
+  font-weight: 600 !important;
+}
+
+/* Menu container background */
+.wy-menu-vertical {
+  background-color: var(--gpype-blue-background) !important;
+}
+
+/* Menu text elements */
+.wy-menu-vertical span {
+  color: var(--gpype-gray-dark) !important;
+}
+
+/* ====================================================================== */
+/* LINKS & BUTTONS                                                       */
+/* ====================================================================== */
+
+/* Global link styling */
+a {
+  color: var(--gpype-blue) !important;
+}
+
+a:hover {
+  color: var(--gpype-orange) !important;
+  text-decoration: underline !important;
+}
+
+/* Button styling to match card design */
+.btn {
+  background-color: var(--gpype-blue-background) !important;
+  border: 1px solid var(--gpype-gray) !important;
+  color: var(--gpype-gray-dark) !important;
+  border-radius: 4px !important;
+  box-shadow: var(--gpype-shadow) !important;
+  font-weight: 600 !important;
+  padding: 8px 16px !important;
+  text-decoration: none !important;
+}
+
+.btn:hover {
+  background-color: var(--gpype-blue-background-dark) !important;
+  border-color: var(--gpype-blue) !important;
+  color: var(--gpype-gray-dark) !important;
+  box-shadow: var(--gpype-shadow-hover) !important;
+  text-decoration: none !important;
+}
+
+.btn:visited {
+  color: var(--gpype-gray-dark) !important;
+}
+
+/* ====================================================================== */
+/* SPHINX-DESIGN CARDS                                                   */
+/* ====================================================================== */
+
+/* Main card container */
+.sd-card {
+  border: 1px solid var(--gpype-gray) !important;
+  box-shadow: var(--gpype-shadow) !important;
+  background-color: var(--gpype-white) !important;
+  border-radius: 4px !important;
+  margin: 0px 0px 0px 0px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Card hover effect */
+.sd-card:hover {
+  box-shadow: var(--gpype-shadow-hover) !important;
+  border-color: var(--gpype-blue) !important;
+}
+
+/* Disable hover for cards that do NOT have a stretched link (i.e., no :link: on the card) */
+.sd-card:not(:has(a.sd-stretched-link)):hover {
+  box-shadow: var(--gpype-shadow) !important;
+  border-color: var(--gpype-gray) !important;
+  cursor: default !important;
+}
+
+/* Also keep the header from changing on hover for non-clickable cards */
+.sd-card:not(:has(a.sd-stretched-link)):hover .sd-card-title:not(.sd-summary-title) {
+  background-color: var(--gpype-blue-background) !important;
+  color: var(--gpype-gray-dark) !important;
+}
+
+/* Optional: neutralize any transform/animation on non-clickable cards */
+.sd-card:not(:has(a.sd-stretched-link)):hover,
+.sd-card:not(:has(a.sd-stretched-link)):focus,
+.sd-card:not(:has(a.sd-stretched-link)):active {
+  transform: none !important;
+}
+
+/* Card headers - simplified selector for grid cards, excluding dropdowns */
+.sd-card .sd-card-title:not(.sd-summary-title) {
+  background-color: var(--gpype-blue-background) !important;
+  color: var(--gpype-gray-dark) !important;
+  border: none !important;
+  border-bottom: 1px solid var(--gpype-gray) !important;
+  border-radius: 4px 4px 0 0 !important;
+  margin: -16px -16px 12px -16px !important;
+  padding: 7px 16px !important;
+  font-weight: 600 !important;
+  position: relative !important;
+}
+
+/* Card header hover effect */
+.sd-card:hover .sd-card-title:not(.sd-summary-title) {
+  background-color: var(--gpype-blue-background-dark) !important;
+  color: var(--gpype-gray-dark) !important;
+}
+
+/* Card body content area */
+.sd-card-body,
+.sd-card > .sd-card-body {
+  background-color: var(--gpype-white) !important;
+  border-radius: 0 0 4px 4px !important;
+  padding: 16px !important;
+}
+
+/* Card link visited states */
+.sd-card-title a:visited,
+.sd-card-header a:visited {
+  color: var(--gpype-white) !important;
+}
+
+.sd-card .sd-card-link:visited {
+  color: var(--gpype-white) !important;
+}
+
+/* Octicon styling in card titles - multiple selectors to catch different structures */
+.sd-card .sd-card-title svg,
+.sd-card .sd-card-title .octicon,
+.sd-card .sd-card-title [class*="octicon"] {
+  margin-right: 4px !important;      /* add spacing before the label */
+  position: relative !important;
+  top: -2px !important;   /* tweak up/down */
+}
+
+
+/* ====================================================================== */
+/* SPHINX-DESIGN DROPDOWNS                                               */
+/* ====================================================================== */
+
+/* Main dropdown container - match actual HTML structure */
+details.sd-sphinx-override.sd-dropdown.sd-card.sd-mb-3 {
+  border: 1px solid var(--gpype-gray) !important;
+  box-shadow: var(--gpype-shadow) !important;
+  margin: 16px 0 !important;
+  background-color: var(--gpype-white) !important;
+  border-radius: 4px !important;
+}
+
+/* Dropdown summary element (clickable header) */
+details.sd-sphinx-override.sd-dropdown > summary.sd-summary-title {
+  border: none !important;
+  outline: none !important;
+  background-color: var(--gpype-blue-background) !important;
+  color: var(--gpype-gray-dark) !important;
+  padding: 8px 16px !important;
+  font-weight: 600 !important;
+}
+
+/* Dropdown content area */
+details.sd-sphinx-override.sd-dropdown .sd-summary-content.sd-card-body {
+  border-top: solid 1px var(--gpype-gray) !important;
+  border-radius: 0 0 4px 4px !important;
+  padding: 16px !important;
+}
+
+/* Open dropdown styling */
+details.sd-sphinx-override.sd-dropdown[open] {
+  border-color: var(--gpype-blue) !important;
+  box-shadow: var(--gpype-shadow-hover) !important;
+}
+
+/* Dropdown hover effects */
+details.sd-sphinx-override.sd-dropdown:hover {
+  border-color: var(--gpype-blue) !important;
+  box-shadow: var(--gpype-shadow-hover) !important;
+}
+
+details.sd-sphinx-override.sd-dropdown:hover > summary.sd-summary-title {
+  background-color: var(--gpype-blue-background-dark) !important;
+}
+
+/* ====================================================================== */
+/* SPHINX-DESIGN TABS                                                    */
+/* ====================================================================== */
+
+/* Tab container */
+.sd-tab-set {
+  border: none !important;
+}
+
+/* Tab labels/headings */
+.sd-tab-set > label.sd-tab-label {
+  color: var(--gpype-gray-dark) !important;
+  padding: 6px 16px !important;
+  font-weight: 600 !important;
+}
+
+/* Active tab */
+.sd-tab-set > input[type="radio"]:checked + label.sd-tab-label {
+  color: var(--gpype-gray-dark) !important;
+  background-color: var(--gpype-blue-background) !important;
+  border-left: solid 1px var(--gpype-gray) !important;
+  border-top: solid 1px var(--gpype-gray) !important;
+  border-right: solid 1px var(--gpype-gray) !important;
+  border-bottom: none !important;
+  border-radius: 4px 4px 0 0 !important;
+}
+
+/* Tab hover effect */
+.sd-tab-set > label.sd-tab-label:hover {
+  color: var(--gpype-orange) !important;
+}
+
+/* Tab content area */
+.sd-tab-content {
+  background-color: var(--gpype-white) !important;
+  padding: 16px !important;
+  border: 1px solid var(--gpype-gray) !important;
+  border-radius: 0 4px 4px 4px !important;
+  box-shadow: var(--gpype-shadow) !important;
+}
+
+/* ====================================================================== */
+/* CODE BLOCKS & SYNTAX HIGHLIGHTING                                     */
+/* ====================================================================== */
+
+.highlight {
+  border-left: 3px solid var(--gpype-orange) !important;
+}
+
+/* Code block backgrounds - use g.Pype blue background instead of default yellow */
+.highlight,
+div.highlight,
+.highlight pre,
+div.highlight pre {
+  background-color: var(--gpype-blue-background) !important;
+}
+
+/* Literalinclude code blocks */
+.rst-content .literal-block-wrapper .highlight,
+.rst-content .literal-block-wrapper .highlight pre {
+  background-color: var(--gpype-blue-background) !important;
+}
+
+/* Inline code styling */
+.rst-content code.literal {
+  background-color: var(--gpype-blue-background) !important;
+  color: var(--gpype-gray-dark) !important;
+  border: 1px solid var(--gpype-gray-semilight) !important;
+}
+
+/* ====================================================================== */
+/* ADMONITIONS (NOTES, WARNINGS, ETC)                                   */
+/* ====================================================================== */
+
+.admonition.note {
+  border-color: var(--gpype-blue) !important;
+}
+
+.admonition.warning {
+  border-color: var(--gpype-orange) !important;
+}
+
+.admonition.danger {
+  border-color: var(--gpype-red) !important;
+}
+
+.admonition.tip {
+  border-color: var(--gpype-green) !important;
+}
+
+/* ====================================================================== */
+/* TABLES                                                                */
+/* ====================================================================== */
+
+.rst-content table.docutils {
+  border-color: var(--gpype-blue) !important;
+}
+
+.rst-content table.docutils th {
+  background-color: var(--gpype-blue) !important;
+  color: var(--gpype-gray-light) !important;
+}
+
+.borderless table {
+  border: none !important;
+  background: transparent !important;
+}
+
+.borderless td {
+  border: none !important;
+  background: transparent !important;
+}
+
+/* ====================================================================== */
+/* MOBILE/RESPONSIVE BANNER                                              */
+/* ====================================================================== */
+
+/* Mobile navigation banner styling */
+.wy-nav-top {
+  background-color: var(--gpype-blue) !important;
+  color: var(--gpype-white) !important;
+}
+
+.wy-nav-top a {
+  color: var(--gpype-white) !important;
+}
+
+.wy-nav-top i {
+  color: var(--gpype-white) !important;
+}
+
+/* ====================================================================== */
+/* CUSTOM UTILITY CLASSES                                               */
+/* ====================================================================== */
+
+/* Flexbox layout for card content */
+.card-content-flex {
+  display: flex !important;
+  align-items: center !important;
+  align-content: center !important;
+  gap: 16px !important;
+  height: 60px !important;
+}
+
+.card-image {
+  flex-shrink: 0 !important;
+  vertical-align: middle !important;
+}
+
+.card-text {
+  flex: 1 !important;
+}
+
+/* ========================================================================= */
+/* CODE LINE NUMBERS WITH LEADING ZEROS (3 digits)                           */
+/* ========================================================================= */
+
+/* Style line numbers to be right-aligned and use tabular numbers */
+span.linenos {
+  font-variant-numeric: tabular-nums !important;
+  color: var(--gpype-gray-dark) !important;
+  text-align: right !important;
+  min-width: 3ch !important;
+  display: inline-block !important;
+  padding-right: 0.5em !important;
+  font-family: "Cascadia Code", "Consolas", "Segoe UI Mono", "Courier New", monospace !important;
+}
+
+/* ========================================================================= */
+/* SEASON INTRODUCTION LAYOUT                                               */
+/* ========================================================================= */
+
+.season-intro {
+  display: flex !important;
+  align-items: stretch !important;
+  background-color: var(--gpype-blue-background) !important;
+  border: 1px solid var(--gpype-gray-dark) !important;
+  box-shadow: var(--gpype-shadow) !important;
+  margin-top: -60px !important;
+  border-radius: 10px !important;
+  margin-bottom: 10px !important;
+}
+
+/* Season-specific background colors */
+.season-intro.season1 {
+  background-color: var(--season1-background) !important;
+}
+
+.season-intro.season2 {
+  background-color: var(--season2-background) !important;
+}
+
+.season-intro.season3 {
+  background-color: var(--season3-background) !important;
+}
+
+.season-intro.season4 {
+  background-color: var(--season4-background) !important;
+}
+
+.season-intro.season5 {
+  background-color: var(--season5-background) !important;
+}
+
+.season-intro.season6 {
+  background-color: var(--season6-background) !important;
+}
+
+.season-intro.season7 {
+  background-color: var(--season7-background) !important;
+}
+
+.season-intro.season8 {
+  background-color: var(--season8-background) !important;
+}
+
+.season-content {
+  width: 500px !important; /* Fixed width for content */
+  flex-shrink: 1 !important; /* Don't allow shrinking initially */
+  padding-top: 50px !important;
+  padding-bottom: 0px !important;
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+}
+
+.season-image {
+  flex-shrink: 0 !important;
+  height: 170px !important;
+  width: 255px !important; /* Fixed width for image container */
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: stretch !important;
+  margin-left: auto !important; /* Push image to the right */
+  border-left: 1px solid var(--gpype-gray) !important;
+  border-radius: 0px 8px 8px 0px !important;
+}
+
+.season-image img {
+  box-shadow: var(--gpype-shadow) !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  -ms-interpolation-mode: bicubic !important;
+}
+
+/* Inline season images - hidden by default on large screens */
+.season-inline-image {
+  display: none !important;
+  width: 360px !important;
+  height: 260px !important;
+  margin: 16px 0 16px 0 !important; /* Remove auto centering, align left */
+/*  border: 1px solid var(--gpype-gray) !important;*/
+/*  border-radius: 10px !important;*/
+  box-shadow: var(--gpype-shadow) !important;
+  object-fit: cover !important;
+  /* High-quality image rendering */
+  image-rendering: high-quality !important;
+  /* Prevent image blur on scaling */
+  -ms-interpolation-mode: bicubic !important;
+}
+
+/* Responsive behavior: Hide right image and show inline image on smaller screens */
+@media screen and (max-width: 1150px) {
+  /* Hide the original right-side image */
+  .season-image {
+    display: none !important;
+  }
+  
+  /* Show the inline image within the content */
+  .season-inline-image {
+    display: block !important;
+  }
+}
+
+.season-description {
+  color: var(--gpype-gray-semidark) !important;
+  align-content: center !important;
+}
+
+
+/* ====================================================================== */
+/* CUSTOM CLASSES FOR SPECIFIC ADJUSTMENTS                               */
+/* ====================================================================== */
+
+/* For figure elements with screenshot class */
+figure.screenshot img {
+  margin-top: -70px !important;
+  margin-bottom: -60px !important;
+  mix-blend-mode: multiply !important;
+  z-index: 1 !important;
+}
+
+/* Keep caption in normal position but on top of image in z-stack */
+figure.screenshot figcaption {
+  z-index: 10 !important;
+}
+
+/* For figure elements with screenshot class */
+figure.screenshot-compact img {
+  margin-top: -70px !important;
+  margin-bottom: -60px !important;
+  mix-blend-mode: multiply !important;
+  z-index: 1 !important;
+}
+
+/* Target the actual caption structure that Sphinx generates */
+figure.screenshot figcaption p,
+figure.screenshot figcaption .caption-text,
+figcaption p,
+figcaption .caption-text {
+  font-size: 14px !important;
+  font-style: italic !important;
+  color: var(--gpype-gray-semidark) !important;
+  text-align: center !important;
+}
+
+/* Disable figure caption links and hover effects */
+figcaption a,
+figcaption .caption-number,
+.caption-number {
+  text-decoration: none !important;
+  color: inherit !important;
+  cursor: default !important;
+  pointer-events: none !important;
+}
+
+figcaption a:hover,
+.caption-number:hover {
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+/* Custom class for literalinclude blocks with reduced bottom margin */
+div.compact.highlight-python,
+div.compact {
+  margin-bottom: -20px !important;
+}

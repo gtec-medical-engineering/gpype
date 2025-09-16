@@ -1,0 +1,25 @@
+Episode 2: Node Design Pattern
+------------------------------
+
+In this episode, you learn the Node Design Pattern, a fundamental concept for creating custom nodes in g.Pype.
+
+.. tab-set::
+
+   .. tab-item:: Read
+      :sync: read
+
+      TBD
+
+   .. tab-item:: Watch
+      :sync: watch
+
+      TBD
+
+   .. tab-item:: Code
+      :sync: code
+
+      TBD
+
+      .. code-block:: python
+
+         TBD

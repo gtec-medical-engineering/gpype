@@ -1,0 +1,476 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Episode 3: Sending UDP Streams</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=0382cca7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../_static/js/line_numbers.js?v=98e8ade1"></script>
+      <script src="../../../_static/js/training_page.js?v=c174bc68"></script>
+      <script src="../../../_static/js/external_links.js?v=613fa8ce"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Episode 1: Paradigm Presenter" href="../season5_engaging_senses/s5e1_paradigm_presenter.html" />
+    <link rel="prev" title="Episode 2: Sending LSL Streams" href="s4e2_sending_lsl.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            g.Pype v3.0.4
+              <img src="../../../_static/gpype-logo-sRGB.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../1_basic_concepts/index.html">Basic Concepts</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">g.Pype Training</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#season-1-boarding">Season 1: Boarding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#season-2-easy-drifting">Season 2: Easy Drifting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#season-3-gearing-up">Season 3: Gearing Up</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#season-4-crossing-borders">Season 4: Crossing Borders</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="s4e1_saving_data.html">Episode 1: Saving Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="s4e2_sending_lsl.html">Episode 2: Sending LSL Streams</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Episode 3: Sending UDP Streams</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#season-5-engaging-senses">Season 5: Engaging Senses</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../5_faq/index.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../6_troubleshooting/index.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../7_sdk_reference/index.html">SDK Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../8_appendix/index.html">Appendix</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">g.Pype v3.0.4</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">g.Pype Training</a></li>
+      <li class="breadcrumb-item active">Episode 3: Sending UDP Streams</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="episode-3-sending-udp-streams">
+<h1>Episode 3: Sending UDP Streams<a class="headerlink" href="#episode-3-sending-udp-streams" title="Link to this heading"></a></h1>
+<p>In this episode, you learn how to send EEG data through a UDP (User Datagram Protocol) interface using g.Pype.</p>
+<div class="warning admonition">
+<p class="admonition-title">Note</p>
+<p>This page is still under development. Until we have the step-by-step instructions ready, please refer to the
+code example below.</p>
+</div>
+<p><strong>File example_basic_udp_send.py (send UDP stream)</strong> – <a class="reference external" href="https://github.com/gtec-medical-engineering/gpype/blob/main/examples/example_basic_udp_send.py">View file on GitHub</a></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos"> 2</span><span class="sd">Basic UDP Send Example - Network Data Transmission via UDP Protocol</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="sd">This example demonstrates how to stream data over IP networks using the UDP</span>
+<span class="linenos"> 5</span><span class="sd">(User Datagram Protocol) for real-time BCI data transmission. UDP provides</span>
+<span class="linenos"> 6</span><span class="sd">low-latency, connectionless communication ideal for streaming applications</span>
+<span class="linenos"> 7</span><span class="sd">where speed is more important than guaranteed delivery.</span>
+<span class="linenos"> 8</span>
+<span class="linenos"> 9</span><span class="sd">What this example shows:</span>
+<span class="linenos">10</span><span class="sd">- Generating synthetic 8-channel EEG-like signals with noise</span>
+<span class="linenos">11</span><span class="sd">- Capturing keyboard events as experimental markers</span>
+<span class="linenos">12</span><span class="sd">- Combining signal and event data using Router</span>
+<span class="linenos">13</span><span class="sd">- Streaming combined data over UDP network protocol</span>
+<span class="linenos">14</span><span class="sd">- Headless operation (no GUI) for dedicated streaming servers</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span><span class="sd">Expected behavior:</span>
+<span class="linenos">17</span><span class="sd">When you run this example:</span>
+<span class="linenos">18</span><span class="sd">- UDP packets are sent to the configured network destination</span>
+<span class="linenos">19</span><span class="sd">- Data includes 8 signal channels + 1 event channel (9 total)</span>
+<span class="linenos">20</span><span class="sd">- Keyboard events are transmitted as numerical markers</span>
+<span class="linenos">21</span><span class="sd">- Console shows &quot;Pipeline is running. Press enter to stop.&quot;</span>
+<span class="linenos">22</span><span class="sd">- Network clients can receive the UDP stream for analysis</span>
+<span class="linenos">23</span>
+<span class="linenos">24</span><span class="sd">Network streaming details:</span>
+<span class="linenos">25</span><span class="sd">- Protocol: UDP (User Datagram Protocol)</span>
+<span class="linenos">26</span><span class="sd">- Port: Configurable in UDPSender</span>
+<span class="linenos">27</span><span class="sd">- Data format: Binary packed multi-channel samples</span>
+<span class="linenos">28</span><span class="sd">- Packet rate: 250 Hz (one packet per sample frame)</span>
+<span class="linenos">29</span><span class="sd">- Destination: Broadcast or specific IP address</span>
+<span class="linenos">30</span>
+<span class="linenos">31</span><span class="sd">Real-world applications:</span>
+<span class="linenos">32</span><span class="sd">- Low-latency BCI control systems</span>
+<span class="linenos">33</span><span class="sd">- Real-time signal monitoring across networks</span>
+<span class="linenos">34</span><span class="sd">- Distributed processing (send to analysis computers)</span>
+<span class="linenos">35</span><span class="sd">- Integration with custom analysis software</span>
+<span class="linenos">36</span><span class="sd">- Multi-computer BCI setups</span>
+<span class="linenos">37</span><span class="sd">- Remote data logging and backup systems</span>
+<span class="linenos">38</span>
+<span class="linenos">39</span><span class="sd">UDP vs other protocols:</span>
+<span class="linenos">40</span><span class="sd">- UDP: Fast, low-latency, no connection overhead (used here)</span>
+<span class="linenos">41</span><span class="sd">- TCP: Reliable but higher latency (use for file transfer)</span>
+<span class="linenos">42</span><span class="sd">- LSL: Specialized for neuroscience (use for research integration)</span>
+<span class="linenos">43</span><span class="sd">- WebSockets: Browser-based applications</span>
+<span class="linenos">44</span>
+<span class="linenos">45</span><span class="sd">Network configuration:</span>
+<span class="linenos">46</span><span class="sd">- Sender: This g.Pype application (data source)</span>
+<span class="linenos">47</span><span class="sd">- Receiver: Custom application or example_basic_udp_receive.py</span>
+<span class="linenos">48</span><span class="sd">- Firewall: May need to allow UDP traffic on specified port</span>
+<span class="linenos">49</span><span class="sd">- Local network: Works on same subnet by default</span>
+<span class="linenos">50</span>
+<span class="linenos">51</span><span class="sd">Usage:</span>
+<span class="linenos">52</span><span class="sd">    1. Configure network settings in UDPSender if needed</span>
+<span class="linenos">53</span><span class="sd">    2. Run: python example_basic_udp_send.py</span>
+<span class="linenos">54</span><span class="sd">    3. Use example_basic_udp_receive.py or custom client to receive</span>
+<span class="linenos">55</span><span class="sd">    4. Press arrow keys to send event markers over network</span>
+<span class="linenos">56</span><span class="sd">    5. Press Enter in console to stop streaming</span>
+<span class="linenos">57</span>
+<span class="linenos">58</span><span class="sd">Note:</span>
+<span class="linenos">59</span><span class="sd">    UDP is ideal for real-time applications where occasional packet loss</span>
+<span class="linenos">60</span><span class="sd">    is acceptable in exchange for minimal latency and overhead.</span>
+<span class="linenos">61</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos">62</span><span class="kn">import</span><span class="w"> </span><span class="nn">gpype</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gp</span>
+<span class="linenos">63</span>
+<span class="linenos">64</span><span class="n">fs</span> <span class="o">=</span> <span class="mi">250</span>  <span class="c1"># Sampling frequency in Hz</span>
+<span class="linenos">65</span>
+<span class="linenos">66</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">67</span>    <span class="c1"># Create processing pipeline (no GUI needed for UDP streaming)</span>
+<span class="linenos">68</span>    <span class="n">p</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">()</span>
+<span class="linenos">69</span>
+<span class="linenos">70</span>    <span class="c1"># Generate synthetic 8-channel EEG-like signals</span>
+<span class="linenos">71</span>    <span class="n">source</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Generator</span><span class="p">(</span>
+<span class="linenos">72</span>        <span class="n">sampling_rate</span><span class="o">=</span><span class="n">fs</span><span class="p">,</span>
+<span class="linenos">73</span>        <span class="n">channel_count</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>  <span class="c1"># 8 EEG channels</span>
+<span class="linenos">74</span>        <span class="n">signal_frequency</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>  <span class="c1"># 10 Hz alpha rhythm</span>
+<span class="linenos">75</span>        <span class="n">signal_amplitude</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>  <span class="c1"># Signal strength</span>
+<span class="linenos">76</span>        <span class="n">signal_shape</span><span class="o">=</span><span class="s2">&quot;sine&quot;</span><span class="p">,</span>  <span class="c1"># Clean sine waves</span>
+<span class="linenos">77</span>        <span class="n">noise_amplitude</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+<span class="linenos">78</span>    <span class="p">)</span>  <span class="c1"># Background noise</span>
+<span class="linenos">79</span>
+<span class="linenos">80</span>    <span class="c1"># Capture keyboard input as event markers</span>
+<span class="linenos">81</span>    <span class="n">keyboard</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Keyboard</span><span class="p">()</span>  <span class="c1"># Arrow keys -&gt; event codes</span>
+<span class="linenos">82</span>
+<span class="linenos">83</span>    <span class="c1"># Combine signal data (8 channels) + keyboard events (1 channel)</span>
+<span class="linenos">84</span>    <span class="n">router</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Router</span><span class="p">(</span><span class="n">input_selector</span><span class="o">=</span><span class="p">[</span><span class="n">gp</span><span class="o">.</span><span class="n">Router</span><span class="o">.</span><span class="n">ALL</span><span class="p">,</span> <span class="n">gp</span><span class="o">.</span><span class="n">Router</span><span class="o">.</span><span class="n">ALL</span><span class="p">])</span>
+<span class="linenos">85</span>
+<span class="linenos">86</span>    <span class="c1"># UDP sender for low-latency network streaming</span>
+<span class="linenos">87</span>    <span class="n">sender</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">UDPSender</span><span class="p">()</span>  <span class="c1"># Streams to configured UDP destination</span>
+<span class="linenos">88</span>
+<span class="linenos">89</span>    <span class="c1"># Connect processing chain: signals + events -&gt; UDP network stream</span>
+<span class="linenos">90</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">router</span><span class="p">[</span><span class="s2">&quot;in1&quot;</span><span class="p">])</span>  <span class="c1"># Signal data -&gt; Router input 1</span>
+<span class="linenos">91</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">keyboard</span><span class="p">,</span> <span class="n">router</span><span class="p">[</span><span class="s2">&quot;in2&quot;</span><span class="p">])</span>  <span class="c1"># Event data -&gt; Router input 2</span>
+<span class="linenos">92</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">router</span><span class="p">,</span> <span class="n">sender</span><span class="p">)</span>  <span class="c1"># Combined data -&gt; UDP stream</span>
+<span class="linenos">93</span>
+<span class="linenos">94</span>    <span class="c1"># Start headless UDP streaming operation</span>
+<span class="linenos">95</span>    <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>  <span class="c1"># Begin UDP data transmission</span>
+<span class="linenos">96</span>    <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Pipeline is running. Press enter to stop.&quot;</span><span class="p">)</span>  <span class="c1"># Wait for user</span>
+<span class="linenos">97</span>    <span class="n">p</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>  <span class="c1"># Stop streaming and cleanup</span>
+</pre></div>
+</div>
+<p><strong>File example_basic_udp_receive.py (standalone UDP receiver)</strong> – <a class="reference external" href="https://github.com/gtec-medical-engineering/gpype/blob/main/examples/example_basic_udp_receive.py">View file on GitHub</a></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos">  2</span><span class="sd">Basic UDP Receive Example - Network Data Reception and Visualization</span>
+<span class="linenos">  3</span>
+<span class="linenos">  4</span><span class="sd">This example demonstrates how to receive and visualize data transmitted over</span>
+<span class="linenos">  5</span><span class="sd">UDP networks in real-time. It complements example_basic_udp_send.py by showing</span>
+<span class="linenos">  6</span><span class="sd">the receiving side of UDP communication, creating a standalone visualization</span>
+<span class="linenos">  7</span><span class="sd">application for UDP data streams.</span>
+<span class="linenos">  8</span>
+<span class="linenos">  9</span><span class="sd">What this example shows:</span>
+<span class="linenos"> 10</span><span class="sd">- UDP socket programming for real-time data reception</span>
+<span class="linenos"> 11</span><span class="sd">- Multi-channel time-series visualization using PyQtGraph</span>
+<span class="linenos"> 12</span><span class="sd">- Binary data unpacking from network packets</span>
+<span class="linenos"> 13</span><span class="sd">- EEG display with channel stacking</span>
+<span class="linenos"> 14</span><span class="sd">- Continuous visualization in real-time scope</span>
+<span class="linenos"> 15</span>
+<span class="linenos"> 16</span><span class="sd">Expected behavior:</span>
+<span class="linenos"> 17</span><span class="sd">When you run this example:</span>
+<span class="linenos"> 18</span><span class="sd">- Opens UDP socket on localhost:56000 for incoming data</span>
+<span class="linenos"> 19</span><span class="sd">- Displays real-time visualization window</span>
+<span class="linenos"> 20</span><span class="sd">- Shows incoming multi-channel data as scrolling time-series plots</span>
+<span class="linenos"> 21</span><span class="sd">- Updates display at ~25 Hz for smooth real-time visualization</span>
+<span class="linenos"> 22</span><span class="sd">- Handles network timing variations and packet buffering</span>
+<span class="linenos"> 23</span>
+<span class="linenos"> 24</span><span class="sd">Workflow with UDP Send example:</span>
+<span class="linenos"> 25</span><span class="sd">1. Run this script first (starts UDP receiver and visualization)</span>
+<span class="linenos"> 26</span><span class="sd">2. Run example_basic_udp_send.py (connects and streams data)</span>
+<span class="linenos"> 27</span><span class="sd">3. Press arrow keys in the send example to see event markers</span>
+<span class="linenos"> 28</span><span class="sd">4. Observe real-time data updates in the visualization</span>
+<span class="linenos"> 29</span>
+<span class="linenos"> 30</span><span class="sd">Network configuration:</span>
+<span class="linenos"> 31</span><span class="sd">- Protocol: UDP (User Datagram Protocol)</span>
+<span class="linenos"> 32</span><span class="sd">- IP Address: 127.0.0.1 (localhost)</span>
+<span class="linenos"> 33</span><span class="sd">- Port: 56000 (configurable)</span>
+<span class="linenos"> 34</span><span class="sd">- Data format: Binary packed float64 arrays</span>
+<span class="linenos"> 35</span><span class="sd">- Packet size: Configurable frame size × channel count × 8 bytes</span>
+<span class="linenos"> 36</span>
+<span class="linenos"> 37</span><span class="sd">Real-world applications:</span>
+<span class="linenos"> 38</span><span class="sd">- Real-time BCI data monitoring and quality assessment</span>
+<span class="linenos"> 39</span><span class="sd">- Network-based signal analysis and processing</span>
+<span class="linenos"> 40</span><span class="sd">- Distributed BCI systems with remote visualization</span>
+<span class="linenos"> 41</span><span class="sd">- Integration with custom data acquisition hardware</span>
+<span class="linenos"> 42</span><span class="sd">- Multi-computer BCI setups for specialized processing</span>
+<span class="linenos"> 43</span><span class="sd">- Remote data logging and backup systems</span>
+<span class="linenos"> 44</span>
+<span class="linenos"> 45</span><span class="sd">Usage:</span>
+<span class="linenos"> 46</span><span class="sd">    1. Run: python example_basic_udp_receive.py</span>
+<span class="linenos"> 47</span><span class="sd">    2. Visualization window opens and waits for UDP data</span>
+<span class="linenos"> 48</span><span class="sd">    3. Run example_basic_udp_send.py to start data transmission</span>
+<span class="linenos"> 49</span><span class="sd">    4. Close window to stop reception</span>
+<span class="linenos"> 50</span>
+<span class="linenos"> 51</span><span class="sd">Prerequisites:</span>
+<span class="linenos"> 52</span><span class="sd">    - pyqtgraph (pip install pyqtgraph)</span>
+<span class="linenos"> 53</span><span class="sd">    - PySide6 (pip install PySide6)</span>
+<span class="linenos"> 54</span><span class="sd">    - Active UDP data source on the configured port</span>
+<span class="linenos"> 55</span>
+<span class="linenos"> 56</span><span class="sd">Note:</span>
+<span class="linenos"> 57</span><span class="sd">    UDP provides fast, low-latency communication ideal for real-time BCI</span>
+<span class="linenos"> 58</span><span class="sd">    applications where speed is prioritized over guaranteed packet delivery.</span>
+<span class="linenos"> 59</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos"> 60</span>
+<span class="linenos"> 61</span><span class="kn">import</span><span class="w"> </span><span class="nn">socket</span>
+<span class="linenos"> 62</span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="linenos"> 63</span><span class="kn">import</span><span class="w"> </span><span class="nn">pyqtgraph</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pg</span>
+<span class="linenos"> 64</span><span class="kn">from</span><span class="w"> </span><span class="nn">pyqtgraph.Qt</span><span class="w"> </span><span class="kn">import</span> <span class="n">QtWidgets</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="linenos"> 65</span><span class="kn">from</span><span class="w"> </span><span class="nn">PySide6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="n">QPalette</span><span class="p">,</span> <span class="n">QColor</span>
+<span class="linenos"> 66</span><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="linenos"> 67</span>
+<span class="linenos"> 68</span><span class="c1"># Network and display configuration constants</span>
+<span class="linenos"> 69</span><span class="n">UDP_IP</span> <span class="o">=</span> <span class="s2">&quot;127.0.0.1&quot;</span>  <span class="c1"># Listen on localhost</span>
+<span class="linenos"> 70</span><span class="n">UDP_PORT</span> <span class="o">=</span> <span class="mi">56000</span>  <span class="c1"># UDP port for incoming data</span>
+<span class="linenos"> 71</span><span class="n">FRAME_SIZE</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Samples per UDP packet</span>
+<span class="linenos"> 72</span><span class="n">CHANNEL_COUNT</span> <span class="o">=</span> <span class="mi">9</span>  <span class="c1"># Total channels (8 signals + 1 events)</span>
+<span class="linenos"> 73</span><span class="n">SAMPLING_RATE</span> <span class="o">=</span> <span class="mi">250</span>  <span class="c1"># Expected sampling rate in Hz</span>
+<span class="linenos"> 74</span><span class="n">TIME_WINDOW</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># Seconds of data to display</span>
+<span class="linenos"> 75</span><span class="n">AMPLITUDE_LIMIT</span> <span class="o">=</span> <span class="mi">50</span>  <span class="c1"># µV - amplitude scaling for display</span>
+<span class="linenos"> 76</span>
+<span class="linenos"> 77</span><span class="c1"># Calculated constants for data handling</span>
+<span class="linenos"> 78</span><span class="n">MAX_POINTS</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">TIME_WINDOW</span> <span class="o">*</span> <span class="n">SAMPLING_RATE</span><span class="p">)</span>  <span class="c1"># Total points in buffer</span>
+<span class="linenos"> 79</span><span class="n">BUFFER_SIZE</span> <span class="o">=</span> <span class="mi">65536</span>  <span class="c1"># UDP receive buffer size</span>
+<span class="linenos"> 80</span>
+<span class="linenos"> 81</span>
+<span class="linenos"> 82</span><span class="k">class</span><span class="w"> </span><span class="nc">UDPTimeScope</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMainWindow</span><span class="p">):</span>
+<span class="linenos"> 83</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos"> 84</span><span class="sd">    Real-time UDP data visualization application.</span>
+<span class="linenos"> 85</span>
+<span class="linenos"> 86</span><span class="sd">    Creates a time-series display for multi-channel data received</span>
+<span class="linenos"> 87</span><span class="sd">    via UDP. Implements circular buffering and real-time plotting</span>
+<span class="linenos"> 88</span><span class="sd">    with PyQtGraph for smooth visualization of streaming data.</span>
+<span class="linenos"> 89</span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos"> 90</span>
+<span class="linenos"> 91</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="linenos"> 92</span>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+<span class="linenos"> 93</span>        <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s2">&quot;UDP Time Series Scope&quot;</span><span class="p">)</span>
+<span class="linenos"> 94</span>
+<span class="linenos"> 95</span>        <span class="c1"># Get system colors for professional appearance</span>
+<span class="linenos"> 96</span>        <span class="n">palette</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">palette</span><span class="p">()</span>
+<span class="linenos"> 97</span>        <span class="bp">self</span><span class="o">.</span><span class="n">foreground_color</span> <span class="o">=</span> <span class="n">palette</span><span class="o">.</span><span class="n">color</span><span class="p">(</span><span class="n">QPalette</span><span class="o">.</span><span class="n">ColorRole</span><span class="o">.</span><span class="n">WindowText</span><span class="p">)</span>
+<span class="linenos"> 98</span>        <span class="bp">self</span><span class="o">.</span><span class="n">background_color</span> <span class="o">=</span> <span class="n">palette</span><span class="o">.</span><span class="n">color</span><span class="p">(</span><span class="n">QPalette</span><span class="o">.</span><span class="n">ColorRole</span><span class="o">.</span><span class="n">Window</span><span class="p">)</span>
+<span class="linenos"> 99</span>
+<span class="linenos">100</span>        <span class="c1"># Create main plot widget with scientific visualization styling</span>
+<span class="linenos">101</span>        <span class="bp">self</span><span class="o">.</span><span class="n">plot_widget</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">PlotWidget</span><span class="p">()</span>
+<span class="linenos">102</span>        <span class="bp">self</span><span class="o">.</span><span class="n">setCentralWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_widget</span><span class="p">)</span>
+<span class="linenos">103</span>        <span class="bp">self</span><span class="o">.</span><span class="n">plot_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_widget</span><span class="o">.</span><span class="n">getPlotItem</span><span class="p">()</span>
+<span class="linenos">104</span>        <span class="bp">self</span><span class="o">.</span><span class="n">plot_item</span><span class="o">.</span><span class="n">showGrid</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>  <span class="c1"># Subtle grid</span>
+<span class="linenos">105</span>        <span class="c1"># Disable mouse interaction for fixed view</span>
+<span class="linenos">106</span>        <span class="bp">self</span><span class="o">.</span><span class="n">plot_item</span><span class="o">.</span><span class="n">getViewBox</span><span class="p">()</span><span class="o">.</span><span class="n">setMouseEnabled</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="linenos">107</span>        <span class="bp">self</span><span class="o">.</span><span class="n">plot_widget</span><span class="o">.</span><span class="n">setBackground</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">background_color</span><span class="p">)</span>
+<span class="linenos">108</span>
+<span class="linenos">109</span>        <span class="c1"># Configure axes labels and ranges for EEG-style display</span>
+<span class="linenos">110</span>        <span class="bp">self</span><span class="o">.</span><span class="n">plot_item</span><span class="o">.</span><span class="n">setLabels</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="s2">&quot;Channels&quot;</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="s2">&quot;Time (s)&quot;</span><span class="p">)</span>
+<span class="linenos">111</span>        <span class="bp">self</span><span class="o">.</span><span class="n">plot_item</span><span class="o">.</span><span class="n">setYRange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">CHANNEL_COUNT</span><span class="p">)</span>  <span class="c1"># Stack channels vertically</span>
+<span class="linenos">112</span>
+<span class="linenos">113</span>        <span class="c1"># Create channel labels (CH1, CH2, etc.) positioned at channel centers</span>
+<span class="linenos">114</span>        <span class="bp">self</span><span class="o">.</span><span class="n">plot_item</span><span class="o">.</span><span class="n">getAxis</span><span class="p">(</span><span class="s2">&quot;left&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">setTicks</span><span class="p">(</span>
+<span class="linenos">115</span>            <span class="p">[</span>
+<span class="linenos">116</span>                <span class="p">[</span>
+<span class="linenos">117</span>                    <span class="p">(</span><span class="n">CHANNEL_COUNT</span> <span class="o">-</span> <span class="n">i</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;CH</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">118</span>                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">CHANNEL_COUNT</span><span class="p">)</span>  <span class="c1"># noqa: E501</span>
+<span class="linenos">119</span>                <span class="p">]</span>
+<span class="linenos">120</span>            <span class="p">]</span>
+<span class="linenos">121</span>        <span class="p">)</span>
+<span class="linenos">122</span>        <span class="bp">self</span><span class="o">.</span><span class="n">plot_item</span><span class="o">.</span><span class="n">setXRange</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">TIME_WINDOW</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span>
+<span class="linenos">123</span>
+<span class="linenos">124</span>        <span class="c1"># Create individual plot curves for each channel</span>
+<span class="linenos">125</span>        <span class="bp">self</span><span class="o">.</span><span class="n">curves</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">126</span>        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">CHANNEL_COUNT</span><span class="p">):</span>
+<span class="linenos">127</span>            <span class="c1"># Each channel gets its own curve with consistent styling</span>
+<span class="linenos">128</span>            <span class="n">curve</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_item</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+<span class="linenos">129</span>                <span class="n">pen</span><span class="o">=</span><span class="n">pg</span><span class="o">.</span><span class="n">mkPen</span><span class="p">(</span><span class="n">QColor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">foreground_color</span><span class="p">),</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">130</span>            <span class="p">)</span>  <span class="c1"># noqa: E501</span>
+<span class="linenos">131</span>            <span class="bp">self</span><span class="o">.</span><span class="n">curves</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">curve</span><span class="p">)</span>
+<span class="linenos">132</span>
+<span class="linenos">133</span>        <span class="c1"># Initialize data buffers for circular buffering</span>
+<span class="linenos">134</span>        <span class="bp">self</span><span class="o">.</span><span class="n">t_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">MAX_POINTS</span><span class="p">)</span> <span class="o">/</span> <span class="n">SAMPLING_RATE</span>  <span class="c1"># Time vector</span>
+<span class="linenos">135</span>        <span class="c1"># Circular buffer for multi-channel data storage</span>
+<span class="linenos">136</span>        <span class="bp">self</span><span class="o">.</span><span class="n">data_buffer</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">MAX_POINTS</span><span class="p">,</span> <span class="n">CHANNEL_COUNT</span><span class="p">))</span>
+<span class="linenos">137</span>        <span class="bp">self</span><span class="o">.</span><span class="n">sample_index</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Current position in circular buffer</span>
+<span class="linenos">138</span>
+<span class="linenos">139</span>        <span class="c1"># Set up UDP socket for non-blocking data reception</span>
+<span class="linenos">140</span>        <span class="bp">self</span><span class="o">.</span><span class="n">sock</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_DGRAM</span><span class="p">)</span>
+<span class="linenos">141</span>        <span class="bp">self</span><span class="o">.</span><span class="n">sock</span><span class="o">.</span><span class="n">bind</span><span class="p">((</span><span class="n">UDP_IP</span><span class="p">,</span> <span class="n">UDP_PORT</span><span class="p">))</span>  <span class="c1"># Bind to specified address/port</span>
+<span class="linenos">142</span>        <span class="bp">self</span><span class="o">.</span><span class="n">sock</span><span class="o">.</span><span class="n">setblocking</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># Non-blocking for real-time operation</span>
+<span class="linenos">143</span>
+<span class="linenos">144</span>        <span class="c1"># Set up timer for regular plot updates (independent of data rate)</span>
+<span class="linenos">145</span>        <span class="bp">self</span><span class="o">.</span><span class="n">timer</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QTimer</span><span class="p">()</span>
+<span class="linenos">146</span>        <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">timeout</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update_plot</span><span class="p">)</span>
+<span class="linenos">147</span>        <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">40</span><span class="p">)</span>  <span class="c1"># ~25 Hz refresh rate for smooth visualization</span>
+<span class="linenos">148</span>
+<span class="linenos">149</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_last_second</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Track time axis updates</span>
+<span class="linenos">150</span>
+<span class="linenos">151</span>    <span class="k">def</span><span class="w"> </span><span class="nf">update_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="linenos">152</span><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos">153</span><span class="sd">        Main update loop called by timer for real-time visualization.</span>
+<span class="linenos">154</span>
+<span class="linenos">155</span><span class="sd">        Handles UDP packet reception, data buffering, and plot updates.</span>
+<span class="linenos">156</span><span class="sd">        Runs at ~25 Hz for smooth visualization independent of data rate.</span>
+<span class="linenos">157</span><span class="sd">        &quot;&quot;&quot;</span>
+<span class="linenos">158</span>        <span class="c1"># Receive and process all available UDP packets</span>
+<span class="linenos">159</span>        <span class="k">try</span><span class="p">:</span>
+<span class="linenos">160</span>            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+<span class="linenos">161</span>                <span class="c1"># Non-blocking receive - get packet if available</span>
+<span class="linenos">162</span>                <span class="n">packet</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sock</span><span class="o">.</span><span class="n">recvfrom</span><span class="p">(</span><span class="n">BUFFER_SIZE</span><span class="p">)</span>
+<span class="linenos">163</span>
+<span class="linenos">164</span>                <span class="c1"># Unpack binary data: convert bytes to float64 array</span>
+<span class="linenos">165</span>                <span class="n">frame</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+<span class="linenos">166</span>                <span class="n">frame</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">FRAME_SIZE</span><span class="p">,</span> <span class="n">CHANNEL_COUNT</span><span class="p">))</span>
+<span class="linenos">167</span>
+<span class="linenos">168</span>                <span class="c1"># Store in circular buffer with proper indexing</span>
+<span class="linenos">169</span>                <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_index</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">FRAME_SIZE</span><span class="p">)</span>
+<span class="linenos">170</span>                <span class="n">idx</span> <span class="o">%=</span> <span class="n">MAX_POINTS</span>  <span class="c1"># Wrap around for circular buffering</span>
+<span class="linenos">171</span>                <span class="bp">self</span><span class="o">.</span><span class="n">data_buffer</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">frame</span>
+<span class="linenos">172</span>                <span class="bp">self</span><span class="o">.</span><span class="n">sample_index</span> <span class="o">+=</span> <span class="n">FRAME_SIZE</span>
+<span class="linenos">173</span>
+<span class="linenos">174</span>        <span class="k">except</span> <span class="ne">BlockingIOError</span><span class="p">:</span>
+<span class="linenos">175</span>            <span class="c1"># No data available - continue with plot update</span>
+<span class="linenos">176</span>            <span class="k">pass</span>
+<span class="linenos">177</span>
+<span class="linenos">178</span>        <span class="c1"># Update visualization with decimated data for performance</span>
+<span class="linenos">179</span>        <span class="c1"># Decimate data based on window width to avoid oversampling display</span>
+<span class="linenos">180</span>        <span class="n">N</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">MAX_POINTS</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">()))</span>
+<span class="linenos">181</span>        <span class="n">display</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_buffer</span><span class="p">[::</span><span class="n">N</span><span class="p">]</span>  <span class="c1"># Take every Nth sample</span>
+<span class="linenos">182</span>        <span class="n">t_disp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t_vec</span><span class="p">[::</span><span class="n">N</span><span class="p">]</span>  <span class="c1"># Corresponding time points</span>
+<span class="linenos">183</span>
+<span class="linenos">184</span>        <span class="c1"># Update each channel curve with normalized and offset data</span>
+<span class="linenos">185</span>        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">curve</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">curves</span><span class="p">):</span>
+<span class="linenos">186</span>            <span class="c1"># Stack channels vertically with amplitude scaling</span>
+<span class="linenos">187</span>            <span class="n">offset</span> <span class="o">=</span> <span class="n">CHANNEL_COUNT</span> <span class="o">-</span> <span class="n">i</span> <span class="o">-</span> <span class="mf">0.5</span>  <span class="c1"># Vertical position</span>
+<span class="linenos">188</span>            <span class="c1"># Normalize amplitude and add channel offset</span>
+<span class="linenos">189</span>            <span class="n">curve</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">t_disp</span><span class="p">,</span> <span class="n">display</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">AMPLITUDE_LIMIT</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">offset</span><span class="p">)</span>
+<span class="linenos">190</span>
+<span class="linenos">191</span>        <span class="c1"># Update time axis labels for scrolling display</span>
+<span class="linenos">192</span>        <span class="n">cur_second</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+<span class="linenos">193</span>            <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_index</span> <span class="o">%</span> <span class="n">MAX_POINTS</span><span class="p">)</span> <span class="o">/</span> <span class="n">SAMPLING_RATE</span><span class="p">)</span>
+<span class="linenos">194</span>        <span class="p">)</span>  <span class="c1"># noqa: E501</span>
+<span class="linenos">195</span>        <span class="k">if</span> <span class="n">cur_second</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_second</span><span class="p">:</span>
+<span class="linenos">196</span>            <span class="n">time_window</span> <span class="o">=</span> <span class="n">TIME_WINDOW</span>
+<span class="linenos">197</span>            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_index</span> <span class="o">&gt;</span> <span class="n">MAX_POINTS</span><span class="p">:</span>
+<span class="linenos">198</span>                <span class="c1"># Scrolling mode: calculate proper time labels</span>
+<span class="linenos">199</span>                <span class="n">ticks</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">200</span>                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">time_window</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+<span class="linenos">201</span>                    <span class="n">tick_val</span> <span class="o">=</span> <span class="p">(</span>
+<span class="linenos">202</span>                        <span class="n">np</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="p">(</span><span class="n">cur_second</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">time_window</span><span class="p">)</span>
+<span class="linenos">203</span>                        <span class="o">+</span> <span class="n">cur_second</span>
+<span class="linenos">204</span>                        <span class="o">+</span> <span class="mi">1</span>
+<span class="linenos">205</span>                    <span class="p">)</span>  <span class="c1"># noqa: E501</span>
+<span class="linenos">206</span>                    <span class="n">offset</span> <span class="o">=</span> <span class="p">(</span>
+<span class="linenos">207</span>                        <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_index</span> <span class="o">/</span> <span class="n">MAX_POINTS</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+<span class="linenos">208</span>                        <span class="o">*</span> <span class="n">time_window</span>
+<span class="linenos">209</span>                    <span class="p">)</span>  <span class="c1"># noqa: E501</span>
+<span class="linenos">210</span>                    <span class="n">tick_val</span> <span class="o">+=</span> <span class="n">offset</span>
+<span class="linenos">211</span>                    <span class="n">tick_label</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tick_val</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="linenos">212</span>                    <span class="n">ticks</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">tick_label</span><span class="p">))</span>
+<span class="linenos">213</span>            <span class="k">else</span><span class="p">:</span>
+<span class="linenos">214</span>                <span class="c1"># Initial filling mode: simple sequential labels</span>
+<span class="linenos">215</span>                <span class="n">ticks</span> <span class="o">=</span> <span class="p">[</span>
+<span class="linenos">216</span>                    <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">cur_second</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="linenos">217</span>                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">time_window</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+<span class="linenos">218</span>                <span class="p">]</span>
+<span class="linenos">219</span>
+<span class="linenos">220</span>            <span class="c1"># Apply new tick labels to time axis</span>
+<span class="linenos">221</span>            <span class="bp">self</span><span class="o">.</span><span class="n">plot_item</span><span class="o">.</span><span class="n">getAxis</span><span class="p">(</span><span class="s2">&quot;bottom&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">setTicks</span><span class="p">([</span><span class="n">ticks</span><span class="p">])</span>
+<span class="linenos">222</span>            <span class="bp">self</span><span class="o">.</span><span class="n">_last_second</span> <span class="o">=</span> <span class="n">cur_second</span>
+<span class="linenos">223</span>
+<span class="linenos">224</span>
+<span class="linenos">225</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">226</span>    <span class="c1"># Create Qt application for GUI event loop</span>
+<span class="linenos">227</span>    <span class="n">app</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+<span class="linenos">228</span>
+<span class="linenos">229</span>    <span class="c1"># Create and configure main window</span>
+<span class="linenos">230</span>    <span class="n">window</span> <span class="o">=</span> <span class="n">UDPTimeScope</span><span class="p">()</span>
+<span class="linenos">231</span>    <span class="n">window</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span>  <span class="c1"># Set reasonable window size</span>
+<span class="linenos">232</span>    <span class="n">window</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="linenos">233</span>
+<span class="linenos">234</span>    <span class="c1"># Start application event loop (blocks until window closes)</span>
+<span class="linenos">235</span>    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">exec</span><span class="p">())</span>
+</pre></div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="s4e2_sending_lsl.html" class="btn btn-neutral float-left" title="Episode 2: Sending LSL Streams" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../season5_engaging_senses/s5e1_paradigm_presenter.html" class="btn btn-neutral float-right" title="Episode 1: Paradigm Presenter" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright g.tec medical engineering GmbH.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

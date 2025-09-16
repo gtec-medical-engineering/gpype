@@ -1,0 +1,54 @@
+Architecture & Design
+=====================
+
+This section provides an in-depth look at g.Pype's architecture, design patterns, and implementation details.
+
+.. grid:: 1 1 1 1
+   :gutter: 3
+
+   .. grid-item-card:: Configuration & Context
+      :link: configuration_context
+      :link-type: doc
+
+      Learn how gPype manages configuration settings, context switching, and environment-specific parameters for flexible deployment scenarios.
+
+   .. grid-item-card:: Data Structures
+      :link: data_structures
+      :link-type: doc
+
+      Explore the fundamental data structures used throughout gPype, including signal representations, metadata handling, and memory management.
+
+   .. grid-item-card:: Signal Processing & Propagation
+      :link: signal_processing_propagation
+      :link-type: doc
+
+      Understand how signals flow through the processing pipeline, buffering strategies, and real-time processing optimizations.
+
+   .. grid-item-card:: Node Design Pattern
+      :link: node_design_pattern
+      :link-type: doc
+
+      Deep dive into the node design pattern, inheritance hierarchy, and guidelines for creating custom processing nodes.
+
+   .. grid-item-card:: User Interface Layer
+      :link: user_interface_layer
+      :link-type: doc
+
+      Examine the user interface architecture, widget system, and interaction patterns that make gPype's frontend intuitive and extensible.
+
+   .. grid-item-card:: Logging & Monitoring
+      :link: logging_monitoring
+      :link-type: doc
+
+      Learn about gPype's logging framework, performance monitoring, debugging tools, and system health tracking capabilities.
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+
+   configuration_context
+   data_structures
+   signal_processing_propagation
+   node_design_pattern
+   user_interface_layer
+   logging_monitoring

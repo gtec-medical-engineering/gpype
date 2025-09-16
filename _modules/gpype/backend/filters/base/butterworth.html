@@ -5,9 +5,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.backend.filters.base.butterworth &mdash; g.Pype v3.0.3  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
+  <title>gpype.backend.filters.base.butterworth</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/custom.css?v=0382cca7" />
 
   
       <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
@@ -15,6 +17,10 @@
       <script src="../../../../../_static/documentation_options.js?v=5929fcd5"></script>
       <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../../../_static/js/line_numbers.js?v=98e8ade1"></script>
+      <script src="../../../../../_static/js/training_page.js?v=c174bc68"></script>
+      <script src="../../../../../_static/js/external_links.js?v=613fa8ce"></script>
     <script src="../../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" /> 
@@ -29,7 +35,8 @@
           
           
           <a href="../../../../../index.html" class="icon icon-home">
-            g.Pype v3.0.3
+            g.Pype v3.0.4
+              <img src="../../../../../_static/gpype-logo-sRGB.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
@@ -39,13 +46,13 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/introduction/index.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/backend/index.html">Backend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/common/index.html">Common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../content/examples/index.html">Examples</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/1_basic_concepts/index.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/2_gpype_training/index.html">g.Pype Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/5_faq/index.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/6_troubleshooting/index.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/7_sdk_reference/index.html">SDK Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../content/8_appendix/index.html">Appendix</a></li>
 </ul>
 
         </div>
@@ -54,7 +61,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../../index.html">g.Pype v3.0.3</a>
+          <a href="../../../../../index.html">g.Pype v3.0.4</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -86,33 +93,24 @@
 
 
 <div class="viewcode-block" id="Butterworth">
-<a class="viewcode-back" href="../../../../../content/backend/filters/base/butterworth.html#gpype.backend.filters.base.butterworth.Butterworth">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/backend_filters/butterworth.html#gpype.backend.filters.base.butterworth.Butterworth">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Butterworth</span><span class="p">(</span><span class="n">IONode</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Butterworth filter implementation for real-time signal processing.</span>
 
-<span class="sd">    This class implements a Butterworth digital filter using second-order</span>
-<span class="sd">    sections (SOS) for improved numerical stability. It supports lowpass,</span>
-<span class="sd">    highpass, bandpass, and bandstop filtering with configurable order.</span>
-
-<span class="sd">    The filter maintains internal state for continuous processing of streaming</span>
-<span class="sd">    data, making it suitable for real-time applications in BCI and signal</span>
-<span class="sd">    processing pipelines.</span>
-
-<span class="sd">    Attributes:</span>
-<span class="sd">        DEFAULT_ORDER: Default filter order (2) when not specified.</span>
-<span class="sd">        _sos: Second-order sections representation of the filter.</span>
-<span class="sd">        _z: Filter state for each channel to maintain continuity between steps.</span>
+<span class="sd">    Implements a Butterworth digital filter using second-order sections for</span>
+<span class="sd">    numerical stability. Supports lowpass, highpass, bandpass, and bandstop</span>
+<span class="sd">    filtering with configurable order and maintains state for streaming data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">DEFAULT_ORDER</span> <span class="o">=</span> <span class="mi">2</span>
 
 <div class="viewcode-block" id="Butterworth.Configuration">
-<a class="viewcode-back" href="../../../../../content/backend/filters/base/butterworth.html#gpype.backend.filters.base.butterworth.Butterworth.Configuration">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/backend_filters/butterworth.html#gpype.backend.filters.base.butterworth.Butterworth.Configuration">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">Configuration</span><span class="p">(</span><span class="n">IONode</span><span class="o">.</span><span class="n">Configuration</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Configuration class for Butterworth filter parameters.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Butterworth.Configuration.Keys">
-<a class="viewcode-back" href="../../../../../content/backend/filters/base/butterworth.html#gpype.backend.filters.base.butterworth.Butterworth.Configuration.Keys">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/backend_filters/butterworth.html#gpype.backend.filters.base.butterworth.Butterworth.Configuration.Keys">[docs]</a>
         <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">IONode</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Configuration keys for Butterworth filter settings.&quot;&quot;&quot;</span>
 
@@ -123,17 +121,15 @@
 
 
 <div class="viewcode-block" id="Butterworth.__init__">
-<a class="viewcode-back" href="../../../../../content/backend/filters/base/butterworth.html#gpype.backend.filters.base.butterworth.Butterworth.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/backend_filters/butterworth.html#gpype.backend.filters.base.butterworth.Butterworth.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">btype</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the Butterworth filter with specified parameters.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            fn: List of cutoff frequencies in Hz. For lowpass/highpass: single</span>
-<span class="sd">                value in list. For bandpass/bandstop: two values [low, high].</span>
-<span class="sd">            btype: Filter type. Must be one of &#39;lowpass&#39;, &#39;highpass&#39;,</span>
-<span class="sd">                &#39;bandpass&#39;, or &#39;bandstop&#39;.</span>
-<span class="sd">            order: Filter order. Higher orders provide steeper rolloff but</span>
-<span class="sd">                may introduce more phase distortion. Defaults to 2.</span>
+<span class="sd">            fn: List of cutoff frequencies in Hz. Single value for lowpass/</span>
+<span class="sd">                highpass, two values [low, high] for bandpass/bandstop.</span>
+<span class="sd">            btype: Filter type (&#39;lowpass&#39;, &#39;highpass&#39;, &#39;bandpass&#39;, &#39;bandstop&#39;).</span>
+<span class="sd">            order: Filter order. Defaults to 2 if not specified.</span>
 <span class="sd">            **kwargs: Additional arguments passed to parent IONode class.</span>
 
 <span class="sd">        Raises:</span>
@@ -161,19 +157,19 @@
 
 
 <div class="viewcode-block" id="Butterworth.setup">
-<a class="viewcode-back" href="../../../../../content/backend/filters/base/butterworth.html#gpype.backend.filters.base.butterworth.Butterworth.setup">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/backend_filters/butterworth.html#gpype.backend.filters.base.butterworth.Butterworth.setup">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">setup</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">port_context_in</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Setup the Butterworth filter before processing begins.</span>
 
-<span class="sd">        This method initializes the filter coefficients and state based on</span>
-<span class="sd">        the sampling rate and channel configuration from the input context.</span>
+<span class="sd">        Initializes filter coefficients and state based on sampling rate</span>
+<span class="sd">        and channel configuration from input context.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: Initial data dictionary (not used in setup).</span>
-<span class="sd">            port_context_in: Input port context containing sampling_rate,</span>
-<span class="sd">                channel_count, and other metadata.</span>
+<span class="sd">            port_context_in: Input port context with sampling_rate and</span>
+<span class="sd">                channel_count metadata.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Output port context dictionary with updated metadata.</span>
@@ -199,6 +195,10 @@
         <span class="c1"># Nyquist frequency is sampling_rate/2, so normalize by 2*fn/fs</span>
         <span class="n">Wn</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="o">/</span> <span class="n">sampling_rate</span> <span class="o">*</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fn</span><span class="p">]</span>
 
+        <span class="c1"># For lowpass and highpass, scipy expects a scalar, not a list</span>
+        <span class="k">if</span> <span class="n">btype</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;lowpass&quot;</span><span class="p">,</span> <span class="s2">&quot;highpass&quot;</span><span class="p">]:</span>
+            <span class="n">Wn</span> <span class="o">=</span> <span class="n">Wn</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Extract single element for scalar conversion</span>
+
         <span class="c1"># Design Butterworth filter using scipy</span>
         <span class="n">b</span><span class="p">,</span> <span class="n">a</span> <span class="o">=</span> <span class="n">butter</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">,</span> <span class="n">Wn</span><span class="o">=</span><span class="n">Wn</span><span class="p">,</span> <span class="n">btype</span><span class="o">=</span><span class="n">btype</span><span class="p">)</span>
 
@@ -215,16 +215,16 @@
 
 
 <div class="viewcode-block" id="Butterworth.step">
-<a class="viewcode-back" href="../../../../../content/backend/filters/base/butterworth.html#gpype.backend.filters.base.butterworth.Butterworth.step">[docs]</a>
+<a class="viewcode-back" href="../../../../../content/7_sdk_reference/backend_filters/butterworth.html#gpype.backend.filters.base.butterworth.Butterworth.step">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply Butterworth filter to input data.</span>
 
-<span class="sd">        Processes the input data through the Butterworth filter while</span>
-<span class="sd">        maintaining filter state for continuous operation.</span>
+<span class="sd">        Processes input data through the filter while maintaining filter</span>
+<span class="sd">        state for continuous operation.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: Dictionary containing input data with key PORT_IN.</span>
-<span class="sd">                Input data should be 2D array (samples x channels).</span>
+<span class="sd">                Input should be 2D array (samples x channels).</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Dictionary with filtered data under key PORT_OUT.</span>

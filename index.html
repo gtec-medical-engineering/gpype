@@ -6,9 +6,11 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>g.Pype User Manual &mdash; g.Pype v3.0.3  documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+  <title>Welcome to g.Pype!</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=0382cca7" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
@@ -16,10 +18,14 @@
       <script src="_static/documentation_options.js?v=5929fcd5"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/design-tabs.js?v=f930bc37"></script>
+      <script src="_static/js/line_numbers.js?v=98e8ade1"></script>
+      <script src="_static/js/training_page.js?v=c174bc68"></script>
+      <script src="_static/js/external_links.js?v=613fa8ce"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Introduction" href="content/introduction/index.html" /> 
+    <link rel="next" title="Basic Concepts" href="content/1_basic_concepts/index.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -31,7 +37,8 @@
           
           
           <a href="#" class="icon icon-home">
-            g.Pype v3.0.3
+            g.Pype v3.0.4
+              <img src="_static/gpype-logo-sRGB.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -41,13 +48,13 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="content/introduction/index.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="content/backend/index.html">Backend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="content/common/index.html">Common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="content/examples/index.html">Examples</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="content/1_basic_concepts/index.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="content/2_gpype_training/index.html">g.Pype Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="content/5_faq/index.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="content/6_troubleshooting/index.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="content/7_sdk_reference/index.html">SDK Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="content/8_appendix/index.html">Appendix</a></li>
 </ul>
 
         </div>
@@ -56,7 +63,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">g.Pype v3.0.3</a>
+          <a href="#">g.Pype v3.0.4</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -64,9 +71,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">g.Pype User Manual</li>
+      <li class="breadcrumb-item active">Welcome to g.Pype!</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -74,47 +80,119 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="g-pype-user-manual">
-<h1>g.Pype User Manual<a class="headerlink" href="#g-pype-user-manual" title="Link to this heading"></a></h1>
-<p>Please select from the menu.</p>
+  <section id="welcome-to-g-pype">
+<h1>Welcome to g.Pype!<a class="headerlink" href="#welcome-to-g-pype" title="Link to this heading"></a></h1>
+<div class="badges" style="margin-bottom: 20px;">
+   <a href="http://gtec.at"><img src="https://img.shields.io/badge/powered_by-g.tec-blue" alt="Powered by g.tec" /></a>
+   <a href="https://pypi.org/project/gpype/"><img src="https://img.shields.io/pypi/v/gpype.svg?label=PyPI%20version&color=brown" alt="PyPI" /></a>
+   <a href="https://pypi.org/project/gpype/"><img src="https://img.shields.io/pypi/pyversions/gpype.svg" alt="Python" /></a>
+   <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fgtec-medical-engineering%2Fgpype%2Fbadges%2Ftests.json" alt="Tests" />
+   <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fgtec-medical-engineering%2Fgpype%2Fbadges%2Fcoverage.json" alt="Coverage" />
+   <a href="https://github.com/gtec-medical-engineering/gpype/blob/main/LICENSE-GNCL.txt"><img src="https://img.shields.io/badge/License-GNCL-red" alt="License" /></a>
+   <a href="https://gtec-medical-engineering.github.io/gpype/"><img src="https://img.shields.io/badge/Documentation-GitHub%20Pages-green" alt="Documentation" /></a>
+</div><p>g.Pype is a Python Software Development Kit (SDK) for building neuroscience and Brain-Computer Interface (BCI) applications. It is designed to be simple to use, with a clear and well-documented coding interface with many examples that help you get started quickly. It provides essential building blocks that can be combined and adapted to your needs, while remaining open to integration with other Python packages. g.Pype runs on Windows and macOS.</p>
+<p>To get started with g.Pype, first familiarize yourself with the <a class="reference internal" href="content/1_basic_concepts/index.html"><span class="doc">Basic Concepts</span></a> and then dive into the <a class="reference internal" href="content/2_gpype_training/index.html"><span class="doc">g.Pype Training</span></a>. Have fun!</p>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-1 sd-row-cols-md-1 sd-row-cols-lg-2 sd-g-3 sd-g-xs-3 sd-g-sm-3 sd-g-md-3 sd-g-lg-3 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Basic Concepts</div>
+<div class="card-content-flex docutils container">
+<div class="card-image docutils container">
+<img alt="_images/section1.svg" src="_images/section1.svg" style="width: 60px;" />
+</div>
+<div class="card-text docutils container">
+<p class="sd-card-text">Get familiar with nodes, ports, widgets, backend pipelines, and frontend apps.</p>
+</div>
+</div>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="content/1_basic_concepts/index.html"><span class="doc">Basic Concepts</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+g.Pype Training</div>
+<div class="card-content-flex docutils container">
+<div class="card-image docutils container">
+<img alt="_images/section2.svg" src="_images/section2.svg" style="width: 60px;" />
+</div>
+<div class="card-text docutils container">
+<p class="sd-card-text">Learn g.Pype step by step with hands-on training episodes to build your skills.</p>
+</div>
+</div>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="content/2_gpype_training/index.html"><span class="doc">g.Pype Training</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Frequently Asked Questions</div>
+<div class="card-content-flex docutils container">
+<div class="card-image docutils container">
+<img alt="_images/section5.svg" src="_images/section5.svg" style="width: 60px;" />
+</div>
+<div class="card-text docutils container">
+<p class="sd-card-text">Find answers to common questions, clarifications, shortcuts, and useful hints.</p>
+</div>
+</div>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="content/5_faq/index.html"><span class="doc">Frequently Asked Questions</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Troubleshooting</div>
+<div class="card-content-flex docutils container">
+<div class="card-image docutils container">
+<img alt="_images/section6.svg" src="_images/section6.svg" style="width: 60px;" />
+</div>
+<div class="card-text docutils container">
+<p class="sd-card-text">Identify issues, debug pipelines, and resolve common problems with this guide.</p>
+</div>
+</div>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="content/6_troubleshooting/index.html"><span class="doc">Troubleshooting</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+SDK Reference</div>
+<div class="card-content-flex docutils container">
+<div class="card-image docutils container">
+<img alt="_images/section7.svg" src="_images/section7.svg" style="width: 60px;" />
+</div>
+<div class="card-text docutils container">
+<p class="sd-card-text">Explore the detailed programming reference for g.Pype’s backend and frontend.</p>
+</div>
+</div>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="content/7_sdk_reference/index.html"><span class="doc">SDK Reference</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Appendix</div>
+<div class="card-content-flex docutils container">
+<div class="card-image docutils container">
+<img alt="_images/section8.svg" src="_images/section8.svg" style="width: 60px;" />
+</div>
+<div class="card-text docutils container">
+<p class="sd-card-text">Check additional resources like the changelog, license, references, and more.</p>
+</div>
+</div>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="content/8_appendix/index.html"><span class="doc">Appendix</span></a></div>
+</div>
+</div>
+</div>
 <div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Contents</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="content/introduction/index.html">Introduction</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="content/introduction/index.html#g-pype">g.Pype</a></li>
-<li class="toctree-l2"><a class="reference internal" href="content/introduction/index.html#highlights">Highlights</a></li>
-<li class="toctree-l2"><a class="reference internal" href="content/introduction/index.html#installation">Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="content/introduction/index.html#documentation">Documentation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="content/introduction/index.html#license">License</a></li>
-<li class="toctree-l2"><a class="reference internal" href="content/introduction/index.html#changelog">Changelog</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="content/backend/index.html">Backend</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="content/backend/core/index.html">Core</a></li>
-<li class="toctree-l2"><a class="reference internal" href="content/backend/filters/index.html">Filters</a></li>
-<li class="toctree-l2"><a class="reference internal" href="content/backend/flow/index.html">Flow</a></li>
-<li class="toctree-l2"><a class="reference internal" href="content/backend/sinks/index.html">Sinks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="content/backend/sources/index.html">Source Nodes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="content/backend/timing/index.html">Timing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="content/backend/transform/index.html">Transform</a></li>
-<li class="toctree-l2"><a class="reference internal" href="content/backend/pipeline.html">Pipeline</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="content/frontend/index.html">Frontend</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="content/frontend/widgets/index.html">Widgets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="content/frontend/main_app.html">MainApp</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="content/common/index.html">Common</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="content/common/constants.html">Constants</a></li>
-<li class="toctree-l2"><a class="reference internal" href="content/common/settings.html">Settings</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="content/examples/index.html">Examples</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="content/examples/index.html#getting-started">Getting Started</a></li>
-</ul>
-</li>
-</ul>
 </div>
 </section>
 
@@ -122,7 +200,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="content/introduction/index.html" class="btn btn-neutral float-right" title="Introduction" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="content/1_basic_concepts/index.html" class="btn btn-neutral float-right" title="Basic Concepts" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

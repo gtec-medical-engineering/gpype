@@ -5,9 +5,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.frontend.main_app &mdash; g.Pype v3.0.3  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+  <title>gpype.frontend.main_app</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=0382cca7" />
 
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
@@ -15,6 +17,10 @@
       <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
       <script src="../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../_static/js/line_numbers.js?v=98e8ade1"></script>
+      <script src="../../../_static/js/training_page.js?v=c174bc68"></script>
+      <script src="../../../_static/js/external_links.js?v=613fa8ce"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -29,7 +35,8 @@
           
           
           <a href="../../../index.html" class="icon icon-home">
-            g.Pype v3.0.3
+            g.Pype v3.0.4
+              <img src="../../../_static/gpype-logo-sRGB.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -39,13 +46,13 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../content/introduction/index.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../content/backend/index.html">Backend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../content/common/index.html">Common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../content/examples/index.html">Examples</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../content/1_basic_concepts/index.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../content/2_gpype_training/index.html">g.Pype Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../content/5_faq/index.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../content/6_troubleshooting/index.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../content/7_sdk_reference/index.html">SDK Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../content/8_appendix/index.html">Appendix</a></li>
 </ul>
 
         </div>
@@ -54,7 +61,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">g.Pype v3.0.3</a>
+          <a href="../../../index.html">g.Pype v3.0.4</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -76,6 +83,9 @@
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">platform</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">PySide6.QtGui</span><span class="w"> </span><span class="kn">import</span> <span class="n">QIcon</span>
@@ -85,25 +95,13 @@
 
 
 <div class="viewcode-block" id="MainApp">
-<a class="viewcode-back" href="../../../content/frontend/main_app.html#gpype.frontend.main_app.MainApp">[docs]</a>
+<a class="viewcode-back" href="../../../content/7_sdk_reference/frontend/main_app.html#gpype.frontend.main_app.MainApp">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MainApp</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Main application class for g.Pype frontend applications.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Main application class for g.Pype frontend applications.</span>
 
-<span class="sd">    Provides a simple framework for creating PyQt6-based applications</span>
-<span class="sd">    with widget management, window configuration, and lifecycle handling.</span>
-<span class="sd">    Uses composition over inheritance for better flexibility and testability.</span>
-
-<span class="sd">    The application manages a collection of widgets, handles window setup,</span>
-<span class="sd">    and coordinates application startup and shutdown procedures.</span>
-
-<span class="sd">    Features:</span>
-<span class="sd">        - Automatic QApplication creation and management</span>
-<span class="sd">        - Window configuration with icon and positioning</span>
-<span class="sd">        - Widget lifecycle management (run/terminate)</span>
-<span class="sd">        - Graceful application shutdown handling</span>
-<span class="sd">        - Support for dependency injection (testing)</span>
-<span class="sd">        - Grid-based layout system (MATLAB subplot-style)</span>
+<span class="sd">    Provides framework for creating PyQt6-based applications with widget</span>
+<span class="sd">    management, window configuration, and lifecycle handling. Uses</span>
+<span class="sd">    composition for better flexibility and testability.</span>
 
 <span class="sd">    Attributes:</span>
 <span class="sd">        DEFAULT_POSITION: Default window geometry [x, y, width, height].</span>
@@ -112,7 +110,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Default window geometry configuration</span>
-    <span class="n">DEFAULT_POSITION</span> <span class="o">=</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">800</span><span class="p">,</span> <span class="mi">600</span><span class="p">]</span>  <span class="c1"># [x, y, width, height]</span>
+    <span class="n">DEFAULT_POSITION</span> <span class="o">=</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">700</span><span class="p">,</span> <span class="mi">400</span><span class="p">]</span>  <span class="c1"># [x, y, width, height]</span>
 
     <span class="c1"># Default grid size (rows, cols)</span>
     <span class="n">DEFAULT_GRID_SIZE</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
@@ -121,20 +119,16 @@
     <span class="n">ICON_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="s2">&quot;resources&quot;</span><span class="p">,</span> <span class="s2">&quot;gtec.ico&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="MainApp.__init__">
-<a class="viewcode-back" href="../../../content/frontend/main_app.html#gpype.frontend.main_app.MainApp.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../content/7_sdk_reference/frontend/main_app.html#gpype.frontend.main_app.MainApp.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">caption</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;g.Pype Application&quot;</span><span class="p">,</span>
         <span class="n">position</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">grid_size</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">app</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">prevent_sleep</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize the main application with window and widget management.</span>
-
-<span class="sd">        Sets up the QApplication, main window, grid layout system, and event</span>
-<span class="sd">        handling for a complete g.Pype frontend application. Supports</span>
-<span class="sd">        dependency injection for testing purposes.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the main application with window and widget management.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            caption: Window title text displayed in the title bar.</span>
@@ -144,6 +138,8 @@
 <span class="sd">                Uses DEFAULT_GRID_SIZE if None.</span>
 <span class="sd">            app: Existing QApplication instance for testing or integration.</span>
 <span class="sd">                Creates new QApplication if None.</span>
+<span class="sd">            prevent_sleep: Whether to prevent system sleep/power saving.</span>
+<span class="sd">                Default True for real-time applications.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Create or use existing QApplication (composition over inheritance)</span>
         <span class="c1"># This allows for better testability and flexibility</span>
@@ -152,9 +148,11 @@
         <span class="c1"># Initialize widget collection for lifecycle management</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Widget</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="c1"># Store grid configuration</span>
+        <span class="c1"># Store configuration</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_grid_size</span> <span class="o">=</span> <span class="n">grid_size</span> <span class="ow">or</span> <span class="n">MainApp</span><span class="o">.</span><span class="n">DEFAULT_GRID_SIZE</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_grid_rows</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grid_cols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grid_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prevent_sleep</span> <span class="o">=</span> <span class="n">prevent_sleep</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sleep_prevention_active</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="c1"># Create and configure main window</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_window</span> <span class="o">=</span> <span class="n">QMainWindow</span><span class="p">()</span>
@@ -184,14 +182,13 @@
 
 
 <div class="viewcode-block" id="MainApp.add_widget">
-<a class="viewcode-back" href="../../../content/frontend/main_app.html#gpype.frontend.main_app.MainApp.add_widget">[docs]</a>
+<a class="viewcode-back" href="../../../content/7_sdk_reference/frontend/main_app.html#gpype.frontend.main_app.MainApp.add_widget">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">add_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">:</span> <span class="n">Widget</span><span class="p">,</span> <span class="n">grid_positions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Add a widget to the application layout and management system.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a widget to the application layout and management system.</span>
 
 <span class="sd">        Registers the widget for lifecycle management and adds it to the</span>
-<span class="sd">        main window&#39;s grid layout. The widget will be automatically</span>
-<span class="sd">        started during run() and terminated during shutdown.</span>
+<span class="sd">        main window&#39;s grid layout. Widget will be automatically started</span>
+<span class="sd">        during run() and terminated during shutdown.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            widget: Widget instance to add to the application.</span>
@@ -199,16 +196,6 @@
 <span class="sd">            grid_positions: List of grid positions (1-indexed) to span.</span>
 <span class="sd">                For a 3x3 grid: [1,2,3] spans top row, [1,4,7] spans left col.</span>
 <span class="sd">                If None, adds to next available position.</span>
-
-<span class="sd">        Example:</span>
-<span class="sd">            For a 3x3 grid numbered as:</span>
-<span class="sd">            [1] [2] [3]</span>
-<span class="sd">            [4] [5] [6]</span>
-<span class="sd">            [7] [8] [9]</span>
-
-<span class="sd">            app.add_widget(w, [1,2,3])  # Top row</span>
-<span class="sd">            app.add_widget(w, [1,4])    # Top-left 2x1 rectangle</span>
-<span class="sd">            app.add_widget(w, [5])      # Center cell only</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Register widget for lifecycle management</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
@@ -237,32 +224,196 @@
             <span class="p">)</span></div>
 
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_enable_sleep_prevention</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Enable system sleep prevention based on the current platform.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prevent_sleep</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sleep_prevention_active</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">system</span> <span class="o">=</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">system</span> <span class="o">==</span> <span class="s2">&quot;Windows&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_prevent_sleep_windows</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">system</span> <span class="o">==</span> <span class="s2">&quot;Darwin&quot;</span><span class="p">:</span>  <span class="c1"># macOS</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_prevent_sleep_macos</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sleep prevention not implemented for </span><span class="si">{</span><span class="n">system</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">return</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sleep_prevention_active</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to enable sleep prevention: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_disable_sleep_prevention</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Disable system sleep prevention and restore normal power mgmt.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sleep_prevention_active</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">system</span> <span class="o">=</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">system</span> <span class="o">==</span> <span class="s2">&quot;Windows&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_restore_sleep_windows</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">system</span> <span class="o">==</span> <span class="s2">&quot;Darwin&quot;</span><span class="p">:</span>  <span class="c1"># macOS</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_restore_sleep_macos</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sleep_prevention_active</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to disable sleep prevention: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_prevent_sleep_windows</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Prevent sleep on Windows using SetThreadExecutionState.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">ctypes</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">ctypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">wintypes</span>
+
+            <span class="c1"># Constants for SetThreadExecutionState</span>
+            <span class="n">ES_CONTINUOUS</span> <span class="o">=</span> <span class="mh">0x80000000</span>
+            <span class="n">ES_SYSTEM_REQUIRED</span> <span class="o">=</span> <span class="mh">0x00000001</span>
+            <span class="n">ES_DISPLAY_REQUIRED</span> <span class="o">=</span> <span class="mh">0x00000002</span>
+            <span class="n">ES_AWAYMODE_REQUIRED</span> <span class="o">=</span> <span class="mh">0x00000040</span>
+
+            <span class="c1"># Prevent system sleep and display sleep</span>
+            <span class="n">execution_state</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">ES_CONTINUOUS</span>
+                <span class="o">|</span> <span class="n">ES_SYSTEM_REQUIRED</span>
+                <span class="o">|</span> <span class="n">ES_DISPLAY_REQUIRED</span>
+                <span class="o">|</span> <span class="n">ES_AWAYMODE_REQUIRED</span>
+            <span class="p">)</span>
+
+            <span class="n">kernel32</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">windll</span><span class="o">.</span><span class="n">kernel32</span>
+            <span class="n">kernel32</span><span class="o">.</span><span class="n">SetThreadExecutionState</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">wintypes</span><span class="o">.</span><span class="n">DWORD</span><span class="p">]</span>
+            <span class="n">kernel32</span><span class="o">.</span><span class="n">SetThreadExecutionState</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">wintypes</span><span class="o">.</span><span class="n">DWORD</span>
+
+            <span class="n">result</span> <span class="o">=</span> <span class="n">kernel32</span><span class="o">.</span><span class="n">SetThreadExecutionState</span><span class="p">(</span><span class="n">execution_state</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;SetThreadExecutionState failed&quot;</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Windows API not available&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_restore_sleep_windows</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Restore normal sleep behavior on Windows.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">ctypes</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">ctypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">wintypes</span>
+
+            <span class="c1"># ES_CONTINUOUS without other flags restores normal behavior</span>
+            <span class="n">ES_CONTINUOUS</span> <span class="o">=</span> <span class="mh">0x80000000</span>
+
+            <span class="n">kernel32</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">windll</span><span class="o">.</span><span class="n">kernel32</span>
+            <span class="n">kernel32</span><span class="o">.</span><span class="n">SetThreadExecutionState</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">wintypes</span><span class="o">.</span><span class="n">DWORD</span><span class="p">]</span>
+            <span class="n">kernel32</span><span class="o">.</span><span class="n">SetThreadExecutionState</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">wintypes</span><span class="o">.</span><span class="n">DWORD</span>
+
+            <span class="n">kernel32</span><span class="o">.</span><span class="n">SetThreadExecutionState</span><span class="p">(</span><span class="n">ES_CONTINUOUS</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="k">pass</span>  <span class="c1"># Silently fail if Windows API not available</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_prevent_sleep_macos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Prevent sleep on macOS using caffeinate or IOKit.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+
+            <span class="c1"># Try to use caffeinate command (available on macOS 10.8+)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_caffeinate_process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+                <span class="p">[</span><span class="s2">&quot;caffeinate&quot;</span><span class="p">,</span> <span class="s2">&quot;-d&quot;</span><span class="p">,</span> <span class="s2">&quot;-i&quot;</span><span class="p">,</span> <span class="s2">&quot;-m&quot;</span><span class="p">,</span> <span class="s2">&quot;-s&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">,</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">SubprocessError</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Fallback to IOKit (requires pyobjc)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_prevent_sleep_macos_iokit</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                    <span class="s2">&quot;macOS sleep prevention requires caffeinate command &quot;</span>
+                    <span class="s2">&quot;or pyobjc library&quot;</span>
+                <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_prevent_sleep_macos_iokit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Prevent sleep on macOS using IOKit (requires pyobjc).&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">Cocoa</span>  <span class="c1"># noqa: F401</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">CoreFoundation</span><span class="w"> </span><span class="kn">import</span> <span class="n">kCFStringEncodingUTF8</span>  <span class="c1"># noqa: F401</span>
+
+            <span class="c1"># Create assertion to prevent sleep</span>
+            <span class="n">reason</span> <span class="o">=</span> <span class="n">Cocoa</span><span class="o">.</span><span class="n">CFStringCreateWithCString</span><span class="p">(</span>
+                <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;g.Pype Application&quot;</span><span class="p">,</span> <span class="n">kCFStringEncodingUTF8</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Import IOKit functions</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">IOKit</span><span class="w"> </span><span class="kn">import</span> <span class="n">IOPMAssertionCreateWithName</span>  <span class="c1"># noqa: F401</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">IOKit</span><span class="w"> </span><span class="kn">import</span> <span class="n">kIOPMAssertionTypeNoDisplaySleep</span>
+
+            <span class="n">success</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sleep_assertion_id</span> <span class="o">=</span> <span class="n">IOPMAssertionCreateWithName</span><span class="p">(</span>
+                <span class="n">kIOPMAssertionTypeNoDisplaySleep</span><span class="p">,</span>
+                <span class="mi">255</span><span class="p">,</span>  <span class="c1"># kIOPMAssertionLevelOn</span>
+                <span class="n">reason</span><span class="p">,</span>
+                <span class="kc">None</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">success</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Failed to create IOKit assertion&quot;</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;pyobjc library required for IOKit method&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_restore_sleep_macos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Restore normal sleep behavior on macOS.&quot;&quot;&quot;</span>
+        <span class="c1"># Terminate caffeinate process if running</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_caffeinate_process&quot;</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_caffeinate_process</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_caffeinate_process</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">TimeoutExpired</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_caffeinate_process</span><span class="o">.</span><span class="n">kill</span><span class="p">()</span>
+                <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_caffeinate_process&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Release IOKit assertion if created</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_sleep_assertion_id&quot;</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">IOKit</span><span class="w"> </span><span class="kn">import</span> <span class="n">IOPMAssertionRelease</span>  <span class="c1"># noqa: F401</span>
+
+                <span class="n">IOPMAssertionRelease</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sleep_assertion_id</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_sleep_assertion_id&quot;</span><span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_on_quit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Handle application shutdown cleanup.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle application shutdown cleanup.</span>
 
 <span class="sd">        Called automatically when the QApplication is about to quit.</span>
-<span class="sd">        Ensures all registered widgets are properly terminated to</span>
-<span class="sd">        prevent resource leaks and data corruption.</span>
+<span class="sd">        Ensures all registered widgets are properly terminated and</span>
+<span class="sd">        restores normal sleep behavior.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Disable sleep prevention before terminating widgets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_disable_sleep_prevention</span><span class="p">()</span>
+
         <span class="c1"># Terminate all widgets gracefully</span>
         <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_widgets</span><span class="p">:</span>
             <span class="n">widget</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
 
 <div class="viewcode-block" id="MainApp.run">
-<a class="viewcode-back" href="../../../content/frontend/main_app.html#gpype.frontend.main_app.MainApp.run">[docs]</a>
+<a class="viewcode-back" href="../../../content/7_sdk_reference/frontend/main_app.html#gpype.frontend.main_app.MainApp.run">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Start the application and enter the main event loop.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start the application and enter the main event loop.</span>
 
-<span class="sd">        Shows the main window, starts all registered widgets, and enters</span>
-<span class="sd">        the Qt event loop. This method blocks until the application is</span>
-<span class="sd">        closed by the user or programmatically terminated.</span>
+<span class="sd">        Shows the main window, starts all registered widgets, enables</span>
+<span class="sd">        sleep prevention if configured, and enters the Qt event loop.</span>
+<span class="sd">        Blocks until the application is closed.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            int: Application exit code. 0 indicates successful execution,</span>
 <span class="sd">                non-zero values indicate errors or abnormal termination.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Enable sleep prevention if configured</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prevent_sleep</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_enable_sleep_prevention</span><span class="p">()</span>
+
         <span class="c1"># Show the main window</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_window</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 

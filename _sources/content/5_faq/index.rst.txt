@@ -1,0 +1,238 @@
+Frequently Asked Questions
+==========================
+
+This FAQ answers the most common questions about using, extending, and supporting g.Pype. If you are new or troubleshooting, this is the right place.
+
+Getting Started & Licensing
+---------------------------
+
+.. dropdown:: How do I install g.Pype?
+   :icon: question
+
+   You can install g.Pype directly from PyPI using ``pip install gpype``. Run this command in your preferred Python terminal. After installation, continue with the :doc:`g.Pype Training <../2_gpype_training/index>` section of the manual to learn how to use it.
+
+.. dropdown:: How do I use g.Pype?
+   :icon: question
+
+   The best way to get started is to follow the :doc:`g.Pype Training <../2_gpype_training/index>` section of the manual, which provides step-by-step examples and walkthroughs.
+
+.. dropdown:: Is g.Pype free?
+   :icon: question
+
+   Yes, g.Pype is free for private and educational use within an IDE (VS Code, PyCharm, etc.). For commercial deployment, a g.Pype Runtime license must be purchased.
+
+.. dropdown:: How is g.Pype licensed?
+   :icon: question
+
+   g.Pype is, for large parts, open source under the g.tec :doc:`Non-Commercial License <../8_appendix/license>` (GNCL). This means you can use it freely for private and educational use within an IDE. For commercial deployment of applications, a g.Pype Runtime license must be obtained. Please contact us for details.
+
+General Use & Philosophy
+------------------------
+
+.. dropdown:: What programming skills do I need to use g.Pype?
+   :icon: gear
+
+   Only basic Python knowledge is required. Pipelines are simple to define, and the :doc:`g.Pype Training <../2_gpype_training/index>` allows you to get started even with little coding skills.
+
+.. dropdown:: Can I use g.Pype without coding?
+   :icon: gear
+
+   No. g.Pype is intentionally code-based. There is no design GUI planned, because writing code is often simpler, more flexible, and easier to maintain.
+
+.. dropdown:: How is g.Pype different from NeuroPype, Medusa, or BrainFlow?
+   :icon: gear
+
+   g.Pype focuses on simplicity and a code-based interface. Unlike NeuroPype or Medusa, no GUI is planned, because the code itself is intentionally simple. BrainFlow focuses on device-agnostic data acquisition and basic filtering, whereas g.Pype provides a modular real-time signal processing backend and visualization frontend for end-to-end neuroscience and BCI applications.
+
+.. dropdown:: How is g.Pype different from MNE-Python?
+   :icon: gear
+
+   MNE-Python provides powerful research-oriented tools with a primary (and historical) emphasis on offline biosignal data analysis, while g.Pype focuses on self-contained real-time neuroscience and BCI applications. g.Pype can also stream into the MNE-Python ecosystem via MNE-LSL, so the two toolkits can be used together.
+
+Platform Support
+----------------
+
+.. dropdown:: Can I use g.Pype on macOS and Linux?
+   :icon: device-desktop
+
+   Yes on macOS. Linux is currently not supported.
+
+.. dropdown:: Are there restrictions on macOS?
+   :icon: device-desktop
+
+   Yes. You cannot use g.Nautilus or Paradigm Presenter on macOS.
+
+.. dropdown:: Can I use g.Pype on Android or iOS devices?
+   :icon: device-mobile
+
+   Planned for upcoming releases.
+
+Hardware Support
+----------------
+
+.. dropdown:: Can I use g.Pype with my own amplifier?
+   :icon: cpu
+
+   Yes, as long as it is a BCI Core-8 or a g.Nautilus. Third-party amplifiers are not supported. However, you can still use g.Pype without hardware, for example with the signal/noise generator.
+
+.. dropdown:: Can I use g.Pype with the Unicorn Hybrid Black?
+   :icon: cpu
+
+   Planned for upcoming releases.
+
+.. dropdown:: Can I use g.Pype with g.HIamp, g.USBamp, or g.Nautilus?
+   :icon: cpu
+
+   Integration is planned. We are currently investigating performance feasibility, but technically it is possible.
+
+.. dropdown:: Can I connect multiple amplifiers to one pipeline?
+   :icon: cpu
+
+   Yes. You can instantiate multiple source nodes for each amplifier.
+
+.. dropdown:: Does g.Pype support trigger boxes (e.g. g.TRIGbox)?
+   :icon: cpu
+
+   Yes. You can record trigger signals via the DI of g.Nautilus.
+
+.. dropdown:: Does g.Pype support third-party stimulators or TMS devices?
+   :icon: cpu
+
+   Yes, you can build your own stimulation node in g.Pype if the device has a Python-compatible interface.
+
+Pipelines & Execution
+---------------------
+
+.. dropdown:: Can I create standalone applications with g.Pype?
+   :icon: workflow
+
+   Yes. You can compile your g.Pype application into an executable and deploy it with g.Pype Runtime.
+
+.. dropdown:: Does g.Pype support real-time data processing?
+   :icon: workflow
+
+   Yes. g.Pype is designed for low-latency, real-time applications such as BCI experiments.
+
+.. dropdown:: Can I stop and resume a pipeline?
+   :icon: workflow
+
+   Yes.
+
+.. dropdown:: How do I save, load, or share pipelines?
+   :icon: workflow
+
+   Pipelines are just Python code, so you save them as .py scripts and can share them like any other code file.
+
+.. dropdown:: What happens if one node crashes?
+   :icon: workflow
+
+   You will be notified in the IDE terminal with more information. You can check the g.Pype log file for details. Use your IDE's debugging features or write diagnostic messages to the log. See the :doc:`Troubleshooting <../6_troubleshooting/index>` section for guidance.
+
+.. dropdown:: Can I debug pipelines interactively?
+   :icon: workflow
+
+   Yes. Pipelines can be run directly in Python, allowing you to use standard debugging tools such as breakpoints, logging, or variable inspection. Pipelines also feature a :doc:`monitoring and logging <../3_architecture_design/logging_monitoring>` component which simplifies multi-threaded bug tracing and fixing.
+
+Visualization & Stimulus Presentation
+-------------------------------------
+
+.. dropdown:: What visualization tools are available?
+   :icon: eye
+
+   g.Pype uses PyQtGraph for fast, interactive plotting in Qt applications. Standard visualization tools like time series scopes are available. You can also develop your own custom dashboards or use external plotting libraries.
+
+.. dropdown:: Can I present stimuli (audio/visual) with g.Pype?
+   :icon: eye
+
+   Yes. You can purchase the Paradigm Presenter from g.tec, which provides millisecond-precision stimulus presentation. Alternatively, you can integrate PsychoPy into g.Pype.
+
+.. dropdown:: Can I use g.Pype with VR/AR displays?
+   :icon: eye
+
+   Experimental integration is possible using external Python libraries or custom nodes.
+
+.. dropdown:: Can I use g.Pype widgets outside of Qt?
+   :icon: eye
+
+   Widgets are Qt-based, but we plan to integrate additional frontend technologies (Flutter, React, etc.) into g.Pype.
+
+Interfacing & Extensions
+------------------------
+
+.. dropdown:: Can I use third-party libraries like scikit-learn with g.Pype?
+   :color: light
+   :icon: plug
+
+   Absolutely. Third-party Python libraries can be integrated into your pipeline by wrapping them in :doc:`custom nodes <../4_advanced_topics/node_customization>`. Alternatively, you can stream g.Pype data via LSL/UDP into third-party interfaces.
+
+.. dropdown:: Does g.Pype support Lab Streaming Layer (LSL)?
+   :color: light
+   :icon: plug
+
+   Yes. LSL output nodes are supported, making it easy to stream your data into LSL-enabled applications.
+
+.. dropdown:: Can I receive data streams (UDP/LSL) from remote sources?
+   :color: light
+   :icon: plug
+
+   Not generally. g.Pype is restricted to g.tec amplifiers, and external LSL/UDP streams may originate from unsupported devices.
+
+.. dropdown:: Can I control g.Pype pipelines from a web dashboard?
+   :color: light
+   :icon: plug
+
+   Planned for upcoming releases.
+
+Advanced & Research Use
+-----------------------
+
+.. dropdown:: Can I use OSCAR with g.Pype?
+   :color: dark
+   :icon: beaker
+
+   Yes. Integration of the OSCAR artifact removal algorithm is planned for upcoming releases.
+
+.. dropdown:: Can I do source localization or machine learning with g.Pype?
+   :color: dark
+   :icon: beaker
+
+   Yes. You can implement :doc:`custom nodes <../4_advanced_topics/node_customization>` for this purpose, or use LSL/UDP streaming to connect g.Pype with other applications.
+
+.. dropdown:: Can I re-run a file that has been pre-recorded with g.Pype?
+   :color: dark
+   :icon: beaker
+
+   This is not the primary use case, since stored data is often pre-processed and pipelines may rely on multiple synchronous sources. However, you can store comprehensive data for downstream offline analysis.
+
+.. dropdown:: Is g.Pype suitable for clinical use?
+   :color: dark
+   :icon: beaker
+
+   g.Pype itself is a research tool. Applications in the clinical context require ethical approval.
+
+.. dropdown:: Can I simulate EEG data with g.Pype?
+   :color: dark
+   :icon: beaker
+
+   Partly yes. The generator node allows you to create noise, which you can bandpass and modulate to resemble EEG with band-power activity. Simulating time-locked responses like ERPs is technically possible but requires customized nodes.
+
+.. dropdown:: I am using g.Pype in my scientific publication. How do I cite it?
+   :color: dark
+   :icon: beaker
+
+   Please refer to the :doc:`Citation Guidelines <../8_appendix/how_to_cite>` in the Appendix for the correct citation format.
+
+Contact & Support
+-----------------
+
+.. dropdown:: How do I report bugs or request features?
+   :color: muted
+   :icon: bug
+
+   Please open an issue in the public GitHub repository.
+
+.. dropdown:: How do I get support?
+   :color: muted
+   :icon: bug
+
+   Direct g.tec support is not included with the free version. However, we provide extensive documentation, a :doc:`troubleshooting guide <../6_troubleshooting/index>`, and FAQs (this page) to help you solve problems efficiently.

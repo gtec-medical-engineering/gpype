@@ -5,9 +5,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gpype.backend.filters.moving_average &mdash; g.Pype v3.0.3  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+  <title>gpype.backend.filters.moving_average</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=0382cca7" />
 
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
@@ -15,6 +17,10 @@
       <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../../_static/js/line_numbers.js?v=98e8ade1"></script>
+      <script src="../../../../_static/js/training_page.js?v=c174bc68"></script>
+      <script src="../../../../_static/js/external_links.js?v=613fa8ce"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -29,7 +35,8 @@
           
           
           <a href="../../../../index.html" class="icon icon-home">
-            g.Pype v3.0.3
+            g.Pype v3.0.4
+              <img src="../../../../_static/gpype-logo-sRGB.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -39,13 +46,13 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/introduction/index.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/backend/index.html">Backend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/frontend/index.html">Frontend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/common/index.html">Common</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../content/examples/index.html">Examples</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/1_basic_concepts/index.html">Basic Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/2_gpype_training/index.html">g.Pype Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/5_faq/index.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/6_troubleshooting/index.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/7_sdk_reference/index.html">SDK Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../content/8_appendix/index.html">Appendix</a></li>
 </ul>
 
         </div>
@@ -54,7 +61,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../index.html">g.Pype v3.0.3</a>
+          <a href="../../../../index.html">g.Pype v3.0.4</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -84,38 +91,23 @@
 
 
 <div class="viewcode-block" id="MovingAverage">
-<a class="viewcode-back" href="../../../../content/backend/filters/moving_average.html#gpype.backend.filters.moving_average.MovingAverage">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_filters/moving_average.html#gpype.backend.filters.moving_average.MovingAverage">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MovingAverage</span><span class="p">(</span><span class="n">GenericFilter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Moving average filter for signal smoothing and noise reduction.</span>
 
-<span class="sd">    This class implements a moving average filter using various window</span>
-<span class="sd">    functions. Moving average filters are linear phase FIR filters that</span>
-<span class="sd">    smooth signals by averaging values within a sliding window.</span>
-
-<span class="sd">    The filter is commonly used in BCI applications for:</span>
-<span class="sd">    - Signal smoothing and noise reduction</span>
-<span class="sd">    - Trend analysis and baseline correction</span>
-<span class="sd">    - Feature extraction preprocessing</span>
-
-<span class="sd">    The implementation supports various window functions including rectangular</span>
-<span class="sd">    (boxcar), Hamming, Hanning, and others available in scipy.signal.</span>
-
-<span class="sd">    Attributes:</span>
-<span class="sd">        window_size: Length of the averaging window</span>
-<span class="sd">        window_function: Type of window function applied</span>
-
-<span class="sd">    Note:</span>
-<span class="sd">        Moving average filters introduce delay equal to (window_size-1)/2</span>
-<span class="sd">        samples, which should be considered in real-time applications.</span>
+<span class="sd">    Implements a moving average filter using various window functions. Moving</span>
+<span class="sd">    average filters are linear phase FIR filters that smooth signals by</span>
+<span class="sd">    averaging values within a sliding window. Supports window functions</span>
+<span class="sd">    including rectangular, Hamming, Hanning, and others.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="MovingAverage.Configuration">
-<a class="viewcode-back" href="../../../../content/backend/filters/moving_average.html#gpype.backend.filters.moving_average.MovingAverage.Configuration">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_filters/moving_average.html#gpype.backend.filters.moving_average.MovingAverage.Configuration">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">Configuration</span><span class="p">(</span><span class="n">GenericFilter</span><span class="o">.</span><span class="n">Configuration</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Configuration class for MovingAverage filter parameters.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="MovingAverage.Configuration.Keys">
-<a class="viewcode-back" href="../../../../content/backend/filters/moving_average.html#gpype.backend.filters.moving_average.MovingAverage.Configuration.Keys">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_filters/moving_average.html#gpype.backend.filters.moving_average.MovingAverage.Configuration.Keys">[docs]</a>
         <span class="k">class</span><span class="w"> </span><span class="nc">Keys</span><span class="p">(</span><span class="n">GenericFilter</span><span class="o">.</span><span class="n">Configuration</span><span class="o">.</span><span class="n">Keys</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Configuration keys for moving average parameters.&quot;&quot;&quot;</span>
 
@@ -125,7 +117,7 @@
 
 
 <div class="viewcode-block" id="MovingAverage.__init__">
-<a class="viewcode-back" href="../../../../content/backend/filters/moving_average.html#gpype.backend.filters.moving_average.MovingAverage.__init__">[docs]</a>
+<a class="viewcode-back" href="../../../../content/7_sdk_reference/backend_filters/moving_average.html#gpype.backend.filters.moving_average.MovingAverage.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">window_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -136,12 +128,10 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            window_size: Number of samples in the averaging window.</span>
-<span class="sd">                Must be greater than 1. Larger windows provide more</span>
-<span class="sd">                smoothing but introduce more delay.</span>
-<span class="sd">            window_function: Type of window function to apply.</span>
-<span class="sd">                Supported functions include &#39;boxcar&#39; (rectangular),</span>
-<span class="sd">                &#39;hamming&#39;, &#39;hanning&#39;, &#39;blackman&#39;, etc. Defaults to</span>
-<span class="sd">                &#39;boxcar&#39; for standard moving average.</span>
+<span class="sd">                Must be greater than 1.</span>
+<span class="sd">            window_function: Type of window function to apply. Supported</span>
+<span class="sd">                functions include &#39;boxcar&#39;, &#39;hamming&#39;, &#39;hanning&#39;, etc.</span>
+<span class="sd">                Defaults to &#39;boxcar&#39;.</span>
 <span class="sd">            **kwargs: Additional arguments passed to parent GenericFilter.</span>
 
 <span class="sd">        Raises:</span>

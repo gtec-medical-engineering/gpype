@@ -1,0 +1,293 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Episode 4: Visualizing Data</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=0382cca7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../_static/js/line_numbers.js?v=98e8ade1"></script>
+      <script src="../../../_static/js/training_page.js?v=c174bc68"></script>
+      <script src="../../../_static/js/external_links.js?v=613fa8ce"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Episode 1: Standard Filtering" href="../season2_easy_drifting/s2e1_filtering.html" />
+    <link rel="prev" title="Episode 3: Generating Signals" href="s1e3_signal_generator.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            g.Pype v3.0.4
+              <img src="../../../_static/gpype-logo-sRGB.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../1_basic_concepts/index.html">Basic Concepts</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">g.Pype Training</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#season-1-boarding">Season 1: Boarding</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="s1e1_environment_setup.html">Episode 1: Environment Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="s1e2_hello_world.html">Episode 2: Hello World!</a></li>
+<li class="toctree-l3"><a class="reference internal" href="s1e3_signal_generator.html">Episode 3: Generating Signals</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Episode 4: Visualizing Data</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#season-2-easy-drifting">Season 2: Easy Drifting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#season-3-gearing-up">Season 3: Gearing Up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#season-4-crossing-borders">Season 4: Crossing Borders</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#season-5-engaging-senses">Season 5: Engaging Senses</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../5_faq/index.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../6_troubleshooting/index.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../7_sdk_reference/index.html">SDK Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../8_appendix/index.html">Appendix</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">g.Pype v3.0.4</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">g.Pype Training</a></li>
+      <li class="breadcrumb-item active">Episode 4: Visualizing Data</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="episode-4-visualizing-data">
+<h1>Episode 4: Visualizing Data<a class="headerlink" href="#episode-4-visualizing-data" title="Link to this heading"></a></h1>
+<p>In this episode, you learn how to adjust data visualization in g.Pype.</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="read" for="sd-tab-item-0">
+Read</label><div class="sd-tab-content docutils">
+<p>Let’s begin with the code from the previous episode. Notice that the <a class="reference internal" href="../../7_sdk_reference/backend_sources/generator.html"><span class="doc">Generator</span></a> constructor
+is compact again, while the <a class="reference internal" href="../../7_sdk_reference/frontend_widgets/time_series_scope.html"><span class="doc">TimeSeriesScope</span></a> constructor now includes three new parameters:
+<code class="docutils literal notranslate"><span class="pre">time_window</span></code>, <code class="docutils literal notranslate"><span class="pre">amplitude_limit</span></code>, and <code class="docutils literal notranslate"><span class="pre">hidden_channels</span></code>, all set to their default values.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span><span class="w"> </span><span class="nn">gpype</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gp</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span>    <span class="n">app</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">MainApp</span><span class="p">()</span>
+<span class="linenos"> 6</span>    <span class="n">p</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">()</span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span>    <span class="n">source</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Generator</span><span class="p">(</span><span class="n">signal_amplitude</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
+<span class="linenos"> 9</span>
+<span class="hll"><span class="linenos">10</span>    <span class="n">scope</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">TimeSeriesScope</span><span class="p">(</span><span class="n">time_window</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+</span><span class="hll"><span class="linenos">11</span>                               <span class="n">amplitude_limit</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+</span><span class="hll"><span class="linenos">12</span>                               <span class="n">hidden_channels</span><span class="o">=</span><span class="p">[])</span>
+</span><span class="linenos">13</span>
+<span class="linenos">14</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">scope</span><span class="p">)</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span>    <span class="n">app</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">scope</span><span class="p">)</span>
+<span class="linenos">17</span>
+<span class="linenos">18</span>    <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="linenos">19</span>    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>  <span class="c1"># blocking until window is closed</span>
+<span class="linenos">20</span>    <span class="n">p</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Again, first run the script to ensure the output is as expected.</p>
+<figure class="screenshot align-default" id="id1">
+<img alt="S1E4 example screenshot" src="../../../_images/s1e4_1.png" />
+<figcaption>
+<p><span class="caption-number">Figure 9: </span><span class="caption-text">Minimal g.Pype application with a signal generator and time series scope.</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>Now, let’s customize the time <a class="reference internal" href="../../7_sdk_reference/frontend_widgets/time_series_scope.html"><span class="doc">TimeSeriesScope</span></a> visualization using its parameters.</p>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-1 sd-row-cols-md-1 sd-row-cols-lg-1 sd-g-2 sd-g-xs-2 sd-g-sm-2 sd-g-md-2 sd-g-lg-2 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Time Window</div>
+<p class="sd-card-text">The time window determines how many seconds of data are displayed in the scope. By default, it’s 10 seconds.
+Change the time window to 5 seconds by changing <code class="docutils literal notranslate"><span class="pre">time_window=5</span></code> in the parameter list. Run the script
+and observe that only 5 seconds of data are now visible. Let it run for a while to see how the scope
+cursor overwrites older data. The x-axis automatically adjusts to the displayed segment.</p>
+<figure class="screenshot align-default" id="id2">
+<img alt="S1E4 example screenshot" src="../../../_images/s1e4_2.png" />
+<figcaption>
+<p><span class="caption-number">Figure 10: </span><span class="caption-text">Time window reduced to 5 seconds.</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Amplitude Limit</div>
+<p class="sd-card-text">The amplitude limit sets the y-axis range in microvolts (µV), controlling how much vertical space each channel receives.
+By default, each channel is allocated 25 µV above and below its center line, for a total height of 50 µV per channel.
+The scope’s grid lines are spaced accordingly, making it easy to estimate signal amplitudes. Change the amplitude limit to 25 µV
+by changing <code class="docutils literal notranslate"><span class="pre">amplitude_limit=25</span></code> in the parameter list. Run the script and notice how the sinusoids (with amplitude 25 µV)
+now touch each other in the scope.</p>
+<figure class="screenshot align-default" id="id3">
+<img alt="S1E4 example screenshot" src="../../../_images/s1e4_3.png" />
+<figcaption>
+<p><span class="caption-number">Figure 11: </span><span class="caption-text">Amplitude limit set to 25 µV.</span><a class="headerlink" href="#id3" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Hide Channels</div>
+<p class="sd-card-text">Sometimes, you may want to hide specific channels from the scope view, especially if you have many channels or want to focus on a subset.
+For example, you might exclude trigger channels that aren’t relevant for your analysis. By default, all channels are shown.
+To hide the first and last channel, set <code class="docutils literal notranslate"><span class="pre">hidden_channels=[0,</span> <span class="pre">7]</span></code> in the parameter list (note: Python uses zero-based indexing).
+Run the script and observe that only six channels are now displayed, with the channel labels reflecting that
+channel 1 and 8 have been excluded.</p>
+<figure class="screenshot align-default" id="id4">
+<img alt="S1E4 example screenshot" src="../../../_images/s1e4_4.png" />
+<figcaption>
+<p><span class="caption-number">Figure 12: </span><span class="caption-text">First and last channel hidden.</span><a class="headerlink" href="#id4" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>All set! You can now control <a class="reference internal" href="../../7_sdk_reference/frontend_widgets/time_series_scope.html"><span class="doc">TimeSeriesScope</span></a> with its most important parameters to adjust the visualization to your needs.</p>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-1 sd-row-cols-md-1 sd-row-cols-lg-1 sd-g-2 sd-g-xs-2 sd-g-sm-2 sd-g-md-2 sd-g-lg-2 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+Summary</div>
+<p class="sd-card-text">In this episode, you learned how to adjust the <a class="reference internal" href="../../7_sdk_reference/frontend_widgets/time_series_scope.html"><span class="doc">TimeSeriesScope</span></a> parameters to:</p>
+<ul class="simple">
+<li><p class="sd-card-text">Change the time window</p></li>
+<li><p class="sd-card-text">Set the amplitude limit</p></li>
+<li><p class="sd-card-text">Hide specific channels</p></li>
+</ul>
+<p class="sd-card-text">Note that there are additional parameters available for advanced use cases. We will cover them in upcoming episodes.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>Now, you have successfully completed Season 1 of the g.Pype training. You are ready to proceed to Season 2,
+where we will discover g.Pype’s library building blocks for standard processing pipelines.</p>
+</div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="code" for="sd-tab-item-1">
+Code</label><div class="sd-tab-content docutils">
+<p><strong>File s1e4_time_series_scope.py</strong> – <a class="reference external" href="https://github.com/gtec-medical-engineering/gpype/blob/main/examples/s1e4_time_series_scope.py">View file on GitHub</a></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># --------------------------------------------------------------</span>
+<span class="linenos"> 2</span><span class="c1"># Example file s1e4_time_series_scope.py</span>
+<span class="linenos"> 3</span><span class="c1"># For details and usage, see g.Pype Training Season 1, Episode 4</span>
+<span class="linenos"> 4</span><span class="c1"># --------------------------------------------------------------</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="kn">import</span><span class="w"> </span><span class="nn">gpype</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gp</span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span>    <span class="c1"># Create main app and pipeline</span>
+<span class="linenos">11</span>    <span class="n">app</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">MainApp</span><span class="p">()</span>
+<span class="linenos">12</span>    <span class="n">p</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">()</span>
+<span class="linenos">13</span>
+<span class="linenos">14</span>    <span class="c1"># Create signal source</span>
+<span class="linenos">15</span>    <span class="n">source</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">Generator</span><span class="p">(</span><span class="n">signal_amplitude</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
+<span class="linenos">16</span>
+<span class="linenos">17</span>    <span class="c1"># Create scope</span>
+<span class="linenos">18</span>    <span class="n">scope</span> <span class="o">=</span> <span class="n">gp</span><span class="o">.</span><span class="n">TimeSeriesScope</span><span class="p">(</span><span class="n">time_window</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+<span class="linenos">19</span>                               <span class="n">amplitude_limit</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+<span class="linenos">20</span>                               <span class="n">hidden_channels</span><span class="o">=</span><span class="p">[])</span>
+<span class="linenos">21</span>
+<span class="linenos">22</span>    <span class="c1"># Connect nodes</span>
+<span class="linenos">23</span>    <span class="n">p</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">scope</span><span class="p">)</span>
+<span class="linenos">24</span>
+<span class="linenos">25</span>    <span class="c1"># Add widget to main app</span>
+<span class="linenos">26</span>    <span class="n">app</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">scope</span><span class="p">)</span>
+<span class="linenos">27</span>
+<span class="linenos">28</span>    <span class="c1"># Start pipeline and run application</span>
+<span class="linenos">29</span>    <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="linenos">30</span>    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>  <span class="c1"># blocking until window is closed</span>
+<span class="linenos">31</span>    <span class="n">p</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="s1e3_signal_generator.html" class="btn btn-neutral float-left" title="Episode 3: Generating Signals" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../season2_easy_drifting/s2e1_filtering.html" class="btn btn-neutral float-right" title="Episode 1: Standard Filtering" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright g.tec medical engineering GmbH.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
