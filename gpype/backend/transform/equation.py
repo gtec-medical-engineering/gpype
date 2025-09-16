@@ -16,28 +16,11 @@ PORT_OUT = Constants.Defaults.PORT_OUT
 
 
 class Equation(IONode):
-    """
-    Mathematical expression evaluation node for data transformation.
+    """Mathematical expression evaluation node for data transformation.
 
-    The Equation node allows users to apply custom mathematical expressions
-    to input data using SymPy symbolic mathematics. It parses string
-    expressions, converts them to optimized NumPy functions, and applies
-    them to input data arrays in real-time.
-
-    The node automatically creates input ports based on variables found
-    in the expression and handles the special case of 'in' as a variable
-    name (Python keyword) by using an internal alias.
-
-    Features:
-        - Symbolic expression parsing with SymPy
-        - Automatic input port generation from expression variables
-        - NumPy-optimized function compilation for performance
-        - Support for complex mathematical operations
-        - Handles Python keyword conflicts (e.g., 'in' variable)
-
-    Note:
-        The expression must be a valid SymPy expression. All variables
-        in the expression will become input port names.
+    Applies custom mathematical expressions to input data using SymPy.
+    Automatically creates input ports from expression variables and compiles
+    to optimized NumPy functions. Handles 'in' keyword via internal aliasing.
     """
 
     class Configuration(IONode.Configuration):
@@ -49,19 +32,16 @@ class Equation(IONode):
             EXPRESSION = "expression"
 
     def __init__(self, expression: str = None, **kwargs):
-        """
-        Initialize the Equation node with a mathematical expression.
+        """Initialize Equation node with mathematical expression.
 
-        Parses the provided mathematical expression using SymPy, extracts
-        all variables to create input ports, and compiles the expression
-        into an optimized NumPy function for real-time evaluation.
+        Parses expression using SymPy, extracts variables to create input
+        ports, and compiles to optimized NumPy function.
 
         Args:
-            expression (str): Mathematical expression as a string. Must be
-                a valid SymPy expression. All variables in the expression
-                will become input port names. The special variable 'in'
-                is handled by internal aliasing.
-            **kwargs: Additional configuration parameters passed to IONode.
+            expression: Mathematical expression string. Must be valid SymPy
+                expression. Variables become input port names. 'in' keyword
+                handled via internal aliasing.
+            **kwargs: Additional configuration parameters for IONode.
 
         Raises:
             ValueError: If expression is None or empty.
@@ -112,40 +92,30 @@ class Equation(IONode):
     def setup(
         self, data: dict[str, np.ndarray], port_context_in: dict[str, dict]
     ) -> dict[str, dict]:
-        """
-        Set up the Equation node and validate input port configurations.
-
-        Inherits the standard setup behavior from IONode, which validates
-        that all required input ports are connected and have compatible
-        configurations. No special setup is required for equation evaluation.
+        """Setup Equation node and validate input port configurations.
 
         Args:
-            data (dict): Initial data dictionary for port configuration.
-            port_context_in (dict): Input port context information containing
-                channel counts, sampling rates, frame sizes, and data types.
+            data: Initial data dictionary for port configuration.
+            port_context_in: Input port context with channel counts,
+                sampling rates, and frame sizes.
 
         Returns:
-            dict: Output port context with validated configuration.
+            Output port context with validated configuration.
         """
         return super().setup(data, port_context_in)
 
     def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
-        """
-        Apply the mathematical expression to input data.
+        """Apply mathematical expression to input data.
 
-        Evaluates the compiled mathematical function on the current frame
-        of input data. The function expects inputs in the same order as
-        the sorted variable names from the original expression.
+        Evaluates compiled function on current frame of input data in the
+        order of sorted variable names from expression.
 
         Args:
-            data (dict): Dictionary containing input data arrays for each
-                variable in the expression. Keys are variable names,
-                values are NumPy arrays with the current data frame.
+            data: Dictionary with input data arrays for each expression
+                variable. Keys are variable names, values are NumPy arrays.
 
         Returns:
-            dict: Dictionary containing the result of the expression
-                evaluation. The output is stored under the default
-                output port name.
+            Dictionary with expression evaluation result on output port.
         """
         # Collect input data in the order expected by the compiled function
         inputs = [data[name] for name in self._port_names]

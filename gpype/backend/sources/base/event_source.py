@@ -18,51 +18,15 @@ PORT_OUT = Constants.Defaults.PORT_OUT
 class EventSource(Source):
     """Event-driven source for asynchronous data generation.
 
-    This class implements an event-driven source that generates data in
-    response to external triggers rather than continuous sampling. It
-    supports both immediate event processing and delayed event processing
-    for timing control.
-
-    The EventSource is particularly useful for:
-    - Stimulus presentation systems
-    - User interaction events
-    - External trigger processing
-    - Marker and annotation generation
-
-    Features:
-    - Asynchronous event triggering with configurable delay
-    - Thread-safe event queuing for delayed processing
-    - Automatic data type conversion and formatting
-    - Integration with g.Pype timing framework
-
-    Attributes:
-        _data: Current data to be output in the next step
-        _delay_thread_queue: Queue for delayed event processing
-        _delay_thread: Background thread for delay management
-        _delay_thread_running: Flag to control thread execution
-
-    Note:
-        Events can be triggered immediately or with a specified delay.
-        The delay mechanism uses a separate thread to maintain real-time
-        performance of the main processing pipeline.
+    Generates events in response to external triggers.
     """
 
     def __init__(self, **kwargs):
-        """Initialize the event source with asynchronous output configuration.
-
-        Configures the event source with default asynchronous timing and
-        initializes data storage for each configured output port. The source
-        automatically handles port configuration and data array allocation.
+        """Initialize event source with asynchronous output configuration.
 
         Args:
-            **kwargs: Additional arguments passed to parent Source class.
-                Can include channel_count, frame_size, and other source
-                configuration parameters.
-
-        Note:
-            Output ports are automatically configured with ASYNC timing
-            if not explicitly provided. Data arrays are pre-allocated
-            for all non-inherited channel configurations.
+            **kwargs: Additional arguments for parent Source class including
+                channel_count, frame_size, and other configuration parameters.
         """
         # Extract output_ports from kwargs with default async configuration
         op_key = self.Configuration.Keys.OUTPUT_PORTS
@@ -94,22 +58,10 @@ class EventSource(Source):
             self._delay_thread_running: Optional[bool] = None
 
     def start(self):
-        """Start the event source and initialize delay processing if needed.
+        """Start event source."""
 
-        Initializes the event source by calling the parent start method,
-        setting the running state, and starting the delay processing thread
-        if source_delay is configured.
-
-        Note:
-            If source_delay > 0, a background thread is started to handle
-            delayed event processing. The initial cycle() call ensures the
-            source is ready for immediate event processing.
-        """
         # Call parent start method first
         Source.start(self)
-
-        # Set running state
-        self.status = Constants.States.RUNNING
 
         # Initialize delay processing thread if needed
         if self.source_delay > 0:
@@ -124,18 +76,7 @@ class EventSource(Source):
         self.cycle()
 
     def stop(self):
-        """Stop the event source and clean up delay processing thread.
-
-        Sets the stopped state and signals the delay processing thread
-        to terminate. The parent stop method handles the main cleanup.
-
-        Note:
-            The delay thread is set to daemon mode, so it will automatically
-            terminate when the main thread exits, but we explicitly signal
-            it to stop for clean shutdown.
-        """
-        # Set stopped state
-        self.status = Constants.States.STOPPED
+        """Stop event source."""
 
         # Signal delay thread to stop
         if hasattr(self, "_delay_thread_running"):
@@ -147,19 +88,9 @@ class EventSource(Source):
     def trigger(self, value):
         """Trigger an event with the specified value.
 
-        Creates an event with the given value and either processes it
-        immediately or queues it for delayed processing based on the
-        configured source_delay.
-
         Args:
-            value: The event value to be transmitted. Will be converted
-                to the appropriate data type and formatted as a single-sample
-                array for output.
-
-        Note:
-            If source_delay > 0, the event is queued with a timestamp for
-            delayed processing. Otherwise, it's processed immediately with
-            a cycle() call.
+            value: Event value to be transmitted. Converted to appropriate
+                data type and formatted as single-sample array.
         """
         # Create data array with the event value
         data = {PORT_OUT: np.array([[value]], dtype=Constants.DATA_TYPE)}
@@ -177,18 +108,8 @@ class EventSource(Source):
     def _timer_loop(self):
         """Background thread loop for delayed event processing.
 
-        Continuously monitors the delay queue for events that have reached
-        their delay time. When an event's delay period has elapsed, it
-        processes the event by triggering a pipeline cycle.
-
-        This method runs in a separate daemon thread to avoid blocking
-        the main processing pipeline while waiting for delay periods
-        to complete.
-
-        Note:
-            Uses brief sleep periods (1ms) to prevent excessive CPU usage
-            while maintaining responsive timing. The thread terminates when
-            _delay_thread_running is set to False.
+        Monitors delay queue for events that have reached their delay time
+        and processes them by triggering pipeline cycles.
         """
         while self._delay_thread_running:
             try:
@@ -212,21 +133,11 @@ class EventSource(Source):
     def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
         """Return current event data if available.
 
-        This method is called by the pipeline framework to retrieve data
-        from the event source. It returns the current event data if an
-        event has been triggered, or an empty dictionary if no event
-        is pending.
-
         Args:
             data: Input data dictionary (unused for source nodes).
 
         Returns:
-            Dictionary containing event data if an event is active,
-            empty dictionary otherwise.
-
-        Note:
-            The returned data is only available for one step cycle after
-            an event is triggered. This ensures events are processed
-            exactly once by the pipeline.
+            Dictionary containing event data if event is active, empty dict
+            otherwise.
         """
         return self._data if self._data is not None else {}

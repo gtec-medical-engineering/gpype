@@ -15,6 +15,12 @@ PORT_IN = ioc.Constants.Defaults.PORT_IN
 
 
 class SpectrumScope(Scope):
+    """Frequency domain visualization widget for spectral analysis.
+
+    Displays real-time frequency spectrum of input signals with configurable
+    amplitude limits and averaging. Shows multiple channels with automatic
+    scaling and frequency axis labeling.
+    """
 
     DEFAULT_AMPLITUDE_LIMIT = 50
     DEFAULT_NUM_AVERAGES = 10
@@ -35,6 +41,17 @@ class SpectrumScope(Scope):
         hidden_channels: list = None,
         **kwargs,
     ):
+        """Initialize the SpectrumScope widget.
+
+        Args:
+            amplitude_limit (float, optional): Maximum amplitude for display
+                scaling. Defaults to 50.
+            num_averages (int, optional): Number of spectra to average.
+                Defaults to 10.
+            hidden_channels (list, optional): List of channel indices to hide.
+                Defaults to empty list.
+            **kwargs: Additional arguments passed to parent classes.
+        """
 
         if amplitude_limit is None:
             amplitude_limit = self.DEFAULT_AMPLITUDE_LIMIT
@@ -79,6 +96,18 @@ class SpectrumScope(Scope):
     def setup(
         self, data: dict[str, np.ndarray], port_context_in: dict[str, dict]
     ) -> dict[str, dict]:
+        """Set up the spectrum scope with frequency vector and channels.
+
+        Args:
+            data (dict): Initial data dictionary.
+            port_context_in (dict): Input port context information.
+
+        Returns:
+            dict: Output port context from parent setup.
+
+        Raises:
+            ValueError: If required parameters are missing or invalid.
+        """
         c = port_context_in[PORT_IN]
 
         sampling_rate = c.get(Constants.Keys.SAMPLING_RATE)
@@ -110,6 +139,11 @@ class SpectrumScope(Scope):
         return super().setup(data, port_context_in)
 
     def _update(self):
+        """Update the spectrum display with current averaged data.
+
+        Called periodically by the widget timer to refresh the frequency
+        domain visualization with averaged spectral data.
+        """
 
         if not self._new_data:
             return
@@ -160,6 +194,14 @@ class SpectrumScope(Scope):
         self._plot_item.setXRange(*xlim)
 
     def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
+        """Process incoming FFT data and update buffer for averaging.
+
+        Args:
+            data (dict): Dictionary containing FFT amplitude data.
+
+        Returns:
+            dict: Unchanged input data (pass-through).
+        """
         with self._lock:
             fft_input = data[PORT_IN]
             self._data_buffer.append(fft_input)

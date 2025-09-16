@@ -8,19 +8,9 @@ from .base.butterworth import Butterworth
 class Bandstop(Butterworth):
     """Bandstop filter implementation using Butterworth design.
 
-    This class provides a convenient interface for creating bandstop (notch)
-    filters by extending the Butterworth filter implementation. It
-    automatically configures the filter for bandstop operation with specified
-    lower and upper cutoff frequencies.
-
-    Bandstop filters attenuate frequencies within a specific range while
-    allowing frequencies outside this range to pass through. This is commonly
-    used in BCI applications to remove specific interference frequencies
-    (e.g., 50/60 Hz power line noise, or specific artifact frequencies).
-
-    The filter uses Butterworth design characteristics, providing maximally
-    flat response in the passband with no ripples, making it suitable for
-    applications requiring smooth frequency response outside the stopband.
+    Provides a convenient interface for creating bandstop (notch) filters that
+    attenuate frequencies within a specific range while allowing frequencies
+    outside this range to pass. Uses Butterworth design for smooth response.
     """
 
     class Configuration(Butterworth.Configuration):
@@ -36,23 +26,13 @@ class Bandstop(Butterworth):
         """Initialize the bandstop filter with cutoff frequencies.
 
         Args:
-            f_lo: Lower cutoff frequency in Hz. This defines the lower
-                boundary of the stopband.
-            f_hi: Upper cutoff frequency in Hz. This defines the upper
-                boundary of the stopband.
-            order: Filter order. Higher orders provide steeper rolloff
-                but may introduce more phase distortion. Defaults to
-                DEFAULT_ORDER from parent class.
+            f_lo: Lower cutoff frequency in Hz (lower boundary of stopband).
+            f_hi: Upper cutoff frequency in Hz (upper boundary of stopband).
+            order: Filter order. Defaults to DEFAULT_ORDER from parent class.
             **kwargs: Additional arguments passed to parent Butterworth class.
 
         Raises:
             ValueError: If f_lo >= f_hi or if frequencies are invalid.
-
-        Note:
-            The stopband is defined as [f_lo, f_hi]. Frequencies within
-            this range will be attenuated, while frequencies outside will
-            pass through with minimal attenuation according to the filter
-            characteristics.
         """
         # Validate cutoff frequency relationship
         if f_lo >= f_hi:

@@ -12,36 +12,11 @@ PORT_OUT = Constants.Defaults.PORT_OUT
 
 
 class FFT(IONode):
-    """
-    Fast Fourier Transform node for frequency domain analysis.
+    """Fast Fourier Transform node for frequency domain analysis.
 
-    The FFT node performs windowed Fast Fourier Transform on input data
-    to convert time-domain signals to frequency-domain representations.
-    It supports overlapping windows, various window functions, and proper
-    amplitude scaling for spectral analysis.
-
-    This node is essential for BCI applications that analyze frequency
-    content of neural signals, such as detecting alpha rhythms, motor
-    imagery patterns, or steady-state visual evoked potentials (SSVEP).
-
-    Features:
-        - Configurable window size and overlap
-        - Multiple window functions (Hanning, Hamming, Blackman, etc.)
-        - Proper amplitude scaling and normalization
-        - Rolling buffer for continuous processing
-        - Decimation for overlapping windows
-        - FFT optimization for real-valued signals
-
-    Args:
-        window_size (int): Size of the FFT window in samples. Must be > 1.
-        window_function (str): Window function name (default: 'boxcar').
-            Supports all scipy.signal window functions.
-        overlap (float): Overlap ratio between windows (0.0 to 1.0).
-            Default is 0.5 (50% overlap).
-
-    Note:
-        Input data must have frame_size=1 for proper windowing.
-        Output frame rate is reduced by the step size (decimation).
+    Performs windowed FFT on input data with configurable window size,
+    overlap, and window functions. Uses rolling buffer for continuous
+    processing and proper amplitude scaling for spectral analysis.
     """
 
     # Type annotation for the rolling buffer
@@ -64,23 +39,14 @@ class FFT(IONode):
         overlap: float = None,
         **kwargs,
     ):
-        """
-        Initialize the FFT node with windowing and overlap parameters.
-
-        Sets up the FFT node with specified window size, window function,
-        and overlap ratio. Calculates the step size for overlapping windows
-        and configures the node for decimated output.
+        """Initialize FFT transform node.
 
         Args:
-            window_size (int): Size of the FFT window in samples. Must be
-                an integer greater than 1.
+            window_size (int): Size of the FFT window in samples. Must be > 1.
             window_function (str, optional): Name of the window function
                 to apply. Defaults to 'boxcar' (rectangular window).
-                Supports all scipy.signal window functions like 'hanning',
-                'hamming', 'blackman', etc.
             overlap (float, optional): Overlap ratio between consecutive
-                windows, ranging from 0.0 (no overlap) to 1.0 (full overlap).
-                Defaults to 0.5 (50% overlap).
+                windows, ranging from 0.0 to 1.0. Defaults to 0.5.
             **kwargs: Additional configuration parameters passed to IONode.
 
         Raises:
@@ -133,17 +99,11 @@ class FFT(IONode):
     def setup(
         self, data: dict[str, np.ndarray], port_context_in: dict[str, dict]
     ) -> dict[str, dict]:
-        """
-        Set up the FFT node and initialize windowing components.
-
-        Validates input requirements, initializes the rolling buffer for
-        windowing, and precomputes the window function weights for
-        efficient real-time processing.
+        """Set up the FFT node and initialize windowing components.
 
         Args:
             data (dict): Initial data dictionary for port configuration.
-            port_context_in (dict): Input port context information containing
-                sampling rates, frame sizes, and channel counts.
+            port_context_in (dict): Input port context information.
 
         Returns:
             dict: Output port context with updated frame size for FFT output.
@@ -191,27 +151,17 @@ class FFT(IONode):
         return port_context_out
 
     def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
-        """
-        Process one frame of data and compute FFT when ready.
-
-        Updates the rolling buffer with new input data and performs FFT
-        computation when the decimation step is reached (based on overlap
-        configuration). Returns frequency domain amplitude spectrum.
+        """Process one frame of data and compute FFT when ready.
 
         Args:
-            data (dict): Dictionary containing input data arrays. The input
-                data should have shape (1, channel_count) for each frame.
+            data (dict): Dictionary containing input data arrays with
+                shape (1, channel_count) for each frame.
 
         Returns:
             dict or None: Dictionary containing FFT amplitude spectrum when
-                decimation step is reached, None otherwise. The output has
-                shape (frequency_bins, channel_count) where frequency_bins
-                is (window_size // 2 + 1) for real FFT.
-
-        Note:
-            The output amplitude is properly scaled and normalized for
-            spectral analysis. DC and Nyquist components are scaled
-            appropriately, while other frequencies are scaled by factor 2.
+                decimation step is reached, None otherwise. Output shape
+                is (frequency_bins, channel_count) where frequency_bins
+                is (window_size // 2 + 1).
         """
         # Update rolling buffer with new data sample
         # Efficiently shift all samples: move rows up by one position

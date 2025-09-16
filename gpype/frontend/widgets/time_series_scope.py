@@ -4,6 +4,7 @@ import time
 import ioiocore as ioc
 import numpy as np
 import pyqtgraph as pg
+from PySide6 import QtWidgets
 from PySide6.QtCore import QEvent, QObject, Qt
 from PySide6.QtGui import QColor, QFont, QPalette
 
@@ -16,26 +17,10 @@ PORT_IN = ioc.Constants.Defaults.PORT_IN
 
 
 class TimeSeriesScope(Scope):
-    """
-    Real-time oscilloscope widget for multi-channel time series visualization.
+    """Real-time oscilloscope widget for multi-channel time series.
 
-    Displays continuous time-series data from BCI pipelines with multiple
-    channels in a stationary oscilloscope-style view. Features include
-    configurable time windows, amplitude scaling, channel hiding, event
-    markers, and real-time performance monitoring.
-
-    The widget automatically handles data buffering, display scaling,
-    time axis management, and provides interactive features like keyboard
-    shortcuts for toggling performance information.
-
-    Features:
-        - Multi-channel time series visualization
-        - Configurable time window and amplitude limits
-        - Channel selection and hiding capabilities
-        - Event marker support with custom colors and labels
-        - Real-time performance monitoring (Alt+R)
-        - Automated, internal data decimation for performance
-        - Thread-safe data handling
+    Displays continuous time-series data from BCI pipelines with configurable
+    time windows, amplitude scaling, channel hiding, and event markers.
 
     Args:
         time_window (int): Display window duration in seconds (1-120).
@@ -50,12 +35,10 @@ class TimeSeriesScope(Scope):
     DEFAULT_AMPLITUDE_LIMIT: float = 50  # microvolts
 
     class Markers(dict):
-        """
-        Container for event marker configuration.
+        """Container for event marker configuration.
 
-        Stores marker properties including visual appearance (color),
-        identification (label), channel association, and trigger value
-        for event-based visualization in the time series plot.
+        Stores marker properties including color, label, channel association,
+        and trigger value for event-based visualization.
 
         Args:
             color: Hex color code or color name for marker visualization.
@@ -73,8 +56,7 @@ class TimeSeriesScope(Scope):
             self["value"] = value
 
     class Configuration(Scope.Configuration):
-        """
-        Configuration keys for TimeSeriesScope widget settings.
+        """Configuration keys for TimeSeriesScope widget settings.
 
         Extends the base Scope configuration with time series specific
         parameters for display window, amplitude scaling, event markers,
@@ -94,11 +76,9 @@ class TimeSeriesScope(Scope):
             HIDDEN_CHANNELS = "hidden_channels"  # Channels to hide
 
     class KeyPressFilter(QObject):
-        """
-        Event filter for keyboard shortcuts in the time series scope.
+        """Event filter for keyboard shortcuts in the time series scope.
 
-        Captures and processes keyboard events to provide interactive
-        functionality like toggling performance information display.
+        Captures keyboard events to provide interactive functionality.
         Currently handles Alt+R for performance monitoring toggle.
 
         Args:
@@ -111,8 +91,7 @@ class TimeSeriesScope(Scope):
             self.callback = callback
 
         def eventFilter(self, obj, event):
-            """
-            Filter keyboard events and trigger callbacks for shortcuts.
+            """Filter keyboard events and trigger callbacks for shortcuts.
 
             Args:
                 obj: Qt object that received the event.
@@ -135,13 +114,7 @@ class TimeSeriesScope(Scope):
         hidden_channels: list = None,
         **kwargs,
     ):
-        """
-        Initialize the time series oscilloscope widget.
-
-        Sets up the plotting area, data buffers, timer configurations,
-        and user interface elements for real-time time series visualization.
-        Validates input parameters and configures the widget for optimal
-        performance with multi-channel BCI data streams.
+        """Initialize the time series oscilloscope widget.
 
         Args:
             time_window: Display window duration in seconds (1-120).
@@ -233,12 +206,10 @@ class TimeSeriesScope(Scope):
         self.widget.installEventFilter(self._key_filter)
 
     def _toggle_show_rates(self):
-        """
-        Toggle visibility of performance monitoring information.
+        """Toggle visibility of performance monitoring information.
 
-        Shows or hides the performance statistics display that includes
-        frame rates, processing rates, and timing information. This method
-        is triggered by the Alt+R keyboard shortcut.
+        Shows or hides performance statistics including frame rates and
+        processing rates. Triggered by the Alt+R keyboard shortcut.
         """
         self._show_rates = not self._show_rates
         self._rate_label.setVisible(self._show_rates)
@@ -246,12 +217,7 @@ class TimeSeriesScope(Scope):
     def setup(
         self, data: dict[str, np.ndarray], port_context_in: dict[str, dict]
     ) -> dict[str, dict]:
-        """
-        Initialize the widget with data stream parameters and allocate buffers.
-
-        Sets up the time series scope based on incoming data characteristics
-        including sampling rate, channel count, and frame size. Allocates
-        appropriate buffer sizes and initializes display parameters.
+        """Initialize the widget with data stream parameters and buffers.
 
         Args:
             data: Input data dictionary (not used in setup phase).
@@ -312,18 +278,11 @@ class TimeSeriesScope(Scope):
         return super().setup(data, port_context_in)
 
     def _update(self):
-        """
-        Update the visual display with new data from the buffer.
+        """Update the visual display with new data from the buffer.
 
-        This method is called by the Qt timer to refresh the plot with
-        the latest data. It handles curve creation, data plotting,
-        performance monitoring, and marker visualization. The method
-        operates in the main Qt thread for UI safety.
-
-        Note:
-            This method only updates when new data is available
-            (_new_data flag). UI elements are created lazily on first
-            update call.
+        Called by the Qt timer to refresh the plot with latest data.
+        Handles curve creation, data plotting, performance monitoring,
+        and marker visualization. Only updates when new data is available.
         """
         if not self._new_data:
             return
@@ -494,13 +453,15 @@ class TimeSeriesScope(Scope):
                 f"refresh rate: {update_rate:.1f} Hz"
             )
 
-    def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
-        """
-        Process incoming data frames and store them in the circular buffer.
+        # Mark all layers dirty to force redraw
+        scene = self._plot_item.scene()
+        scene.invalidate(scene.sceneRect(), QtWidgets.QGraphicsScene.AllLayers)
 
-        This method is called by the pipeline for each new data frame.
-        It handles performance monitoring, circular buffer management,
-        and thread-safe data storage for real-time visualization.
+    def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
+        """Process incoming data frames and store them in the circular buffer.
+
+        Called by the pipeline for each new data frame. Handles performance
+        monitoring, circular buffer management, and thread-safe data storage.
 
         Args:
             data: Dictionary containing input data arrays from connected ports.

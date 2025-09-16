@@ -8,24 +8,11 @@ from PySide6.QtWidgets import (QBoxLayout, QGroupBox, QHBoxLayout, QVBoxLayout,
 
 
 class Widget:
-    """
-    Base class for BCI visualization widgets with automatic updates.
+    """Base class for BCI visualization widgets with automatic updates.
 
-    Provides a common foundation for creating real-time visualization
-    widgets in the g.Pype BCI framework. Handles automatic UI updates
-    via a QTimer and provides a standardized layout structure with
-    grouped content.
-
-    The widget automatically wraps content in a QGroupBox with optional
-    naming and configurable layout direction. Subclasses implement the
-    _update() method to define their specific visualization logic.
-
-    Features:
-        - Automatic periodic updates for real-time visualization
-        - Configurable update rate (default 60 FPS)
-        - Standardized layout with optional grouping and naming
-        - Timer-based lifecycle management
-        - Abstract interface for custom update logic
+    Provides foundation for real-time visualization widgets with automatic
+    UI updates via QTimer and standardized layout structure with grouped
+    content. Wraps content in QGroupBox with configurable layout.
 
     Args:
         widget (QWidget): The Qt widget to wrap and manage.
@@ -34,8 +21,7 @@ class Widget:
             (default: QVBoxLayout).
 
     Note:
-        Subclasses must implement the _update() method to define
-        their specific update behavior.
+        Subclasses must implement the _update() method.
     """
 
     # Update interval for widget refresh in milliseconds
@@ -48,13 +34,7 @@ class Widget:
         name: str = "",
         layout: type[QBoxLayout] = QVBoxLayout,
     ):
-        """
-        Initialize the widget with layout and timer setup.
-
-        Creates the widget structure with a group box container and
-        sets up the automatic update timer. The widget is wrapped in
-        a horizontal layout containing a named group box with the
-        specified content layout.
+        """Initialize the widget with layout and timer setup.
 
         Args:
             widget (QWidget): The Qt widget to wrap and manage.
@@ -82,50 +62,30 @@ class Widget:
         self.widget.setLayout(box_layout)
 
     def run(self):
-        """
-        Start the automatic update timer for real-time visualization.
+        """Start the automatic update timer for real-time visualization.
 
         Begins periodic updates at the configured interval (default 60 FPS).
-        The _update() method will be called repeatedly until terminate()
-        is called or the widget is destroyed.
-
-        Note:
-            Should be called after the widget is fully initialized and
-            ready to display data.
+        Should be called after the widget is fully initialized.
         """
         self._timer.start(self.UPDATE_INTERVAL_MS)
 
     def terminate(self):
-        """
-        Stop the automatic update timer and cleanup resources.
+        """Stop the automatic update timer and cleanup resources.
 
-        Stops the periodic updates and prepares the widget for cleanup.
         Should be called before the widget is destroyed to ensure
         proper resource management.
-
-        Note:
-            After calling terminate(), the widget will no longer update
-            automatically until run() is called again.
         """
         self._timer.stop()
 
     @abstractmethod
     def _update(self):
-        """
-        Abstract method for implementing widget-specific update logic.
+        """Abstract method for implementing widget-specific update logic.
 
-        This method is called periodically by the timer (at UPDATE_INTERVAL_MS
-        intervals) to refresh the widget's visual content. Subclasses must
-        implement this method to define their specific visualization behavior.
-
-        The method should:
-        - Update displayed data from the pipeline
-        - Refresh visual elements (plots, text, indicators)
-        - Handle any real-time visualization requirements
-        - Be efficient to maintain smooth frame rates
+        Called periodically by the timer to refresh the widget's visual
+        content. Subclasses must implement this method to define their
+        specific visualization behavior.
 
         Note:
-            This method runs on the main Qt thread, so heavy computations
-            should be avoided or moved to background threads.
+            Runs on the main Qt thread, so avoid heavy computations.
         """
         pass  # pragma: no cover

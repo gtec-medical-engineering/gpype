@@ -17,32 +17,11 @@ from ..core.i_port import IPort
 class FileWriter(INode):
     """Threaded file writer for real-time data logging to CSV files.
 
-    This class implements a file writer that operates in a separate background
-    thread to prevent blocking the main signal processing pipeline. Data is
-    queued from the main thread and written asynchronously to maintain
-    real-time performance.
-
-    The writer automatically adds timestamps to filenames and includes sample
-    indices and channel headers in the CSV output. It supports continuous
-    streaming of multi-channel data with proper synchronization.
-
-    Features:
-    - Thread-safe data queuing for non-blocking operation
-    - Automatic timestamp addition to filenames
-    - CSV format with sample indices and channel headers
-    - Proper resource cleanup on stop
-    - Real-time data streaming capability
-
-    Attributes:
-        _file_queue: Thread-safe queue for data blocks
-        _stop_event: Threading event for clean shutdown
-        _worker_thread: Background thread for file operations
-        _file_handle: File handle for CSV writing
-        _sample_counter: Global sample index counter
-
-    Note:
-        Only CSV format is currently supported. The file writer adds a
-        timestamp to the filename to prevent overwrites.
+    Implements a file writer that operates in a separate background thread
+    to prevent blocking the main signal processing pipeline. Data is queued
+    and written asynchronously to maintain real-time performance. Automatically
+    adds timestamps to filenames and includes sample indices with channel
+    headers in CSV output.
     """
 
     class Configuration(ioc.INode.Configuration):
@@ -56,41 +35,20 @@ class FileWriter(INode):
     def __init__(
         self,
         file_name: str,
-        input_ports: Optional[list[IPort.Configuration]] = None,
         **kwargs,
     ):
         """Initialize the file writer with specified filename and ports.
 
         Args:
             file_name: Base filename for data output. A timestamp will be
-                automatically appended to prevent overwrites. Must have
-                .csv extension or will raise ValueError.
-            input_ports: List of input port configurations. Defaults to
-                a single input port if not specified.
+                automatically appended. Must have .csv extension.
             **kwargs: Additional arguments passed to parent INode class.
 
         Raises:
             ValueError: If file format is not supported (.csv required).
-
-        Example:
-            Basic file writer with default single input port::
-
-                writer = FileWriter(file_name="data.csv")
-
-            Writer with multiple input ports::
-
-                ports = [IPort.Configuration(), IPort.Configuration()]
-                writer = FileWriter(file_name="multichannel.csv",
-                                  input_ports=ports)
         """
-        # Set default input port configuration if none provided
-        if input_ports is None:
-            input_ports = [IPort.Configuration()]
-
         # Initialize parent INode with configuration
-        INode.__init__(
-            self, input_ports=input_ports, file_name=file_name, **kwargs
-        )
+        INode.__init__(self, file_name=file_name, **kwargs)
 
         # Initialize threading components for background file operations
         self._file_queue = queue.Queue()  # Thread-safe data queue
@@ -108,10 +66,6 @@ class FileWriter(INode):
         Raises:
             ValueError: If the file format is not .csv.
             IOError: If the file cannot be created or opened.
-
-        Note:
-            The method automatically appends a timestamp to the filename
-            to prevent overwrites of existing data files.
         """
         # Get base filename from configuration
         file_name = self.config[self.Configuration.Keys.FILE_NAME]
@@ -146,10 +100,7 @@ class FileWriter(INode):
 
         Signals the background thread to stop, waits for it to finish
         processing remaining data, and properly closes the file handle.
-
-        Note:
-            This method ensures all queued data is written before stopping
-            and properly releases file resources to prevent data loss.
+        Ensures all queued data is written before stopping.
         """
         # Signal background thread to stop
         self._stop_event.set()
@@ -182,8 +133,8 @@ class FileWriter(INode):
             Empty dictionary as this is a sink node with no outputs.
 
         Raises:
-            RuntimeError: If file handle is not initialized
-                (start() not called).
+            RuntimeError: If file handle is not initialized (start() not
+                called).
         """
         # Verify file handle is initialized
         if not self._file_handle:
@@ -201,10 +152,6 @@ class FileWriter(INode):
 
         Returns:
             Empty dictionary as this is a sink node with no outputs.
-
-        Note:
-            Data is copied before queuing to prevent race conditions
-            between the main thread and background writer thread.
         """
         # Get data from default input port
         d = data[Constants.Defaults.PORT_IN]
@@ -218,16 +165,10 @@ class FileWriter(INode):
     def _file_worker(self):
         """Background worker thread for asynchronous file writing.
 
-        This method runs in a separate thread to handle file I/O operations
-        without blocking the main signal processing pipeline. It continuously
-        processes data blocks from the queue until stop is signaled.
-
-        The worker generates CSV headers on the first write and maintains
-        a global sample counter for proper indexing across all data blocks.
-
-        Note:
-            The worker ensures all remaining data is written even after
-            stop is signaled, preventing data loss during shutdown.
+        Runs in a separate thread to handle file I/O operations without
+        blocking the main signal processing pipeline. Continuously processes
+        data blocks from the queue until stop is signaled. Generates CSV
+        headers on first write and maintains global sample counter.
         """
         # Continue processing until stop signaled AND queue is empty
         while not self._stop_event.is_set() or not self._file_queue.empty():

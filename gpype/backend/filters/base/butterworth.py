@@ -13,18 +13,9 @@ PORT_OUT = Constants.Defaults.PORT_OUT
 class Butterworth(IONode):
     """Butterworth filter implementation for real-time signal processing.
 
-    This class implements a Butterworth digital filter using second-order
-    sections (SOS) for improved numerical stability. It supports lowpass,
-    highpass, bandpass, and bandstop filtering with configurable order.
-
-    The filter maintains internal state for continuous processing of streaming
-    data, making it suitable for real-time applications in BCI and signal
-    processing pipelines.
-
-    Attributes:
-        DEFAULT_ORDER: Default filter order (2) when not specified.
-        _sos: Second-order sections representation of the filter.
-        _z: Filter state for each channel to maintain continuity between steps.
+    Implements a Butterworth digital filter using second-order sections for
+    numerical stability. Supports lowpass, highpass, bandpass, and bandstop
+    filtering with configurable order and maintains state for streaming data.
     """
 
     DEFAULT_ORDER = 2
@@ -43,12 +34,10 @@ class Butterworth(IONode):
         """Initialize the Butterworth filter with specified parameters.
 
         Args:
-            fn: List of cutoff frequencies in Hz. For lowpass/highpass: single
-                value in list. For bandpass/bandstop: two values [low, high].
-            btype: Filter type. Must be one of 'lowpass', 'highpass',
-                'bandpass', or 'bandstop'.
-            order: Filter order. Higher orders provide steeper rolloff but
-                may introduce more phase distortion. Defaults to 2.
+            fn: List of cutoff frequencies in Hz. Single value for lowpass/
+                highpass, two values [low, high] for bandpass/bandstop.
+            btype: Filter type ('lowpass', 'highpass', 'bandpass', 'bandstop').
+            order: Filter order. Defaults to 2 if not specified.
             **kwargs: Additional arguments passed to parent IONode class.
 
         Raises:
@@ -79,13 +68,13 @@ class Butterworth(IONode):
     ) -> dict[str, dict]:
         """Setup the Butterworth filter before processing begins.
 
-        This method initializes the filter coefficients and state based on
-        the sampling rate and channel configuration from the input context.
+        Initializes filter coefficients and state based on sampling rate
+        and channel configuration from input context.
 
         Args:
             data: Initial data dictionary (not used in setup).
-            port_context_in: Input port context containing sampling_rate,
-                channel_count, and other metadata.
+            port_context_in: Input port context with sampling_rate and
+                channel_count metadata.
 
         Returns:
             Output port context dictionary with updated metadata.
@@ -111,6 +100,10 @@ class Butterworth(IONode):
         # Nyquist frequency is sampling_rate/2, so normalize by 2*fn/fs
         Wn = [f / sampling_rate * 2 for f in fn]
 
+        # For lowpass and highpass, scipy expects a scalar, not a list
+        if btype in ["lowpass", "highpass"]:
+            Wn = Wn[0]  # Extract single element for scalar conversion
+
         # Design Butterworth filter using scipy
         b, a = butter(N=N, Wn=Wn, btype=btype)
 
@@ -128,12 +121,12 @@ class Butterworth(IONode):
     def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
         """Apply Butterworth filter to input data.
 
-        Processes the input data through the Butterworth filter while
-        maintaining filter state for continuous operation.
+        Processes input data through the filter while maintaining filter
+        state for continuous operation.
 
         Args:
             data: Dictionary containing input data with key PORT_IN.
-                Input data should be 2D array (samples x channels).
+                Input should be 2D array (samples x channels).
 
         Returns:
             Dictionary with filtered data under key PORT_OUT.

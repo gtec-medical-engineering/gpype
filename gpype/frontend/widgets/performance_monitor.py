@@ -9,16 +9,14 @@ UPDATE_INTERVAL_MS = 1000
 
 
 class PerformanceMonitor(Widget):
-    """
-    Visualization widget for real-time pipeline performance monitoring.
+    """Visualization widget for real-time pipeline performance monitoring.
 
-    Displays the current state, condition, and per-node load statistics
-    of a g.Pype pipeline in a tabular format with automatic updates.
+    Displays pipeline state, condition, and per-node load statistics
+    in a tabular format with automatic updates.
     """
 
     def __init__(self, pipeline: Pipeline):
-        """
-        Initialize the PerformanceMonitor widget.
+        """Initialize the PerformanceMonitor widget.
 
         Args:
             pipeline (Pipeline): The pipeline object to monitor for
@@ -59,12 +57,10 @@ class PerformanceMonitor(Widget):
         self._layout.addWidget(self.load_table)
 
     def _update(self):
-        """
-        Update the performance monitor display with current pipeline data.
+        """Update the performance monitor display with current pipeline data.
 
-        This method is called periodically by the widget timer to refresh
-        the displayed state, condition, and load information from the
-        monitored pipeline.
+        Called periodically by the widget timer to refresh the displayed
+        state, condition, and load information.
         """
         # Retrieve current pipeline metrics
         state = self.pipeline.get_state()
@@ -79,8 +75,7 @@ class PerformanceMonitor(Widget):
         self._update_load_table(load_data)
 
     def _update_load_table(self, load_data):
-        """
-        Update the load table with performance data for each pipeline node.
+        """Update the load table with performance data for each pipeline node.
 
         Args:
             load_data (list): List of dictionaries containing node performance

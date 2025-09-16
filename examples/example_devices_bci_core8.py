@@ -66,7 +66,7 @@ Note:
 """
 import gpype as gp
 
-# Sampling rate (hardware-dependent, typically 256 Hz for BCI Core-8)
+# Sampling rate (hardware-dependent, typically 250 Hz for BCI Core-8)
 fs = 250
 
 if __name__ == "__main__":
@@ -80,7 +80,7 @@ if __name__ == "__main__":
     # === HARDWARE DATA SOURCE ===
     # BCI Core-8: Professional 8-channel EEG amplifier
     # Automatically detects and connects to available hardware
-    # Provides high-quality, low-noise EEG signals at ~256 Hz
+    # Provides high-quality, low-noise EEG signals at 250 Hz
     source = gp.BCICore8()
 
     # === SIGNAL CONDITIONING STAGE ===

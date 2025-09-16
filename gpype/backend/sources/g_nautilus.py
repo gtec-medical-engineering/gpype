@@ -18,27 +18,15 @@ PORT_IN = Constants.Defaults.PORT_IN
 
 
 class GNautilus(AmplifierSource):
-    """
-    g.Nautilus EEG amplifier interface for real-time data acquisition.
+    """g.Nautilus EEG amplifier interface for real-time data acquisition.
 
-    This class provides an interface to g.tec's g.Nautilus wireless EEG
-    amplifier system. It handles device initialization, data streaming,
-    and electrode impedance monitoring.
-
-    Features:
-        - Real-time EEG data acquisition
-        - Configurable sampling rates and channel counts
-        - Electrode impedance monitoring
-        - Digital input channel support
-        - Wireless connectivity
-
-    Note:
-        Requires g.tec GDS library and Windows operating system.
-        The device must be paired and configured via g.tec software.
+    Interface to g.tec's g.Nautilus wireless EEG amplifier system. Handles
+    device initialization, data streaming, and electrode impedance monitoring.
+    Requires g.tec GDS library and Windows operating system.
     """
 
     # Source code fingerprint
-    FINGERPRINT = "80a8c8db4bb8a13cb4a71adeb50f310b"
+    FINGERPRINT = "b5242da72970374b38744c5053daea7a"
 
     class Configuration(AmplifierSource.Configuration):
         """Configuration class for g.Nautilus amplifier parameters."""
@@ -58,26 +46,19 @@ class GNautilus(AmplifierSource):
         enable_di: bool = False,
         **kwargs,
     ):
-        """
-        Initialize the g.Nautilus amplifier interface.
+        """Initialize g.Nautilus amplifier interface.
 
         Args:
-            serial (str, optional): Device serial number for identification.
-                If None, connects to first available device.
-            sampling_rate (float, optional): Sampling frequency in Hz.
-            channel_count (int, optional): Number of EEG channels to acquire.
-            frame_size (int, optional): Number of samples per data frame.
-                Affects latency and processing efficiency.
-            sensitivity (float, optional): Amplifier sensitivity setting.
-                Determines input voltage range.
-            enable_di (bool): Enable digital input channel for triggers.
-                Adds one additional channel for event markers.
-            **kwargs: Additional configuration parameters passed to
-                AmplifierSource.
+            serial: Device serial number. Uses first available if None.
+            sampling_rate: Sampling frequency in Hz.
+            channel_count: Number of EEG channels to acquire.
+            frame_size: Samples per data frame.
+            sensitivity: Amplifier sensitivity setting.
+            enable_di: Enable digital input channel for triggers.
+            **kwargs: Additional parameters for AmplifierSource.
 
         Raises:
-            RuntimeError: If GDS library is not available or device
-                initialization fails.
+            RuntimeError: If GDS library unavailable or device init fails.
         """
         # Import gtec_gds only when actually needed (lazy import)
         try:
@@ -128,12 +109,10 @@ class GNautilus(AmplifierSource):
         self._impedance_fresh = True
 
     def start(self) -> None:
-        """
-        Start the g.Nautilus data acquisition.
+        """Start g.Nautilus data acquisition.
 
-        Initiates the hardware data streaming and activates the amplifier.
-        The device will begin acquiring EEG data and triggering data
-        callbacks for real-time processing.
+        Initiates hardware data streaming and activates the amplifier for
+        real-time EEG data processing.
         """
         # Start hardware data acquisition
         self._device.start()
@@ -141,11 +120,10 @@ class GNautilus(AmplifierSource):
         super().start()
 
     def stop(self):
-        """
-        Stop the g.Nautilus data acquisition and cleanup resources.
+        """Stop g.Nautilus data acquisition and cleanup resources.
 
-        Stops the hardware streaming, cleans up device resources, and
-        ensures proper shutdown of the amplifier connection.
+        Stops hardware streaming and ensures proper shutdown of amplifier
+        connection.
         """
         # Stop hardware data acquisition
         self._device.stop()
@@ -155,16 +133,10 @@ class GNautilus(AmplifierSource):
         del self._device
 
     def start_impedance_check(self) -> None:
-        """
-        Start electrode impedance monitoring in a background thread.
+        """Start electrode impedance monitoring in background thread.
 
         Initiates continuous impedance measurement for all electrodes.
-        This provides real-time feedback on electrode contact quality,
-        which is crucial for obtaining good EEG signals. Impedance values
-        are updated periodically and can be retrieved with get_impedance().
-
-        The impedance check runs in a separate daemon thread to avoid
-        blocking the main data acquisition process.
+        Provides real-time feedback on electrode contact quality.
         """
         # Start the impedance retrieval in a background thread
         self._impedance_check_running = True
@@ -175,12 +147,9 @@ class GNautilus(AmplifierSource):
         self._impedance_thread.start()
 
     def stop_impedance_check(self):
-        """
-        Stop electrode impedance monitoring and cleanup the thread.
+        """Stop electrode impedance monitoring and cleanup thread.
 
-        Stops the background impedance measurement thread and waits for
-        it to complete. Call this before stopping the main data acquisition
-        to ensure clean shutdown.
+        Stops background impedance measurement thread and waits for completion.
         """
         # Signal thread to stop
         self._impedance_check_running = False
@@ -189,23 +158,13 @@ class GNautilus(AmplifierSource):
             self._impedance_thread.join()
 
     def get_impedance(self):
-        """
-        Get current electrode impedance values and freshness status.
-
-        Returns the most recent impedance measurements for all electrodes.
-        The freshness flag indicates whether new impedance data is available
-        since the last call to this method.
+        """Get current electrode impedance values and freshness status.
 
         Returns:
             tuple: (impedance_array, is_fresh)
-                - impedance_array (np.ndarray): Impedance values in kOhms
-                    for each electrode. -10 indicates unknown/disconnected.
-                - is_fresh (bool): True if impedance data has been updated
-                    since last call, False otherwise.
-
-        Note:
-            Impedance values < 5 kOhm are typically considered good for EEG.
-            Values > 25 kOhm may indicate poor electrode contact.
+                - impedance_array: Impedance values in kOhms per electrode.
+                    -10 indicates unknown/disconnected.
+                - is_fresh: True if data updated since last call.
         """
         # Get current freshness status and mark as read
         imp_fresh = self._impedance_fresh
@@ -213,32 +172,22 @@ class GNautilus(AmplifierSource):
         return self._z, imp_fresh
 
     def _data_callback(self, data: np.ndarray):
-        """
-        Handle incoming data from the g.Nautilus device.
+        """Handle incoming data from g.Nautilus device.
 
-        This callback is invoked by the GDS library whenever new EEG data
-        is available from the amplifier. It forwards the data through the
-        g.Pype pipeline using the cycle mechanism.
+        Callback invoked by GDS library when new EEG data is available.
+        Forwards data through g.Pype pipeline using cycle mechanism.
 
         Args:
-            data (np.ndarray): Raw EEG data from the amplifier.
-                Shape: (frame_size, channel_count)
-                Data type typically float32 or float64.
+            data: Raw EEG data with shape (frame_size, channel_count).
         """
         # Forward data through the pipeline using the input port
         self.cycle(data={PORT_IN: data})
 
     def _get_z_thread(self):
-        """
-        Background thread function for continuous impedance monitoring.
+        """Background thread function for continuous impedance monitoring.
 
-        This function runs in a separate thread to periodically retrieve
-        electrode impedance values from the g.Nautilus device. The first
-        measurement may take longer as it initializes the impedance
-        measurement circuit.
-
-        The thread continues until _impedance_check_running is set to False.
-        Each measurement updates the _z array and sets the freshness flag.
+        Periodically retrieves electrode impedance values from device. Runs
+        until _impedance_check_running is set to False.
         """
         # First impedance measurement requires initialization
         first = True
@@ -250,20 +199,13 @@ class GNautilus(AmplifierSource):
             self._impedance_fresh = True
 
     def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
-        """
-        Process one step of data through the g.Nautilus source.
-
-        This method implements the core data processing step for the
-        AmplifierSource interface. It simply passes through the input
-        data from PORT_IN to PORT_OUT without modification.
+        """Process one step of data through g.Nautilus source.
 
         Args:
-            data (dict): Input data dictionary with PORT_IN key containing
-                EEG data array from the amplifier.
+            data: Input data dictionary with PORT_IN key containing EEG data.
 
         Returns:
-            dict: Output data dictionary with PORT_OUT key containing
-                the same EEG data array for downstream processing.
+            Output data dictionary with PORT_OUT key containing EEG data.
         """
         # Pass through data from input to output port
         return {PORT_OUT: data[PORT_IN]}

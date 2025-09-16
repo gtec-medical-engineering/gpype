@@ -8,19 +8,9 @@ from .base.butterworth import Butterworth
 class Highpass(Butterworth):
     """Highpass filter implementation using Butterworth design.
 
-    This class provides a convenient interface for creating highpass filters
-    by extending the Butterworth filter implementation. It automatically
-    configures the filter for highpass operation with a specified cutoff
-    frequency.
-
-    Highpass filters allow frequencies above the cutoff frequency to pass
-    through while attenuating frequencies below the cutoff. This is commonly
-    used in BCI applications to remove low-frequency drift, DC offset, or
-    slow artifacts while preserving higher-frequency neural activity.
-
-    The filter uses Butterworth design characteristics, providing maximally
-    flat response in the passband with no ripples, making it suitable for
-    applications requiring smooth frequency response above the cutoff.
+    Provides a convenient interface for creating highpass filters that allow
+    frequencies above the cutoff to pass while attenuating frequencies below
+    the cutoff. Uses Butterworth design for maximally flat response.
     """
 
     class Configuration(Butterworth.Configuration):
@@ -35,21 +25,12 @@ class Highpass(Butterworth):
         """Initialize the highpass filter with cutoff frequency.
 
         Args:
-            f_c: Cutoff frequency in Hz. Frequencies below this value will
-                be attenuated, while frequencies above will pass through.
-                Must be positive and less than Nyquist frequency.
-            order: Filter order. Higher orders provide steeper rolloff
-                but may introduce more phase distortion. Defaults to
-                DEFAULT_ORDER from parent class.
+            f_c: Cutoff frequency in Hz. Must be positive.
+            order: Filter order. Defaults to DEFAULT_ORDER from parent class.
             **kwargs: Additional arguments passed to parent Butterworth class.
 
         Raises:
             ValueError: If f_c is not positive.
-
-        Note:
-            The cutoff frequency is defined as the -3dB point where the
-            filter response is 0.707 (-3dB) of the passband gain. Higher
-            order filters will have steeper transitions around this point.
         """
         # Validate cutoff frequency
         if f_c <= 0:

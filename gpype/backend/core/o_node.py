@@ -13,18 +13,9 @@ from .o_port import OPort
 class ONode(ioc.ONode, Node):
     """Abstract base class for output-only nodes in the g.Pype pipeline.
 
-    ONode combines the functionality of ioiocore.ONode and Node to provide a
-    base class for nodes that only have output ports (no inputs). These are
-    typically source nodes that generate data without consuming input, such as
-    signal generators, file readers, or data acquisition devices.
-
-    All ONode subclasses must implement the step() method to define their
-    specific data generation behavior. The setup() method delegates to the
-    parent class for output port context configuration.
-
-    Attributes:
-        Output ports are managed by the parent ioiocore.ONode class.
-        Node-specific configuration is handled by the parent Node class.
+    Combines ioiocore.ONode and Node functionality for nodes that generate
+    output data without consuming inputs (e.g., EEG devices, signal
+    generators). Subclasses must implement the abstract step() method.
     """
 
     def __init__(
@@ -33,9 +24,8 @@ class ONode(ioc.ONode, Node):
         """Initialize the ONode with output port configurations.
 
         Args:
-            output_ports: List of output port configurations. If None, default
-                configuration will be used.
-            **kwargs: Additional keyword arguments passed to parent classes.
+            output_ports: List of output port configurations or None.
+            **kwargs: Additional arguments passed to parent classes.
         """
         # Initialize ioiocore output node functionality
         ioc.ONode.__init__(self, output_ports=output_ports, **kwargs)
@@ -47,20 +37,14 @@ class ONode(ioc.ONode, Node):
     ) -> dict[str, dict]:
         """Setup the output node before processing begins.
 
-        This method delegates to the parent setup method to configure output
-        port contexts. Output-only nodes typically don't have input contexts
-        to validate, so this mainly handles output port initialization.
+        Delegates to parent setup method to configure output port contexts.
 
         Args:
-            data: Dictionary mapping port names to numpy arrays containing
-                initial data (typically empty for output-only nodes).
-            port_context_in: Dictionary mapping input port names to their
-                context dictionaries (typically empty for output-only nodes).
+            data: Dictionary mapping port names to numpy arrays.
+            port_context_in: Dictionary mapping input port names to contexts.
 
         Returns:
-            Dictionary mapping output port names to their context dictionaries.
-            Contains metadata like sampling_rate, channel_count, frame_size,
-            and type for each output port.
+            Dictionary mapping output port names to context dictionaries.
         """
         # Delegate to parent class for output port context setup
         return super().setup(data=data, port_context_in=port_context_in)
@@ -69,23 +53,15 @@ class ONode(ioc.ONode, Node):
     def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
         """Generate output data at each discrete time step.
 
-        This method is executed at each discrete time step during pipeline
-        execution. Output-only nodes generate data without consuming input
-        (e.g., generating signals, acquiring from hardware).
+        Abstract method that must be implemented by subclasses to define
+        their specific data generation behavior.
 
         Args:
-            data: Dictionary mapping input port names to numpy arrays. For
-                output-only nodes, this is typically empty or None since
-                they don't have input ports.
+            data: Dictionary mapping input port names to numpy arrays.
+                Typically empty for output-only nodes.
 
         Returns:
             Dictionary mapping output port names to numpy arrays containing
-            the generated output data for this time step. The data should
-            match the configured output port specifications.
-
-        Note:
-            This is an abstract method that must be implemented by all
-            ONode subclasses to define their specific data generation
-            behavior.
+            the generated output data.
         """
         pass  # pragma: no cover

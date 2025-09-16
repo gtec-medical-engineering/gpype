@@ -3,16 +3,10 @@ import numpy as np
 
 
 class Constants(ioc.Constants):
-    """
-    Application-wide constants for g.Pype BCI framework.
+    """Application-wide constants for g.Pype BCI framework.
 
-    Extends the ioiocore Constants class to provide g.Pype-specific
-    constants, data types, and configuration keys used throughout
-    the BCI processing pipeline.
-
-    This class centralizes all constant values to ensure consistency
-    across the framework and provides a single point of maintenance
-    for shared configuration parameters.
+    Extends ioiocore Constants with g.Pype-specific constants,
+    data types, and configuration keys for signal processing.
     """
 
     # Default data type for numerical operations in the pipeline
@@ -24,12 +18,10 @@ class Constants(ioc.Constants):
     INHERITED = -1
 
     class Keys(ioc.Constants.Keys):
-        """
-        Configuration key constants for pipeline components.
+        """Configuration key constants for pipeline components.
 
-        Defines standard key names used in configuration dictionaries
-        throughout the g.Pype framework. These keys ensure consistent
-        naming across different nodes and components.
+        Standard key names for configuration dictionaries used
+        throughout the g.Pype framework.
         """
 
         # Sampling rate in Hz (samples per second)

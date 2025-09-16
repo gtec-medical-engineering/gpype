@@ -12,22 +12,11 @@ OUT_PORT = ioc.Constants.Defaults.PORT_OUT
 
 
 class Generator(FixedRateSource):
-    """
-    Signal generator source for creating synthetic test signals.
+    """Signal generator source for creating synthetic test signals.
 
-    This class generates configurable test signals with optional noise for
-    testing and development of BCI pipelines. It supports multiple waveform
-    types including sinusoidal, rectangular, and pulse signals.
-
-    The generator can produce multi-channel signals with identical waveforms
-    across all channels, making it useful for testing filters, analyzing
-    pipeline performance, and creating controlled test scenarios.
-
-    Features:
-        - Multiple signal shapes (sine, rectangular, pulse)
-        - Configurable frequency, amplitude, and noise levels
-        - Multi-channel output support
-        - Frame-based output compatible with g.Pype architecture
+    Generates configurable test signals with optional noise for testing
+    pipelines. Supports multiple waveforms (sine, rectangular, pulse) with
+    multi-channel output.
     """
 
     # Signal shape constants
@@ -36,7 +25,15 @@ class Generator(FixedRateSource):
     SHAPE_PULSE = "pulse"  # Brief pulses at specified frequency
 
     # Source code fingerprint
-    FINGERPRINT = "da7c08f1537b99baea5a47cfe8c1b47a"
+    FINGERPRINT = "5be1f01bfd1f798f995d338527b49444"
+
+    # Default configuration values
+    DEFAULT_SAMPLING_RATE = 250.0
+    DEFAULT_CHANNEL_COUNT = 8
+    DEFAULT_SIGNAL_FREQUENCY = 10.0
+    DEFAULT_SIGNAL_SHAPE = SHAPE_SINUSOID
+    DEFAULT_SIGNAL_AMPLITUDE = 0.0
+    DEFAULT_NOISE_AMPLITUDE = 0.0
 
     class Configuration(FixedRateSource.Configuration):
         """Configuration class for Generator signal parameters."""
@@ -51,8 +48,8 @@ class Generator(FixedRateSource):
 
     def __init__(
         self,
-        sampling_rate: float,
-        channel_count: int,
+        sampling_rate: float = None,
+        channel_count: int = None,
         frame_size: int = None,
         signal_frequency: float = None,
         signal_shape: str = None,
@@ -60,46 +57,37 @@ class Generator(FixedRateSource):
         noise_amplitude: float = 0.0,
         **kwargs,
     ):
-        """
-        Initialize the signal generator.
+        """Initialize signal generator.
 
         Args:
-            sampling_rate (float): Sampling frequency in Hz for signal
-                generation and output timing.
-            channel_count (int): Number of output channels. All channels
-                will receive identical generated signals.
-            frame_size (int, optional): Number of samples per output frame.
-                Affects processing latency and computational efficiency.
-            signal_frequency (float, optional): Frequency of the generated
-                signal in Hz. Defaults to 10.0 Hz if None.
-            signal_shape (str, optional): Shape of the generated waveform.
-                Must be one of SHAPE_SINUSOID, SHAPE_RECTANGULAR, or
-                SHAPE_PULSE. Defaults to SHAPE_SINUSOID if None.
-            signal_amplitude (float): Peak amplitude of the signal component.
-                Set to 0.0 for noise-only output.
-            noise_amplitude (float): Standard deviation of Gaussian noise
-                added to the signal. Set to 0.0 for noise-free output.
-            **kwargs: Additional configuration parameters passed to
-                FixedRateSource.
+            sampling_rate: Sampling frequency in Hz.
+            channel_count: Number of output channels. All get same signals.
+            frame_size: Samples per output frame.
+            signal_frequency: Signal frequency in Hz. Defaults to 10.0.
+            signal_shape: Waveform shape (sine, rect, pulse). Defaults to sine.
+            signal_amplitude: Peak amplitude of signal component.
+            noise_amplitude: Standard deviation of Gaussian noise.
+            **kwargs: Additional parameters for FixedRateSource.
 
         Raises:
             ValueError: If signal_frequency or noise_amplitude is negative,
-                or if signal_shape is not a supported waveform type.
+                or signal_shape is unsupported.
         """
         # Set default values and validate parameters
+        if sampling_rate is None:
+            sampling_rate = self.DEFAULT_SAMPLING_RATE
+        if channel_count is None:
+            channel_count = self.DEFAULT_CHANNEL_COUNT
         if signal_frequency is None:
-            signal_frequency = 10.0
+            signal_frequency = self.DEFAULT_SIGNAL_FREQUENCY
         if signal_frequency < 0:
             raise ValueError("signal_frequency must be positive.")
-
         if signal_shape is None:
-            signal_shape = self.SHAPE_SINUSOID
-
+            signal_shape = self.DEFAULT_SIGNAL_SHAPE
         if signal_amplitude is None:
-            signal_amplitude = 0.0
-
+            signal_amplitude = self.DEFAULT_SIGNAL_AMPLITUDE
         if noise_amplitude is None:
-            noise_amplitude = 0.0
+            noise_amplitude = self.DEFAULT_NOISE_AMPLITUDE
         if noise_amplitude < 0:
             raise ValueError("noise_amplitude must be positive.")
 
@@ -129,26 +117,17 @@ class Generator(FixedRateSource):
         self._rng = np.random.default_rng()
 
     def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
-        """
-        Generate one frame of synthetic signal data.
+        """Generate one frame of synthetic signal data.
 
-        This method implements the core signal generation logic, creating
-        a frame of data containing the configured waveform plus optional
-        noise. The signal maintains phase continuity across frames through
-        internal time tracking.
+        Creates a frame containing the configured waveform plus optional noise.
+        Maintains phase continuity across frames through time tracking.
 
         Args:
-            data (dict): Input data dictionary (unused for signal generation
-                but required by the FixedRateSource interface).
+            data: Input data dictionary (unused for signal generation).
 
         Returns:
-            dict: Output data dictionary with OUT_PORT key containing the
-                generated signal frame of shape (frame_size, channel_count).
-                Returns None if not a decimation step.
-
-        Note:
-            The generated signal is identical across all channels. Time
-            continuity is maintained between frames for seamless waveforms.
+            Output data dictionary with generated signal frame of shape
+            (frame_size, channel_count), or None if not a decimation step.
         """
         # Check if this is a decimation step (frame generation timing)
         if not self.is_decimation_step():

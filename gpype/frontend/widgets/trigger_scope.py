@@ -20,27 +20,12 @@ PORT_IN = ioc.Constants.Defaults.PORT_IN
 
 
 class TriggerScope(Scope):
-    """
-    Event-triggered oscilloscope widget for analyzing signal epochs.
+    """Event-triggered oscilloscope widget for analyzing signal epochs.
 
     Displays triggered signal epochs based on events detected by upstream
-    trigger nodes. Unlike TimeSeriesScope which shows continuous data,
-    TriggerScope visualizes fixed-duration signal segments around trigger
-    events, making it ideal for analyzing event-related potentials (ERPs),
-    stimulus responses, and other event-locked brain activity.
-
-    The widget supports multiple mathematical expressions to compute
-    derived signals and can overlay multiple plots with color-coded
-    legends for comparative analysis.
-
-    Features:
-        - Event-triggered signal visualization
-        - Mathematical expression evaluation for signal processing
-        - Multi-plot overlay with automatic color coding
-        - Channel selection and hiding capabilities
-        - Automatic signal averaging across trigger epochs
-        - Interactive legend for multi-plot identification
-        - Pre/post trigger time window display
+    trigger nodes. Visualizes fixed-duration signal segments around trigger
+    events, ideal for analyzing ERPs and event-locked brain activity.
+    Supports mathematical expressions and multi-plot overlay with legends.
 
     Args:
         amplitude_limit (float): Y-axis scale limit in microvolts (1-5000).
@@ -51,8 +36,7 @@ class TriggerScope(Scope):
     """
 
     class Configuration(Scope.Configuration):
-        """
-        Configuration keys for TriggerScope widget settings.
+        """Configuration keys for TriggerScope widget settings.
 
         Extends the base Scope configuration with trigger-specific
         parameters for amplitude scaling and mathematical plot expressions.
@@ -76,13 +60,10 @@ class TriggerScope(Scope):
         hidden_channels: list = None,
         **kwargs,
     ):
-        """
-        Initialize the trigger scope widget.
+        """Initialize the trigger scope widget.
 
         Sets up mathematical expression parsing, input port configuration,
         and display parameters for event-triggered signal visualization.
-        Parses mathematical expressions to create lambda functions for
-        real-time signal computation.
 
         Args:
             amplitude_limit: Y-axis scale limit in microvolts (1-5000).
@@ -202,13 +183,10 @@ class TriggerScope(Scope):
     def setup(
         self, data: dict[str, np.ndarray], port_context_in: dict[str, dict]
     ) -> dict[str, dict]:
-        """
-        Initialize the widget with trigger parameters and allocate buffers.
+        """Initialize the widget with trigger parameters and allocate buffers.
 
         Sets up the trigger scope based on upstream trigger node configuration
-        including sampling rate, channel count, frame size, and pre/post
-        trigger timing. Validates that all input ports have consistent
-        parameters and allocates appropriate data structures.
+        including timing, sampling parameters, and channel configuration.
 
         Args:
             data: Input data dictionary (not used in setup phase).
@@ -308,19 +286,12 @@ class TriggerScope(Scope):
         return super().setup(data, port_context_in)
 
     def _update(self):
-        """
-        Update the visual display with new trigger epoch data.
+        """Update the visual display with new trigger epoch data.
 
-        This method is called by the Qt timer to refresh the plot with
-        the latest trigger epochs. It handles curve creation, mathematical
-        expression evaluation, signal averaging, and multi-plot visualization
-        with color-coded legends. The method operates in the main Qt thread
-        for UI safety.
-
-        Note:
-            This method only updates when new data is available
-            (_new_data flag). UI elements are created lazily on first
-            update call.
+        Called by the Qt timer to refresh the plot with latest trigger epochs.
+        Handles curve creation, mathematical expression evaluation, signal
+        averaging, and multi-plot visualization with color-coded legends.
+        Only updates when new data is available.
         """
         if not self._new_data:
             return
@@ -410,14 +381,11 @@ class TriggerScope(Scope):
         self._plot_item.setXRange(*xlim)
 
     def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
-        """
-        Process incoming trigger epoch data and store for visualization.
+        """Process incoming trigger epoch data and store for visualization.
 
-        This method is called by the pipeline for each new trigger epoch.
-        It accumulates trigger epochs in buffers for averaging and
-        mathematical expression evaluation. Unlike continuous data streams,
-        trigger epochs represent fixed-duration signal segments around
-        detected events.
+        Called by the pipeline for each new trigger epoch. Accumulates
+        trigger epochs in buffers for averaging and mathematical expression
+        evaluation.
 
         Args:
             data: Dictionary containing trigger epoch arrays from connected

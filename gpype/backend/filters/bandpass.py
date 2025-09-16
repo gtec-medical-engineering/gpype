@@ -8,19 +8,9 @@ from .base.butterworth import Butterworth
 class Bandpass(Butterworth):
     """Bandpass filter implementation using Butterworth design.
 
-    This class provides a convenient interface for creating bandpass filters
-    by extending the Butterworth filter implementation. It automatically
-    configures the filter for bandpass operation with specified lower and
-    upper cutoff frequencies.
-
-    Bandpass filters allow frequencies within a specific range to pass through
-    while attenuating frequencies outside this range. This is commonly used
-    in BCI applications to isolate specific frequency bands of interest
-    (e.g., alpha, beta, or gamma rhythms).
-
-    The filter uses Butterworth design characteristics, providing maximally
-    flat response in the passband with no ripples, making it suitable for
-    applications requiring smooth frequency response.
+    Provides a convenient interface for creating bandpass filters that allow
+    frequencies within a specific range to pass while attenuating frequencies
+    outside this range. Uses Butterworth design for maximally flat response.
     """
 
     class Configuration(Butterworth.Configuration):
@@ -36,23 +26,13 @@ class Bandpass(Butterworth):
         """Initialize the bandpass filter with cutoff frequencies.
 
         Args:
-            f_lo: Lower cutoff frequency in Hz. Frequencies below this
-                value will be attenuated.
-            f_hi: Upper cutoff frequency in Hz. Frequencies above this
-                value will be attenuated.
-            order: Filter order. Higher orders provide steeper rolloff
-                but may introduce more phase distortion. Defaults to
-                DEFAULT_ORDER from parent class.
+            f_lo: Lower cutoff frequency in Hz.
+            f_hi: Upper cutoff frequency in Hz.
+            order: Filter order. Defaults to DEFAULT_ORDER from parent class.
             **kwargs: Additional arguments passed to parent Butterworth class.
 
         Raises:
             ValueError: If f_lo >= f_hi or if frequencies are invalid.
-
-        Note:
-            The passband is defined as [f_lo, f_hi]. Frequencies within
-            this range will pass through with minimal attenuation, while
-            frequencies outside will be attenuated according to the filter
-            order and Butterworth characteristics.
         """
         # Validate cutoff frequency relationship
         if f_lo >= f_hi:

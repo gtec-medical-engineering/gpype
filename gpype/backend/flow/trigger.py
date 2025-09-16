@@ -13,35 +13,12 @@ PORT_OUT = Constants.Defaults.PORT_OUT
 
 
 class Trigger(IONode):
-    """
-    Event-triggered data extraction node for BCI applications.
+    """Event-triggered data extraction node for BCI applications.
 
-    The Trigger node monitors trigger events and extracts time-locked data
-    segments around trigger occurrences. It maintains a rolling buffer of
-    input data and outputs complete data epochs when target trigger values
-    are detected.
-
-    This node is commonly used in event-related potential (ERP) analysis,
-    where specific stimuli or responses trigger the extraction of neural
-    data segments for averaging and analysis.
-
-    Features:
-        - Configurable pre- and post-trigger time windows
-        - Multiple target trigger values support
-        - Asynchronous output timing (only when triggered)
-        - Single-sample input frame requirement for precise timing
-
-    Args:
-        time_pre (float): Time in seconds before trigger to include in epoch.
-            Default is 0.7 seconds.
-        time_post (float): Time in seconds after trigger to include in epoch.
-            Default is 0.2 seconds.
-        target (list or float): Trigger value(s) that cause epoch extraction.
-            Can be a single value or list of values. Default is [1].
-
-    Note:
-        Input data must have frame_size=1 for accurate trigger timing.
-        The node requires two input ports: data and trigger.
+    Monitors trigger events and extracts time-locked data segments around
+    trigger occurrences. Maintains a rolling buffer of input data and outputs
+    complete data epochs when target trigger values are detected. Commonly
+    used in event-related potential (ERP) analysis.
     """
 
     # Default time window values in seconds
@@ -68,19 +45,15 @@ class Trigger(IONode):
         target: float = None,
         **kwargs,
     ):
-        """
-        Initialize the Trigger node with timing and target configurations.
+        """Initialize the Trigger node with timing and target configurations.
 
         Args:
-            time_pre (float, optional): Time in seconds before trigger to
-                include in the extracted epoch. Must be > 0.
-                Defaults to DEFAULT_TIME_PRE (0.7 seconds).
-            time_post (float, optional): Time in seconds after trigger to
-                include in the extracted epoch. Must be > 0.
-                Defaults to DEFAULT_TIME_POST (0.2 seconds).
-            target (float or list, optional): Trigger value(s) that will
-                cause epoch extraction. Can be a single value or list of
-                values. Defaults to [1].
+            time_pre: Time in seconds before trigger to include in epoch.
+                Must be > 0. Defaults to 0.7 seconds.
+            time_post: Time in seconds after trigger to include in epoch.
+                Must be > 0. Defaults to 0.2 seconds.
+            target: Trigger value(s) that cause epoch extraction. Can be
+                single value or list. Defaults to [1].
             **kwargs: Additional configuration parameters passed to IONode.
 
         Raises:
@@ -138,25 +111,24 @@ class Trigger(IONode):
     def setup(
         self, data: dict[str, np.ndarray], port_context_in: dict[str, dict]
     ) -> dict[str, dict]:
-        """
-        Set up the Trigger node and initialize internal buffers.
+        """Set up the Trigger node and initialize internal buffers.
 
         Validates input requirements, calculates buffer sizes based on
         sampling rate and timing parameters, and initializes the rolling
         input buffer for data collection.
 
         Args:
-            data (dict): Initial data dictionary for port configuration.
-            port_context_in (dict): Input port context information containing
-                sampling rates, frame sizes, and channel counts.
+            data: Initial data dictionary for port configuration.
+            port_context_in: Input port context with sampling rates, frame
+                sizes, and channel counts.
 
         Returns:
-            dict: Output port context with updated frame size and timing
-                information for the extracted epochs.
+            Output port context with updated frame size and timing
+            information for the extracted epochs.
 
         Raises:
             ValueError: If input frame size is not 1 or sampling rate is
-                not provided in the context.
+                not provided.
         """
         # Call parent setup to get base output context
         port_context_out = super().setup(data, port_context_in)
@@ -211,26 +183,20 @@ class Trigger(IONode):
         return port_context_out
 
     def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
-        """
-        Process one frame of data and check for trigger events.
+        """Process one frame of data and check for trigger events.
 
         Updates the rolling input buffer with new data, monitors trigger
         changes, and extracts complete epochs when countdown timers expire.
-        Multiple triggers can be active simultaneously, each with its own
-        countdown timer.
+        Multiple triggers can be active simultaneously.
 
         Args:
-            data (dict): Dictionary containing input data arrays. Must include
+            data: Dictionary containing input data arrays. Must include
                 both the main data port and trigger port data.
 
         Returns:
-            dict or None: Dictionary containing extracted epoch data when a
-                trigger countdown completes, None otherwise. The returned
-                epoch has shape (samples_pre + samples_post, channel_count).
-
-        Note:
-            The function returns data only when a trigger countdown reaches
-            zero, making this an asynchronous output node.
+            Dictionary containing extracted epoch data when a trigger
+            countdown completes, None otherwise. Epoch has shape
+            (samples_pre + samples_post, channel_count).
         """
         # Update rolling buffer with new data sample
         # Efficiently shift buffer: move all rows up by one position

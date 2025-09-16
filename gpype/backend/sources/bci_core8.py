@@ -20,38 +20,12 @@ PORT_IN = Constants.Defaults.PORT_IN
 class BCICore8(AmplifierSource):
     """g.tec BCI Core-8 amplifier source for wireless EEG acquisition.
 
-    This class provides interface to the g.tec BCI Core-8 wireless EEG
-    amplifier using Bluetooth Low Energy (BLE) communication. It handles
-    device connection, data streaming, buffering, and real-time processing
-    for BCI applications.
-
-    The BCI Core-8 features:
-    - 8-channel EEG acquisition at 250 Hz sampling rate
-    - Wireless BLE connectivity with low latency
-    - Real-time data streaming with configurable buffering
-    - Optional buffer level monitoring for system diagnostics
-
-    Features:
-    - Automatic device discovery and connection by serial number
-    - Frame-based data buffering with configurable sizes
-    - Thread-safe data acquisition with precise timing
-    - Buffer level monitoring for real-time system analysis
-    - Automatic decimation and frame assembly
-
-    Attributes:
-        SAMPLING_RATE: Fixed 250 Hz sampling rate
-        MAX_NUM_CHANNELS: Maximum 8 channels supported
-        DEFAULT_BUFFER_SIZE_SAMPLES: Default buffer size (60ms at 250Hz)
-        PORT_BUF_LEVEL: Port name for buffer level output
-
-    Note:
-        The amplifier uses a fixed 250 Hz sampling rate and supports up to
-        8 channels. Buffer management is crucial for real-time performance
-        and preventing data loss during intensive processing.
+    Interface to g.tec BCI Core-8 wireless EEG amplifier using BLE. Supports
+    8-channel acquisition at 250 Hz.
     """
 
     # Source code fingerprint
-    FINGERPRINT = "332ae2b13167e57afbb6f2972ec51352"
+    FINGERPRINT = "8b2d1645874477bb3fa5f76c27a7d10f"
 
     # Optional buffer level output port
     PORT_BUF_LEVEL = "buffer_level"
@@ -65,6 +39,7 @@ class BCICore8(AmplifierSource):
     FILL_RATIO_ALPHA = 0.9995
     FILL_RATIO_CORRECTION_INTERVAL_S = 1.0
     NUM_UNDERRUNS_ALLOWED = 10
+    DEVICE_DELAY_MS = 18
 
     class Configuration(AmplifierSource.Configuration):
         """Configuration class for BCI Core-8 specific parameters."""
@@ -91,22 +66,13 @@ class BCICore8(AmplifierSource):
         """Initialize BCI Core-8 amplifier source.
 
         Args:
-            serial: Serial number of target BCI Core-8 device. If None,
-                the first discovered device will be used.
-            channel_count: Number of EEG channels to acquire (1-8).
-                Defaults to maximum 8 channels if not specified.
-            frame_size: Number of samples per processing frame. Affects
-                latency and processing efficiency.
-            buffer_size_samples: Size of internal buffer in samples.
-                Defaults to 60ms worth of samples for low latency.
-            output_buffer_level: If True, outputs buffer level monitoring
-                data on a second port for system diagnostics.
-            **kwargs: Additional arguments passed to parent AmplifierSource.
-
-        Note:
-            The amplifier automatically configures decimation and buffering
-            based on frame size. Buffer level monitoring helps detect
-            real-time performance issues.
+            serial: Serial number of target device. Uses first discovered
+                if None.
+            channel_count: Number of EEG channels (1-8). Defaults to 8.
+            frame_size: Samples per processing frame.
+            buffer_delay_ms: Internal buffer delay in milliseconds.
+            output_buffer_level: Enable buffer level monitoring output.
+            **kwargs: Additional arguments for parent AmplifierSource.
         """
         # Validate and set channel count (1-8 channels supported)
         if channel_count is None:
@@ -170,10 +136,9 @@ class BCICore8(AmplifierSource):
         self._fill_ratio: float = None
 
         # Calculate and set source delay for timing synchronization
-        self.source_delay = buffer_delay_ms / 1000
+        self.source_delay = (buffer_delay_ms + self.DEVICE_DELAY_MS) / 1000
         print(
-            f"BCI Core-8 buffer delay is set to "
-            f"{self.source_delay * 1e3:.2f} ms."
+            f"BCI Core-8 buffer delay is set to " f"{buffer_delay_ms:.2f} ms."
         )
 
         # Initialize buffer level monitoring if enabled
@@ -181,20 +146,14 @@ class BCICore8(AmplifierSource):
             self._buffer_level_buffer: Optional[queue.Queue] = None
 
     def start(self) -> None:
-        """Start the BCI Core-8 amplifier and begin data acquisition.
+        """Start BCI Core-8 amplifier and begin data acquisition.
 
-        Initializes data buffers, starts the background processing thread,
-        establishes BLE connection to the amplifier, and begins real-time
-        data streaming.
+        Initializes buffers, starts background thread, establishes BLE
+        connection, and begins real-time data streaming.
 
         Raises:
             ConnectionError: If amplifier connection fails.
             RuntimeError: If background thread creation fails.
-
-        Note:
-            The method first initializes internal buffers, then starts the
-            background thread for timing control, connects to the amplifier
-            hardware, and finally begins data acquisition.
         """
         # Get configuration parameters
         frame_size = self.config[self.Configuration.Keys.FRAME_SIZE]
@@ -230,29 +189,20 @@ class BCICore8(AmplifierSource):
     ) -> dict[str, dict]:
         """Setup output port contexts for BCI Core-8 data streams.
 
-        Configures output port contexts by calling the parent setup method
-        which handles sampling rate and channel configuration propagation.
-
         Args:
-            data: Dictionary of input data arrays (empty for source nodes).
+            data: Input data arrays (empty for source nodes).
             port_context_in: Input port contexts (empty for source nodes).
 
         Returns:
-            Dictionary of output port contexts with BCI Core-8 specific
-            configuration including 250 Hz sampling rate.
+            Dictionary of output port contexts with 250 Hz sampling rate.
         """
         return super().setup(data, port_context_in)
 
     def stop(self):
-        """Stop the BCI Core-8 amplifier and clean up resources.
+        """Stop BCI Core-8 amplifier and clean up resources.
 
-        Stops data acquisition, terminates the background thread, and
-        properly disconnects from the amplifier hardware.
-
-        Note:
-            The method ensures proper shutdown sequence: stop amplifier,
-            call parent stop, terminate background thread, and clean up
-            device connection.
+        Stops data acquisition, terminates background thread, and disconnects
+        from amplifier hardware.
         """
         # Stop amplifier data acquisition
         if self._device is not None:
@@ -273,9 +223,8 @@ class BCICore8(AmplifierSource):
     def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
         """Retrieve processed data frames from the amplifier.
 
-        Returns data frames when decimation step is active, otherwise
-        returns None. Handles buffer underruns by providing zero-filled
-        frames to maintain pipeline continuity.
+        Returns data frames when decimation step is active. Handles buffer
+        underruns by providing zero-filled frames to maintain continuity.
 
         Args:
             data: Input data dictionary (unused for source nodes).
@@ -283,11 +232,6 @@ class BCICore8(AmplifierSource):
         Returns:
             Dictionary containing EEG data and optionally buffer level data,
             or None if not a decimation step.
-
-        Note:
-            Buffer underruns (empty queue) are handled by returning
-            zero-filled frames to prevent pipeline stalls. This should
-            be rare with proper buffer sizing.
         """
         if self.is_decimation_step():
             out_data = {}
@@ -303,15 +247,24 @@ class BCICore8(AmplifierSource):
                     type=Constants.LogTypes.WARNING,
                 )
 
-            out_data = {PORT_OUT: self._frame_buffer.get()}
+            try:
+                out_data = {PORT_OUT: self._frame_buffer.get(timeout=1)}
+
+            except queue.Empty:
+                # Provide zero-filled frame to maintain pipeline continuity
+                frame_size = self.config[self.Configuration.Keys.FRAME_SIZE][0]
+                cc_key = self.Configuration.Keys.CHANNEL_COUNT
+                channel_count = self.config[cc_key][0]
+                zero_frame = np.zeros((frame_size, channel_count))
+                out_data = {PORT_OUT: zero_frame}
 
             # Buffer level monitoring
             delta = self._in_sample_counter - self._out_sample_counter
             cur_fill_ratio = delta / self._frame_buffer.maxsize
             alpha = self.FILL_RATIO_ALPHA
             self._fill_ratio = (
-                (1 - alpha) * cur_fill_ratio + alpha * self._fill_ratio
-            )
+                1 - alpha
+            ) * cur_fill_ratio + alpha * self._fill_ratio
 
             if self.config[self.Configuration.Keys.OUTPUT_BUFFER_LEVEL]:
                 buf_lvl = (cur_fill_ratio - 0.5) * 2 * 100
@@ -326,20 +279,12 @@ class BCICore8(AmplifierSource):
     def _data_callback(self, data: np.ndarray):
         """Callback function for incoming amplifier data.
 
-        Processes individual samples from the BCI Core-8 amplifier,
-        assembles them into frames, and manages buffer queues for
-        real-time processing.
+        Processes individual samples, assembles them into frames, and manages
+        buffer queues for real-time processing.
 
         Args:
             data: Single sample data array from amplifier with shape
-                (n_channels,). Only the configured number of channels
-                are used.
-
-        Note:
-            This method runs in the amplifier's callback thread and must
-            be efficient to prevent data loss. Frame assembly and buffer
-            management are handled here to minimize processing overhead
-            in the main pipeline.
+                (n_channels,). Only configured channels are used.
         """
         # Safety check for buffer initialization
         if self._sample_buffer is None:
@@ -372,20 +317,8 @@ class BCICore8(AmplifierSource):
     def _thread_function(self):
         """Background thread function for timing control and node cycles.
 
-        This method implements the timing control for the BCI Core-8 data
-        processing pipeline. It waits for the buffer to partially fill,
-        then maintains precise timing for node cycles.
-
-        The algorithm:
-        1. Wait for buffer to reach 50% capacity (startup phase)
-        2. Begin precise timing control using monotonic time
-        3. Calculate expected sample times to prevent drift
-        4. Sleep appropriately and trigger node cycles
-
-        Note:
-            The startup delay ensures stable data flow before beginning
-            real-time processing. Precise timing prevents cumulative
-            drift in the processing pipeline.
+        Implements timing control for data processing pipeline. Waits for
+        buffer to partially fill, then maintains precise timing for cycles.
         """
         # Get sampling rate for timing calculations
         sampling_rate = self.config[self.Configuration.Keys.SAMPLING_RATE]

@@ -13,20 +13,9 @@ from .node import Node
 class IONode(ioc.IONode, Node):
     """Abstract base class for input/output nodes in the g.Pype pipeline.
 
-    IONode combines the functionality of ioiocore.IONode and Node to provide a
-    base class for all signal processing nodes that have input and output
-    ports. This class handles the common validation and setup logic for port
-    contexts including sampling rates, channel counts, frame sizes, and data
-    types.
-
-    All IONode subclasses must implement the step() method to define their
-    specific signal processing behavior. The setup() method is called once
-    before processing begins to validate and configure the node based on input
-    port contexts.
-
-    Attributes:
-        Input and output ports are managed by the parent ioiocore.IONode class.
-        Node-specific configuration is handled by the parent Node class.
+    Combines ioiocore.IONode and Node functionality for signal processing
+    nodes with input and output ports. Handles validation and setup logic
+    for port contexts. Subclasses must implement the abstract step() method.
     """
 
     def __init__(
@@ -38,11 +27,9 @@ class IONode(ioc.IONode, Node):
         """Initialize the IONode with input and output port configurations.
 
         Args:
-            input_ports: List of input port configurations. If None, default
-                configuration will be used.
-            output_ports: List of output port configurations. If None, default
-                configuration will be used.
-            **kwargs: Additional keyword arguments passed to parent classes.
+            input_ports: List of input port configurations or None.
+            output_ports: List of output port configurations or None.
+            **kwargs: Additional arguments passed to parent classes.
         """
         ioc.IONode.__init__(
             self, input_ports=input_ports, output_ports=output_ports, **kwargs
@@ -54,32 +41,19 @@ class IONode(ioc.IONode, Node):
     ) -> dict[str, dict]:
         """Setup the node before processing begins.
 
-        This method is executed once right before the first step of the node.
-        It validates that all input ports have consistent configurations and
-        creates output port contexts based on the input configurations.
-
-        The method performs the following validations:
-        - All ports must have frame_size and channel_count in their context
-        - All ports must have the same sampling rate
-        - Channel counts must be compatible (either all same or broadcastable)
-        - All ports must have the same frame size
-        - Port types must be compatible
+        Validates input port configurations and creates output port contexts.
+        Checks for consistent sampling rates, compatible channel counts,
+        matching frame sizes, and compatible types.
 
         Args:
-            data: Dictionary mapping port names to numpy arrays containing
-                initial data (typically not used in setup).
-            port_context_in: Dictionary mapping input port names to their
-                context dictionaries containing metadata like sampling_rate,
-                channel_count, frame_size, and type.
+            data: Dictionary mapping port names to numpy arrays.
+            port_context_in: Dictionary mapping input port names to contexts.
 
         Returns:
-            Dictionary mapping output port names to their context dictionaries.
-            The output contexts are derived from the validated input contexts.
+            Dictionary mapping output port names to context dictionaries.
 
         Raises:
-            ValueError: If any validation fails, including missing required
-                keys, mismatched sampling rates, incompatible channel counts,
-                different frame sizes, or incompatible types.
+            ValueError: If validation fails for any configuration parameter.
         """
         # Validate required keys are present in all input port contexts
         for context in port_context_in.values():
@@ -175,23 +149,14 @@ class IONode(ioc.IONode, Node):
     def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
         """Process data at each discrete time step.
 
-        This method is executed at each discrete time step during pipeline
-        execution. Subclasses must implement this method to define their
-        specific signal processing behavior.
+        Abstract method that must be implemented by subclasses to define
+        their specific signal processing behavior.
 
         Args:
-            data: Dictionary mapping input port names to numpy arrays
-                containing the input data for this time step. The shape
-                and content depend on the specific node's input configuration.
+            data: Dictionary mapping input port names to numpy arrays.
 
         Returns:
-            Dictionary mapping output port names to numpy arrays containing
-            the processed output data. The shape and content depend on the
-            specific node's processing logic. May return None if no output
-            is produced for this time step.
-
-        Note:
-            This is an abstract method that must be implemented by all
-            IONode subclasses.
+            Dictionary mapping output port names to numpy arrays.
+            May return None if no output is produced.
         """
         pass  # pragma: no cover

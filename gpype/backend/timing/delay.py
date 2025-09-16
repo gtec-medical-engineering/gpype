@@ -12,18 +12,10 @@ PORT_OUT = Constants.Defaults.PORT_OUT
 
 
 class Delay(IONode):
-    """
-    Introduces a configurable N-sample delay to the input signal.
+    """Introduces configurable N-sample delay to input signal.
 
-    Parameters
-    ----------
-    taps : int
-        Number of samples to delay the signal. Must be non-negative.
-
-    Notes
-    -----
-    - Output is zero-initialized until the buffer is filled.
-    - Efficient deque-based implementation with O(1) operations.
+    Uses efficient deque-based buffer. Output is zero-initialized until
+    buffer is filled with sufficient samples.
     """
 
     class Configuration(IONode.Configuration):
@@ -31,6 +23,16 @@ class Delay(IONode):
             NUM_SAMPLES = "num_samples"
 
     def __init__(self, num_samples: int, **kwargs):
+        """Initialize delay with specified number of samples.
+
+        Args:
+            num_samples: Number of samples to delay signal. Must be
+                non-negative.
+            **kwargs: Additional arguments for parent IONode.
+
+        Raises:
+            ValueError: If num_samples is negative.
+        """
         if num_samples < 0:
             raise ValueError("Number of taps must be non-negative.")
         super().__init__(num_samples=num_samples, **kwargs)
@@ -41,6 +43,18 @@ class Delay(IONode):
     def setup(
         self, data: dict[str, np.ndarray], port_context_in: dict[str, dict]
     ) -> dict[str, dict]:
+        """Setup delay buffer and zero frame.
+
+        Args:
+            data: Input data arrays.
+            port_context_in: Input port contexts containing channel count.
+
+        Returns:
+            Output port contexts from parent setup.
+
+        Raises:
+            ValueError: If channel count is not provided in context.
+        """
         md = port_context_in[PORT_IN]
         channel_count = md.get(Constants.Keys.CHANNEL_COUNT)
         if channel_count is None:
@@ -50,6 +64,14 @@ class Delay(IONode):
         return super().setup(data, port_context_in)
 
     def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
+        """Process one step of delay.
+
+        Args:
+            data: Input data dictionary containing signal to delay.
+
+        Returns:
+            Dictionary with delayed signal or zero frame if buffer not full.
+        """
         data_in = data[PORT_IN]
 
         if self._taps == 0:

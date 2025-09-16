@@ -12,30 +12,12 @@ from ..core.o_port import OPort
 
 
 class Router(IONode):
-    """
-    Channel routing and selection node for flexible data flow management.
+    """Channel routing and selection node for flexible data flow management.
 
-    The Router node provides sophisticated channel selection and routing
-    capabilities for BCI data pipelines. It allows users to select specific
-    channels from multiple input ports and route them to multiple output
-    ports in flexible configurations.
-
-    The router supports both simple channel selection (list of indices) and
-    complex multi-port routing (dictionary mapping). It can aggregate
-    channels from multiple sources and distribute them to different outputs
-    based on user-defined routing rules.
-
-    Features:
-        - Multi-input, multi-output channel routing
-        - Flexible channel selection with index lists
-        - Automatic port naming for multiple inputs/outputs
-        - Channel aggregation and distribution
-        - Validation of sampling rates and frame sizes
-        - Support for "ALL" channels selection
-
-    Note:
-        All input ports must have the same sampling rate, frame size,
-        and data type. The router validates these constraints during setup.
+    Provides channel selection and routing capabilities for BCI data pipelines.
+    Allows selecting specific channels from multiple input ports and routing
+    them to multiple output ports. Supports both simple channel selection
+    (index lists) and complex multi-port routing (dictionary mapping).
     """
 
     # Special constant for selecting all available channels
@@ -59,21 +41,14 @@ class Router(IONode):
         output_selector: Union[list, dict] = None,
         **kwargs,
     ):
-        """
-        Initialize the Router node with channel selection configurations.
+        """Initialize the Router node with channel selection configurations.
 
         Args:
-            input_selector (Union[list, dict], optional): Specification for
-                input channel selection. Can be:
-
-                - None: Use all channels from default input port
-                - list: Channel indices for single port or list of lists for
-                  multiple ports. In case of multiple ports, their names
-                  are automatically generated as 'in1', 'in2', etc.
-                - dict: Port name to channel indices mapping
-
-            output_selector (Union[list, dict], optional): Specification for
-                output channel selection. Same format as input_selector.
+            input_selector: Specification for input channel selection. Can be
+                None (all channels), list (channel indices), or dict (port
+                name to channel indices mapping).
+            output_selector: Specification for output channel selection.
+                Same format as input_selector.
             **kwargs: Additional configuration parameters passed to IONode.
 
         Raises:
@@ -148,25 +123,23 @@ class Router(IONode):
     def setup(
         self, data: dict[str, np.ndarray], port_context_in: dict[str, dict]
     ) -> dict[str, dict]:
-        """
-        Set up the Router node and build the internal channel mapping.
+        """Set up the Router node and build the internal channel mapping.
 
         Creates the internal routing map that defines which input channels
         are connected to which output channels. Validates that all input
         ports have compatible sampling rates, frame sizes, and data types.
 
         Args:
-            data (dict): Initial data dictionary for port configuration.
-            port_context_in (dict): Input port context information containing
-                channel counts, sampling rates, frame sizes, and data types.
+            data: Initial data dictionary for port configuration.
+            port_context_in: Input port context information with channel
+                counts, sampling rates, frame sizes, and data types.
 
         Returns:
-            dict: Output port context with routing information and updated
-                channel counts for each output port.
+            Output port context with routing information and updated
+            channel counts for each output port.
 
         Raises:
-            ValueError: If input ports have incompatible sampling rates,
-                frame sizes, or data types.
+            ValueError: If input ports have incompatible parameters.
         """
         # Get commonly used configuration keys
         cc_key = Constants.Keys.CHANNEL_COUNT
@@ -266,23 +239,21 @@ class Router(IONode):
         return port_context_out
 
     def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
-        """
-        Process one frame of data by routing channels according to the mapping.
+        """Process one frame of data by routing channels according to mapping.
 
         Routes channels from input ports to output ports based on the channel
         mapping established during setup. Each output port receives data from
-        its configured subset of input channels, maintaining frame structure
-        and data types.
+        its configured subset of input channels.
 
         Args:
-            data (dict): Dictionary containing input data arrays for each port.
-                Keys are port names, values are NumPy arrays with shape
+            data: Dictionary containing input data arrays for each port.
+                Keys are port names, values are arrays with shape
                 (frame_size, channel_count).
 
         Returns:
-            dict: Dictionary containing output data arrays for each output
-                port. Keys are output port names, values are NumPy arrays
-                with shape (frame_size, selected_channel_count).
+            Dictionary containing output data arrays for each output port.
+            Keys are output port names, values are arrays with shape
+            (frame_size, selected_channel_count).
         """
         data_out: dict = {}
 

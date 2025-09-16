@@ -11,33 +11,10 @@ from ..core.i_node import INode
 
 
 class UDPSender(INode):
-    """UDP sender for real-time data transmission over network.
+    """UDP sink node for real-time data transmission.
 
-    This class implements a UDP-based data sender that transmits incoming
-    data blocks immediately during step() execution. The sender uses direct
-    UDP transmission without additional threading to maintain real-time
-    performance and minimize latency.
-
-    The data is automatically serialized as float64 numpy arrays before
-    transmission, ensuring consistent data format across the network. Each
-    step() call results in one UDP packet being sent.
-
-    Features:
-    - Direct UDP transmission without threading overhead
-    - Automatic float64 serialization for network compatibility
-    - Configurable IP address and port settings
-    - Real-time safe operation with minimal latency
-
-    Attributes:
-        DEFAULT_IP: Default target IP address (localhost)
-        DEFAULT_PORT: Default target port number
-        _socket: UDP socket for data transmission
-        _target: Target address tuple (ip, port)
-
-    Note:
-        Data is serialized as float64 numpy array before sending. One UDP
-        packet is sent per step() call. The receiving end is responsible
-        for proper deserialization of the binary data.
+    Transmits data as float64 numpy arrays via UDP packets to a configurable
+    target address. Each step() sends one packet with direct transmission.
     """
 
     DEFAULT_IP = "127.0.0.1"
@@ -55,14 +32,12 @@ class UDPSender(INode):
     def __init__(
         self, ip: Optional[str] = None, port: Optional[int] = None, **kwargs
     ):
-        """Initialize the UDP sender with target address and port.
+        """Initialize UDP sender with target address and port.
 
         Args:
-            ip: Target IP address for UDP transmission. If None, uses
-                DEFAULT_IP (localhost). Can be any valid IPv4 address.
-            port: Target port number for UDP transmission. If None, uses
-                DEFAULT_PORT. Must be a valid port number (1-65535).
-            **kwargs: Additional arguments passed to parent INode class.
+            ip: Target IP address. Defaults to localhost if None.
+            port: Target port number. Defaults to DEFAULT_PORT if None.
+            **kwargs: Additional arguments for parent INode.
         """
         # Use default values if not specified
         if ip is None:
@@ -78,18 +53,12 @@ class UDPSender(INode):
         self._target = (ip, port)  # Target address tuple
 
     def start(self):
-        """Start the UDP sender and initialize socket connection.
+        """Start UDP sender and initialize socket connection.
 
-        Creates a UDP socket and configures the target address from
-        the current configuration. The socket is ready for immediate
-        data transmission after this method completes.
+        Creates UDP socket and configures target address from configuration.
 
         Raises:
-            OSError: If socket creation fails or address is invalid.
-
-        Note:
-            The target address is read from configuration to support
-            dynamic address changes between start/stop cycles.
+            OSError: If socket creation fails.
         """
         # Create UDP socket for data transmission
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -104,16 +73,7 @@ class UDPSender(INode):
         super().start()
 
     def stop(self):
-        """Stop the UDP sender and clean up socket resources.
-
-        Properly closes the UDP socket if it exists and resets the
-        socket reference to None. This ensures clean resource cleanup
-        and prevents potential network resource leaks.
-
-        Note:
-            Socket closure is handled gracefully - if the socket is
-            already closed or None, no error is raised.
-        """
+        """Stop UDP sender and clean up socket resources."""
         # Close socket and clean up resources
         if self._socket:
             self._socket.close()
@@ -125,22 +85,14 @@ class UDPSender(INode):
     def setup(
         self, data: dict[str, np.ndarray], port_context_in: dict[str, dict]
     ) -> dict[str, dict]:
-        """Setup method called before processing begins.
-
-        This method is called during pipeline initialization but requires
-        no specific setup for UDP transmission since all configuration
-        is handled during start().
+        """Setup method for pipeline initialization.
 
         Args:
-            data: Dictionary of input data arrays from connected ports.
+            data: Input data arrays from connected ports.
             port_context_in: Context information from input ports.
 
         Returns:
-            Empty dictionary as this is a sink node with no output context.
-
-        Note:
-            UDP transmission requires no data-dependent configuration,
-            so this method simply returns an empty context dictionary.
+            Empty dictionary (sink node has no output context).
         """
         # No setup required for UDP transmission
         return {}
@@ -148,21 +100,13 @@ class UDPSender(INode):
     def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
         """Process and transmit data via UDP.
 
-        Retrieves data from the default input port, converts it to float64
-        format, serializes it to bytes, and transmits it via UDP to the
-        configured target address.
+        Converts data to float64, serializes to bytes, and sends via UDP.
 
         Args:
-            data: Dictionary containing input data arrays. Uses the default
-                input port to retrieve data for transmission.
+            data: Input data arrays. Uses default input port.
 
         Returns:
-            Empty dictionary as this is a sink node with no output data.
-
-        Note:
-            Data is automatically converted to float64 format before
-            serialization to ensure consistent network representation.
-            Each call results in exactly one UDP packet transmission.
+            Empty dictionary (sink node has no output).
         """
         # Get data from default input port
         d = data[Constants.Defaults.PORT_IN]

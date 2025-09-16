@@ -17,24 +17,8 @@ OUT_PORT = Constants.Defaults.PORT_OUT
 class FixedRateSource(Source):
     """Fixed-rate source for continuous data generation at sampling rate.
 
-    This class implements a source that generates data at a fixed sampling rate
-    using a background thread. It maintains precise timing by tracking expected
-    sample times and adjusting sleep periods to compensate for delays.
-
-    Features:
-    - Precise timing control with drift compensation
-    - Background threading for non-blocking operation
-    - Configurable sampling rate validation
-    - Automatic context propagation with sampling rate information
-
-    Attributes:
-        _running: Flag indicating if the background thread is active
-        _thread: Background thread for data generation
-        _time_start: Timestamp when data generation started
-
-    Note:
-        The source uses absolute timing to prevent cumulative drift and
-        handles timing lag gracefully by skipping excessive sleep periods.
+    Generates data at fixed sampling rate using background thread with
+    precise timing control and drift compensation.
     """
 
     class Configuration(Source.Configuration):
@@ -65,14 +49,13 @@ class FixedRateSource(Source):
         output_ports: Optional[list[OPort.Configuration]] = None,
         **kwargs,
     ):
-        """Initialize the fixed-rate source with sampling configuration.
+        """Initialize fixed-rate source with sampling configuration.
 
         Args:
             sampling_rate: Sampling rate in Hz for data generation.
-                Must be positive. Higher rates require more precise timing.
-            output_ports: List of output port configurations. If None,
-                default port configuration will be used.
-            **kwargs: Additional arguments passed to parent Source class.
+            output_ports: List of output port configurations. Defaults to
+                default port configuration if None.
+            **kwargs: Additional arguments for parent Source class.
         """
         # Initialize parent source with configuration
         Source.__init__(
@@ -88,15 +71,10 @@ class FixedRateSource(Source):
         self._time_start: Optional[float] = None
 
     def start(self):
-        """Start the fixed-rate source and begin data generation.
+        """Start fixed-rate source and begin data generation.
 
-        Initializes the parent source and starts the background thread
-        for continuous data generation at the specified sampling rate.
-
-        Note:
-            The background thread is created as a daemon thread to ensure
-            clean shutdown when the main program exits. Data generation
-            begins immediately after the thread starts.
+        Initializes parent source and starts background thread for continuous
+        data generation at specified sampling rate.
         """
         # Start parent source first
         Source.start(self)
@@ -110,15 +88,9 @@ class FixedRateSource(Source):
             self._thread.start()
 
     def stop(self):
-        """Stop the fixed-rate source and terminate data generation.
+        """Stop fixed-rate source and terminate data generation.
 
-        Signals the background thread to stop and waits for it to complete.
-        The parent stop method handles the main cleanup.
-
-        Note:
-            The method waits up to 500ms for the thread to join. After this
-            timeout, the thread will be abandoned but should terminate
-            shortly due to daemon status.
+        Signals background thread to stop and waits for completion.
         """
         # Stop parent source first
         Source.stop(self)
@@ -132,21 +104,8 @@ class FixedRateSource(Source):
     def _thread_function(self):
         """Background thread function for fixed-rate data generation.
 
-        This method runs continuously in a background thread, generating
-        data at precise intervals determined by the sampling rate. It uses
-        absolute timing to prevent cumulative drift and handles timing
-        delays gracefully.
-
-        The timing algorithm:
-        1. Calculate expected time for next sample based on sample count
-        2. Compare with current time to determine sleep duration
-        3. Sleep only if duration is > 1ms (avoid inaccurate short sleeps)
-        4. Handle timing lag by proceeding immediately when behind schedule
-
-        Note:
-            Uses time.time() for wall-clock timing and maintains sample
-            count to calculate absolute expected times, preventing drift
-            accumulation that would occur with relative timing.
+        Runs continuously generating data at precise intervals using absolute
+        timing to prevent cumulative drift. Handles timing delays gracefully.
         """
         # Get configured sampling rate
         rate = self.config[FixedRateSource.Configuration.Keys.SAMPLING_RATE]
@@ -188,22 +147,12 @@ class FixedRateSource(Source):
     ) -> dict[str, dict]:
         """Setup output port contexts with sampling rate information.
 
-        Configures output port contexts by adding sampling rate information
-        to each configured output port. This ensures downstream nodes
-        receive accurate timing information for their processing.
-
         Args:
-            data: Dictionary of input data arrays (empty for source nodes).
+            data: Input data arrays (empty for source nodes).
             port_context_in: Input port contexts (empty for source nodes).
 
         Returns:
-            Dictionary of output port contexts with sampling_rate information
-            added to each configured output port.
-
-        Note:
-            The sampling rate is propagated to all output ports, enabling
-            downstream nodes to perform sample-rate dependent processing
-            such as filtering, windowing, and frequency analysis.
+            Dictionary of output port contexts with sampling_rate information.
         """
         # Call parent setup to initialize base contexts
         port_context_out = super().setup(data, port_context_in)

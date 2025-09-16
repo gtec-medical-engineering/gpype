@@ -9,30 +9,15 @@ PORT_OUT = Constants.Defaults.PORT_OUT
 
 
 class Keyboard(EventSource):
-    """
-    Keyboard input source for capturing key press and release events.
+    """Keyboard input source for capturing key press and release events.
 
-    This class provides real-time keyboard event capture for BCI applications,
-    enabling users to trigger events, control experiments, or provide input
-    through keyboard interactions. It monitors both key press and release
-    events, converting them to numerical values for pipeline processing.
-
-    The keyboard source runs in the background and triggers events whenever
-    keys are pressed or released. Key press events generate the virtual key
-    code, while key release events generate a value of 0.
-
-    Features:
-        - Real-time keyboard event monitoring
-        - Support for both printable and special keys
-        - Press and release event detection
-
-    Note:
-        Requires appropriate permissions for global keyboard monitoring.
-        May need to run with elevated privileges on some systems.
+    Provides real-time keyboard event capture. Monitors key press/release
+    events and convertings them to numerical values. Key press events
+    generate virtual key codes, release events generate 0.
     """
 
     # Source code fingerprint
-    FINGERPRINT = "0783b0f9b30cd1d85468d1f59cc15bec"
+    FINGERPRINT = "7f24dc70954bb6f71537fadeff31fad9"
 
     class Configuration(EventSource.Configuration):
         """Configuration class for Keyboard source parameters."""
@@ -43,12 +28,10 @@ class Keyboard(EventSource):
             pass
 
     def __init__(self, **kwargs):
-        """
-        Initialize the keyboard event source.
+        """Initialize keyboard event source.
 
         Args:
-            **kwargs: Additional configuration parameters passed to
-                EventSource base class.
+            **kwargs: Additional configuration parameters for EventSource.
         """
         # Initialize parent EventSource
         EventSource.__init__(self, **kwargs)
@@ -59,15 +42,12 @@ class Keyboard(EventSource):
         self._release_listener = None
 
     def _on_press(self, key):
-        """
-        Handle keyboard key press events.
+        """Handle keyboard key press events.
 
-        This callback is invoked when any key is pressed. It extracts the
-        virtual key code and triggers an event in the BCI pipeline.
+        Extracts virtual key code and triggers an event.
 
         Args:
-            key: The pressed key object from pynput library.
-                Can be KeyCode (printable keys) or Key (special keys).
+            key: Pressed key object from pynput (KeyCode or Key).
         """
         # Extract virtual key code based on key type
         if isinstance(key, KeyCode):  # Printable keys (letters, digits, etc.)
@@ -83,25 +63,21 @@ class Keyboard(EventSource):
         self.trigger(key_value)
 
     def _on_release(self, key):
-        """
-        Handle keyboard key release events.
+        """Handle keyboard key release events.
 
-        This callback is invoked when any key is released. It triggers
-        an event with value 0 to indicate key release.
+        Triggers an event with value 0 to indicate key release.
 
         Args:
-            key: The released key object from pynput library.
+            key: Released key object from pynput.
         """
         # Always trigger 0 for key release events
         self.trigger(0)
 
     def start(self):
-        """
-        Start keyboard event monitoring.
+        """Start keyboard event monitoring.
 
-        Initializes and starts the keyboard listeners for both press and
-        release events. The listeners run in background threads to avoid
-        blocking the main application.
+        Initializes and starts keyboard listeners for press and release events
+        in background threads.
         """
         # Only start if not already running
         if not self._running:
@@ -121,11 +97,9 @@ class Keyboard(EventSource):
         EventSource.start(self)
 
     def stop(self):
-        """
-        Stop keyboard event monitoring and cleanup resources.
+        """Stop keyboard event monitoring and cleanup resources.
 
-        Stops the keyboard listeners and waits for their threads to complete.
-        This ensures clean shutdown and proper resource cleanup.
+        Stops keyboard listeners and waits for their threads to complete.
         """
         # Stop parent EventSource first
         EventSource.stop(self)

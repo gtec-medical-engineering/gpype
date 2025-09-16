@@ -13,31 +13,10 @@ PORT_OUT = Constants.Defaults.PORT_OUT
 class GenericFilter(IONode):
     """Generic Linear Time-Invariant (LTI) digital filter for real-time use.
 
-    This class implements a flexible LTI filter using transfer function
-    coefficients (numerator 'b' and denominator 'a' polynomials). It
-    automatically converts to second-order sections (SOS) for improved
-    numerical stability and maintains internal state for continuous
-    processing of streaming data.
-
-    The filter supports both FIR (Finite Impulse Response) and IIR
-    (Infinite Impulse Response) implementations, making it suitable for
-    a wide range of signal processing applications in BCI and real-time
-    systems.
-
-    The transfer function is defined as:
-        H(z) = (b[0] + b[1]*z^-1 + ... + b[M]*z^-M) /
-               (a[0] + a[1]*z^-1 + ... + a[N]*z^-N)
-
-    This class uses second-order sections (SOS) internally instead of
-    direct form implementation to avoid numerical issues with high-order
-    filters or filters with coefficients spanning many orders of magnitude.
-
-    Attributes:
-        DEFAULT_ORDER: Default filter order (2) when not specified.
-        _sos: Second-order sections representation of the filter for
-            numerical stability.
-        _z: Filter state array maintaining continuity between processing
-            steps. Shape: (n_sections, n_states, n_channels).
+    Implements a flexible LTI filter using transfer function coefficients
+    (numerator 'b' and denominator 'a' polynomials). Converts to second-order
+    sections for numerical stability and maintains state for streaming data.
+    Supports both FIR and IIR implementations.
     """
 
     DEFAULT_ORDER = 2
@@ -55,10 +34,8 @@ class GenericFilter(IONode):
         """Initialize the generic filter with transfer function coefficients.
 
         Args:
-            b: Numerator coefficients of the transfer function. Must be a
-                non-empty numpy array.
-            a: Denominator coefficients of the transfer function. Must be a
-                non-empty numpy array with non-zero first element.
+            b: Numerator coefficients of the transfer function.
+            a: Denominator coefficients of the transfer function.
             **kwargs: Additional arguments passed to parent IONode class.
 
         Raises:
@@ -82,9 +59,8 @@ class GenericFilter(IONode):
     ) -> dict[str, dict]:
         """Setup the generic filter before processing begins.
 
-        This method converts the transfer function to second-order sections
-        for numerical stability and initializes the filter state based on
-        the channel configuration.
+        Converts transfer function to second-order sections for numerical
+        stability and initializes filter state based on channel configuration.
 
         Args:
             data: Initial data dictionary (not used in setup).
@@ -130,12 +106,12 @@ class GenericFilter(IONode):
     def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
         """Apply the generic filter to input data.
 
-        Processes the input data through the filter while maintaining
-        filter state for continuous operation across processing steps.
+        Processes input data through the filter while maintaining filter
+        state for continuous operation across processing steps.
 
         Args:
             data: Dictionary containing input data with key PORT_IN.
-                Input data should be 2D array (samples x channels).
+                Input should be 2D array (samples x channels).
 
         Returns:
             Dictionary with filtered data under key PORT_OUT.

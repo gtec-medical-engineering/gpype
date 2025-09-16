@@ -7,27 +7,18 @@ from xml.dom import minidom
 
 
 class _Settings(dict):
-    """
-    Singleton settings manager for g.Pype application configuration.
+    """Singleton settings manager for g.Pype application configuration.
 
-    Manages persistent application settings stored in XML format in
-    platform-specific system directories. Provides automatic type
-    conversion, default value handling, and thread-safe singleton access.
+    Manages persistent settings stored in XML format in platform-specific
+    directories. Provides automatic type conversion, default values,
+    and thread-safe singleton access.
 
-    The settings are stored as XML files in:
+    Storage locations:
     - Windows: %PROGRAMDATA%/gtec/gPype/settings.xml
     - macOS: ~/Library/Application Support/gtec/gPype/settings.xml
 
-    Features:
-        - Singleton pattern for global access
-        - Automatic type conversion (bool, int, float, string)
-        - Default value initialization
-        - Platform-specific storage locations
-        - XML persistence with pretty formatting
-
     Note:
         Use Settings.get() to access the singleton instance.
-        Direct instantiation will raise a RuntimeError.
     """
 
     # Default settings applied on first initialization
@@ -37,11 +28,10 @@ class _Settings(dict):
     _instance: Optional["_Settings"] = None
 
     def __init__(self):
-        """
-        Initialize the settings singleton instance.
+        """Initialize the settings singleton instance.
 
-        Loads existing settings from the XML file, applies default values
-        for any missing keys, and saves the updated configuration.
+        Loads existing settings from XML file, applies default values
+        for missing keys, and saves the updated configuration.
 
         Raises:
             RuntimeError: If an instance already exists. Use get() instead.
@@ -80,12 +70,10 @@ class _Settings(dict):
 
     @staticmethod
     def get() -> "_Settings":
-        """
-        Get the singleton settings instance.
+        """Get the singleton settings instance.
 
         Creates the instance if it doesn't exist, otherwise returns
-        the existing instance. This is the preferred way to access
-        the settings throughout the application.
+        the existing instance.
 
         Returns:
             _Settings: The singleton settings instance.
@@ -95,12 +83,7 @@ class _Settings(dict):
         return _Settings._instance
 
     def _get_settings_path(self) -> Path:
-        """
-        Determine platform-specific settings file path.
-
-        Returns the appropriate path for storing settings based on
-        the operating system conventions. Can be overridden using
-        the GPYPE_SETTINGS_DIR environment variable for testing.
+        """Determine platform-specific settings file path.
 
         Returns:
             Path: Full path to the settings XML file.
@@ -126,21 +109,11 @@ class _Settings(dict):
         return base / "gtec" / "gPype" / "settings.xml"
 
     def _ensure_path_exists(self):
-        """
-        Create the settings directory if it doesn't exist.
-
-        Ensures that the parent directory structure exists for the
-        settings file, creating all necessary intermediate directories.
-        """
+        """Create the settings directory if it doesn't exist."""
         self.file_path.parent.mkdir(parents=True, exist_ok=True)
 
     def _convert_type(self, value: str) -> Any:
-        """
-        Convert string values to appropriate Python types.
-
-        Attempts to convert string values to boolean, integer, float,
-        or keeps as string based on the content. This enables automatic
-        type handling when reading from XML.
+        """Convert string values to appropriate Python types.
 
         Args:
             value (str): String value to convert.
@@ -172,12 +145,7 @@ class _Settings(dict):
         return value
 
     def _read(self) -> dict[str, Any]:
-        """
-        Read settings from the XML file.
-
-        Parses the settings XML file and converts all values to appropriate
-        Python types using _convert_type(). Returns an empty dictionary
-        if the file doesn't exist or parsing fails.
+        """Read settings from the XML file.
 
         Returns:
             dict[str, Any]: Dictionary of setting key-value pairs.
@@ -202,13 +170,7 @@ class _Settings(dict):
             return {}
 
     def write(self):
-        """
-        Write current settings to the XML file.
-
-        Serializes all current settings to XML format with pretty formatting
-        and saves them to the settings file. Creates the directory structure
-        if it doesn't exist.
-        """
+        """Write current settings to the XML file with pretty formatting."""
         # Create XML root element
         root = ET.Element("Settings")
 

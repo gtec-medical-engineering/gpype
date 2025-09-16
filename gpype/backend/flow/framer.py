@@ -11,27 +11,13 @@ PORT_OUT = Constants.Defaults.PORT_OUT
 
 
 class Framer(IONode):
-    """
-    Frame aggregation node for combining single samples into frames.
+    """Frame aggregation node for combining single samples into frames.
 
-    The Framer node collects individual samples (frame size = 1) and
-    aggregates them into larger frames of a specified size. This is useful
-    for converting sample-by-sample data streams into frame-based processing,
-    which can improve computational efficiency and enable block-based
-    algorithms.
-
-    The node maintains an internal buffer that accumulates incoming samples
-    until a complete frame is assembled. Once a frame is ready, it outputs
-    the entire frame and starts collecting the next frame.
-
-    Features:
-        - Single sample to frame conversion
-        - Configurable output frame size
-        - Multi-channel support
-
-    Note:
-        Input data must have frame_size = 1. The node will raise an error
-        if the input frame size is not 1.
+    Collects individual samples (frame size = 1) and aggregates them into
+    larger frames of a specified size. Maintains an internal buffer that
+    accumulates samples until a complete frame is assembled, then outputs
+    the entire frame. Useful for converting sample-by-sample streams into
+    frame-based processing.
     """
 
     # Type annotation for the internal buffer
@@ -46,12 +32,11 @@ class Framer(IONode):
             FRAME_SIZE = Constants.Keys.FRAME_SIZE
 
     def __init__(self, frame_size: int = None, **kwargs):
-        """
-        Initialize the Framer node.
+        """Initialize the Framer node.
 
         Args:
-            frame_size (int, optional): Size of output frames to generate.
-                Must be a positive integer. Defaults to 1 if None.
+            frame_size: Size of output frames to generate. Must be a positive
+                integer. Defaults to 1 if None.
             **kwargs: Additional configuration parameters passed to IONode.
 
         Raises:
@@ -77,20 +62,19 @@ class Framer(IONode):
     def setup(
         self, data: dict[str, np.ndarray], port_context_in: dict[str, dict]
     ) -> dict[str, dict]:
-        """
-        Set up the Framer node and allocate the internal buffer.
+        """Set up the Framer node and allocate the internal buffer.
 
-        Validates the input port configuration and initializes the internal
-        buffer based on the output frame size and channel count. The input
-        must have frame_size = 1 for proper single-sample aggregation.
+        Validates input port configuration and initializes the internal buffer
+        based on output frame size and channel count. Input must have
+        frame_size = 1 for proper single-sample aggregation.
 
         Args:
-            data (dict): Initial data dictionary for port configuration.
-            port_context_in (dict): Input port context information containing
-                frame size and channel count specifications.
+            data: Initial data dictionary for port configuration.
+            port_context_in: Input port context with frame size and channel
+                count specifications.
 
         Returns:
-            dict: Output port context with updated frame size information.
+            Output port context with updated frame size information.
 
         Raises:
             ValueError: If input frame size is not 1.
@@ -119,24 +103,19 @@ class Framer(IONode):
         return port_context_out
 
     def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
-        """
-        Process one sample and add it to the internal frame buffer.
+        """Process one sample and add it to the internal frame buffer.
 
-        Takes a single sample from the input and stores it in the appropriate
-        position within the internal buffer. When a complete frame has been
-        assembled (every frame_size samples), outputs the complete frame.
+        Takes a single sample from input and stores it in the buffer. When a
+        complete frame has been assembled (every frame_size samples), outputs
+        the complete frame.
 
         Args:
-            data (dict): Input data dictionary containing a single sample
-                with PORT_IN key. The sample should have shape (1, channels).
+            data: Input data dictionary containing a single sample with
+                PORT_IN key. Sample should have shape (1, channels).
 
         Returns:
-            dict: Output data dictionary with PORT_OUT key containing the
-                complete frame when ready, or None if frame is not complete.
-
-        Note:
-            The method uses modular arithmetic to cycle through buffer
-            positions, ensuring proper sample placement within frames.
+            Output data dictionary with PORT_OUT key containing the complete
+            frame when ready, or None if frame is not complete.
         """
         # Calculate buffer position using sample counter
         buf_idx = self.get_counter() % self._frame_size

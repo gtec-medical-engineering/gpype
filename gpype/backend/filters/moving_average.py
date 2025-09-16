@@ -11,25 +11,10 @@ from .base.generic_filter import GenericFilter
 class MovingAverage(GenericFilter):
     """Moving average filter for signal smoothing and noise reduction.
 
-    This class implements a moving average filter using various window
-    functions. Moving average filters are linear phase FIR filters that
-    smooth signals by averaging values within a sliding window.
-
-    The filter is commonly used in BCI applications for:
-    - Signal smoothing and noise reduction
-    - Trend analysis and baseline correction
-    - Feature extraction preprocessing
-
-    The implementation supports various window functions including rectangular
-    (boxcar), Hamming, Hanning, and others available in scipy.signal.
-
-    Attributes:
-        window_size: Length of the averaging window
-        window_function: Type of window function applied
-
-    Note:
-        Moving average filters introduce delay equal to (window_size-1)/2
-        samples, which should be considered in real-time applications.
+    Implements a moving average filter using various window functions. Moving
+    average filters are linear phase FIR filters that smooth signals by
+    averaging values within a sliding window. Supports window functions
+    including rectangular, Hamming, Hanning, and others.
     """
 
     class Configuration(GenericFilter.Configuration):
@@ -51,12 +36,10 @@ class MovingAverage(GenericFilter):
 
         Args:
             window_size: Number of samples in the averaging window.
-                Must be greater than 1. Larger windows provide more
-                smoothing but introduce more delay.
-            window_function: Type of window function to apply.
-                Supported functions include 'boxcar' (rectangular),
-                'hamming', 'hanning', 'blackman', etc. Defaults to
-                'boxcar' for standard moving average.
+                Must be greater than 1.
+            window_function: Type of window function to apply. Supported
+                functions include 'boxcar', 'hamming', 'hanning', etc.
+                Defaults to 'boxcar'.
             **kwargs: Additional arguments passed to parent GenericFilter.
 
         Raises:

@@ -13,30 +13,11 @@ OUT_PORT = Constants.Defaults.PORT_OUT
 
 
 class Source(ONode):
-    """Base class for data source nodes in the BCI pipeline.
+    """Base class for data source nodes in a pipeline.
 
-    This abstract base class provides the foundation for all data source
-    nodes that generate or acquire data in the g.Pype framework. Source
-    nodes have only output ports and serve as the entry points for data
-    into the processing pipeline.
-
-    The class handles validation and configuration of output ports,
-    channel counts, and frame sizes. It ensures that all sources provide
-    consistent metadata about their output data streams.
-
-    Features:
-    - Multiple output port support with individual configuration
-    - Channel count validation and configuration per port
-    - Frame size validation with consistency checks
-    - Delay property for timing adjustments
-    - Automatic context propagation to connected nodes
-
-    Attributes:
-        _delay: Timing delay in seconds for synchronization purposes
-
-    Note:
-        Source nodes cannot have input ports by design. All data
-        generation must happen internally within the source implementation.
+    Provides foundation for all data source nodes that generate or acquire
+    data. Sources have only output ports and serve as pipeline entry points.
+    Handles validation of output ports, channel counts, and frame sizes.
     """
 
     class Configuration(ONode.Configuration):
@@ -55,29 +36,18 @@ class Source(ONode):
         frame_size: Optional[Union[list, int]] = None,
         **kwargs,
     ):
-        """Initialize the source with output port configuration.
+        """Initialize source with output port configuration.
 
         Args:
-            output_ports: List of output port configurations. Must be provided
-                as source nodes require at least one output port.
-            channel_count: Number of channels for each output port. Can be:
-                - None: defaults to 1 channel per port
-                - int: same channel count for all ports
-                - list: individual channel count per port
-                Must be >= 1 or Constants.INHERITED.
-            frame_size: Number of samples per frame for each output port.
-                Can be:
-                - None: defaults to 1 sample per frame
-                - int: same frame size for all ports
-                - list: individual frame size per port
-                Must be >= 1 or Constants.INHERITED, and all non-inherited
-                values must be equal.
-            **kwargs: Additional arguments passed to parent ONode class.
+            output_ports: List of output port configurations. Required.
+            channel_count: Number of channels per port. Can be int (all ports)
+                or list (per port). Defaults to 1. Must be >= 1 or INHERITED.
+            frame_size: Samples per frame. Can be int (all ports) or list
+                (per port). Defaults to 1. Must be >= 1 or INHERITED.
+            **kwargs: Additional arguments for parent ONode class.
 
         Raises:
-            ValueError: If output_ports is None, if channel_count or
-                frame_size contain invalid values, if lengths don't match,
-                or if input_ports is specified (sources cannot have inputs).
+            ValueError: If validation fails or input_ports specified.
         """
         # Validate that output_ports is provided (required for sources)
         if output_ports is None:
@@ -151,11 +121,7 @@ class Source(ONode):
         """Get the timing delay in seconds.
 
         Returns:
-            Current delay value in seconds used for timing synchronization.
-
-        Note:
-            Delay can be used to synchronize multiple sources or compensate
-            for processing latencies in the pipeline.
+            Current delay value in seconds for timing synchronization.
         """
         return self._delay
 
@@ -164,15 +130,10 @@ class Source(ONode):
         """Set the timing delay in seconds.
 
         Args:
-            value: Delay value in seconds. Must be non-negative as negative
-                delays are not physically meaningful in real-time systems.
+            value: Delay value in seconds. Must be non-negative.
 
         Raises:
             ValueError: If value is negative.
-
-        Note:
-            Changing delay during operation may affect timing consistency.
-            It's recommended to set delay before starting the pipeline.
         """
         if value < 0:
             raise ValueError("Delay must be non-negative.")
@@ -183,22 +144,13 @@ class Source(ONode):
     ) -> dict[str, dict]:
         """Setup output port contexts with channel and frame information.
 
-        This method configures the output port contexts by propagating
-        channel count and frame size information to connected downstream
-        nodes. Each output port receives its specific configuration.
-
         Args:
-            data: Dictionary of input data arrays (empty for source nodes).
+            data: Input data arrays (empty for source nodes).
             port_context_in: Input port contexts (empty for source nodes).
 
         Returns:
             Dictionary of output port contexts with channel_count and
-            frame_size information for each configured output port.
-
-        Note:
-            The setup method ensures that downstream nodes receive accurate
-            metadata about the data streams they will process. This includes
-            the number of channels and samples per frame for each port.
+            frame_size information for each output port.
         """
         # Call parent setup method to initialize base contexts
         port_context_out = super().setup(data, port_context_in)

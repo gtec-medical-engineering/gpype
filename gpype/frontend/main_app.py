@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import os
+import platform
+import subprocess
+import sys
 from pathlib import Path
 
 from PySide6.QtGui import QIcon
@@ -10,23 +13,11 @@ from .widgets.base.widget import Widget
 
 
 class MainApp:
-    """
-    Main application class for g.Pype frontend applications.
+    """Main application class for g.Pype frontend applications.
 
-    Provides a simple framework for creating PyQt6-based applications
-    with widget management, window configuration, and lifecycle handling.
-    Uses composition over inheritance for better flexibility and testability.
-
-    The application manages a collection of widgets, handles window setup,
-    and coordinates application startup and shutdown procedures.
-
-    Features:
-        - Automatic QApplication creation and management
-        - Window configuration with icon and positioning
-        - Widget lifecycle management (run/terminate)
-        - Graceful application shutdown handling
-        - Support for dependency injection (testing)
-        - Grid-based layout system (MATLAB subplot-style)
+    Provides framework for creating PyQt6-based applications with widget
+    management, window configuration, and lifecycle handling. Uses
+    composition for better flexibility and testability.
 
     Attributes:
         DEFAULT_POSITION: Default window geometry [x, y, width, height].
@@ -35,7 +26,7 @@ class MainApp:
     """
 
     # Default window geometry configuration
-    DEFAULT_POSITION = [100, 100, 800, 600]  # [x, y, width, height]
+    DEFAULT_POSITION = [100, 100, 700, 400]  # [x, y, width, height]
 
     # Default grid size (rows, cols)
     DEFAULT_GRID_SIZE = [3, 3]
@@ -49,13 +40,9 @@ class MainApp:
         position: list[int] = None,
         grid_size: list[int] = None,
         app=None,
+        prevent_sleep: bool = True,
     ):
-        """
-        Initialize the main application with window and widget management.
-
-        Sets up the QApplication, main window, grid layout system, and event
-        handling for a complete g.Pype frontend application. Supports
-        dependency injection for testing purposes.
+        """Initialize the main application with window and widget management.
 
         Args:
             caption: Window title text displayed in the title bar.
@@ -65,6 +52,8 @@ class MainApp:
                 Uses DEFAULT_GRID_SIZE if None.
             app: Existing QApplication instance for testing or integration.
                 Creates new QApplication if None.
+            prevent_sleep: Whether to prevent system sleep/power saving.
+                Default True for real-time applications.
         """
         # Create or use existing QApplication (composition over inheritance)
         # This allows for better testability and flexibility
@@ -73,9 +62,11 @@ class MainApp:
         # Initialize widget collection for lifecycle management
         self._widgets: list[Widget] = []
 
-        # Store grid configuration
+        # Store configuration
         self._grid_size = grid_size or MainApp.DEFAULT_GRID_SIZE
         self._grid_rows, self._grid_cols = self._grid_size
+        self._prevent_sleep = prevent_sleep
+        self._sleep_prevention_active = False
 
         # Create and configure main window
         self._window = QMainWindow()
@@ -104,12 +95,11 @@ class MainApp:
         self._app.aboutToQuit.connect(self._on_quit)
 
     def add_widget(self, widget: Widget, grid_positions: list[int] = None):
-        """
-        Add a widget to the application layout and management system.
+        """Add a widget to the application layout and management system.
 
         Registers the widget for lifecycle management and adds it to the
-        main window's grid layout. The widget will be automatically
-        started during run() and terminated during shutdown.
+        main window's grid layout. Widget will be automatically started
+        during run() and terminated during shutdown.
 
         Args:
             widget: Widget instance to add to the application.
@@ -117,16 +107,6 @@ class MainApp:
             grid_positions: List of grid positions (1-indexed) to span.
                 For a 3x3 grid: [1,2,3] spans top row, [1,4,7] spans left col.
                 If None, adds to next available position.
-
-        Example:
-            For a 3x3 grid numbered as:
-            [1] [2] [3]
-            [4] [5] [6]
-            [7] [8] [9]
-
-            app.add_widget(w, [1,2,3])  # Top row
-            app.add_widget(w, [1,4])    # Top-left 2x1 rectangle
-            app.add_widget(w, [5])      # Center cell only
         """
         # Register widget for lifecycle management
         self._widgets.append(widget)
@@ -154,30 +134,194 @@ class MainApp:
                 widget.widget, start_row, start_col, row_span, col_span
             )
 
+    def _enable_sleep_prevention(self):
+        """Enable system sleep prevention based on the current platform."""
+        if not self._prevent_sleep or self._sleep_prevention_active:
+            return
+
+        system = platform.system()
+
+        try:
+            if system == "Windows":
+                self._prevent_sleep_windows()
+            elif system == "Darwin":  # macOS
+                self._prevent_sleep_macos()
+            else:
+                print(f"Sleep prevention not implemented for {system}")
+                return
+
+            self._sleep_prevention_active = True
+        except Exception as e:
+            print(f"Failed to enable sleep prevention: {e}")
+
+    def _disable_sleep_prevention(self):
+        """Disable system sleep prevention and restore normal power mgmt."""
+        if not self._sleep_prevention_active:
+            return
+
+        system = platform.system()
+
+        try:
+            if system == "Windows":
+                self._restore_sleep_windows()
+            elif system == "Darwin":  # macOS
+                self._restore_sleep_macos()
+
+            self._sleep_prevention_active = False
+        except Exception as e:
+            print(f"Failed to disable sleep prevention: {e}")
+
+    def _prevent_sleep_windows(self):
+        """Prevent sleep on Windows using SetThreadExecutionState."""
+        try:
+            import ctypes
+            from ctypes import wintypes
+
+            # Constants for SetThreadExecutionState
+            ES_CONTINUOUS = 0x80000000
+            ES_SYSTEM_REQUIRED = 0x00000001
+            ES_DISPLAY_REQUIRED = 0x00000002
+            ES_AWAYMODE_REQUIRED = 0x00000040
+
+            # Prevent system sleep and display sleep
+            execution_state = (
+                ES_CONTINUOUS
+                | ES_SYSTEM_REQUIRED
+                | ES_DISPLAY_REQUIRED
+                | ES_AWAYMODE_REQUIRED
+            )
+
+            kernel32 = ctypes.windll.kernel32
+            kernel32.SetThreadExecutionState.argtypes = [wintypes.DWORD]
+            kernel32.SetThreadExecutionState.restype = wintypes.DWORD
+
+            result = kernel32.SetThreadExecutionState(execution_state)
+            if not result:
+                raise RuntimeError("SetThreadExecutionState failed")
+
+        except ImportError:
+            raise RuntimeError("Windows API not available")
+
+    def _restore_sleep_windows(self):
+        """Restore normal sleep behavior on Windows."""
+        try:
+            import ctypes
+            from ctypes import wintypes
+
+            # ES_CONTINUOUS without other flags restores normal behavior
+            ES_CONTINUOUS = 0x80000000
+
+            kernel32 = ctypes.windll.kernel32
+            kernel32.SetThreadExecutionState.argtypes = [wintypes.DWORD]
+            kernel32.SetThreadExecutionState.restype = wintypes.DWORD
+
+            kernel32.SetThreadExecutionState(ES_CONTINUOUS)
+
+        except ImportError:
+            pass  # Silently fail if Windows API not available
+
+    def _prevent_sleep_macos(self):
+        """Prevent sleep on macOS using caffeinate or IOKit."""
+        try:
+            import subprocess
+
+            # Try to use caffeinate command (available on macOS 10.8+)
+            self._caffeinate_process = subprocess.Popen(
+                ["caffeinate", "-d", "-i", "-m", "-s"]
+            )
+        except (FileNotFoundError, subprocess.SubprocessError):
+            try:
+                # Fallback to IOKit (requires pyobjc)
+                self._prevent_sleep_macos_iokit()
+            except ImportError:
+                raise RuntimeError(
+                    "macOS sleep prevention requires caffeinate command "
+                    "or pyobjc library"
+                )
+
+    def _prevent_sleep_macos_iokit(self):
+        """Prevent sleep on macOS using IOKit (requires pyobjc)."""
+        try:
+            import Cocoa  # noqa: F401
+            from CoreFoundation import kCFStringEncodingUTF8  # noqa: F401
+
+            # Create assertion to prevent sleep
+            reason = Cocoa.CFStringCreateWithCString(
+                None, "g.Pype Application", kCFStringEncodingUTF8
+            )
+
+            # Import IOKit functions
+            from IOKit import IOPMAssertionCreateWithName  # noqa: F401
+            from IOKit import kIOPMAssertionTypeNoDisplaySleep
+
+            success, self._sleep_assertion_id = IOPMAssertionCreateWithName(
+                kIOPMAssertionTypeNoDisplaySleep,
+                255,  # kIOPMAssertionLevelOn
+                reason,
+                None,
+            )
+
+            if not success:
+                raise RuntimeError("Failed to create IOKit assertion")
+
+        except ImportError:
+            raise ImportError("pyobjc library required for IOKit method")
+
+    def _restore_sleep_macos(self):
+        """Restore normal sleep behavior on macOS."""
+        # Terminate caffeinate process if running
+        if hasattr(self, "_caffeinate_process"):
+            try:
+                self._caffeinate_process.terminate()
+                self._caffeinate_process.wait(timeout=5)
+            except (AttributeError, subprocess.TimeoutExpired):
+                try:
+                    self._caffeinate_process.kill()
+                except AttributeError:
+                    pass
+            finally:
+                delattr(self, "_caffeinate_process")
+
+        # Release IOKit assertion if created
+        if hasattr(self, "_sleep_assertion_id"):
+            try:
+                from IOKit import IOPMAssertionRelease  # noqa: F401
+
+                IOPMAssertionRelease(self._sleep_assertion_id)
+            except ImportError:
+                pass
+            finally:
+                delattr(self, "_sleep_assertion_id")
+
     def _on_quit(self):
-        """
-        Handle application shutdown cleanup.
+        """Handle application shutdown cleanup.
 
         Called automatically when the QApplication is about to quit.
-        Ensures all registered widgets are properly terminated to
-        prevent resource leaks and data corruption.
+        Ensures all registered widgets are properly terminated and
+        restores normal sleep behavior.
         """
+        # Disable sleep prevention before terminating widgets
+        self._disable_sleep_prevention()
+
         # Terminate all widgets gracefully
         for widget in self._widgets:
             widget.terminate()
 
     def run(self) -> int:
-        """
-        Start the application and enter the main event loop.
+        """Start the application and enter the main event loop.
 
-        Shows the main window, starts all registered widgets, and enters
-        the Qt event loop. This method blocks until the application is
-        closed by the user or programmatically terminated.
+        Shows the main window, starts all registered widgets, enables
+        sleep prevention if configured, and enters the Qt event loop.
+        Blocks until the application is closed.
 
         Returns:
             int: Application exit code. 0 indicates successful execution,
                 non-zero values indicate errors or abnormal termination.
         """
+        # Enable sleep prevention if configured
+        if self._prevent_sleep:
+            self._enable_sleep_prevention()
+
         # Show the main window
         self._window.show()
 

@@ -9,20 +9,15 @@ from ...common.constants import Constants
 class IPort(ioc.IPort):
     """Input port class for g.Pype signal processing nodes.
 
-    IPort extends the ioiocore.IPort to provide g.Pype-specific functionality
-    for input ports. It handles data input with configurable timing modes and
-    type validation for signal processing pipelines.
-
-    The port supports different timing modes (synchronous/asynchronous) and
-    automatic type inference for numpy arrays, making it suitable for
-    real-time signal processing applications.
+    Extends ioiocore.IPort with g.Pype-specific functionality for handling
+    data input with configurable timing modes and type validation.
     """
 
     class Configuration(ioc.IPort.Configuration):
         """Configuration class for IPort with g.Pype-specific extensions."""
 
         class Keys(ioc.IPort.Configuration.Keys):
-            """Configuration keys inherited from ioiocore with extensions."""
+            """Configuration keys inherited from ioiocore."""
 
             pass
 
@@ -35,16 +30,10 @@ class IPort(ioc.IPort):
         """Initialize the input port with g.Pype-specific defaults.
 
         Args:
-            name: Name of the input port. Defaults to the standard input port
-                name defined in Constants.Defaults.PORT_IN.
-            timing: Timing mode for the port (SYNC or ASYNC). Defaults to
-                synchronous timing for real-time processing.
-            **kwargs: Additional configuration parameters passed to the parent
-                class, including 'type' for data type specification.
-
-        Note:
-            If no 'type' is specified in kwargs, it defaults to np.ndarray
-            which is the standard data type for signal processing in g.Pype.
+            name: Name of the input port.
+            timing: Timing mode (SYNC or ASYNC). Defaults to SYNC.
+            **kwargs: Additional configuration parameters including 'type'.
+                Defaults to np.ndarray if not specified.
         """
         # Extract and set default type for signal processing
         type_key = self.Configuration.Keys.TYPE

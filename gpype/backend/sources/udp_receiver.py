@@ -11,36 +11,15 @@ PORT_OUT = Constants.Defaults.PORT_OUT
 
 
 class UDPReceiver(EventSource):
-    """
-    UDP network receiver for capturing remote trigger events.
+    """UDP network receiver for capturing remote trigger events.
 
-    This class provides network-based event capture for BCI applications,
-    enabling remote systems to send trigger signals via UDP packets. It
-    listens on a specified IP address and port for incoming messages,
-    parsing them to extract trigger values.
-
-    The receiver supports plain integer message format where the entire
-    UDP packet content should be a numeric string (e.g., "123").
-
-    Each received trigger generates two events: first the trigger value,
-    then immediately a value of 0 to indicate trigger completion.
-
-    Features:
-        - UDP network communication
-        - Non-blocking socket operation
-        - Plain integer message format
-        - Background thread operation
-        - Configurable IP address and port
-        - Automatic trigger completion signaling
-
-    Note:
-        Requires network permissions and available UDP port.
-        Firewall settings may need adjustment for remote connections.
-        Only numeric string messages are supported (e.g., "123", "42").
+    Provides network-based event capture. Listens on specified IP/port
+    for UDP packets containing numeric trigger values. Each trigger
+    outputs the received value, followed immediately by a zero.
     """
 
     # Source code fingerprint
-    FINGERPRINT = "16094605bf234cec0f98f6edf2392b8d"
+    FINGERPRINT = "e4558a93e67f779b9a8fd010962ebc93"
 
     # Default network configuration
     DEFAULT_IP: str = "127.0.0.1"  # Localhost
@@ -58,17 +37,13 @@ class UDPReceiver(EventSource):
     def __init__(
         self, ip: str = DEFAULT_IP, port: int = DEFAULT_PORT, **kwargs
     ):
-        """
-        Initialize the UDP receiver.
+        """Initialize UDP receiver.
 
         Args:
-            ip (str): IP address to bind the UDP socket to. Use "0.0.0.0"
-                to listen on all available interfaces, or "127.0.0.1" for
-                localhost only. Defaults to localhost.
-            port (int): UDP port number to listen on. Must be available
-                and not blocked by firewall. Defaults to 1000.
-            **kwargs: Additional configuration parameters passed to
-                EventSource base class.
+            ip: IP address to bind socket to. Use "0.0.0.0" for all interfaces
+                or "127.0.0.1" for localhost. Defaults to localhost.
+            port: UDP port number to listen on. Defaults to 1000.
+            **kwargs: Additional parameters for EventSource base class.
         """
         # Initialize parent EventSource with network configuration
         super().__init__(ip=ip, port=port, **kwargs)
@@ -80,19 +55,11 @@ class UDPReceiver(EventSource):
         self._t_start = None  # Start time tracking
 
     def _udp_listener(self):
-        """
-        Background thread function for UDP message reception.
+        """Background thread function for UDP message reception.
 
-        Creates and manages the UDP socket, continuously listening for
-        incoming messages. Parses received data and triggers appropriate
-        events in the BCI pipeline. Runs until _udp_thread_running is False.
-
-        Message format:
-        - Plain integers only: "123" -> triggers 123, then 0
-
-        The method uses select() for non-blocking operation to allow
-        clean shutdown when requested. Only numeric string messages
-        are accepted; non-numeric messages are silently ignored.
+        Creates UDP socket and continuously listens for incoming messages.
+        Parses numeric string data and triggers events. Uses select() for
+        non-blocking operation to allow clean shutdown.
         """
         # Create UDP socket for receiving messages
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -138,12 +105,10 @@ class UDPReceiver(EventSource):
                 continue
 
     def start(self):
-        """
-        Start the UDP receiver and begin listening for messages.
+        """Start UDP receiver and begin listening for messages.
 
-        Initializes the background UDP listener thread and starts monitoring
-        for incoming trigger messages. The receiver will continue operating
-        until stop() is called.
+        Initializes background UDP listener thread and starts monitoring
+        for incoming trigger messages.
         """
         # Start parent EventSource
         super().start()
@@ -160,12 +125,10 @@ class UDPReceiver(EventSource):
         self._t_start = time.perf_counter()
 
     def stop(self):
-        """
-        Stop the UDP receiver and cleanup network resources.
+        """Stop UDP receiver and cleanup network resources.
 
-        Stops the background listener thread, closes the UDP socket, and
-        waits for clean thread termination. This ensures proper resource
-        cleanup and network port release.
+        Stops background listener thread, closes UDP socket, and waits for
+        clean thread termination.
         """
         # Stop parent EventSource first
         super().stop()

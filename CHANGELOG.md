@@ -1,18 +1,23 @@
 # Changelog
 
+## [3.0.4] - 2025-09-16
+- Updated unit tests
+- Updated documentation
+- Fingerprints fixed
+
 ## [3.0.3] - 2025-08-04
 - BCI Core-8 source buffering optimized
-- updated build procedure
+- Updated build procedure
 
 ## [3.0.1] - 2025-07-17
-- small bugfix in examples
-- new build procedure
+- Small bugfix in examples
+- New build procedure
 
 ## [3.0.0] - 2025-07-15
-- moved from metadata to contexts
-- added various nodes (Framer, Decimator, ...)
-- implemented frames
-- implemented multirate support
+- Moved from metadata to contexts
+- Added various nodes (Framer, Decimator, ...)
+- Implemented frames
+- Implemented multirate support
 
 ## [2.1.2] - 2025-05-05
 - Added support for Python 3.8-3.13

@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (QComboBox, QFileDialog, QHBoxLayout, QLabel,
                                QMessageBox, QPushButton, QSizePolicy,
                                QSpacerItem, QWidget)
 
+from ...backend.sources.udp_receiver import UDPReceiver
 # Local imports
 from .base.widget import Widget
 
@@ -19,34 +20,41 @@ from .base.widget import Widget
 MINIMUM_BUTTON_WIDTH = 120
 
 
-class ParadigmPresenter(Widget):
-    """
-    Control widget for g.tec ParadigmPresenter integration.
+class ParadigmPresenter(Widget, UDPReceiver):
+    """Control widget for g.tec ParadigmPresenter integration.
 
-    Provides a user interface for loading, starting, and stopping paradigms
-    using the g.tec ParadigmPresenter library. Supports both folder-based
-    paradigm selection and manual file loading.
+    Provides interface for loading, starting, and stopping paradigms
+    using the g.tec ParadigmPresenter library. Inherits from UDPReceiver
+    to receive stimulus onset messages from ParadigmPresenter via UDP.
+    Supports folder-based paradigm selection and manual file loading.
     """
+
+    # Source code fingerprint
+    FINGERPRINT = "70ea1c44118f252b714c865617bfa0d5"
 
     def __init__(self, paradigm: str = None):
-        """
-        Initialize the ParadigmPresenter control widget.
+        """Initialize the ParadigmPresenter control widget.
+
+        Initializes both the Widget UI components and UDPReceiver for
+        receiving stimulus onset messages from ParadigmPresenter.
 
         Args:
             paradigm (str, optional): Path to paradigm file (.xml) or folder
-                containing paradigm files. If file, it will be loaded directly.
-                If folder, a dropdown will be created for paradigm selection.
-                If None, a file dialog will be used for loading.
+                containing paradigm files. If None, uses file dialog.
         """
         # Import gtec_pp here to avoid issues if not installed
         import gtec_pp as pp
 
         # Initialize base widget with horizontal layout
-        super().__init__(
+        Widget.__init__(
+            self,
             widget=QWidget(),
             name="ParadigmPresenter Control",
             layout=QHBoxLayout,
         )
+
+        # Initialize the UDP receiver
+        UDPReceiver.__init__(self)
 
         # Initialize the ParadigmPresenter instance
         self.paradigm_presenter = pp.ParadigmPresenter()
@@ -247,8 +255,7 @@ class ParadigmPresenter(Widget):
                     self.start_button.setEnabled(True)
 
     def _get_all_paradigms(self):
-        """
-        Discover all paradigm files in the root folder and subfolders.
+        """Discover all paradigm files in the root folder and subfolders.
 
         Returns:
             list: List of relative paths to valid paradigm XML files.
@@ -281,8 +288,7 @@ class ParadigmPresenter(Widget):
         return self._validate_paradigms(paradigms)
 
     def _validate_paradigms(self, paradigms):
-        """
-        Validate paradigm files by attempting to load them.
+        """Validate paradigm files by attempting to load them.
 
         Args:
             paradigms (list): List of paradigm file paths to validate.
@@ -305,8 +311,7 @@ class ParadigmPresenter(Widget):
         return valid_paradigms
 
     def terminate(self):
-        """
-        Clean up resources when the widget is terminated.
+        """Clean up resources when the widget is terminated.
 
         Closes ParadigmPresenter windows and shuts down the presenter
         before calling the parent terminate method.

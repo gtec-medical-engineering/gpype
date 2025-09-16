@@ -13,18 +13,9 @@ from .node import Node
 class INode(ioc.INode, Node):
     """Abstract base class for input-only nodes in the g.Pype pipeline.
 
-    INode combines the functionality of ioiocore.INode and Node to provide a
-    base class for nodes that only have input ports (no outputs). These are
-    typically sink nodes that consume data without producing output, such as
-    file writers, displays, or data loggers.
-
-    All INode subclasses must implement the step() method to define their
-    specific data consumption behavior. The setup() method validates input
-    port contexts and ensures required metadata is present.
-
-    Attributes:
-        Input ports are managed by the parent ioiocore.INode class.
-        Node-specific configuration is handled by the parent Node class.
+    Combines ioiocore.INode and Node functionality for nodes that consume
+    input data without producing outputs (e.g., file writers, displays).
+    Subclasses must implement the abstract step() method.
     """
 
     def __init__(
@@ -33,9 +24,8 @@ class INode(ioc.INode, Node):
         """Initialize the INode with input port configurations.
 
         Args:
-            input_ports: List of input port configurations. If None, default
-                configuration will be used.
-            **kwargs: Additional keyword arguments passed to parent classes.
+            input_ports: List of input port configurations or None.
+            **kwargs: Additional arguments passed to parent classes.
         """
         # Initialize ioiocore input node functionality
         ioc.INode.__init__(self, input_ports=input_ports, **kwargs)
@@ -45,27 +35,20 @@ class INode(ioc.INode, Node):
     def setup(
         self, data: dict[str, np.ndarray], port_context_in: dict[str, dict]
     ) -> dict[str, dict]:
-        """Setup the input node before processing begins.
+        """Setup the input node before pipeline processing begins.
 
-        This method validates that all input ports have the required metadata
-        and then delegates to the parent setup method for additional
-        processing.
+        Validates that all input ports have required metadata keys
+        (frame_size, channel_count) then delegates to parent setup.
 
         Args:
-            data: Dictionary mapping port names to numpy arrays containing
-                initial data (typically not used in setup).
-            port_context_in: Dictionary mapping input port names to their
-                context dictionaries containing metadata like sampling_rate,
-                channel_count, frame_size, and type.
+            data: Dictionary mapping port names to numpy arrays.
+            port_context_in: Dictionary mapping port names to context dicts.
 
         Returns:
-            Dictionary mapping port names to their context dictionaries.
-            For input-only nodes, this typically returns the input contexts
-            unchanged.
+            Dictionary mapping port names to validated context dictionaries.
 
         Raises:
-            ValueError: If required keys (frame_size, channel_count) are
-                missing from any input port context.
+            ValueError: If required metadata keys are missing.
         """
         # Validate required metadata is present in all input contexts
         for context in port_context_in.values():
@@ -79,24 +62,16 @@ class INode(ioc.INode, Node):
 
     @abstractmethod
     def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
-        """Process input data at each discrete time step.
+        """Process input data at each pipeline time step.
 
-        This method is executed at each discrete time step during pipeline
-        execution. Input-only nodes typically consume data without producing
-        output (e.g., saving to file, displaying, logging).
+        Abstract method that must be implemented by subclasses to define
+        their specific data consumption behavior.
 
         Args:
-            data: Dictionary mapping input port names to numpy arrays
-                containing the input data for this time step.
+            data: Dictionary mapping input port names to numpy arrays.
 
         Returns:
-            Dictionary mapping output port names to numpy arrays. For
-            input-only nodes, this is typically None or an empty dictionary
-            since they don't produce output data.
-
-        Note:
-            This is an abstract method that must be implemented by all
-            INode subclasses to define their specific data consumption
-            behavior.
+            Dictionary mapping output port names to numpy arrays.
+            Typically None or empty dict for input-only nodes.
         """
         pass  # pragma: no cover
