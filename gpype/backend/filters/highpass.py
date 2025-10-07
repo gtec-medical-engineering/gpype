@@ -19,7 +19,8 @@ class Highpass(Butterworth):
         class Keys(Butterworth.Configuration.Keys):
             """Configuration keys for highpass-specific parameters."""
 
-            F_C = "f_c"  # Cutoff frequency
+            #: Cutoff frequency configuration key
+            F_C = "f_c"
 
     def __init__(self, f_c: float, order: int = None, **kwargs):
         """Initialize the highpass filter with cutoff frequency.

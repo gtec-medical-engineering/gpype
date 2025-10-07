@@ -5,8 +5,9 @@ import numpy as np
 from ...common.constants import Constants
 from ..core.io_node import IONode
 
-# Port identifiers for data flow
+#: Default input port identifier
 PORT_IN = Constants.Defaults.PORT_IN
+#: Default output port identifier
 PORT_OUT = Constants.Defaults.PORT_OUT
 
 
@@ -29,6 +30,7 @@ class Framer(IONode):
         class Keys(IONode.Configuration.Keys):
             """Configuration key constants for the Framer."""
 
+            #: Frame size configuration key
             FRAME_SIZE = Constants.Keys.FRAME_SIZE
 
     def __init__(self, frame_size: int = None, **kwargs):

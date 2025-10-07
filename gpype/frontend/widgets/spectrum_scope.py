@@ -11,6 +11,7 @@ from ...backend.core.i_port import IPort
 from ...common.constants import Constants
 from .base.scope import Scope
 
+#: Default input port identifier
 PORT_IN = ioc.Constants.Defaults.PORT_IN
 
 
@@ -22,16 +23,21 @@ class SpectrumScope(Scope):
     scaling and frequency axis labeling.
     """
 
+    #: Default maximum amplitude for display scaling
     DEFAULT_AMPLITUDE_LIMIT = 50
+    #: Default number of spectra to average for smoothing
     DEFAULT_NUM_AVERAGES = 10
 
     class Configuration(Scope.Configuration):
 
         class Keys(Scope.Configuration.Keys):
+            #: Configuration key for maximum amplitude display limit
             AMPLITUDE_LIMIT = "amplitude_limit"
+            #: Configuration key for number of averaging samples
             NUM_AVERAGES = "num_averages"
 
         class KeysOptional:
+            #: Configuration key for list of channels to hide from display
             HIDDEN_CHANNELS = "hidden_channels"
 
     def __init__(
@@ -76,21 +82,36 @@ class SpectrumScope(Scope):
             num_averages=num_averages,
             **kwargs,
         )
+        #: Maximum number of data points for plotting
         self._max_points: int = None
+        #: Buffer for storing raw FFT data
         self._data_buffer: np.ndarray = None
+        #: Buffer for averaged display data
         self._display_buffer: np.ndarray = None
+        #: Current plot buffer index
         self._plot_index: int = 0
+        #: Flag indicating if buffer is completely filled
         self._buffer_full: bool = False
+        #: Current sample index for data tracking
         self._sample_index: int = 0
+        #: Timestamp when widget was initialized
         self._start_time = time.time()
+        #: Counter for display update operations
         self._update_counts = 0
+        #: Counter for data processing steps
         self._step_counts = 0
+        #: Current step processing rate in Hz
         self._step_rate = 0
+        #: Thread lock for data buffer synchronization
         self._lock = threading.Lock()
+        #: Flag indicating new data is available for display
         self._new_data = False
+        #: Label widget for displaying rate information
         self._rate_label = None
         p = self.widget.palette()
+        #: Foreground color from system theme
         self._foreground_color = p.color(QPalette.ColorRole.WindowText)
+        #: Background color from system theme
         self._background_color = p.color(QPalette.ColorRole.Window)
 
     def setup(

@@ -5,7 +5,9 @@ import numpy as np
 from ...common.constants import Constants
 from ..core.io_node import IONode
 
+#: Default input port identifier
 PORT_IN = Constants.Defaults.PORT_IN
+#: Default output port identifier
 PORT_OUT = Constants.Defaults.PORT_OUT
 
 

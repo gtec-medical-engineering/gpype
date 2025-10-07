@@ -7,7 +7,9 @@ import numpy as np
 from ...common.constants import Constants
 from ..core.io_node import IONode
 
+#: Default input port identifier
 PORT_IN = Constants.Defaults.PORT_IN
+#: Default output port identifier
 PORT_OUT = Constants.Defaults.PORT_OUT
 
 
@@ -20,6 +22,7 @@ class Delay(IONode):
 
     class Configuration(IONode.Configuration):
         class Keys(IONode.Configuration.Keys):
+            #: Configuration key for number of delay samples
             NUM_SAMPLES = "num_samples"
 
     def __init__(self, num_samples: int, **kwargs):
@@ -36,8 +39,11 @@ class Delay(IONode):
         if num_samples < 0:
             raise ValueError("Number of taps must be non-negative.")
         super().__init__(num_samples=num_samples, **kwargs)
+        #: Circular buffer storing delayed samples
         self._buffer: deque[np.ndarray] = None
+        #: Number of samples to delay (same as num_samples)
         self._taps: int = num_samples
+        #: Zero-filled frame for initialization period
         self._zero_frame: np.ndarray = None
 
     def setup(

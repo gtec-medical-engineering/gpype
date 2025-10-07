@@ -6,7 +6,7 @@ import time
 from ...common.constants import Constants
 from .base.event_source import EventSource
 
-# Output port identifier
+#: Default output port identifier
 PORT_OUT = Constants.Defaults.PORT_OUT
 
 
@@ -18,12 +18,13 @@ class UDPReceiver(EventSource):
     outputs the received value, followed immediately by a zero.
     """
 
-    # Source code fingerprint
-    FINGERPRINT = "e4558a93e67f779b9a8fd010962ebc93"
+    #: Source code fingerprint for licensing verification
+    FINGERPRINT = "a3a4d3f7bff2679bfeed026eec6ebab5"
 
-    # Default network configuration
-    DEFAULT_IP: str = "127.0.0.1"  # Localhost
-    DEFAULT_PORT: int = 1000  # Default UDP port
+    #: Default IP address for localhost binding
+    DEFAULT_IP: str = "127.0.0.1"
+    #: Default UDP port number for listening
+    DEFAULT_PORT: int = 1000
 
     class Configuration(EventSource.Configuration):
         """Configuration class for UDP receiver network parameters."""
@@ -31,8 +32,10 @@ class UDPReceiver(EventSource):
         class Keys(EventSource.Configuration.Keys):
             """Configuration key constants for the UDP receiver."""
 
-            IP: str = "ip"  # IP address to bind to
-            PORT: str = "port"  # UDP port number to listen on
+            #: Configuration key for IP address binding
+            IP: str = "ip"
+            #: Configuration key for UDP port number
+            PORT: str = "port"
 
     def __init__(
         self, ip: str = DEFAULT_IP, port: int = DEFAULT_PORT, **kwargs
@@ -48,11 +51,14 @@ class UDPReceiver(EventSource):
         # Initialize parent EventSource with network configuration
         super().__init__(ip=ip, port=port, **kwargs)
 
-        # Initialize UDP receiver state
+        #: Flag indicating if UDP listener thread is running
         self._udp_thread_running = False
+        #: UDP socket instance for message reception
         self._socket = None
+        #: Background thread for UDP message listening
         self._udp_thread = None
-        self._t_start = None  # Start time tracking
+        #: Start time for timing analysis
+        self._t_start = None
 
     def _udp_listener(self):
         """Background thread function for UDP message reception.

@@ -6,7 +6,9 @@ from scipy.signal import sosfilt, sosfilt_zi, tf2sos
 from ....common.constants import Constants
 from ...core.io_node import IONode
 
+#: Default input port identifier
 PORT_IN = Constants.Defaults.PORT_IN
+#: Default output port identifier
 PORT_OUT = Constants.Defaults.PORT_OUT
 
 
@@ -19,16 +21,16 @@ class GenericFilter(IONode):
     Supports both FIR and IIR implementations.
     """
 
-    DEFAULT_ORDER = 2
-
     class Configuration(IONode.Configuration):
         """Configuration class for GenericFilter parameters."""
 
         class Keys(IONode.Configuration.Keys):
             """Configuration keys for filter coefficients."""
 
-            B = "b"  # Numerator coefficients
-            A = "a"  # Denominator coefficients
+            #: Numerator coefficients configuration key
+            B = "b"
+            #: Denominator coefficients configuration key
+            A = "a"
 
     def __init__(self, b: np.ndarray = None, a: np.ndarray = None, **kwargs):
         """Initialize the generic filter with transfer function coefficients.

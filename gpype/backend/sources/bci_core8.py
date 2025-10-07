@@ -12,8 +12,9 @@ from ...common.constants import Constants
 from ..core.o_port import OPort
 from .base.amplifier_source import AmplifierSource
 
-# Convenience constants for default port names
+#: Default output port identifier
 PORT_OUT = Constants.Defaults.PORT_OUT
+#: Default input port identifier
 PORT_IN = Constants.Defaults.PORT_IN
 
 
@@ -24,21 +25,29 @@ class BCICore8(AmplifierSource):
     8-channel acquisition at 250 Hz.
     """
 
-    # Source code fingerprint
-    FINGERPRINT = "8b2d1645874477bb3fa5f76c27a7d10f"
+    #: Source code fingerprint for licensing verification
+    FINGERPRINT = "ab95434638bbb88b94747b250488a5cf"
 
-    # Optional buffer level output port
+    #: Optional buffer level monitoring output port name
     PORT_BUF_LEVEL = "buffer_level"
 
-    # Hardware specifications
+    #: Bluetooth scanning timeout in seconds
     SCANNING_TIMEOUT_S = 10
+    #: Fixed sampling rate for BCI Core-8 amplifier in Hz
     SAMPLING_RATE = 250
+    #: Maximum number of supported EEG channels
     MAX_NUM_CHANNELS = 8
+    #: Default internal buffer delay in milliseconds
     DEFAULT_BUFFER_DELAY_MS = 40
+    #: Target buffer fill ratio for stable operation
     TARGET_FILL_RATIO = 0.5
+    #: Smoothing factor for buffer fill ratio calculation
     FILL_RATIO_ALPHA = 0.9995
+    #: Correction interval for buffer timing in seconds
     FILL_RATIO_CORRECTION_INTERVAL_S = 1.0
+    #: Maximum allowed consecutive buffer underruns
     NUM_UNDERRUNS_ALLOWED = 10
+    #: Hardware delay compensation in milliseconds
     DEVICE_DELAY_MS = 18
 
     class Configuration(AmplifierSource.Configuration):
@@ -50,8 +59,9 @@ class BCICore8(AmplifierSource):
             OUTPUT_BUFFER_LEVEL = "output_buffer_level"
             BUFFER_DELAY_MS = "buffer_delay_ms"
 
-    # Type hints for amplifier-specific attributes
+    #: BLE amplifier device connection instance
     _device: Optional[ble.Amplifier]
+    #: Target device serial number for connection
     _target_sn: Optional[str]
 
     def __init__(

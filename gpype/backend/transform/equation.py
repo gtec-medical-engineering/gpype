@@ -10,8 +10,9 @@ from ...common.constants import Constants
 from ..core.i_port import IPort
 from ..core.io_node import IONode
 
-# Port name constants for convenience
+#: Default input port identifier
 PORT_IN = Constants.Defaults.PORT_IN
+#: Default output port identifier
 PORT_OUT = Constants.Defaults.PORT_OUT
 
 
@@ -29,6 +30,7 @@ class Equation(IONode):
         class Keys(IONode.Configuration.Keys):
             """Configuration key constants for the Equation."""
 
+            #: Configuration key for mathematical expression string
             EXPRESSION = "expression"
 
     def __init__(self, expression: str = None, **kwargs):
@@ -68,10 +70,10 @@ class Equation(IONode):
         # Extract all variables from the expression and sort for consistency
         vars = sorted(expr.free_symbols, key=lambda s: s.name)
 
-        # Compile expression to optimized NumPy function
+        #: Compiled NumPy function from SymPy expression
         self._func = lambdify(vars, expr, modules="numpy")
 
-        # Store port names corresponding to expression variables
+        #: Ordered list of input port names from expression variables
         self._port_names = [str(var) for var in vars]
 
         # Create input ports for each variable in the expression
