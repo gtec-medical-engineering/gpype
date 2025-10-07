@@ -7,9 +7,8 @@ from ..core.i_port import IPort
 from ..core.io_node import IONode
 from ..core.o_port import OPort
 
-#: Default input port identifier
+# Port name constants for convenience
 PORT_IN = Constants.Defaults.PORT_IN
-#: Default output port identifier
 PORT_OUT = Constants.Defaults.PORT_OUT
 
 
@@ -22,12 +21,11 @@ class Trigger(IONode):
     used in event-related potential (ERP) analysis.
     """
 
-    #: Default pre-trigger window in seconds
-    DEFAULT_TIME_PRE = 0.7
-    #: Default post-trigger window in seconds
-    DEFAULT_TIME_POST = 0.2
+    # Default time window values in seconds
+    DEFAULT_TIME_PRE = 0.7  # Pre-trigger window
+    DEFAULT_TIME_POST = 0.2  # Post-trigger window
 
-    #: Port name for trigger input
+    # Port name for trigger input
     PORT_TRIGGER = "trigger"
 
     class Configuration(IONode.Configuration):
@@ -36,11 +34,8 @@ class Trigger(IONode):
         class Keys(IONode.Configuration.Keys):
             """Configuration key constants for the Trigger."""
 
-            #: Pre-trigger time configuration key
             TIME_PRE = "time_pre"
-            #: Post-trigger time configuration key
             TIME_POST = "time_post"
-            #: Target trigger value configuration key
             TARGET = "target"
 
     def __init__(

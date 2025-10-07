@@ -6,9 +6,7 @@ from scipy.signal import butter, sosfilt, sosfilt_zi, tf2sos
 from ....common.constants import Constants
 from ...core.io_node import IONode
 
-#: Default input port identifier
 PORT_IN = Constants.Defaults.PORT_IN
-#: Default output port identifier
 PORT_OUT = Constants.Defaults.PORT_OUT
 
 
@@ -20,7 +18,6 @@ class Butterworth(IONode):
     filtering with configurable order and maintains state for streaming data.
     """
 
-    #: Default filter order for Butterworth filters
     DEFAULT_ORDER = 2
 
     class Configuration(IONode.Configuration):
@@ -29,12 +26,9 @@ class Butterworth(IONode):
         class Keys(IONode.Configuration.Keys):
             """Configuration keys for Butterworth filter settings."""
 
-            #: Cutoff frequencies configuration key
-            FN = "fn"
-            #: Filter type configuration key
-            BTYPE = "btype"
-            #: Filter order configuration key
-            ORDER = "order"
+            FN = "fn"  # Cutoff frequencies
+            BTYPE = "btype"  # Filter type
+            ORDER = "order"  # Filter order
 
     def __init__(self, fn: list, btype: str, order: int = None, **kwargs):
         """Initialize the Butterworth filter with specified parameters.

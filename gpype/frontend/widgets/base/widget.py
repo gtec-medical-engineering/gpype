@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (QBoxLayout, QGroupBox, QHBoxLayout, QVBoxLayout,
 
 
 class Widget:
-    """Base class for main app visualization widgets with automatic updates.
+    """Base class for BCI visualization widgets with automatic updates.
 
     Provides foundation for real-time visualization widgets with automatic
     UI updates via QTimer and standardized layout structure with grouped
@@ -20,10 +20,12 @@ class Widget:
         layout (type[QBoxLayout]): Layout class for the content area
             (default: QVBoxLayout).
 
-    Subclasses must implement the _update() method.
+    Note:
+        Subclasses must implement the _update() method.
     """
 
-    #: Update interval for widget refresh in milliseconds (60 FPS)
+    # Update interval for widget refresh in milliseconds
+    # 16.67ms = 60 FPS, suitable for smooth real-time BCI visualization
     UPDATE_INTERVAL_MS: float = 16.67
 
     def __init__(

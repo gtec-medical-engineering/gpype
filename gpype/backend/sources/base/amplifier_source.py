@@ -8,7 +8,7 @@ from ....common.constants import Constants
 from ...core.o_port import OPort
 from .source import Source
 
-#: Default output port identifier
+# Convenience constant for default output port name
 PORT_OUT = Constants.Defaults.PORT_OUT
 
 
@@ -25,8 +25,7 @@ class AmplifierSource(Source):
         class Keys(Source.Configuration.Keys):
             """Configuration keys for amplifier source settings."""
 
-            #: Sampling rate configuration key
-            SAMPLING_RATE = Constants.Keys.SAMPLING_RATE
+            SAMPLING_RATE = Constants.Keys.SAMPLING_RATE  # 'sampling_rate'
 
         def __init__(self, sampling_rate: float, **kwargs):
             """Initialize configuration with sampling rate validation.

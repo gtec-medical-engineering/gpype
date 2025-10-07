@@ -32,13 +32,15 @@ class Pipeline(ioc.Pipeline):
 
     def connect(self, source: Union[Node, dict], target: Union[Node, dict]):
         """Connect two nodes to establish data flow in the pipeline.
-        Nodes are automatically added to pipeline if not already present.
 
         Args:
             source (Union[Node, dict]): Source node or port specification.
                 Use dict for specific ports (e.g., node["port_name"]).
             target (Union[Node, dict]): Target node or port specification.
                 Use dict for specific ports (e.g., node["port_name"]).
+
+        Note:
+            Nodes are automatically added to pipeline if not already present.
         """
         super().connect(source, target)
 
@@ -47,7 +49,9 @@ class Pipeline(ioc.Pipeline):
 
         Initiates execution of all nodes according to their configured
         connections and timing. Runs continuously until stop() is called.
-        This method is non-blocking.
+
+        Note:
+            This method is non-blocking.
         """
         super().start()
 
@@ -55,9 +59,11 @@ class Pipeline(ioc.Pipeline):
         """Stop the pipeline and terminate all data processing.
 
         Gracefully shuts down all nodes and cleans up resources including
-        threads, file handles, and hardware connections. Always call
-        stop() before program termination to ensure proper cleanup,
-        especially when using hardware interfaces.
+        threads, file handles, and hardware connections.
+
+        Note:
+            Always call stop() before program termination to ensure
+            proper cleanup, especially when using hardware interfaces.
         """
         super().stop()
 

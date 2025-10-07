@@ -10,7 +10,7 @@ from ....common.constants import Constants
 from ...core.o_port import OPort
 from .source import Source
 
-#: Default output port identifier
+# Convenience constant for default output port name
 OUT_PORT = Constants.Defaults.PORT_OUT
 
 
@@ -27,8 +27,7 @@ class FixedRateSource(Source):
         class Keys(Source.Configuration.Keys):
             """Configuration keys for fixed-rate source settings."""
 
-            #: Configuration key for sampling rate in Hz
-            SAMPLING_RATE = Constants.Keys.SAMPLING_RATE
+            SAMPLING_RATE = Constants.Keys.SAMPLING_RATE  # 'sampling_rate'
 
         def __init__(self, sampling_rate: float, **kwargs):
             """Initialize configuration with sampling rate validation.
@@ -67,11 +66,8 @@ class FixedRateSource(Source):
         )
 
         # Initialize threading components
-        #: Flag indicating if the source is currently running
         self._running: bool = False
-        #: Background thread for continuous data generation
         self._thread: Optional[threading.Thread] = None
-        #: Start time for precise timing calculations
         self._time_start: Optional[float] = None
 
     def start(self):

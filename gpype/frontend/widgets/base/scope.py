@@ -16,13 +16,25 @@ class Scope(INode, Widget):
 
     Combines INode data processing with Widget visualization for real-time
     plotting of BCI signals. Uses PyQtGraph for high-performance plotting
-    with configurable appearance and multiple curve support. Note that
-    subclasses must implement the _update() method.
+    with configurable appearance and multiple curve support.
+
+    Args:
+        input_ports (list[IPort.Configuration], optional): Input port
+            configurations for data connections.
+        update_rule (INode.UpdateRule, optional): Update rule for the node.
+        line_color (tuple[int, int, int], optional): RGB color for plot lines.
+            Defaults to system text color.
+        axis_color (tuple[int, int, int], optional): RGB color for plot
+            background. Defaults to system window color.
+        name (str): Name for the widget group box. Defaults to "Scope".
+        **kwargs: Additional arguments passed to parent classes.
+
+    Note:
+        Subclasses must implement the _update() method.
     """
 
-    #: List of plot curves for multi-channel data display
+    # Type annotations for plot components
     _curves: list[pg.PlotDataItem]
-    #: Main plot item for PyQtGraph visualization
     _plot_item: pg.PlotItem
 
     class Configuration(INode.Configuration):
@@ -31,9 +43,7 @@ class Scope(INode, Widget):
         class Keys(INode.Configuration.Keys):
             """Configuration key constants for the Scope."""
 
-            #: Configuration key for plot line color
             LINE_COLOR = "line_color"
-            #: Configuration key for plot axis/background color
             AXIS_COLOR = "axis_color"
 
     def __init__(
@@ -98,12 +108,10 @@ class Scope(INode, Widget):
         self._plot_item.setVisible(False)
 
         # Initialize plot data structures
-        #: List of plot curves for multi-channel display
-        self._curves = None
-        #: Current data buffer for plot updates
-        self._data = None
+        self._curves = None  # List of plot curves for multi-channel display
+        self._data = None  # Current data buffer
 
-        #: Default pen configuration for drawing curves
+        # Create default pen for drawing curves
         self._pen = pg.mkPen(
             color=self.config[self.Configuration.Keys.LINE_COLOR], width=1
         )

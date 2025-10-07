@@ -15,7 +15,7 @@ from ...backend.flow.trigger import Trigger
 from ...common.constants import Constants
 from .base.scope import Scope
 
-#: Default input port identifier for trigger data
+# Default input port for trigger data
 PORT_IN = ioc.Constants.Defaults.PORT_IN
 
 
@@ -26,6 +26,13 @@ class TriggerScope(Scope):
     trigger nodes. Visualizes fixed-duration signal segments around trigger
     events, ideal for analyzing ERPs and event-locked brain activity.
     Supports mathematical expressions and multi-plot overlay with legends.
+
+    Args:
+        amplitude_limit (float): Y-axis scale limit in microvolts (1-5000).
+        plots (list): Mathematical expressions to evaluate and plot.
+            Defaults to [PORT_IN] for direct signal display.
+        hidden_channels (list): Channel indices to hide from display.
+        **kwargs: Additional arguments passed to parent Scope class.
     """
 
     class Configuration(Scope.Configuration):
@@ -38,16 +45,13 @@ class TriggerScope(Scope):
         class Keys(Scope.Configuration.Keys):
             """Required configuration parameter keys."""
 
-            #: Configuration key for Y-axis scale limit
-            AMPLITUDE_LIMIT = "amplitude_limit"
-            #: Configuration key for mathematical expression list
-            PLOTS = "plots"
+            AMPLITUDE_LIMIT = "amplitude_limit"  # Y-axis scale in microvolts
+            PLOTS = "plots"  # Mathematical expressions
 
         class KeysOptional:
             """Optional configuration parameter keys."""
 
-            #: Configuration key for channels to hide from display
-            HIDDEN_CHANNELS = "hidden_channels"
+            HIDDEN_CHANNELS = "hidden_channels"  # Channels to hide
 
     def __init__(
         self,
@@ -84,12 +88,9 @@ class TriggerScope(Scope):
             plots = [Constants.Defaults.PORT_IN]
 
         # Initialize expression parsing storage
-        #: List of compiled lambda functions for mathematical expressions
-        self._plot_funcs = []
-        #: Argument lists for each compiled function
-        self._plot_args = []
-        #: Required input port names extracted from expressions
-        self._port_names = []
+        self._plot_funcs = []  # Compiled lambda functions
+        self._plot_args = []  # Argument lists for each function
+        self._port_names = []  # Required input port names
 
         # Parse mathematical expressions and compile to lambda functions
         for plot in plots:
@@ -135,48 +136,31 @@ class TriggerScope(Scope):
         )
 
         # Data buffer management
-        #: Maximum number of displayable data points
-        self._max_points: int = None
-        #: Raw trigger epoch storage organized by port name
-        self._data_buffer: dict = None
-        #: Processed display data after expression evaluation
-        self._display_buffer: np.ndarray = None
-        #: Current position index in display buffer
-        self._plot_index: int = 0
-        #: Flag indicating buffer overflow condition
-        self._buffer_full: bool = False
-        #: Global sample counter for data tracking
-        self._sample_index: int = 0
+        self._max_points: int = None  # Maximum displayable points
+        self._data_buffer: dict = None  # Raw data storage by port
+        self._display_buffer: np.ndarray = None  # Processed display data
+        self._plot_index: int = 0  # Current plot position
+        self._buffer_full: bool = False  # Buffer overflow indicator
+        self._sample_index: int = 0  # Current sample index
 
         # Performance monitoring
-        #: Widget initialization timestamp for rate calculations
-        self._start_time = time.time()
-        #: Counter for display update operations
-        self._update_counts = 0
-        #: Counter for trigger epoch processing steps
-        self._step_counts = 0
-        #: Calculated trigger processing rate in Hz
-        self._step_rate = 0
+        self._start_time = time.time()  # Widget start timestamp
+        self._update_counts = 0  # Display update counter
+        self._step_counts = 0  # Processing step counter
+        self._step_rate = 0  # Calculated step rate
 
         # Thread synchronization
-        #: Thread lock for safe data buffer access
-        self._lock = threading.Lock()
-        #: Flag indicating new trigger data is available
-        self._new_data = False
+        self._lock = threading.Lock()  # Data access synchronization
+        self._new_data = False  # New data availability flag
 
         # UI components
-        #: Label widget for displaying performance statistics
-        self._rate_label = None
-        #: Vertical cursor line marking trigger time (t=0)
-        self._cursor = None
-        #: Number of mathematical plot functions to evaluate
-        self._no_plots = len(self._plot_funcs)
+        self._rate_label = None  # Performance display label
+        self._cursor = None  # Time cursor for display
+        self._no_plots = len(self._plot_funcs)  # Number of plot functions
 
         # Theme and appearance setup
         p = self.widget.palette()
-        #: Foreground color extracted from system theme
         self._foreground_color = p.color(QPalette.ColorRole.WindowText)
-        #: Background color extracted from system theme
         self._background_color = p.color(QPalette.ColorRole.Window)
 
         # Setup legend for multi-plot visualization
@@ -194,7 +178,6 @@ class TriggerScope(Scope):
             self._legend.setPen(QPen(fg_color))
             self._legend.setVisible(False)
         else:
-            #: Legend widget for multi-plot identification (None if single)
             self._legend = None
 
     def setup(
@@ -261,9 +244,7 @@ class TriggerScope(Scope):
         self._channel_count = len(self._channel_vec)
 
         # Store processing parameters
-        #: Number of samples per trigger epoch
         self._frame_size = frame_size
-        #: Data acquisition sampling rate in Hz
         self._sampling_rate = sampling_rate
 
         # Initialize data buffers for each input port
@@ -295,13 +276,11 @@ class TriggerScope(Scope):
                 ]
                 return col
 
-        #: Color palette for distinguishing multiple plot expressions
+        # Generate distinct colors for each plot
         self._curve_colors = generate_colors(self._no_plots)
 
         # Initialize state variables
-        #: Flag indicating new trigger data availability
         self._new_data = False
-        #: Widget initialization timestamp
         self._start_time = time.time()
 
         return super().setup(data, port_context_in)

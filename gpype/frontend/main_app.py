@@ -18,16 +18,21 @@ class MainApp:
     Provides framework for creating PyQt6-based applications with widget
     management, window configuration, and lifecycle handling. Uses
     composition for better flexibility and testability.
+
+    Attributes:
+        DEFAULT_POSITION: Default window geometry [x, y, width, height].
+        ICON_PATH: Path to the application icon file.
+        DEFAULT_GRID_SIZE: Default grid dimensions [rows, cols].
     """
 
-    #: Default window geometry configuration
+    # Default window geometry configuration
     DEFAULT_POSITION = [100, 100, 700, 400]  # [x, y, width, height]
 
-    #: Default grid size (rows, cols)
+    # Default grid size (rows, cols)
     DEFAULT_GRID_SIZE = [3, 3]
 
-    #: Application icon path
-    ICON_PATH = Path("resources") / "gtec.ico"
+    # Application icon path
+    ICON_PATH = os.path.join(Path(__file__).parent, "resources", "gtec.ico")
 
     def __init__(
         self,
@@ -68,9 +73,9 @@ class MainApp:
         self._window.setWindowTitle(caption)
 
         # Set application icon if file exists
-        icon_path = Path(__file__).parent / MainApp.ICON_PATH
-        if icon_path.exists():
-            self._window.setWindowIcon(QIcon(str(icon_path)))
+        icon_path = MainApp.ICON_PATH
+        if os.path.exists(icon_path):
+            self._window.setWindowIcon(QIcon(icon_path))
 
         # Configure window geometry
         if position is None:

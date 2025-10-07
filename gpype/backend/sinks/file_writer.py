@@ -30,7 +30,6 @@ class FileWriter(INode):
         class Keys(ioc.INode.Configuration.Keys):
             """Configuration keys for file writer settings."""
 
-            #: File name configuration key
             FILE_NAME = "file_name"
 
     def __init__(

@@ -19,10 +19,8 @@ class Bandstop(Butterworth):
         class Keys(Butterworth.Configuration.Keys):
             """Configuration keys for bandstop-specific parameters."""
 
-            #: Upper cutoff frequency configuration key
-            F_HI = "f_hi"
-            #: Lower cutoff frequency configuration key
-            F_LO = "f_lo"
+            F_HI = "f_hi"  # Upper cutoff frequency
+            F_LO = "f_lo"  # Lower cutoff frequency
 
     def __init__(self, f_lo: float, f_hi: float, order: int = None, **kwargs):
         """Initialize the bandstop filter with cutoff frequencies.

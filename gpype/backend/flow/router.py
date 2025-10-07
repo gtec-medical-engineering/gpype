@@ -20,8 +20,8 @@ class Router(IONode):
     (index lists) and complex multi-port routing (dictionary mapping).
     """
 
-    #: Special constant for selecting all available channels
-    ALL: list = [-1]
+    # Special constant for selecting all available channels
+    ALL: list = [-1]  # Take all channels
 
     # Type annotation for the internal routing map
     _map: dict
@@ -32,81 +32,79 @@ class Router(IONode):
         class Keys(ioc.IONode.Configuration.Keys):
             """Configuration key constants for the Router."""
 
-            #: Input channels configuration key
-            INPUT_CHANNELS = "input_channels"
-            #: Output channels configuration key
-            OUTPUT_CHANNELS = "output_channels"
+            INPUT_SELECTOR = "input_selector"
+            OUTPUT_SELECTOR = "output_selector"
 
     def __init__(
         self,
-        input_channels: Union[list, dict] = None,
-        output_channels: Union[list, dict] = None,
+        input_selector: Union[list, dict] = None,
+        output_selector: Union[list, dict] = None,
         **kwargs,
     ):
         """Initialize the Router node with channel selection configurations.
 
         Args:
-            input_channels: Specification for input channel selection. Can be
+            input_selector: Specification for input channel selection. Can be
                 None (all channels), list (channel indices), or dict (port
                 name to channel indices mapping).
-            output_channels: Specification for output channel selection.
-                Same format as input_channels.
+            output_selector: Specification for output channel selection.
+                Same format as input_selector.
             **kwargs: Additional configuration parameters passed to IONode.
 
         Raises:
-            ValueError: If input_channels or output_channels is empty.
+            ValueError: If input_selector or output_selector is empty.
         """
-        # Set default input channels to all channels on default port
-        if input_channels is None:
-            input_channels = {Constants.Defaults.PORT_IN: Router.ALL}
+        # Set default input selector to all channels on default port
+        if input_selector is None:
+            input_selector = {Constants.Defaults.PORT_IN: Router.ALL}
 
-        # Convert list format to dictionary format for input channels
-        if type(input_channels) is list:
-            if len(input_channels) == 0:
-                raise ValueError("input_channels must not be empty.")
+        # Convert list format to dictionary format for input selector
+        if type(input_selector) is list:
+            if len(input_selector) == 0:
+                raise ValueError("input_selector must not be empty.")
             # Convert single list to list of lists if needed
-            if type(input_channels[0]) is not list:
-                input_channels = [input_channels]
+            if type(input_selector[0]) is not list:
+                input_selector = [input_selector]
             # Create port mappings
-            if len(input_channels) == 1:
-                input_channels = {
-                    Constants.Defaults.PORT_IN: input_channels[0]
+            if len(input_selector) == 1:
+                input_selector = {
+                    Constants.Defaults.PORT_IN: input_selector[0]
                 }
             else:
-                input_channels = {
-                    f"in{i + 1}": val for i, val in enumerate(input_channels)
+                input_selector = {
+                    f"in{i + 1}": val for i, val in enumerate(input_selector)
                 }
 
         # Create input port configurations
         input_ports = [
             IPort.Configuration(name=name, timing=Constants.Timing.INHERITED)
-            for name in input_channels.keys()
+            for name in input_selector.keys()
         ]
 
-        # Set default output channels to all channels on default port
-        if output_channels is None:
-            output_channels = {Constants.Defaults.PORT_OUT: Router.ALL}
+        # Set default output selector to all channels on default port
+        if output_selector is None:
+            output_selector = {Constants.Defaults.PORT_OUT: Router.ALL}
 
-        # Convert list format to dictionary format for output channels
-        if type(output_channels) is list:
-            if len(output_channels) == 0:
-                raise ValueError("output_channels must not be empty.")
+        # Convert list format to dictionary format for output selector
+        if type(output_selector) is list:
+            if len(output_selector) == 0:
+                raise ValueError("output_selector must not be empty.")
             # Convert single list to list of lists if needed
-            if type(output_channels[0]) is not list:
-                output_channels = [output_channels]
+            if type(output_selector[0]) is not list:
+                output_selector = [output_selector]
             # Create port mappings
-            if len(output_channels) == 1:
-                output_channels = {
-                    Constants.Defaults.PORT_OUT: output_channels[0]
+            if len(output_selector) == 1:
+                output_selector = {
+                    Constants.Defaults.PORT_OUT: output_selector[0]
                 }
             else:
-                output_channels = {
-                    f"out{i + 1}": val for i, val in enumerate(output_channels)
+                output_selector = {
+                    f"out{i + 1}": val for i, val in enumerate(output_selector)
                 }
 
         # Create output port configurations
         output_ports = [
-            OPort.Configuration(name=name) for name in output_channels.keys()
+            OPort.Configuration(name=name) for name in output_selector.keys()
         ]
 
         # Initialize internal routing map
@@ -115,8 +113,8 @@ class Router(IONode):
         # Initialize parent IONode with all configurations
         IONode.__init__(
             self,
-            input_channels=input_channels,
-            output_channels=output_channels,
+            input_selector=input_selector,
+            output_selector=output_selector,
             input_ports=input_ports,
             output_ports=output_ports,
             **kwargs,
@@ -150,13 +148,13 @@ class Router(IONode):
         # Build input channel mapping
         input_map: list = []
         ip_key = Router.Configuration.Keys.INPUT_PORTS
-        ic_key = Router.Configuration.Keys.INPUT_CHANNELS
+        is_key = Router.Configuration.Keys.INPUT_SELECTOR
 
         # Process each input port to build channel mapping
         for k in range(len(self.config[ip_key])):
             port = self.config[ip_key][k]
             name = port[name_key]
-            sel = self.config[ic_key][name]
+            sel = self.config[is_key][name]
 
             # Expand "ALL" to actual channel range
             if sel == Router.ALL:
@@ -166,12 +164,12 @@ class Router(IONode):
 
         # Build output port mapping using input map
         op_key = Router.Configuration.Keys.OUTPUT_PORTS
-        oc_key = Router.Configuration.Keys.OUTPUT_CHANNELS
+        os_key = Router.Configuration.Keys.OUTPUT_SELECTOR
 
         for k in range(len(self.config[op_key])):
             port = self.config[op_key][k]
             name = port[name_key]
-            sel = self.config[oc_key][name]
+            sel = self.config[os_key][name]
 
             # Expand "ALL" to full input map range
             if sel == Router.ALL:

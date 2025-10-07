@@ -17,9 +17,7 @@ class UDPSender(INode):
     target address. Each step() sends one packet with direct transmission.
     """
 
-    #: Default target IP address (localhost)
     DEFAULT_IP = "127.0.0.1"
-    #: Default target UDP port number
     DEFAULT_PORT = 56000
 
     class Configuration(ioc.INode.Configuration):
@@ -28,9 +26,7 @@ class UDPSender(INode):
         class Keys(ioc.INode.Configuration.Keys):
             """Configuration keys for UDP sender settings."""
 
-            #: IP address configuration key
             IP = "ip"
-            #: Port number configuration key
             PORT = "port"
 
     def __init__(

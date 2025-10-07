@@ -17,13 +17,14 @@ class _Settings(dict):
     - Windows: %PROGRAMDATA%/gtec/gPype/settings.xml
     - macOS: ~/Library/Application Support/gtec/gPype/settings.xml
 
-    Use Settings.get() to access the singleton instance.
+    Note:
+        Use Settings.get() to access the singleton instance.
     """
 
-    #: Default settings applied on first initialization
+    # Default settings applied on first initialization
     DEFAULTS = {"Key": ""}
 
-    #: Singleton instance reference
+    # Singleton instance reference
     _instance: Optional["_Settings"] = None
 
     def __init__(self):
@@ -189,5 +190,6 @@ class _Settings(dict):
             f.write(pretty_string)
 
 
-#: Global settings instance for convenient access throughout the application
+# Global settings instance for convenient access throughout the application
+# Use Settings.get() for type-safe access or Settings directly for quick access
 Settings: _Settings = _Settings()

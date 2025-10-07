@@ -12,7 +12,7 @@ from ...backend.core.i_port import IPort
 from ...common.constants import Constants
 from .base.scope import Scope
 
-#: Default input port identifier for time series data
+# Default input port for time series data
 PORT_IN = ioc.Constants.Defaults.PORT_IN
 
 
@@ -21,12 +21,18 @@ class TimeSeriesScope(Scope):
 
     Displays continuous time-series data from BCI pipelines with configurable
     time windows, amplitude scaling, channel hiding, and event markers.
+
+    Args:
+        time_window (int): Display window duration in seconds (1-120).
+        amplitude_limit (float): Y-axis scale limit in microvolts.
+        markers (list): Event markers configuration.
+        hidden_channels (list): Channel indices to hide from display.
+        **kwargs: Additional arguments passed to parent Scope class.
     """
 
-    #: Default display window duration in seconds
-    DEFAULT_TIME_WINDOW: int = 10
-    #: Default amplitude scale limit in microvolts
-    DEFAULT_AMPLITUDE_LIMIT: float = 50
+    # Default configuration values
+    DEFAULT_TIME_WINDOW: int = 10  # seconds
+    DEFAULT_AMPLITUDE_LIMIT: float = 50  # microvolts
 
     class Markers(dict):
         """Container for event marker configuration.
@@ -60,18 +66,14 @@ class TimeSeriesScope(Scope):
         class Keys(Scope.Configuration.Keys):
             """Required configuration parameter keys."""
 
-            #: Configuration key for display duration in seconds
-            TIME_WINDOW = "time_window"
-            #: Configuration key for Y-axis scale in microvolts
-            AMPLITUDE_LIMIT = "amplitude_limit"
+            TIME_WINDOW = "time_window"  # Display duration in seconds
+            AMPLITUDE_LIMIT = "amplitude_limit"  # Y-axis scale in microvolts
 
         class KeysOptional:
             """Optional configuration parameter keys."""
 
-            #: Configuration key for event marker configurations
-            MARKERS = "markers"
-            #: Configuration key for channels to hide from display
-            HIDDEN_CHANNELS = "hidden_channels"
+            MARKERS = "markers"  # Event marker configurations
+            HIDDEN_CHANNELS = "hidden_channels"  # Channels to hide
 
     class KeyPressFilter(QObject):
         """Event filter for keyboard shortcuts in the time series scope.
@@ -170,53 +172,36 @@ class TimeSeriesScope(Scope):
         )
 
         # Data buffer management
-        #: Maximum number of displayable data points
-        self._max_points: int = None
-        #: Raw data storage buffer for all channels
-        self._data_buffer: np.ndarray = None
-        #: Processed display data for visible channels only
-        self._display_buffer: np.ndarray = None
-        #: Current position index in circular buffer
-        self._plot_index: int = 0
-        #: Flag indicating circular buffer overflow status
-        self._buffer_full: bool = False
-        #: Global sample counter for data tracking
-        self._sample_index: int = 0
+        self._max_points: int = None  # Maximum displayable points
+        self._data_buffer: np.ndarray = None  # Raw data storage buffer
+        self._display_buffer: np.ndarray = None  # Processed display data
+        self._plot_index: int = 0  # Current plot position
+        self._buffer_full: bool = False  # Buffer overflow indicator
+        self._sample_index: int = 0  # Current sample index
 
         # Performance monitoring
-        #: Widget initialization timestamp for rate calculations
-        self._start_time = time.time()
-        #: Counter for display update operations
-        self._update_counts = 0
-        #: Counter for data processing steps
-        self._step_counts = 0
-        #: Calculated data processing rate in Hz
-        self._step_rate = 0
+        self._start_time = time.time()  # Widget start timestamp
+        self._update_counts = 0  # Display update counter
+        self._step_counts = 0  # Processing step counter
+        self._step_rate = 0  # Calculated step rate
 
         # Thread synchronization
-        #: Thread lock for safe data buffer access
-        self._lock = threading.Lock()
-        #: Flag indicating new data is available for display
-        self._new_data = False
+        self._lock = threading.Lock()  # Data access synchronization
+        self._new_data = False  # New data availability flag
 
         # UI components
-        #: Label widget for displaying performance statistics
-        self._rate_label = None
+        self._rate_label = None  # Performance display label
 
         # Theme and appearance setup
         p = self.widget.palette()
-        #: Foreground color extracted from system theme
         self._foreground_color = p.color(QPalette.ColorRole.WindowText)
-        #: Background color extracted from system theme
         self._background_color = p.color(QPalette.ColorRole.Window)
 
         # Interactive features
-        #: Flag controlling performance statistics visibility
-        self._show_rates = False
-        #: Vertical cursor line showing current data position
-        self._cursor = None
+        self._show_rates = False  # Performance visibility toggle
+        self._cursor = None  # Data cursor
 
-        #: Keyboard event filter for interactive shortcuts
+        # Install keyboard event filter for shortcuts
         self._key_filter = self.KeyPressFilter(self._toggle_show_rates)
         self.widget.installEventFilter(self._key_filter)
 
@@ -273,11 +258,8 @@ class TimeSeriesScope(Scope):
         self._channel_count = len(self._channel_vec)
 
         # Store processing parameters
-        #: Number of samples per data frame from pipeline
         self._frame_size = frame_size
-        #: Data acquisition sampling rate in Hz
         self._sampling_rate = sampling_rate
-        #: Last displayed second for time axis tick updates
         self._last_second = None
 
         # Allocate data buffers
@@ -289,11 +271,8 @@ class TimeSeriesScope(Scope):
         )
 
         # Initialize state variables
-        #: Flag indicating new data availability for display
         self._new_data = False
-        #: Widget initialization timestamp
         self._start_time = time.time()
-        #: Dictionary storing active event markers
         self._markers = {}
 
         return super().setup(data, port_context_in)
@@ -491,6 +470,9 @@ class TimeSeriesScope(Scope):
         Returns:
             dict: Empty dictionary (this is a sink node with no outputs).
         """
+        # Initialize performance monitoring on first call
+        if self._step_counts == 0:
+            self._start_time = time.time()
         self._step_counts += 1
 
         # Calculate data processing rate for performance monitoring

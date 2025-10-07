@@ -19,7 +19,6 @@ class LSLSender(INode):
     size. Supports both single-sample and chunk-based streaming modes.
     """
 
-    #: Default LSL stream name for g.Pype data streams
     DEFAULT_STREAM_NAME = "gpype_lsl"
 
     class Configuration(ioc.INode.Configuration):
@@ -28,7 +27,6 @@ class LSLSender(INode):
         class Keys(ioc.INode.Configuration.Keys):
             """Configuration keys for LSL sender settings."""
 
-            #: Stream name configuration key
             STREAM_NAME = "stream_name"
 
     def __init__(self, stream_name: Optional[str] = None, **kwargs):

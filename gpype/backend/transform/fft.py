@@ -6,9 +6,8 @@ from scipy.signal import get_window
 from ...common.constants import Constants
 from ..core.io_node import IONode
 
-#: Default input port identifier
+# Port name constants for convenience
 PORT_IN = Constants.Defaults.PORT_IN
-#: Default output port identifier
 PORT_OUT = Constants.Defaults.PORT_OUT
 
 
@@ -29,11 +28,8 @@ class FFT(IONode):
         class Keys(IONode.Configuration.Keys):
             """Configuration key constants for the FFT."""
 
-            #: Window size configuration key
             WINDOW_SIZE = "window_size"
-            #: Window function configuration key
             WINDOW_FUNCTION = "window_function"
-            #: Overlap configuration key
             OVERLAP = "overlap"
 
     def __init__(

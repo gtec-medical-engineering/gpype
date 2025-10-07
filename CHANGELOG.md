@@ -1,18 +1,5 @@
 # Changelog
 
-## [3.0.5] - 2025-10-07
-
-### Summary
-
-We added Season 2 Episode 2 (Routing Signals) to the g.Pype Training, updated the documentation and switched the theme to dark. We also fixed some minor bugs in the g.Pype source code.
-
-### Details
-
-- Migrated documentation to all black design
-- Fixed division by zero error in TimeSeriesScope
-- Router training page added
-- Changed Router input parameters from {input, output}_selector to {input, output}_channels
-
 ## [3.0.4] - 2025-09-16
 - Updated unit tests
 - Updated documentation

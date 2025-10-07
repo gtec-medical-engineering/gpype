@@ -12,9 +12,8 @@ from .base.amplifier_source import AmplifierSource
 if sys.platform != "win32":
     raise NotImplementedError("This module is only supported on Windows.")
 
-#: Default output port identifier
+# Port identifiers for data flow
 PORT_OUT = Constants.Defaults.PORT_OUT
-#: Default input port identifier
 PORT_IN = Constants.Defaults.PORT_IN
 
 
@@ -26,8 +25,8 @@ class GNautilus(AmplifierSource):
     Requires g.tec GDS library and Windows operating system.
     """
 
-    #: Source code fingerprint for licensing verification
-    FINGERPRINT = "2916b52d58fa81e5a8c8791ab4b43900"
+    # Source code fingerprint
+    FINGERPRINT = "b5242da72970374b38744c5053daea7a"
 
     class Configuration(AmplifierSource.Configuration):
         """Configuration class for g.Nautilus amplifier parameters."""
@@ -35,7 +34,6 @@ class GNautilus(AmplifierSource):
         class Keys(AmplifierSource.Configuration.Keys):
             """Configuration key constants for the g.Nautilus amplifier."""
 
-            #: Configuration key for amplifier sensitivity setting
             SENSITIVITY = "sensitivity"
 
     def __init__(
@@ -72,10 +70,10 @@ class GNautilus(AmplifierSource):
                 "library is not installed."
             ) from e
 
-        #: Electrode impedance values in kOhms (-10 indicates unknown)
+        # Initialize impedance values to -10 kOhm (unknown state)
         self._z = np.ones(channel_count) * (-10)
 
-        #: g.Nautilus device interface instance
+        # Create and configure the g.Nautilus device
         self._device = gds.GNautilus(
             serial=serial,
             sampling_rate=sampling_rate,
@@ -106,9 +104,8 @@ class GNautilus(AmplifierSource):
             **kwargs,
         )
 
-        #: Flag indicating if impedance monitoring is active
+        # Initialize impedance monitoring state
         self._impedance_check_running = False
-        #: Flag indicating if impedance data has been updated
         self._impedance_fresh = True
 
     def start(self) -> None:
