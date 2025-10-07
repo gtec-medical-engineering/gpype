@@ -9,12 +9,10 @@ class Constants(ioc.Constants):
     data types, and configuration keys for signal processing.
     """
 
-    # Default data type for numerical operations in the pipeline
-    # Using float32 for memory efficiency while maintaining precision
+    #: Default data type for numerical operations in the pipeline
     DATA_TYPE = np.float32
 
-    # Special value indicating inherited timing or configuration
-    # Used when a node should inherit timing from its parent/input
+    #: Special value indicating inherited timing or configuration
     INHERITED = -1
 
     class Keys(ioc.Constants.Keys):
@@ -24,17 +22,17 @@ class Constants(ioc.Constants):
         throughout the g.Pype framework.
         """
 
-        # Sampling rate in Hz (samples per second)
+        #: Sampling rate in Hz (samples per second)
         SAMPLING_RATE: str = "sampling_rate"
 
-        # Number of data channels in the signal
+        #: Number of data channels in the signal
         CHANNEL_COUNT: str = "channel_count"
 
-        # Number of samples processed per frame
+        #: Number of samples processed per frame
         FRAME_SIZE: str = "frame_size"
 
-        # Frame rate in Hz (frames per second, optional)
+        #: Frame rate in Hz (frames per second, optional)
         FRAME_RATE: str = "frame_rate"
 
-        # Factor by which to reduce the sampling rate
+        #: Factor by which to reduce the sampling rate
         DECIMATION_FACTOR: str = "decimation_factor"

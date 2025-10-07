@@ -21,22 +21,23 @@ MINIMUM_BUTTON_WIDTH = 120
 
 
 class ParadigmPresenter(Widget, UDPReceiver):
-    """Control widget for g.tec ParadigmPresenter integration.
+    """Control widget for g.tec Paradigm Presenter integration.
 
     Provides interface for loading, starting, and stopping paradigms
-    using the g.tec ParadigmPresenter library. Inherits from UDPReceiver
-    to receive stimulus onset messages from ParadigmPresenter via UDP.
+    using the g.tec Paradigm Presenter library. Inherits from UDPReceiver
+    to receive stimulus onset messages from Paradigm Presenter via UDP.
     Supports folder-based paradigm selection and manual file loading.
+    Note that Paradigm Presenter must be installed and licensed separately.
     """
 
     # Source code fingerprint
-    FINGERPRINT = "70ea1c44118f252b714c865617bfa0d5"
+    FINGERPRINT = "137d700899ec33c597952599d95c4224"
 
     def __init__(self, paradigm: str = None):
-        """Initialize the ParadigmPresenter control widget.
+        """Initialize the Paradigm Presenter control widget.
 
         Initializes both the Widget UI components and UDPReceiver for
-        receiving stimulus onset messages from ParadigmPresenter.
+        receiving stimulus onset messages from Paradigm Presenter.
 
         Args:
             paradigm (str, optional): Path to paradigm file (.xml) or folder
@@ -49,14 +50,14 @@ class ParadigmPresenter(Widget, UDPReceiver):
         Widget.__init__(
             self,
             widget=QWidget(),
-            name="ParadigmPresenter Control",
+            name="Paradigm Presenter Control",
             layout=QHBoxLayout,
         )
 
         # Initialize the UDP receiver
         UDPReceiver.__init__(self)
 
-        # Initialize the ParadigmPresenter instance
+        # Initialize the Paradigm Presenter instance
         self.paradigm_presenter = pp.ParadigmPresenter()
 
         # Determine if paradigm is a file or folder
@@ -195,7 +196,7 @@ class ParadigmPresenter(Widget, UDPReceiver):
         self._layout.addWidget(self.stop_button)
 
     def _open_presenter_window(self):
-        """Open the ParadigmPresenter window."""
+        """Open the Paradigm Presenter window."""
         window_type = self.paradigm_presenter.constants.WINDOWTYPE_PLAIN
         self.paradigm_presenter.open_window(window_type)
 
@@ -313,10 +314,10 @@ class ParadigmPresenter(Widget, UDPReceiver):
     def terminate(self):
         """Clean up resources when the widget is terminated.
 
-        Closes ParadigmPresenter windows and shuts down the presenter
+        Closes Paradigm Presenter windows and shuts down the presenter
         before calling the parent terminate method.
         """
-        # Clean up ParadigmPresenter resources
+        # Clean up Paradigm Presenter resources
         self.paradigm_presenter.close_windows()
         self.paradigm_presenter.shutdown()
 

@@ -7,7 +7,7 @@ from ...common.constants import Constants
 from ..core.o_port import OPort
 from .base.fixed_rate_source import FixedRateSource
 
-# Port identifier for signal output
+#: Port identifier for signal output
 OUT_PORT = ioc.Constants.Defaults.PORT_OUT
 
 
@@ -19,20 +19,27 @@ class Generator(FixedRateSource):
     multi-channel output.
     """
 
-    # Signal shape constants
-    SHAPE_SINUSOID = "sine"  # Sinusoidal waveform
-    SHAPE_RECTANGULAR = "rect"  # Square wave
-    SHAPE_PULSE = "pulse"  # Brief pulses at specified frequency
+    #: Sinusoidal waveform signal shape
+    SHAPE_SINUSOID = "sine"
+    #: Square wave signal shape
+    SHAPE_RECTANGULAR = "rect"
+    #: Brief pulses signal shape
+    SHAPE_PULSE = "pulse"
 
-    # Source code fingerprint
-    FINGERPRINT = "5be1f01bfd1f798f995d338527b49444"
+    #: Source code fingerprint for integrity verification
+    FINGERPRINT = "b1d90b82dfac157f0cceff1c771bbfcd"
 
-    # Default configuration values
+    #: Default sampling rate in Hz
     DEFAULT_SAMPLING_RATE = 250.0
+    #: Default number of channels
     DEFAULT_CHANNEL_COUNT = 8
+    #: Default signal frequency in Hz
     DEFAULT_SIGNAL_FREQUENCY = 10.0
+    #: Default signal shape
     DEFAULT_SIGNAL_SHAPE = SHAPE_SINUSOID
+    #: Default signal amplitude
     DEFAULT_SIGNAL_AMPLITUDE = 0.0
+    #: Default noise amplitude
     DEFAULT_NOISE_AMPLITUDE = 0.0
 
     class Configuration(FixedRateSource.Configuration):
@@ -41,9 +48,13 @@ class Generator(FixedRateSource):
         class Keys(FixedRateSource.Configuration.Keys):
             """Configuration key constants for the Generator."""
 
+            #: Signal frequency configuration key
             SIGNAL_FREQUENCY = "signal_frequency"
+            #: Signal shape configuration key
             SIGNAL_SHAPE = "signal_shape"
+            #: Signal amplitude configuration key
             SIGNAL_AMPLITUDE = "signal_amplitude"
+            #: Noise amplitude configuration key
             NOISE_AMPLITUDE = "noise_amplitude"
 
     def __init__(

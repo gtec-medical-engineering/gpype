@@ -23,7 +23,9 @@ class MovingAverage(GenericFilter):
         class Keys(GenericFilter.Configuration.Keys):
             """Configuration keys for moving average parameters."""
 
+            #: Window size configuration key
             WINDOW_SIZE = "window_size"
+            #: Window function configuration key
             WINDOW_FUNCTION = "window_function"
 
     def __init__(

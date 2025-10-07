@@ -8,7 +8,7 @@ from ....common.constants import Constants
 from ...core.o_node import ONode
 from ...core.o_port import OPort
 
-# Convenience constant for default output port name
+#: Default output port identifier
 OUT_PORT = Constants.Defaults.PORT_OUT
 
 
@@ -26,8 +26,10 @@ class Source(ONode):
         class Keys(ONode.Configuration.Keys):
             """Configuration keys for source-specific settings."""
 
-            CHANNEL_COUNT = Constants.Keys.CHANNEL_COUNT  # 'channel_count'
-            FRAME_SIZE = Constants.Keys.FRAME_SIZE  # 'frame_size'
+            #: Configuration key for number of channels per port
+            CHANNEL_COUNT = Constants.Keys.CHANNEL_COUNT
+            #: Configuration key for samples per frame
+            FRAME_SIZE = Constants.Keys.FRAME_SIZE
 
     def __init__(
         self,
@@ -104,7 +106,7 @@ class Source(ONode):
         if "input_ports" in kwargs:
             raise ValueError("Source must not have input ports.")
 
-        # Initialize delay property for timing control
+        #: Timing delay in seconds for synchronization
         self._delay: float = 0
 
         # Initialize parent ONode with validated parameters
