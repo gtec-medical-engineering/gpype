@@ -28,7 +28,7 @@ if __name__ == "__main__":
     trigger = gp.UDPReceiver()
 
     # router
-    router = gp.Router(input_selector=[gp.Router.ALL, gp.Router.ALL])
+    router = gp.Router(input_channels=[gp.Router.ALL, gp.Router.ALL])
 
     # scope
     mk = gp.TimeSeriesScope.Markers

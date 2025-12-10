@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
     # split signals
     splitter = gp.Router(
-        input_selector=[gp.Router.ALL], output_selector=[[0], [1]]
+        input_channels=[gp.Router.ALL], output_channels=[[0], [1]]
     )
 
     # delay one signal by 125 samples (0.5 seconds at 250 Hz)
@@ -68,7 +68,7 @@ if __name__ == "__main__":
 
     # merge signals back together
     merger = gp.Router(
-        input_selector=[[0], [0]], output_selector=[gp.Router.ALL]
+        input_channels=[[0], [0]], output_channels=[gp.Router.ALL]
     )
 
     # scope

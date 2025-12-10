@@ -32,7 +32,7 @@ limited to:
 - Deploying it as part of a commercial SaaS or cloud-based service.
 A separate commercial license must be obtained from the copyright
 holder. For licensing inquiries, please contact g.tec medical
-engineering GmbH (office@gtec.at).
+engineering GmbH.
 
 5. No Warranty
 THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND,

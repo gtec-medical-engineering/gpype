@@ -13,7 +13,7 @@ g.Pype is a Python Software Development Kit (SDK) for building neuroscience and 
 
 # Quickstart
 
-Install `gpype` and clone the repository from GitHub:
+Install `gpype` and clone the GitHub repository:
 
 ```shell
 pip install gpype

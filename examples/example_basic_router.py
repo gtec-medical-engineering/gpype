@@ -86,7 +86,7 @@ if __name__ == "__main__":
     # Input 1: Take channels 0,1 from sine generator
     # Input 2: Take channels 3,4,5 from rectangular generator
     # Output: 5 channels total (2 sine + 3 rectangular)
-    router = gp.Router(input_selector=[[0, 1], [3, 4, 5]])
+    router = gp.Router(input_channels=[[0, 1], [3, 4, 5]])
 
     # Real-time visualization scope
     scope = gp.TimeSeriesScope(

@@ -88,10 +88,10 @@ if __name__ == "__main__":
 
     # Merge signals for scope and data saving
     router_scope = gp.Router(
-        input_selector=[gp.Router.ALL, gp.Router.ALL, gp.Router.ALL]
+        input_channels=[gp.Router.ALL, gp.Router.ALL, gp.Router.ALL]
     )
     router_raw = gp.Router(
-        input_selector=[gp.Router.ALL, gp.Router.ALL, gp.Router.ALL]
+        input_channels=[gp.Router.ALL, gp.Router.ALL, gp.Router.ALL]
     )
 
     # File writer

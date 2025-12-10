@@ -85,15 +85,23 @@ class EventSource(Source):
         # Call parent stop method
         Source.stop(self)
 
-    def trigger(self, value):
+    def trigger(self, value, port_name=PORT_OUT):
         """Trigger an event with the specified value.
 
         Args:
+            port_name: Name of the output port to trigger.
             value: Event value to be transmitted. Converted to appropriate
                 data type and formatted as single-sample array.
         """
         # Create data array with the event value
-        data = {PORT_OUT: np.array([[value]], dtype=Constants.DATA_TYPE)}
+        data = {}
+        if not isinstance(port_name, list):
+            port_name = [PORT_OUT]
+            value = [value]
+        for i in range(len(port_name)):
+            pn = port_name[i]
+            pv = value[i]
+            data[pn] = np.array([[pv]], dtype=Constants.DATA_TYPE)
 
         if self.source_delay > 0:
             # Queue event with timestamp for delayed processing

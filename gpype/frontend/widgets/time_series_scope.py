@@ -110,6 +110,7 @@ class TimeSeriesScope(Scope):
         amplitude_limit: float = None,
         markers: list = None,
         hidden_channels: list = None,
+        name: str = None,
         **kwargs,
     ):
         """Initialize the time series oscilloscope widget.
@@ -155,7 +156,14 @@ class TimeSeriesScope(Scope):
             hidden_channels = []
 
         # Configure input ports for data reception
-        input_ports = [IPort.Configuration(name=PORT_IN)]
+        ip_key = self.Configuration.Keys.INPUT_PORTS
+        input_ports: list[IPort.Configuration] = kwargs.pop(
+            ip_key, [IPort.Configuration(name=PORT_IN)]
+        )
+
+        # Set name if not provided
+        if name is None:
+            name = "Time Series Scope"
 
         # Initialize parent Scope class with configuration
         Scope.__init__(
@@ -163,7 +171,7 @@ class TimeSeriesScope(Scope):
             input_ports=input_ports,
             time_window=time_window,
             amplitude_limit=amplitude_limit,
-            name="Time Series Scope",
+            name=name,
             markers=markers,
             hidden_channels=hidden_channels,
             **kwargs,
@@ -494,7 +502,7 @@ class TimeSeriesScope(Scope):
         self._step_counts += 1
 
         # Calculate data processing rate for performance monitoring
-        t_el = time.time() - self._start_time
+        t_el = time.time() - self._start_time + 1e-10
         self._step_rate = self._step_counts / t_el
 
         # Calculate circular buffer write indices

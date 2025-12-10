@@ -93,6 +93,9 @@ class FileWriter(INode):
         # Initialize header for CSV output
         self._header = ""
 
+        # Sampling rate
+        self._sampling_rate = None
+
         # Call parent start method
         super().start()
 
@@ -141,6 +144,14 @@ class FileWriter(INode):
         if not self._file_handle:
             raise RuntimeError("File handle is not initialized.")
 
+        PORT_IN = Constants.Defaults.PORT_IN
+        sr_key = Constants.Keys.SAMPLING_RATE
+        self._sampling_rate = port_context_in[PORT_IN].get(sr_key, None)
+        if self._sampling_rate is None:
+            raise RuntimeError(
+                "Sampling rate not provided in port context."
+            )
+
         # No output context for sink nodes
         return {}
 
@@ -182,7 +193,7 @@ class FileWriter(INode):
                     if self._file_handle:
                         # Generate CSV header only for first data block
                         if self._sample_counter == 0:
-                            header = "Index, "
+                            header = "Time, "
                             ch_names = [
                                 f"Ch{d + 1:02d}" for d in range(block.shape[1])
                             ]
@@ -194,16 +205,17 @@ class FileWriter(INode):
                         start_idx = self._sample_counter
                         end_idx = self._sample_counter + block.shape[0]
                         indices = np.arange(start_idx, end_idx)
+                        timestamps = indices / self._sampling_rate
                         self._sample_counter += block.shape[0]
 
-                        # Combine indices with data (indices as first column)
-                        full_block = np.column_stack((indices, block))
+                        # Combine timestamps with data (first column)
+                        full_block = np.column_stack((timestamps, block))
 
-                        # Write to CSV with high precision formatting
+                        # Write to CSV with reasonable precision formatting
                         np.savetxt(
                             self._file_handle,
                             full_block,
-                            fmt="%.17g",  # High precision format
+                            fmt=["%g", *(["%.17g"] * block.shape[1])],
                             delimiter=",",
                             header=header,
                             comments="",

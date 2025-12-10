@@ -77,7 +77,7 @@ if __name__ == "__main__":
     keyboard = gp.Keyboard()  # Arrow keys -> numerical event codes
 
     # Combine signal data (8 channels) + keyboard events (1 channel)
-    router = gp.Router(input_selector=[gp.Router.ALL, gp.Router.ALL])
+    router = gp.Router(input_channels=[gp.Router.ALL, gp.Router.ALL])
 
     # Define colored markers for visual feedback (values are key codes)
     mk = gp.TimeSeriesScope.Markers

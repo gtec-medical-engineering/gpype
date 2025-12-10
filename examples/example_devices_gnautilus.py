@@ -57,7 +57,7 @@ Real-world applications:
 Usage:
     1. Mount g.Nautilus cap/electrodes
     2. Power on g.Nautilus
-    4. Run: python example_devices_core8.py
+    4. Run: python example_devices_gnautilus.py
     5. Monitor real-time EEG signals
 
 Note:

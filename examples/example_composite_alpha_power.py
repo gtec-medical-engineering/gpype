@@ -134,7 +134,7 @@ if __name__ == "__main__":
     # Router combines all processing stages for comparative analysis
     # Allows simultaneous viewing of raw, filtered, and processed signals
     merger = gp.Router(
-        input_selector={
+        input_channels={
             "noise": [0],  # Raw noise
             "modulator": [0],  # Modulation
             "multiplier": [0],  # Modulated
@@ -143,7 +143,7 @@ if __name__ == "__main__":
             "moving_average": [0],  # Smoothed power
             "hold": [0],
         },  # Final output
-        output_selector=[gp.Router.ALL],
+        output_channels=[gp.Router.ALL],
     )
 
     # === REAL-TIME VISUALIZATION ===

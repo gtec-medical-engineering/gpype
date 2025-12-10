@@ -26,6 +26,9 @@ class Router(IONode):
     # Type annotation for the internal routing map
     _map: dict
 
+    # Type annotation for output channel counts
+    _channel_count_out: dict
+
     class Configuration(ioc.IONode.Configuration):
         """Configuration class for Router parameters."""
 
@@ -112,6 +115,9 @@ class Router(IONode):
         # Initialize internal routing map
         self._map = {}
 
+        # Store output channel counts for use in step()
+        self._channel_count_out: dict = {}
+
         # Initialize parent IONode with all configurations
         IONode.__init__(
             self,
@@ -177,7 +183,15 @@ class Router(IONode):
             if sel == Router.ALL:
                 sel = range(len(input_map))
             # Map selected input channels to this output port
-            self._map[name] = [input_map[n] for n in sel]
+            map = [input_map[n] for n in sel]
+            map_grouped = []
+            from itertools import groupby
+            for key, group in groupby(map, key=lambda x: list(x.keys())[0]):
+                values = []
+                for item in group:
+                    values.extend(item[key])
+                map_grouped.append({key: values})
+            self._map[name] = map_grouped
 
         # Validate sampling rate consistency across all input ports
         sr_key = Constants.Keys.SAMPLING_RATE
@@ -232,11 +246,14 @@ class Router(IONode):
                     context[full_key][key2] = port_context_in[key1][key2]
 
             # Set output port context with validated values
-            context[cc_key] = len(self._map[op[name_key]])
+            context[cc_key] = sum(
+                len(d[key]) for d in self._map[op[name_key]] for key in d
+            )
             context[sr_key] = sr
             context[fsz_key] = fsz
             context[type_key] = tp
             port_context_out[op[name_key]] = context
+            self._channel_count_out[op[name_key]] = context[cc_key]
 
         return port_context_out
 
@@ -261,19 +278,29 @@ class Router(IONode):
 
         # Process each output port mapping
         for port_out, mapping in self._map.items():
-            # Build channel data list for this output port
-            channel_arrays = []
-            for m in mapping:
-                # Extract data for each channel mapping
-                for port_in, ch_in in m.items():
-                    # Get the specific channel data
-                    try:
-                        channel_arrays.append(data[port_in][:, ch_in])
-                    except Exception:
-                        channel_arrays.append(np.zeros((1, 1)))
+            # Calculate total output channels
+            channel_count = self._channel_count_out[port_out]
 
-            # Horizontally stack all selected channels
-            # Shape: (frame_size, output_channel_count)
-            data_out[port_out] = np.hstack(channel_arrays)
+            # Get frame size from first available input
+            frame_size = next(iter(data.values())).shape[0]
+
+            # Pre-allocate output array
+            output_array = np.zeros((frame_size, channel_count))
+
+            # Fill output array using direct slicing
+            col_idx = 0
+            for m in mapping:
+                for port_in, ch_in in m.items():
+                    try:
+                        num_channels = len(ch_in)
+                        output_array[:, col_idx:col_idx + num_channels] = (
+                            data[port_in][:, ch_in]
+                        )
+                        col_idx += num_channels
+                    except Exception:
+                        # Handle missing data with zeros
+                        col_idx += len(ch_in)
+
+            data_out[port_out] = output_array
 
         return data_out

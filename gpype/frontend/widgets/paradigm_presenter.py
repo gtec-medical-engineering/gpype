@@ -31,7 +31,7 @@ class ParadigmPresenter(Widget, UDPReceiver):
     """
 
     # Source code fingerprint
-    FINGERPRINT = "a97c25ed64c3e2f561836aa0295947ac"
+    FINGERPRINT = "9f95ac603aa4d2666b8f5f0ae4b96fc3"
 
     def __init__(self, paradigm: str = None):
         """Initialize the Paradigm Presenter control widget.

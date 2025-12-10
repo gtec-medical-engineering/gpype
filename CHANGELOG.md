@@ -1,12 +1,16 @@
 # Changelog
 
+## [3.0.6] - 2025-12-10
+
+We applied some small fixes in code and documentation and updated the FileWriter and Router node.
+
+- Updated FileWriter node to store timestamps instead of sample index
+- Improved performance of Router node
+- Minor fixes in documentation
+
 ## [3.0.5] - 2025-10-07
 
-### Summary
-
 We added Season 2 Episode 2 (Routing Signals) to the g.Pype Training, updated the documentation and switched the theme to dark. We also fixed some minor bugs in the g.Pype source code.
-
-### Details
 
 - Migrated documentation to all black design
 - Fixed division by zero error in TimeSeriesScope

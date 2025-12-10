@@ -16,8 +16,9 @@ What this example shows:
 Expected output:
 - Real-time scope showing 8-channel signals with event markers
 - CSV file 'example_YYYYMMDD_HHMMSS.csv' containing:
-  * Columns 0-7: Signal data from 8 channels
-  * Column 8: Event markers (38=Up, 39=Right, 40=Down, 37=Left)
+  * Column 1: Timestamp
+  * Columns 1-8: Signal data from 8 channels
+  * Column 9: Event markers (38=Up, 39=Right, 40=Down, 37=Left)
   * Automatic timestamp in filename prevents overwrites
 
 Interactive controls:
@@ -70,7 +71,7 @@ if __name__ == "__main__":
     keyboard = gp.Keyboard()  # Arrow keys -> event codes
 
     # Combine signal data (8 channels) + event data (1 channel) = 9 channels
-    router = gp.Router(input_selector=[gp.Router.ALL, gp.Router.ALL])
+    router = gp.Router(input_channels=[gp.Router.ALL, gp.Router.ALL])
 
     # Define colored markers for visualization (values korrespond to arrows)
     mk = gp.TimeSeriesScope.Markers
