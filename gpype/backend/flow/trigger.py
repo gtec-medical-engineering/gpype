@@ -111,7 +111,6 @@ class Trigger(IONode):
         self._countdown = None  # List of active countdown timers
         self._samples_pre = None  # Pre-trigger samples count
         self._samples_post = None  # Post-trigger samples count
-        self._last_trigger = None  # Last seen trigger value
 
     def setup(
         self, data: dict[str, np.ndarray], port_context_in: dict[str, dict]
@@ -182,9 +181,6 @@ class Trigger(IONode):
         self._target = self.config[self.Configuration.Keys.TARGET]
         self._countdown = []  # List of active trigger countdowns
 
-        # Initialize last trigger to value outside target range
-        self._last_trigger = min(self._target) - 1
-
         return port_context_out
 
     def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
@@ -203,29 +199,28 @@ class Trigger(IONode):
             countdown completes, None otherwise. Epoch has shape
             (samples_pre + samples_post, channel_count).
         """
-        # Update rolling buffer with new data sample
-        # Efficiently shift buffer: move all rows up by one position
-        self._buf_input[:-1] = self._buf_input[1:]
-        self._buf_input[-1] = data[PORT_IN][-1]  # Add newest sample at end
 
         # Check for trigger state changes
         trigger = data[self.PORT_TRIGGER]
-        if trigger != self._last_trigger:
-            # New trigger detected - check if it's a target value
+        if trigger is not None:
             if trigger in self._target:
-                # Start new countdown for this trigger event
                 self._countdown.append(self._samples_post)
-            self._last_trigger = trigger
 
-        # Process all active countdowns
-        for i in reversed(range(len(self._countdown))):
-            self._countdown[i] -= 1  # Decrement countdown
+        # Update rolling buffer with new data sample
+        # Efficiently shift buffer: move all rows up by one position
+        if data[PORT_IN] is not None:
+            self._buf_input[:-1] = self._buf_input[1:]
+            self._buf_input[-1] = data[PORT_IN][-1]  # Add newest sample at end
 
-            # Check if countdown has completed
-            if self._countdown[i] <= 0:
-                # Remove completed countdown and return epoch data
-                self._countdown.pop(i)
-                return {PORT_OUT: self._buf_input.copy()}
+            # Process all active countdowns
+            for i in reversed(range(len(self._countdown))):
+                self._countdown[i] -= 1  # Decrement countdown
+
+                # Check if countdown has completed
+                if self._countdown[i] <= 0:
+                    # Remove completed countdown and return epoch data
+                    self._countdown.pop(i)
+                    return {PORT_OUT: self._buf_input.copy()}
 
         # No epochs ready - return None (asynchronous behavior)
         return None

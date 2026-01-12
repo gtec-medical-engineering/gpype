@@ -1,6 +1,20 @@
 # Changelog
 
-## [3.0.6] - 2025-12-10
+## [3.0.7] - 2026-01-12
+
+We fixed a bug in the Router and GenericFilter nodes and updated the file writing mechanism. Also, the Equation node can now handle matrix operations.
+
+- Fixed a bug in synchronous/asynchronous signal propagation in the Router node.
+- Ensured numerical stability in GenericFilter nodes by avoiding FIR filters to be forced into biquad structures.
+- Split FileWriter class into a FileWriter base class and CsvWriter concrete class, to cleanly enable other formats in the future.
+- Updated the Equation node to accommodate matrix operations.
+- Minor changes in documentation
+
+## [3.0.6] - 2025-12-10  YANKED
+
+This version contains a serious bug in the propagation of synchronous and asyncronous signals in the Router node, which has been fixed in version 3.0.7. Do not use this version.
+
+Original changelog text:
 
 We applied some small fixes in code and documentation and updated the FileWriter and Router node.
 

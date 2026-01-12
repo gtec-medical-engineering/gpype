@@ -29,6 +29,13 @@ class Router(IONode):
     # Type annotation for output channel counts
     _channel_count_out: dict
 
+    # Type annotation for SYNC/ASYNC port tracking
+    _sync_ports: set
+    _async_ports: set
+
+    # Type annotation for ASYNC data buffers
+    _async_buffers: dict
+
     class Configuration(ioc.IONode.Configuration):
         """Configuration class for Router parameters."""
 
@@ -118,6 +125,13 @@ class Router(IONode):
         # Store output channel counts for use in step()
         self._channel_count_out: dict = {}
 
+        # Initialize SYNC/ASYNC port tracking
+        self._sync_ports: set = set()
+        self._async_ports: set = set()
+
+        # Initialize ASYNC data buffers
+        self._async_buffers: dict = {}
+
         # Initialize parent IONode with all configurations
         IONode.__init__(
             self,
@@ -193,25 +207,48 @@ class Router(IONode):
                 map_grouped.append({key: values})
             self._map[name] = map_grouped
 
-        # Validate sampling rate consistency across all input ports
+        # Identify SYNC vs ASYNC ports and initialize buffers
+        timing_key = IPort.Configuration.Keys.TIMING
+        self._sync_ports = set()
+        self._async_ports = set()
+        self._async_buffers = {}
+
+        for port_name, context in port_context_in.items():
+            port_timing = context.get(timing_key, Constants.Timing.SYNC)
+            if port_timing == Constants.Timing.ASYNC:
+                self._async_ports.add(port_name)
+                # Initialize buffer with zeros based on channel count
+                cc = context.get(Constants.Keys.CHANNEL_COUNT, 1)
+                self._async_buffers[port_name] = np.zeros(
+                    (1, cc), dtype=Constants.DATA_TYPE
+                )
+            else:
+                self._sync_ports.add(port_name)
+
+        # Validate sampling rate consistency across SYNC input ports only
         sr_key = Constants.Keys.SAMPLING_RATE
         sampling_rates = [
-            md.get(sr_key, None) for md in port_context_in.values()
+            md.get(sr_key, None)
+            for name, md in port_context_in.items()
+            if name in self._sync_ports
         ]
         sampling_rates = [sr for sr in sampling_rates if sr is not None]
-        if len(set(sampling_rates)) != 1:
-            raise ValueError("All ports must have the same sampling rate.")
-        sr = sampling_rates[0]
+        if len(set(sampling_rates)) > 1:
+            err_msg = "All SYNC ports must have the same sampling rate."
+            raise ValueError(err_msg)
+        sr = sampling_rates[0] if sampling_rates else None
 
-        # Validate frame size consistency across all input ports
+        # Validate frame size consistency across SYNC input ports only
         fsz_key = Constants.Keys.FRAME_SIZE
         frame_sizes = [
-            md.get(fsz_key, None) for md in port_context_in.values()
+            md.get(fsz_key, None)
+            for name, md in port_context_in.items()
+            if name in self._sync_ports
         ]
         frame_sizes = [fsz for fsz in frame_sizes if fsz is not None]
-        if len(set(frame_sizes)) != 1:
-            raise ValueError("All ports must have the same frame size.")
-        fsz = frame_sizes[0]
+        if len(set(frame_sizes)) > 1:
+            raise ValueError("All SYNC ports must have the same frame size.")
+        fsz = frame_sizes[0] if frame_sizes else 1
 
         # Validate data type consistency across all input ports
         type_key = IPort.Configuration.Keys.TYPE
@@ -264,6 +301,11 @@ class Router(IONode):
         mapping established during setup. Each output port receives data from
         its configured subset of input channels.
 
+        For mixed SYNC/ASYNC inputs:
+        - ASYNC data is buffered when it arrives
+        - Output is only produced when SYNC data is available
+        - Buffered ASYNC data is used when SYNC data triggers output
+
         Args:
             data: Dictionary containing input data arrays for each port.
                 Keys are port names, values are arrays with shape
@@ -272,8 +314,38 @@ class Router(IONode):
         Returns:
             Dictionary containing output data arrays for each output port.
             Keys are output port names, values are arrays with shape
-            (frame_size, selected_channel_count).
+            (frame_size, selected_channel_count). Returns empty dict if
+            no SYNC data is available.
         """
+        # Update ASYNC buffers with any new ASYNC data
+        for port_name in self._async_ports:
+            if port_name in data and data[port_name] is not None:
+                self._async_buffers[port_name] = data[port_name]
+
+        # Check if any SYNC data is available
+        sync_data_available = any(
+            port_name in data and data[port_name] is not None
+            for port_name in self._sync_ports
+        )
+
+        # Only produce output when SYNC data is available
+        # (or if there are no SYNC ports at all)
+        if not sync_data_available and len(self._sync_ports) > 0:
+            return {}
+
+        # Build merged data dict: SYNC data + buffered ASYNC data
+        merged_data = {}
+        for port_name in data:
+            if port_name in self._sync_ports:
+                merged_data[port_name] = data[port_name]
+            elif port_name in self._async_ports:
+                merged_data[port_name] = self._async_buffers[port_name]
+
+        # Also include any ASYNC ports not in current data
+        for port_name in self._async_ports:
+            if port_name not in merged_data:
+                merged_data[port_name] = self._async_buffers[port_name]
+
         data_out: dict = {}
 
         # Process each output port mapping
@@ -281,22 +353,42 @@ class Router(IONode):
             # Calculate total output channels
             channel_count = self._channel_count_out[port_out]
 
-            # Get frame size from first available input
-            frame_size = next(iter(data.values())).shape[0]
+            # Get frame size from first available SYNC input, or default to 1
+            frame_size = 1
+            for port_name in self._sync_ports:
+                if (
+                    port_name in merged_data
+                    and merged_data[port_name] is not None
+                ):
+                    frame_size = merged_data[port_name].shape[0]
+                    break
 
             # Pre-allocate output array
-            output_array = np.zeros((frame_size, channel_count))
+            output_array = np.zeros(
+                (frame_size, channel_count), dtype=Constants.DATA_TYPE
+            )
 
             # Fill output array using direct slicing
             col_idx = 0
             for m in mapping:
                 for port_in, ch_in in m.items():
                     try:
-                        num_channels = len(ch_in)
-                        output_array[:, col_idx:col_idx + num_channels] = (
-                            data[port_in][:, ch_in]
-                        )
-                        col_idx += num_channels
+                        num_ch = len(ch_in)
+                        port_data = merged_data.get(port_in)
+                        if port_data is not None:
+                            # Broadcast ASYNC data (1 row) to match frame_size
+                            if port_data.shape[0] == 1 and frame_size > 1:
+                                output_array[:, col_idx:col_idx + num_ch] = (
+                                    np.broadcast_to(
+                                        port_data[:, ch_in],
+                                        (frame_size, num_ch)
+                                    )
+                                )
+                            else:
+                                output_array[:, col_idx:col_idx + num_ch] = (
+                                    port_data[:, ch_in]
+                                )
+                        col_idx += num_ch
                     except Exception:
                         # Handle missing data with zeros
                         col_idx += len(ch_in)

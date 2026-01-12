@@ -89,13 +89,13 @@ _LAZY_IMPORTS.update(
 # backend.sinks
 
 if TYPE_CHECKING:  # pragma: no cover
-    from .backend.sinks.file_writer import FileWriter
+    from .backend.sinks.csv_writer import CsvWriter
     from .backend.sinks.lsl_sender import LSLSender
     from .backend.sinks.udp_sender import UDPSender
 
 _LAZY_IMPORTS.update(
     {
-        "backend.sinks.file_writer": "FileWriter",
+        "backend.sinks.csv_writer": "CsvWriter",
         "backend.sinks.lsl_sender": "LSLSender",
         "backend.sinks.udp_sender": "UDPSender",
     }

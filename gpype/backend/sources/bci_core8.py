@@ -26,7 +26,7 @@ class BCICore8(AmplifierSource):
     """
 
     #: Source code fingerprint for licensing verification
-    FINGERPRINT = "a3b166726d0d30281be598910b98fc2e"
+    FINGERPRINT = "61276fe1945177158d757223940e9dbd"
 
     #: Optional buffer level monitoring output port name
     PORT_BUF_LEVEL = "buffer_level"

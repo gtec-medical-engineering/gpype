@@ -418,7 +418,7 @@ class TriggerScope(Scope):
         """
         # Accumulate trigger epochs for each input port
         for name in self._port_names:
-            self._data_buffer[name].append(data[name])
-
-        # Signal that new data is available for display update
-        self._new_data = True
+            if data[name] is not None:
+                self._data_buffer[name].append(data[name])
+                # Signal that new data is available for display update
+                self._new_data = True

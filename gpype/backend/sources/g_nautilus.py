@@ -27,7 +27,7 @@ class GNautilus(AmplifierSource):
     """
 
     #: Source code fingerprint for licensing verification
-    FINGERPRINT = "4012ac0540d2ff22f6d87cda7cf3c167"
+    FINGERPRINT = "0c5937de82c5537cb9738b2e92681b28"
 
     class Configuration(AmplifierSource.Configuration):
         """Configuration class for g.Nautilus amplifier parameters."""

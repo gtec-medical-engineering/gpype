@@ -37,7 +37,7 @@ Real-world applications:
 
 Technical details:
 - Router combines 8 signal channels + 1 event channel = 9 total channels
-- FileWriter automatically adds timestamps to prevent file overwrites
+- CsvWriter automatically adds timestamps to prevent file overwrites
 - Keyboard node converts key presses to numerical event codes
 - Markers appear on channel 8 in both display and saved file
 
@@ -90,7 +90,7 @@ if __name__ == "__main__":
     )  # Show event markers
 
     # CSV file writer (auto-timestamped filename)
-    writer = gp.FileWriter(file_name="example_writer.csv")
+    writer = gp.CsvWriter(file_name="example_writer.csv")
 
     # Connect processing chain
     p.connect(source, router["in1"])  # Signal data -> Router input 1

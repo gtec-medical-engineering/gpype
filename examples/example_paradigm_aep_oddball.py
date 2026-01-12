@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
     # File writer
     filename = Path(paradigm).stem
-    writer = gp.FileWriter(file_name=f"{filename}.csv")
+    writer = gp.CsvWriter(file_name=f"{filename}.csv")
 
     # connect amplifier to filter nodes
     p.connect(amp, bandpass)
