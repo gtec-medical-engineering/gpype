@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import deque
 from typing import Union
 
 import ioiocore as ioc
@@ -33,8 +34,11 @@ class Router(IONode):
     _sync_ports: set
     _async_ports: set
 
-    # Type annotation for ASYNC data buffers
-    _async_buffers: dict
+    # Type annotation for ASYNC data buffers (queues)
+    _async_buffers: dict[str, deque]
+
+    # Type annotation for last known ASYNC values (used when queue is empty)
+    _async_last_values: dict[str, np.ndarray]
 
     class Configuration(ioc.IONode.Configuration):
         """Configuration class for Router parameters."""
@@ -92,6 +96,8 @@ class Router(IONode):
             IPort.Configuration(name=name, timing=Constants.Timing.INHERITED)
             for name in input_channels.keys()
         ]
+        input_ports = kwargs.pop(
+            Router.Configuration.Keys.INPUT_PORTS, input_ports)
 
         # Set default output channels to all channels on default port
         if output_channels is None:
@@ -118,6 +124,8 @@ class Router(IONode):
         output_ports = [
             OPort.Configuration(name=name) for name in output_channels.keys()
         ]
+        output_ports = kwargs.pop(
+            Router.Configuration.Keys.OUTPUT_PORTS, output_ports)
 
         # Initialize internal routing map
         self._map = {}
@@ -129,8 +137,11 @@ class Router(IONode):
         self._sync_ports: set = set()
         self._async_ports: set = set()
 
-        # Initialize ASYNC data buffers
-        self._async_buffers: dict = {}
+        # Initialize ASYNC data buffers (queues)
+        self._async_buffers: dict[str, deque] = {}
+
+        # Initialize last known ASYNC values
+        self._async_last_values: dict[str, np.ndarray] = {}
 
         # Initialize parent IONode with all configurations
         IONode.__init__(
@@ -217,9 +228,10 @@ class Router(IONode):
             port_timing = context.get(timing_key, Constants.Timing.SYNC)
             if port_timing == Constants.Timing.ASYNC:
                 self._async_ports.add(port_name)
-                # Initialize buffer with zeros based on channel count
+                # Initialize buffer queue and last value with zeros
                 cc = context.get(Constants.Keys.CHANNEL_COUNT, 1)
-                self._async_buffers[port_name] = np.zeros(
+                self._async_buffers[port_name] = deque()
+                self._async_last_values[port_name] = np.zeros(
                     (1, cc), dtype=Constants.DATA_TYPE
                 )
             else:
@@ -317,10 +329,10 @@ class Router(IONode):
             (frame_size, selected_channel_count). Returns empty dict if
             no SYNC data is available.
         """
-        # Update ASYNC buffers with any new ASYNC data
+        # Enqueue any new ASYNC data
         for port_name in self._async_ports:
             if port_name in data and data[port_name] is not None:
-                self._async_buffers[port_name] = data[port_name]
+                self._async_buffers[port_name].append(data[port_name])
 
         # Check if any SYNC data is available
         sync_data_available = any(
@@ -333,18 +345,20 @@ class Router(IONode):
         if not sync_data_available and len(self._sync_ports) > 0:
             return {}
 
-        # Build merged data dict: SYNC data + buffered ASYNC data
+        # Build merged data dict: SYNC data + dequeued ASYNC data
         merged_data = {}
         for port_name in data:
             if port_name in self._sync_ports:
                 merged_data[port_name] = data[port_name]
-            elif port_name in self._async_ports:
-                merged_data[port_name] = self._async_buffers[port_name]
 
-        # Also include any ASYNC ports not in current data
+        # Dequeue next ASYNC sample for each ASYNC port (or use last value)
         for port_name in self._async_ports:
-            if port_name not in merged_data:
-                merged_data[port_name] = self._async_buffers[port_name]
+            if self._async_buffers[port_name]:
+                # Consume next sample from queue and update last value
+                self._async_last_values[port_name] = (
+                    self._async_buffers[port_name].popleft()
+                )
+            merged_data[port_name] = self._async_last_values[port_name]
 
         data_out: dict = {}
 

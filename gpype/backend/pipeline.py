@@ -80,4 +80,13 @@ class Pipeline(ioc.Pipeline):
         Returns:
             Pipeline: A new Pipeline instance with the specified configuration.
         """
-        return super().deserialize(data)
+        # Deserialize using parent class
+        ioc_pipeline = ioc.Pipeline.deserialize(data)
+
+        # Create Pipeline instance without calling __init__
+        pipeline = object.__new__(Pipeline)
+
+        # Copy all instance attributes from deserialized pipeline
+        pipeline.__dict__.update(ioc_pipeline.__dict__)
+
+        return pipeline

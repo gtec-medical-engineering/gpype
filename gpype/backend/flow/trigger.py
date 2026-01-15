@@ -89,9 +89,13 @@ class Trigger(IONode):
                 name=self.PORT_TRIGGER, timing=Constants.Timing.INHERITED
             ),
         ]
+        input_ports = kwargs.pop(
+            Constants.Keys.INPUT_PORTS, input_ports)
 
         # Configure output port with asynchronous timing (trigger-dependent)
         output_ports = [OPort.Configuration(timing=Constants.Timing.ASYNC)]
+        output_ports = kwargs.pop(
+            Constants.Keys.OUTPUT_PORTS, output_ports)
 
         # Initialize parent IONode with all configurations
         super().__init__(

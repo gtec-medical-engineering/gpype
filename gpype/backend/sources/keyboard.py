@@ -17,7 +17,7 @@ class Keyboard(EventSource):
     """
 
     # Source code fingerprint
-    FINGERPRINT = "76c45248fbd98f7fe6fdb6e9674f6cc8"
+    FINGERPRINT = "caed2ccea022b277a561212912a2d617"
 
     class Configuration(EventSource.Configuration):
         """Configuration class for Keyboard source parameters."""

@@ -19,12 +19,14 @@ class UDPReceiver(EventSource):
     """
 
     #: Source code fingerprint for licensing verification
-    FINGERPRINT = "5d1462314ad1009089cbe60766eeee18"
+    FINGERPRINT = "d598d79456b1fcd16dad2ad4bd2a5c41"
 
     #: Default IP address for localhost binding
     DEFAULT_IP: str = "127.0.0.1"
     #: Default UDP port number for listening
     DEFAULT_PORT: int = 1000
+    #: Hold time in milliseconds before sending reset trigger
+    HOLD_TIME_MS: int = 10
 
     class Configuration(EventSource.Configuration):
         """Configuration class for UDP receiver network parameters."""
@@ -102,7 +104,7 @@ class UDPReceiver(EventSource):
                     # Non-numeric message, skip silently
                     raise ValueError("Unsupported message format")
 
-                # Trigger events: first the value, then 0 for completion
+                # Trigger events: first the value, then 0 for reset
                 self.trigger(value)
                 self.trigger(0)
 

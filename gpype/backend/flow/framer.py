@@ -51,11 +51,18 @@ class Framer(IONode):
             raise ValueError("frame_size must be integer.")
         if frame_size < 1:
             raise ValueError("frame_size must be greater or equal 1.")
+        decimation_factor = frame_size
+
+        # Allow overriding of decimation factor via kwargs
+        decimation_factor = kwargs.pop(
+            self.Configuration.Keys.DECIMATION_FACTOR, decimation_factor)
 
         # Initialize parent IONode with frame configuration
         # Set decimation_factor = frame_size to output every frame_size steps
         super().__init__(
-            frame_size=frame_size, decimation_factor=frame_size, **kwargs
+            frame_size=frame_size,
+            decimation_factor=decimation_factor,
+            **kwargs
         )
 
         # Initialize internal buffer (will be allocated in setup())

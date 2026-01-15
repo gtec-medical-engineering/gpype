@@ -64,6 +64,11 @@ class FFT(IONode):
             raise ValueError("window_size must be integer.")
         if window_size <= 1:
             raise ValueError("window_size must be greater than 1.")
+        frame_size = window_size
+
+        # Allow overriding of frame size via kwargs
+        frame_size = kwargs.pop(
+            Constants.Keys.FRAME_SIZE, frame_size)
 
         # Set default window function if not provided
         if window_function is None:
@@ -86,11 +91,18 @@ class FFT(IONode):
         # Recalculate actual overlap based on integer step size
         overlap = self._step_size / window_size
 
+        # Calculate decimation factor for processing
+        decimation_factor = self._step_size
+
+        # Allow overriding of decimation factor via kwargs
+        decimation_factor = kwargs.pop(
+            self.Configuration.Keys.DECIMATION_FACTOR, decimation_factor)
+
         # Initialize parent IONode with windowing configuration
         super().__init__(
             window_size=window_size,
-            frame_size=window_size,
-            decimation_factor=self._step_size,
+            frame_size=frame_size,
+            decimation_factor=decimation_factor,
             window_function=window_function,
             overlap=overlap,
             **kwargs,

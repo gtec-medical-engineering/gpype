@@ -99,6 +99,8 @@ class Equation(IONode):
             )
             for name in self._port_names
         ]
+        input_ports = kwargs.pop(
+            Equation.Configuration.Keys.INPUT_PORTS, input_ports)
 
         # Initialize parent IONode with expression and input ports
         super().__init__(

@@ -36,3 +36,8 @@ class Constants(ioc.Constants):
 
         #: Factor by which to reduce the sampling rate
         DECIMATION_FACTOR: str = "decimation_factor"
+
+    class Defaults(ioc.Constants.Defaults):
+
+        #: Default frame size in samples
+        FRAME_SIZE: int = 1

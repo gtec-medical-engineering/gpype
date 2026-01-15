@@ -27,7 +27,7 @@ class Generator(FixedRateSource):
     SHAPE_PULSE = "pulse"
 
     #: Source code fingerprint for integrity verification
-    FINGERPRINT = "468a05f0a39ca1b4b51d26604cfbd992"
+    FINGERPRINT = "24982d2a554f4628a2ef931e083a486d"
 
     #: Default sampling rate in Hz
     DEFAULT_SAMPLING_RATE = 250.0
@@ -101,6 +101,15 @@ class Generator(FixedRateSource):
             noise_amplitude = self.DEFAULT_NOISE_AMPLITUDE
         if noise_amplitude < 0:
             raise ValueError("noise_amplitude must be positive.")
+        frame_size = kwargs.pop(
+            Generator.Configuration.Keys.FRAME_SIZE,
+            frame_size
+        )
+        decimation_factor = frame_size
+        decimation_factor = kwargs.pop(
+            Generator.Configuration.Keys.DECIMATION_FACTOR,
+            decimation_factor
+        )
 
         # Configure output ports
         output_ports = kwargs.pop(
@@ -113,7 +122,7 @@ class Generator(FixedRateSource):
             sampling_rate=sampling_rate,
             channel_count=channel_count,
             frame_size=frame_size,
-            decimation_factor=frame_size,
+            decimation_factor=decimation_factor,
             signal_frequency=signal_frequency,
             signal_amplitude=signal_amplitude,
             signal_shape=signal_shape,

@@ -78,7 +78,7 @@ class Source(ONode):
         # Validate and normalize frame_size parameter
         if frame_size is None:
             # Default to 1 sample per frame for all ports
-            frame_size = [1] * len(output_ports)
+            frame_size = [Constants.Defaults.FRAME_SIZE] * len(output_ports)
         elif isinstance(frame_size, int):
             # Convert single int to list for all ports
             frame_size = [frame_size] * len(output_ports)

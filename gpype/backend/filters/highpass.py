@@ -45,5 +45,8 @@ class Highpass(Butterworth):
         if order is None:
             order = self.DEFAULT_ORDER
 
+        fn = kwargs.pop(Butterworth.Configuration.Keys.FN, fn)
+        btype = kwargs.pop(Butterworth.Configuration.Keys.BTYPE, btype)
+
         # Initialize parent Butterworth filter with highpass configuration
         super().__init__(fn=fn, f_c=f_c, btype=btype, order=order, **kwargs)

@@ -72,6 +72,10 @@ class MovingAverage(GenericFilter):
         # FIR filter (no feedback, denominator = 1)
         a = np.array([1.0])
 
+        # Allow overriding of coefficients via kwargs
+        b = kwargs.pop(MovingAverage.Configuration.Keys.B, b)
+        a = kwargs.pop(MovingAverage.Configuration.Keys.A, a)
+
         # Initialize parent generic filter with computed coefficients
         super().__init__(
             b=b,

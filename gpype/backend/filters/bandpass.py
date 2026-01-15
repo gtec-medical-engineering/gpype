@@ -54,6 +54,9 @@ class Bandpass(Butterworth):
         if order is None:
             order = self.DEFAULT_ORDER
 
+        fn = kwargs.pop(Butterworth.Configuration.Keys.FN, fn)
+        btype = kwargs.pop(Butterworth.Configuration.Keys.BTYPE, btype)
+
         # Initialize parent Butterworth filter with bandpass configuration
         super().__init__(
             fn=fn, f_lo=f_lo, f_hi=f_hi, btype=btype, order=order, **kwargs

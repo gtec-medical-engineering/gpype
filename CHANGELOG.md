@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.8] - 2026-01-15
+
+We fixed a bug in the UDPReceiver receiver.
+
+- Fixed a set/reset race condition in the UDPReceiver node
+- Fixed some bugs in the de/serialization procedure
+
 ## [3.0.7] - 2026-01-12
 
 We fixed a bug in the Router and GenericFilter nodes and updated the file writing mechanism. Also, the Equation node can now handle matrix operations.

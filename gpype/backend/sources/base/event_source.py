@@ -37,20 +37,6 @@ class EventSource(Source):
         # Initialize parent Source with configuration
         Source.__init__(self, output_ports=output_ports, **kwargs)
 
-        # Initialize data storage for output ports
-        op_key = self.Configuration.Keys.OUTPUT_PORTS
-        cc_key = self.Configuration.Keys.CHANNEL_COUNT
-        name_key = OPort.Configuration.Keys.NAME
-        self._data = {}
-
-        # Pre-allocate data arrays for non-inherited channel configurations
-        for op, cc in zip(self.config[op_key], self.config[cc_key]):
-            if cc != Constants.INHERITED:
-                # Create zero-filled array with proper data type
-                self._data[op[name_key]] = np.zeros(
-                    (1, cc), dtype=Constants.DATA_TYPE
-                )
-
         # Initialize delay thread components if delay is configured
         if self.source_delay > 0:
             self._delay_thread_queue: Optional[queue.Queue] = None
@@ -72,8 +58,17 @@ class EventSource(Source):
             self._delay_thread_running = True
             self._delay_thread.start()
 
-        # Trigger initial cycle to prepare for events
-        self.cycle()
+        # Trigger initial cycle with empty data
+        op_key = self.Configuration.Keys.OUTPUT_PORTS
+        cc_key = self.Configuration.Keys.CHANNEL_COUNT
+        name_key = OPort.Configuration.Keys.NAME
+        data = {}
+
+        for op, cc in zip(self.config[op_key], self.config[cc_key]):
+            # Create zero-filled array with proper data type
+            data[op[name_key]] = None
+
+        self.cycle(data)
 
     def stop(self):
         """Stop event source."""
@@ -109,9 +104,7 @@ class EventSource(Source):
             self._delay_thread_queue.put((timestamp, data))
         else:
             # Process event immediately
-            self._data = data
-            self.cycle()  # Trigger node cycle
-            self._data = None  # Clear data after processing
+            self.cycle(data)  # Trigger node cycle
 
     def _timer_loop(self):
         """Background thread loop for delayed event processing.
@@ -128,9 +121,7 @@ class EventSource(Source):
                 if now - timestamp >= self.source_delay:
                     # Delay period has elapsed, process the event
                     _, data = self._delay_thread_queue.get()
-                    self._data = data
-                    self.cycle()  # Trigger node cycle
-                    self._data = None  # Clear data after processing
+                    self.cycle(data)  # Trigger node cycle
                 else:
                     # Delay period not yet elapsed, wait briefly
                     time.sleep(0.001)
@@ -148,4 +139,4 @@ class EventSource(Source):
             Dictionary containing event data if event is active, empty dict
             otherwise.
         """
-        return self._data if self._data is not None else {}
+        return data

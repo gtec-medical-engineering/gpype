@@ -24,6 +24,7 @@ class Hold(IONode):
             **kwargs: Additional arguments for parent IONode.
         """
         output_ports = [ioc.OPort.Configuration(timing=Constants.Timing.ASYNC)]
+        output_ports = kwargs.pop(Constants.Keys.OUTPUT_PORTS, output_ports)
         super().__init__(output_ports=output_ports, **kwargs)
 
     def setup(
