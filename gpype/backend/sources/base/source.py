@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from typing import Optional, Union
 
 import numpy as np
@@ -68,11 +69,11 @@ class Source(ONode):
             raise ValueError("All elements of channel_count must be integers.")
         if not all(c == Constants.INHERITED or c >= 1 for c in channel_count):
             raise ValueError(
-                "All elements of channel_count must be greater " "or equal 1."
+                "All elements of channel_count must be greater or equal 1."
             )
         if len(output_ports) != len(channel_count):
             raise ValueError(
-                "output_ports and channel_count must have the " "same length."
+                "output_ports and channel_count must have the same length."
             )
 
         # Validate and normalize frame_size parameter
@@ -88,7 +89,7 @@ class Source(ONode):
             raise ValueError("All elements of frame_size must be integers.")
         if not all(f == Constants.INHERITED or f >= 1 for f in frame_size):
             raise ValueError(
-                "All elements of frame_size must be greater " "or equal 1."
+                "All elements of frame_size must be greater or equal 1."
             )
 
         # Check frame_size consistency (all non-inherited values must be equal)
@@ -99,7 +100,7 @@ class Source(ONode):
             raise ValueError("All elements of frame_size must be equal.")
         if len(output_ports) != len(frame_size):
             raise ValueError(
-                "output_ports and frame_size must have the " "same length."
+                "output_ports and frame_size must have the same length."
             )
 
         # Sources cannot have input ports by design
@@ -174,4 +175,5 @@ class Source(ONode):
             port_name = out_ports[i][OPort.Configuration.Keys.NAME]
             port_context_out[port_name].update(context)
 
+        self.log(f"Source setup complete with {json.dumps(port_context_out)}")
         return port_context_out

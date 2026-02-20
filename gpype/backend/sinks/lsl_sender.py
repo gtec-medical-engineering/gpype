@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import Optional
 
-import ioiocore as ioc
 import numpy as np
 from pylsl import StreamInfo, StreamOutlet, cf_double64
 
@@ -22,10 +21,10 @@ class LSLSender(INode):
     #: Default LSL stream name for g.Pype data streams
     DEFAULT_STREAM_NAME = "gpype_lsl"
 
-    class Configuration(ioc.INode.Configuration):
+    class Configuration(INode.Configuration):
         """Configuration class for LSLSender parameters."""
 
-        class Keys(ioc.INode.Configuration.Keys):
+        class Keys(INode.Configuration.Keys):
             """Configuration keys for LSL sender settings."""
 
             #: Stream name configuration key

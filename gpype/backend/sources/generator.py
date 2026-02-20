@@ -27,7 +27,7 @@ class Generator(FixedRateSource):
     SHAPE_PULSE = "pulse"
 
     #: Source code fingerprint for integrity verification
-    FINGERPRINT = "24982d2a554f4628a2ef931e083a486d"
+    FINGERPRINT = "3baf246bbbfcfe671b205dffcf10b52e"
 
     #: Default sampling rate in Hz
     DEFAULT_SAMPLING_RATE = 250.0

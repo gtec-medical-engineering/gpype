@@ -1,8 +1,17 @@
 # Changelog
 
+## [3.0.9] - 2026-02-20
+
+We integrated the Unicorn Hybrid Black into g.Pype, improved various performance aspects, and fixed various minor bugs.
+
+- HybridBlack node available. See g.Pype Training season 3 episode 4.
+- Enabled direct execution of step() functions of of consecutive nodes to avoid thread spamming.
+- Removed PerformanceMonitor widget (not accurate enough).
+- Fixed some minor bugs.
+
 ## [3.0.8] - 2026-01-15
 
-We fixed a bug in the UDPReceiver receiver.
+We fixed a bug in the UDPReceiver node.
 
 - Fixed a set/reset race condition in the UDPReceiver node
 - Fixed some bugs in the de/serialization procedure

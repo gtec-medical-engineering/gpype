@@ -108,6 +108,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from .backend.sources.bci_core8 import BCICore8
     from .backend.sources.g_nautilus import GNautilus
     from .backend.sources.generator import Generator
+    from .backend.sources.hybrid_black import HybridBlack
     from .backend.sources.keyboard import Keyboard
     from .backend.sources.udp_receiver import UDPReceiver
 
@@ -115,6 +116,7 @@ _LAZY_IMPORTS.update(
     {
         "backend.sources.bci_core8": "BCICore8",
         "backend.sources.generator": "Generator",
+        "backend.sources.hybrid_black": "HybridBlack",
         "backend.sources.keyboard": "Keyboard",
         "backend.sources.udp_receiver": "UDPReceiver",
         "backend.sources.g_nautilus": "GNautilus",
@@ -156,7 +158,6 @@ _LAZY_IMPORTS.update(
 
 if TYPE_CHECKING:  # pragma: no cover
     from .frontend.widgets.paradigm_presenter import ParadigmPresenter
-    from .frontend.widgets.performance_monitor import PerformanceMonitor
     from .frontend.widgets.spectrum_scope import SpectrumScope
     from .frontend.widgets.time_series_scope import TimeSeriesScope
     from .frontend.widgets.trigger_scope import TriggerScope
@@ -164,7 +165,6 @@ if TYPE_CHECKING:  # pragma: no cover
 _LAZY_IMPORTS.update(
     {
         "frontend.widgets.paradigm_presenter": "ParadigmPresenter",
-        "frontend.widgets.performance_monitor": "PerformanceMonitor",
         "frontend.widgets.spectrum_scope": "SpectrumScope",
         "frontend.widgets.time_series_scope": "TimeSeriesScope",
         "frontend.widgets.trigger_scope": "TriggerScope",

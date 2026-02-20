@@ -2,7 +2,7 @@
 g.Nautilus Device Example - Real-time EEG Acquisition and Processing
 
 This example demonstrates how to connect to and process real-time EEG data from
-a g.Nautilus amplifier system. It showcases professional EEG signal
+a g.Nautilus amplifier system. It showcases EEG signal
 processing with standard filtering techniques commonly used in clinical and
 research BCI applications.
 
@@ -36,14 +36,6 @@ Signal processing pipeline:
 3. 50 Hz notch filter - removes European power line noise
 4. 60 Hz notch filter - removes American power line noise
 5. Real-time visualization
-
-Filtering rationale:
-- Bandpass (1-30 Hz): Preserves main EEG rhythms while removing:
-  * DC drift and very low frequencies (<1 Hz)
-  * High-frequency noise and muscle artifacts (>30 Hz)
-- Notch filters: Remove power line interference at:
-  * 50 Hz (Europe, Asia, Africa, Australia)
-  * 60 Hz (North America, parts of South America)
 
 Real-world applications:
 - Clinical EEG monitoring and diagnosis

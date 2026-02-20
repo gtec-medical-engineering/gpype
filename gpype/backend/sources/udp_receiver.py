@@ -19,7 +19,7 @@ class UDPReceiver(EventSource):
     """
 
     #: Source code fingerprint for licensing verification
-    FINGERPRINT = "d598d79456b1fcd16dad2ad4bd2a5c41"
+    FINGERPRINT = "3d171a479e053fe6b394b4cdc6b84e90"
 
     #: Default IP address for localhost binding
     DEFAULT_IP: str = "127.0.0.1"

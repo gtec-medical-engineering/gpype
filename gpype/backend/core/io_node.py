@@ -61,6 +61,8 @@ class IONode(ioc.IONode, Node):
                 raise ValueError("channel_count must be provided in context.")
             if Constants.Keys.FRAME_SIZE not in context:
                 raise ValueError("frame_size must be provided in context.")
+            if IPort.Configuration.Keys.TIMING not in context:
+                raise ValueError("timing must be provided in context.")
 
         # Validate sampling rates - all ports must have the same sampling rate
         sr_key = Constants.Keys.SAMPLING_RATE
@@ -93,9 +95,10 @@ class IONode(ioc.IONode, Node):
         fsz_key = Constants.Keys.FRAME_SIZE
         frame_sizes = [
             md.get(fsz_key, None) for md in port_context_in.values()
+            if md[IPort.Configuration.Keys.TIMING] == Constants.Timing.SYNC
         ]
         frame_sizes = [fsz for fsz in frame_sizes if fsz is not None]
-        if len(set(frame_sizes)) != 1:
+        if len(set(frame_sizes)) > 1:
             raise ValueError("All ports must have the same frame size.")
 
         # Validate port types - all ports must have compatible types

@@ -204,15 +204,14 @@ class Trigger(IONode):
             (samples_pre + samples_post, channel_count).
         """
 
-        # Check for trigger state changes
-        trigger = data[self.PORT_TRIGGER]
-        if trigger is not None:
-            if trigger in self._target:
+        # Check for trigger
+        if self.PORT_TRIGGER in data:
+            if data[self.PORT_TRIGGER] in self._target:
                 self._countdown.append(self._samples_post)
 
         # Update rolling buffer with new data sample
         # Efficiently shift buffer: move all rows up by one position
-        if data[PORT_IN] is not None:
+        if PORT_IN in data:
             self._buf_input[:-1] = self._buf_input[1:]
             self._buf_input[-1] = data[PORT_IN][-1]  # Add newest sample at end
 

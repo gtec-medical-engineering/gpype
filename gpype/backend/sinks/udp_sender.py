@@ -3,7 +3,6 @@ from __future__ import annotations
 import socket
 from typing import Optional
 
-import ioiocore as ioc
 import numpy as np
 
 from ...common.constants import Constants
@@ -22,10 +21,10 @@ class UDPSender(INode):
     #: Default target UDP port number
     DEFAULT_PORT = 56000
 
-    class Configuration(ioc.INode.Configuration):
+    class Configuration(INode.Configuration):
         """Configuration class for UDPSender parameters."""
 
-        class Keys(ioc.INode.Configuration.Keys):
+        class Keys(INode.Configuration.Keys):
             """Configuration keys for UDP sender settings."""
 
             #: IP address configuration key
@@ -118,7 +117,9 @@ class UDPSender(INode):
         # Transmit data if socket is available
         if self._socket:
             # Convert to float64 and serialize to bytes for transmission
-            payload = d.astype(np.float64).tobytes()
+            # Using copy=False to avoid unnecessary allocation if already
+            # float64
+            payload = d.astype(np.float64, copy=False).tobytes()
 
             # Send UDP packet to target address
             self._socket.sendto(payload, self._target)

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 from collections import deque
 from typing import Union
 
@@ -275,6 +276,7 @@ class Router(IONode):
         cc_key = Constants.Keys.CHANNEL_COUNT
         op_key = self.Configuration.Keys.OUTPUT_PORTS
         name_key = OPort.Configuration.Keys.NAME
+        timing_key = OPort.Configuration.Keys.TIMING
 
         for op in self.config[op_key]:
             context = {}
@@ -292,6 +294,7 @@ class Router(IONode):
                         IPort.Configuration.Keys.NAME,
                     ]:
                         continue
+                    # Deep copy to prevent reference leakage
                     context[full_key][key2] = port_context_in[key1][key2]
 
             # Set output port context with validated values
@@ -301,6 +304,7 @@ class Router(IONode):
             context[sr_key] = sr
             context[fsz_key] = fsz
             context[type_key] = tp
+            context[timing_key] = op[timing_key]
             port_context_out[op[name_key]] = context
             self._channel_count_out[op[name_key]] = context[cc_key]
 
@@ -335,7 +339,7 @@ class Router(IONode):
                 self._async_buffers[port_name].append(data[port_name])
 
         # Check if any SYNC data is available
-        sync_data_available = any(
+        sync_data_available = all(
             port_name in data and data[port_name] is not None
             for port_name in self._sync_ports
         )
