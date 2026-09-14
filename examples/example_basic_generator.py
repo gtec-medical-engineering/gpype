@@ -1,43 +1,9 @@
-"""
-Basic Generator Example - Synthetic Signal Generation and Visualization
+"""The smallest g.Pype pipeline: a Generator straight into a scope.
 
-This is the simplest g.Pype example, demonstrating the fundamental concepts
-of signal generation and real-time visualization. It serves as an introduction
-to the g.Pype framework and shows the minimal pipeline needed for signal
-processing applications.
+Start here -- every other example adds nodes between these two.
 
-What this example shows:
-- Creating synthetic EEG-like signals using the Generator node
-- Real-time visualization with TimeSeriesScope
-- Basic two-node pipeline construction: Generator -> Scope
-- Essential g.Pype concepts: nodes, connections, and widgets
-
-Expected output:
-When you run this example, you'll see:
-- 8 channels of clean 10 Hz sine waves with slight background noise
-- Real-time display showing 10 seconds of data history
-- Smooth signal visualization at 250 Hz sampling rate
-
-This example is intended for:
-- First-time g.Pype users learning the basics
-- Testing g.Pype installation and GUI functionality
-- Understanding signal parameters and their visual effects
-- Learning the fundamental pipeline construction pattern
-
-Signal parameters:
-- Sampling rate: 250 Hz (common for EEG applications)
-- Channels: 8 (typical EEG montage)
-- Frequency: 10 Hz (alpha rhythm simulation)
-- Amplitude: 10 µV (clearly visible)
-- Shape: Sine wave (clean, predictable waveform)
-- Noise: Minimal (1 unit) for realistic signal appearance
-
-Usage:
-    python example_basic_generator.py
-
-Note:
-    This is the foundation example - all other examples build upon these
-    basic concepts of signal generation and visualization.
+Requires: pip install gpype[gui]
+Run: python example_basic_generator.py
 """
 import gpype as gp
 

@@ -6,10 +6,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QApplication, QGridLayout, QMainWindow, QWidget
-
-from .widgets.base.widget import Widget
+from ..common.constants import Constants
+from ..common.launch_config import LaunchConfig
+from . import theme as _theme
 
 
 class MainApp:
@@ -36,6 +35,7 @@ class MainApp:
         grid_size: list[int] = None,
         app=None,
         prevent_sleep: bool = True,
+        theme: str = _theme.DARK,
     ):
         """Initialize the main application with window and widget management.
 
@@ -49,10 +49,42 @@ class MainApp:
                 Creates new QApplication if None.
             prevent_sleep: Whether to prevent system sleep/power saving.
                 Default True for real-time applications.
+            theme: Application theme, one of
+                gpype.frontend.theme.THEMES. "dark" applies the
+                bundled dark palette and style sheet to the
+                QApplication; "system" leaves Qt's own defaults
+                alone, for a host application that brings its own
+                look.
         """
+        config = LaunchConfig.get()
+        self._is_server = config.residency == Constants.Residency.SERVER
+
+        if self._is_server:
+            # Server residency: no GUI — empty hull
+            self._widgets = []
+            return
+
+        from PySide6.QtGui import QIcon
+        from PySide6.QtWidgets import (
+            QApplication,
+            QGridLayout,
+            QMainWindow,
+            QWidget,
+        )
+
+        from .widgets.base.widget import Widget
+
         # Create or use existing QApplication (composition over inheritance)
         # This allows for better testability and flexibility
         self._app = app or QApplication([])
+
+        # Theme the application before the first widget exists.
+        # The scopes read their colours out of the palette when
+        # they are constructed, so a theme installed later leaves
+        # every plot on the system background -- see
+        # gpype.frontend.theme for why the sheet alone is not
+        # enough.
+        _theme.apply(self._app, theme)
 
         # Initialize widget collection for lifecycle management
         self._widgets: list[Widget] = []
@@ -89,7 +121,7 @@ class MainApp:
         # Connect cleanup handler for graceful shutdown
         self._app.aboutToQuit.connect(self._on_quit)
 
-    def add_widget(self, widget: Widget, grid_positions: list[int] = None):
+    def add_widget(self, widget, grid_positions: list[int] = None):
         """Add a widget to the application layout and management system.
 
         Registers the widget for lifecycle management and adds it to the
@@ -103,6 +135,9 @@ class MainApp:
                 For a 3x3 grid: [1,2,3] spans top row, [1,4,7] spans left col.
                 If None, adds to next available position.
         """
+        if self._is_server:
+            return
+
         # Register widget for lifecycle management
         self._widgets.append(widget)
 
@@ -288,6 +323,83 @@ class MainApp:
             finally:
                 delattr(self, "_sleep_assertion_id")
 
+    def _watch_pipelines(self) -> None:
+        """Subscribe to every live pipeline's failures.
+
+        The handler runs on ioiocore's monitoring thread, and Qt widgets
+        may only be touched from the thread that owns them. So the
+        report crosses over through a signal on an object created here,
+        on the GUI thread: Qt queues a signal emitted from elsewhere to
+        the receiver's thread, which is the one mechanism that is safe
+        without any locking of our own.
+        """
+        from PySide6.QtCore import QObject, Signal
+
+        from ..common._private import pipelines
+
+        class _Relay(QObject):
+            """Carries a failure from the monitor thread to the GUI."""
+
+            failed = Signal(object)
+
+        relay = _Relay()
+        relay.failed.connect(self._show_failure)
+        # Kept on the instance: a relay that is collected takes the
+        # connection with it, and the failure would go nowhere.
+        self._failure_relay = relay
+
+        for pipeline in pipelines.live():
+            try:
+                pipeline.add_error_handler(relay.failed.emit)
+            except Exception:
+                # A pipeline that cannot take a handler is not a reason
+                # to refuse to start the application.
+                pass
+
+    def _show_failure(self, entry) -> None:
+        """Show a failed pipeline to the user.
+
+        Deliberately not modal. A modal dialog raised from a background
+        failure blocks whatever the user was doing and, in a test run,
+        blocks the run itself.
+
+        Args:
+            entry: The failing log entry.
+        """
+        from PySide6.QtCore import Qt
+        from PySide6.QtWidgets import QMessageBox
+
+        source = {}
+        message = "The pipeline stopped."
+        try:
+            message = str(entry["message"])
+            source = entry["source"] or {}
+        except Exception:  # pragma: no cover
+            pass
+
+        detail = []
+        node = source.get("instance")
+        if node:
+            detail.append(f"Node: {node}")
+        where = source.get("summary")
+        if where:
+            detail.append(f"Raised in {where}")
+
+        box = QMessageBox(getattr(self, "_window", None))
+        # Given a parent, QMessageBox is window-modal by default, which
+        # would lock the very window the user is trying to read. show()
+        # alone is not enough -- the modality has to be cleared too.
+        box.setWindowModality(Qt.NonModal)
+        box.setIcon(QMessageBox.Critical)
+        box.setWindowTitle("Pipeline stopped")
+        box.setText(message)
+        if detail:
+            box.setInformativeText("\n".join(detail))
+        box.setStandardButtons(QMessageBox.Close)
+        # Held so it is not collected the moment this returns.
+        self._failure_box = box
+        box.show()
+
     def _on_quit(self):
         """Handle application shutdown cleanup.
 
@@ -313,6 +425,19 @@ class MainApp:
             int: Application exit code. 0 indicates successful execution,
                 non-zero values indicate errors or abnormal termination.
         """
+        if self._is_server:
+            # No GUI on SERVER — block until user presses Enter, then exit
+            try:
+                input("SERVER running. Press Enter to stop...\n")
+            except EOFError:
+                pass  # non-interactive environment (e.g. piped stdin)
+            return 0
+
+        # Put a pipeline failure in front of the user. Without this the
+        # only report is printed to stdout, which a windowed application
+        # may never show -- so the display freezes and nothing says why.
+        self._watch_pipelines()
+
         # Enable sleep prevention if configured
         if self._prevent_sleep:
             self._enable_sleep_prevention()

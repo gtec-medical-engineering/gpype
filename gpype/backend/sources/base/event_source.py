@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-import queue
-import threading
 import time
-from typing import Optional
 
 import numpy as np
 
+from ....common._private import channels
 from ....common.constants import Constants
 from ...core.o_port import OPort
 from .source import Source
@@ -20,6 +18,11 @@ class EventSource(Source):
 
     Generates events in response to external triggers.
     """
+
+    #: An event source emits one row when something happens, so a frame
+    #: is not a slice of time here and there is nothing to derive a size
+    #: from. See Source.DERIVE_FRAME_SIZE.
+    DERIVE_FRAME_SIZE: bool = False
 
     def __init__(self, **kwargs):
         """Initialize event source with asynchronous output configuration.
@@ -37,26 +40,51 @@ class EventSource(Source):
         # Initialize parent Source with configuration
         Source.__init__(self, output_ports=output_ports, **kwargs)
 
-        # Initialize delay thread components if delay is configured
-        if self.source_delay > 0:
-            self._delay_thread_queue: Optional[queue.Queue] = None
-            self._delay_thread: Optional[threading.Thread] = None
-            self._delay_thread_running: Optional[bool] = None
+    def setup(
+        self, data: dict[str, np.ndarray], port_context_in: dict[str, dict]
+    ) -> dict[str, dict]:
+        """Declare every output channel as a trigger.
+
+        An event source emits occurrences, not a measured signal. Saying
+        so is what stops a filter from smearing the edges it depends on:
+        without a role every channel counts as signal, and a keypress run
+        through a bandpass comes out as a decaying oscillation that still
+        looks like data.
+
+        Args:
+            data: Input data arrays (empty for source nodes).
+            port_context_in: Input port contexts (empty for source nodes).
+
+        Returns:
+            Output port contexts describing trigger channels.
+        """
+        port_context_out = super().setup(data, port_context_in)
+        for context in port_context_out.values():
+            count = channels.channel_count(context)
+            # Declared as well as emitted: the frame trigger() builds
+            # is this wide, and a context that disagrees is a shape
+            # error in whichever node reads it next.
+            #
+            # Unconditional since 2026-08-26. This used to be opt-in,
+            # because a two-channel trigger port beside an eight-channel
+            # signal gave IONode.setup three distinct widths where it
+            # allowed two. That check now exempts sparse ports, and an
+            # event source's output is ASYNC, so there is nothing left
+            # for the switch to protect -- and a source should stamp its
+            # own samples the same way in every residency rather than
+            # depending on which wrapper happened to build it.
+            context[Constants.Keys.CHANNEL_COUNT] = count + 1
+            roles = [Constants.ChannelRoles.TRIGGER] * count + [
+                Constants.ChannelRoles.TIMESTAMP
+            ]
+            context.update(channels.describe(roles))
+        return port_context_out
 
     def start(self):
         """Start event source."""
 
         # Call parent start method first
         Source.start(self)
-
-        # Initialize delay processing thread if needed
-        if self.source_delay > 0:
-            self._delay_thread_queue = queue.Queue()
-            self._delay_thread = threading.Thread(
-                target=self._timer_loop, daemon=True
-            )
-            self._delay_thread_running = True
-            self._delay_thread.start()
 
         # Trigger initial cycle with empty data
         op_key = self.Configuration.Keys.OUTPUT_PORTS
@@ -73,15 +101,23 @@ class EventSource(Source):
     def stop(self):
         """Stop event source."""
 
-        # Signal delay thread to stop
-        if hasattr(self, "_delay_thread_running"):
-            self._delay_thread_running = False
-
         # Call parent stop method
         Source.stop(self)
 
     def trigger(self, value, port_name=PORT_OUT):
         """Trigger an event with the specified value.
+
+        The event is emitted immediately, on the calling thread. It is
+        deliberately not delayed to line up with a buffered signal
+        stream: the observation time is what carries the event's timing,
+        and a Sync node places it on the master timeline from that. A
+        delay here would shift the event away from when it happened and
+        destroy the very information the placement needs.
+
+        The instant is read here, on the calling thread, and travels
+        with the value. Reading it in the Sync instead times whenever
+        the framework got round to the event -- which, in a distributed
+        pipeline, is after it has crossed a Link.
 
         Args:
             port_name: Name of the output port to trigger.
@@ -91,43 +127,18 @@ class EventSource(Source):
         # Create data array with the event value
         data = {}
         if not isinstance(port_name, list):
-            port_name = [PORT_OUT]
+            # The caller's port name, not the default: replacing it here
+            # silently sent every event to the default port instead.
+            port_name = [port_name]
             value = [value]
+        stamp = channels.wrap_time(channels.stamp_clock())
         for i in range(len(port_name)):
             pn = port_name[i]
             pv = value[i]
-            data[pn] = np.array([[pv]], dtype=Constants.DATA_TYPE)
+            row = [pv, stamp]
+            data[pn] = np.array([row], dtype=Constants.DATA_TYPE)
 
-        if self.source_delay > 0:
-            # Queue event with timestamp for delayed processing
-            timestamp = time.monotonic()
-            self._delay_thread_queue.put((timestamp, data))
-        else:
-            # Process event immediately
-            self.cycle(data)  # Trigger node cycle
-
-    def _timer_loop(self):
-        """Background thread loop for delayed event processing.
-
-        Monitors delay queue for events that have reached their delay time
-        and processes them by triggering pipeline cycles.
-        """
-        while self._delay_thread_running:
-            try:
-                # Check the oldest queued event without removing it
-                timestamp, data = self._delay_thread_queue.queue[0]
-                now = time.monotonic()
-
-                if now - timestamp >= self.source_delay:
-                    # Delay period has elapsed, process the event
-                    _, data = self._delay_thread_queue.get()
-                    self.cycle(data)  # Trigger node cycle
-                else:
-                    # Delay period not yet elapsed, wait briefly
-                    time.sleep(0.001)
-            except IndexError:
-                # Queue is empty, wait briefly before checking again
-                time.sleep(0.001)
+        self.cycle(data)
 
     def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
         """Return current event data if available.

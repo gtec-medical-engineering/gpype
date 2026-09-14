@@ -1,61 +1,13 @@
-"""
-Basic UDP Receive Example - Network Data Reception and Visualization
+"""Receiving a g.Pype UDP stream in a plain Qt application.
 
-This example demonstrates how to receive and visualize data transmitted over
-UDP networks in real-time. It complements example_basic_udp_send.py by showing
-the receiving side of UDP communication, creating a standalone visualization
-application for UDP data streams.
+Nothing here imports gpype: this is what somebody else's application
+sees on the wire, the same role example_foreign_lsl_receive.py plays
+for LSL. A UDP packet carries no header, so the constants below --
+port, channel count, samples per packet, float64 -- must match the
+sending pipeline. Run example_basic_udp_send.py to feed it.
 
-What this example shows:
-- UDP socket programming for real-time data reception
-- Multi-channel time-series visualization using PyQtGraph
-- Binary data unpacking from network packets
-- EEG display with channel stacking
-- Continuous visualization in real-time scope
-
-Expected behavior:
-When you run this example:
-- Opens UDP socket on localhost:56000 for incoming data
-- Displays real-time visualization window
-- Shows incoming multi-channel data as scrolling time-series plots
-- Updates display at ~25 Hz for smooth real-time visualization
-- Handles network timing variations and packet buffering
-
-Workflow with UDP Send example:
-1. Run this script first (starts UDP receiver and visualization)
-2. Run example_basic_udp_send.py (connects and streams data)
-3. Press arrow keys in the send example to see event markers
-4. Observe real-time data updates in the visualization
-
-Network configuration:
-- Protocol: UDP (User Datagram Protocol)
-- IP Address: 127.0.0.1 (localhost)
-- Port: 56000 (configurable)
-- Data format: Binary packed float64 arrays
-- Packet size: Configurable frame size × channel count × 8 bytes
-
-Real-world applications:
-- Real-time BCI data monitoring and quality assessment
-- Network-based signal analysis and processing
-- Distributed BCI systems with remote visualization
-- Integration with custom data acquisition hardware
-- Multi-computer BCI setups for specialized processing
-- Remote data logging and backup systems
-
-Usage:
-    1. Run: python example_basic_udp_receive.py
-    2. Visualization window opens and waits for UDP data
-    3. Run example_basic_udp_send.py to start data transmission
-    4. Close window to stop reception
-
-Prerequisites:
-    - pyqtgraph (pip install pyqtgraph)
-    - PySide6 (pip install PySide6)
-    - Active UDP data source on the configured port
-
-Note:
-    UDP provides fast, low-latency communication ideal for real-time BCI
-    applications where speed is prioritized over guaranteed packet delivery.
+Requires: pyqtgraph and PySide6 (gpype[gui])
+Run: python example_basic_udp_receive.py
 """
 
 import socket
@@ -68,7 +20,6 @@ import sys
 # Network and display configuration constants
 UDP_IP = "127.0.0.1"  # Listen on localhost
 UDP_PORT = 56000  # UDP port for incoming data
-FRAME_SIZE = 1  # Samples per UDP packet
 CHANNEL_COUNT = 9  # Total channels (8 signals + 1 events)
 SAMPLING_RATE = 250  # Expected sampling rate in Hz
 TIME_WINDOW = 10  # Seconds of data to display
@@ -163,13 +114,18 @@ class UDPTimeScope(QtWidgets.QMainWindow):
 
                 # Unpack binary data: convert bytes to float64 array
                 frame = np.frombuffer(packet, dtype=np.float64)
-                frame = frame.reshape((FRAME_SIZE, CHANNEL_COUNT))
+                # Derived from the packet, not assumed: a source left
+                # without an explicit frame_size picks one from its rate
+                # -- 4 samples at 250 Hz -- so a hardcoded 1 here raises
+                # on the first packet the paired sender puts on the wire.
+                frame = frame.reshape((-1, CHANNEL_COUNT))
+                n = frame.shape[0]
 
                 # Store in circular buffer with proper indexing
-                idx = self.sample_index + np.arange(FRAME_SIZE)
+                idx = self.sample_index + np.arange(n)
                 idx %= MAX_POINTS  # Wrap around for circular buffering
                 self.data_buffer[idx, :] = frame
-                self.sample_index += FRAME_SIZE
+                self.sample_index += n
 
         except BlockingIOError:
             # No data available - continue with plot update

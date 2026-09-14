@@ -1,50 +1,13 @@
-"""
-Basic File Writer Example - Data Recording with Event Markers
+"""Record 8 generated channels plus keyboard markers to a CSV file.
 
-This example demonstrates how to record data to CSV files while capturing
-event markers from keyboard input. This is essential for BCI experiments
-where you need to save both neural signals and behavioral events for
-offline analysis.
+The Router merges the 8 signal channels with the Keyboard's single event
+channel, so marker codes land on channel 8 in both the scope and the
+file. CsvWriter inserts a timestamp into the file name, so every run
+writes a new file into the current directory. Arrow keys produce the
+codes 37, 38, 39, 40 (left, up, right, down); close the window to stop.
 
-What this example shows:
-- Generating synthetic EEG-like signals (8 channels)
-- Capturing keyboard events as experimental markers
-- Combining signal data with event markers using Router
-- Real-time visualization with color-coded event markers
-- Saving all data (signals + events) to CSV file with timestamps
-
-Expected output:
-- Real-time scope showing 8-channel signals with event markers
-- CSV file 'example_YYYYMMDD_HHMMSS.csv' containing:
-  * Column 1: Timestamp
-  * Columns 1-8: Signal data from 8 channels
-  * Column 9: Event markers (38=Up, 39=Right, 40=Down, 37=Left)
-  * Automatic timestamp in filename prevents overwrites
-
-Interactive controls:
-- Arrow keys trigger colored markers in the display:
-  * ↑ (Up): Red marker (value 38)
-  * → (Right): Green marker (value 39)
-  * ↓ (Down): Blue marker (value 40)
-  * ← (Left): Black marker (value 37)
-
-Real-world applications:
-- BCI training data collection
-- Event-related potential (ERP) experiments
-- Motor imagery paradigm recording
-- Behavioral experiment data logging
-- Synchronizing neural and behavioral data
-
-Technical details:
-- Router combines 8 signal channels + 1 event channel = 9 total channels
-- CsvWriter automatically adds timestamps to prevent file overwrites
-- Keyboard node converts key presses to numerical event codes
-- Markers appear on channel 8 in both display and saved file
-
-Usage:
-    python example_basic_file_writer_record.py
-    Press arrow keys to create event markers
-    Close window to stop recording
+Requires: pip install gpype[gui,devices]
+Run: python example_basic_csv_writer_record.py
 """
 import gpype as gp
 

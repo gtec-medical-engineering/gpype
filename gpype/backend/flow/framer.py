@@ -21,6 +21,9 @@ class Framer(IONode):
     frame-based processing.
     """
 
+    #: See FFT: declared so the catalog can read it.
+    DEFAULT_FRAME_SIZE: int = 1
+
     # Type annotation for the internal buffer
     _buf: np.ndarray
 
@@ -46,23 +49,34 @@ class Framer(IONode):
         """
         # Validate and set default frame size
         if frame_size is None:
-            frame_size = 1
+            frame_size = self.DEFAULT_FRAME_SIZE
         if not isinstance(frame_size, int):
             raise ValueError("frame_size must be integer.")
         if frame_size < 1:
             raise ValueError("frame_size must be greater or equal 1.")
         decimation_factor = frame_size
 
-        # Allow overriding of decimation factor via kwargs
-        decimation_factor = kwargs.pop(
-            self.Configuration.Keys.DECIMATION_FACTOR, decimation_factor)
+        # serialize() writes decimation_factor, so a stored document
+        # carries it and it has to be accepted. It is derived from
+        # frame_size, though, and a hand-written document that disagrees
+        # would tell every downstream node a rate the frames do not
+        # have. Accept the value that matches; refuse the one that lies.
+        supplied = kwargs.pop(
+            self.Configuration.Keys.DECIMATION_FACTOR, decimation_factor
+        )
+        if supplied != decimation_factor:
+            raise ValueError(
+                f"decimation_factor is derived from frame_size and must "
+                f"be {decimation_factor}, not {supplied}. Set frame_size "
+                f"instead."
+            )
 
         # Initialize parent IONode with frame configuration
         # Set decimation_factor = frame_size to output every frame_size steps
         super().__init__(
             frame_size=frame_size,
             decimation_factor=decimation_factor,
-            **kwargs
+            **kwargs,
         )
 
         # Initialize internal buffer (will be allocated in setup())
@@ -91,13 +105,34 @@ class Framer(IONode):
         # Initialize parent setup and get output port context
         port_context_out = super().setup(data, port_context_in)
 
-        # Validate input frame size - must be 1 for single-sample processing
-        frame_size_in = port_context_in[PORT_IN][Constants.Keys.FRAME_SIZE]
-        if frame_size_in != 1:
-            raise ValueError("Input frame size must be 1.")
-
         # Get configuration for output frame setup
         frame_size_out = self.config[self.Configuration.Keys.FRAME_SIZE]
+
+        # Any input frame is accepted, as long as it fits inside an
+        # output frame. This node re-blocks a stream: the samples and
+        # their rate are unchanged, only how many travel together.
+        #
+        # It used to demand a single sample per cycle, and behind that
+        # guard it kept only the LAST row of whatever arrived and counted
+        # cycles rather than samples -- so lifting the guard without
+        # rewriting step() would have silently dropped frame_size_in - 1
+        # of every frame.
+        #
+        # It can only aggregate, never split: a cycle emits at most one
+        # frame, so turning frames of 4 back into single samples would
+        # need four emissions in one cycle.
+        frame_size_in = port_context_in[PORT_IN][Constants.Keys.FRAME_SIZE]
+        if frame_size_in is None:
+            raise ValueError(
+                "Framer needs a frame size in the input context; got none."
+            )
+        if frame_size_in > frame_size_out:
+            raise ValueError(
+                f"Framer assembles frames of {frame_size_out} but its "
+                f"input already carries {frame_size_in}, and a cycle can "
+                f"emit only one frame. Ask for at least {frame_size_in}, "
+                f"or reduce the source's frame_size."
+            )
         channel_count = port_context_out[PORT_OUT][
             Constants.Keys.CHANNEL_COUNT
         ]
@@ -108,35 +143,48 @@ class Framer(IONode):
         # Allocate internal buffer for frame assembly
         self._buf = np.zeros(shape=(frame_size_out, channel_count))
         self._frame_size = frame_size_out
+        #: Rows written into the current frame. Reset here because
+        #: setup() reruns on every run.
+        self._fill = 0
 
         return port_context_out
 
     def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
-        """Process one sample and add it to the internal frame buffer.
+        """Take every incoming sample and emit whole frames.
 
-        Takes a single sample from input and stores it in the buffer. When a
-        complete frame has been assembled (every frame_size samples), outputs
-        the complete frame.
+        Serialises what arrives -- one sample or many -- into a running
+        frame, and emits it once it is full. A frame that does not divide
+        the input evenly simply carries the remainder into the next one,
+        so no sample is dropped or repeated at the boundary.
 
         Args:
-            data: Input data dictionary containing a single sample with
-                PORT_IN key. Sample should have shape (1, channels).
+            data: Input data dictionary with PORT_IN, shape
+                (rows, channels) for any number of rows.
 
         Returns:
-            Output data dictionary with PORT_OUT key containing the complete
-            frame when ready, or None if frame is not complete.
+            Output data dictionary with PORT_OUT holding the completed
+            frame, or None while the frame is still filling.
         """
-        # Calculate buffer position using sample counter
-        buf_idx = self.get_counter() % self._frame_size
+        block = data[PORT_IN]
+        rows = block.shape[0]
+        out = None
 
-        # Store the current sample in the buffer at the correct position
-        # Take the last sample from input (should be shape (1, channels))
-        self._buf[buf_idx, :] = data[PORT_IN][-1:, :]
+        taken = 0
+        while taken < rows:
+            room = self._frame_size - self._fill
+            take = min(room, rows - taken)
+            self._buf[self._fill : self._fill + take] = block[
+                taken : taken + take
+            ]
+            self._fill += take
+            taken += take
+            if self._fill == self._frame_size:
+                # A copy, because the buffer is reused immediately and a
+                # consumer holding the frame would otherwise watch it
+                # change underneath.
+                out = self._buf.copy()
+                self._fill = 0
 
-        # Check if frame is complete (every frame_size samples)
-        if self.is_decimation_step():
-            # Frame is complete, return the assembled frame
-            return {PORT_OUT: self._buf}
-        else:
-            # Frame not complete yet, return None
+        if out is None:
             return None
+        return {PORT_OUT: out}

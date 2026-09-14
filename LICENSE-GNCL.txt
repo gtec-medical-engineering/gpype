@@ -14,16 +14,23 @@ The Licensee may use the Software:
   teaching).
 - In combination with a biosignal amplifier manufactured by g.tec
   medical engineering GmbH.
+- Together with additional third-party data sources (e.g., eye
+  trackers, motion sensors, stimulus presentation software),
+  alongside a g.tec biosignal amplifier.
+- To write and use the Licensee's own processing nodes and data
+  sources built on the Software's public interfaces.
 
 3. Prohibited Uses
 The Licensee may not:
 - Use the Software for any commercial purpose.
-- Modify, distribute, or sublicense the Software in any form.
-- Compile the Software into standalone executables for use outside
-  an integrated development environment (IDE).
+- Modify, distribute, or sublicense the Software itself in any form.
+  This does not restrict the Licensee's own nodes and sources, which
+  remain the Licensee's.
+- Redistribute the Software as a standalone executable or other
+  bundled artefact.
 - Remove or alter any copyright, trademark, or attribution notices.
-- Use the Software with third-party hardware (e.g., biosignal
-  amplifiers not manufactured by g.tec medical engineering GmbH).
+- Use the Software as the acquisition software for a biosignal
+  amplifier not manufactured by g.tec medical engineering GmbH.
 
 4. Commercial Licensing
 To use the Software for commercial purposes, including but not

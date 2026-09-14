@@ -1,16 +1,15 @@
 from __future__ import annotations
 
-from abc import abstractmethod
-
 import ioiocore as ioc
 import numpy as np
 
 from ...common.constants import Constants
+from ._private.placement import PlacingMixin
 from .i_port import IPort
 from .node import Node
 
 
-class INode(ioc.INode, Node):
+class INode(PlacingMixin, ioc.INode, Node):
     """Abstract base class for input-only nodes in the g.Pype pipeline.
 
     Combines ioiocore.INode and Node functionality for nodes that consume
@@ -59,19 +58,3 @@ class INode(ioc.INode, Node):
 
         # Delegate to parent class for additional setup processing
         return super().setup(data, port_context_in)
-
-    @abstractmethod
-    def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
-        """Process input data at each pipeline time step.
-
-        Abstract method that must be implemented by subclasses to define
-        their specific data consumption behavior.
-
-        Args:
-            data: Dictionary mapping input port names to numpy arrays.
-
-        Returns:
-            Dictionary mapping output port names to numpy arrays.
-            Typically None or empty dict for input-only nodes.
-        """
-        pass  # pragma: no cover

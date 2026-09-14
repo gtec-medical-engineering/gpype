@@ -1,51 +1,10 @@
-"""
-Basic Lowpass Filter Example - High-Frequency Noise Reduction
+"""Lowpass filtering broadband noise, shown live.
 
-This example demonstrates how to use a lowpass filter to remove high-frequency
-noise and artifacts from signals while preserving low-frequency content. This
-is fundamental for cleaning noisy signals and extracting slow brain rhythms
-commonly analyzed in BCI applications.
+A 5 Hz cutoff at 250 Hz sampling: what is left is a slow, smooth
+version of the noise that went in.
 
-What this example shows:
-- Generating broadband noise (high-frequency content across spectrum)
-- Applying a 5 Hz lowpass filter to remove high-frequency components
-- Real-time visualization of the smoothing effect
-- Basic pipeline construction: Generator -> Lowpass -> Scope
-
-Expected output:
-When you run this example, you'll see:
-- Dramatically smoothed signals with high-frequency noise removed
-- Much cleaner, slower-varying waveforms compared to input noise
-- Signals that appear more like typical low-frequency EEG rhythms
-- Clear demonstration of how lowpass filters create smoother signals
-
-Real-world applications:
-- EEG slow cortical potential analysis (< 1 Hz)
-- Delta rhythm extraction (0.5-4 Hz) for sleep studies
-- Removing muscle artifacts (EMG) from EEG (typically > 30 Hz)
-- Anti-aliasing before downsampling signals
-- Smoothing signals for trend analysis
-
-Technical details:
-- Cutoff frequency: 5 Hz (removes frequencies above 5 Hz)
-- Filter type: Lowpass (attenuates high frequencies, passes low frequencies)
-- Input signal: Pure broadband noise (all frequencies present)
-- Effect: High-frequency content suppressed, low-frequency content preserved
-
-Common BCI use cases:
-- Slow cortical potential (SCP) detection
-- Removing high-frequency artifacts before feature extraction
-- Delta/theta rhythm analysis for cognitive state assessment
-- Preprocessing for low-frequency BCI paradigms
-- Signal conditioning for slow event-related potentials
-
-Usage:
-    python example_basic_lowpass.py
-
-Note:
-    Compare with example_basic_highpass.py to see complementary filtering:
-    - Lowpass: removes high frequencies, keeps low frequencies
-    - Highpass: removes low frequencies, keeps high frequencies
+Requires: gpype[gui]
+Run: python example_basic_lowpass.py
 """
 import gpype as gp
 

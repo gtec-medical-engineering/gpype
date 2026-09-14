@@ -1,37 +1,11 @@
-"""
-Basic Bandstop (Notch) Filter Example - Power Line Interference Removal
+"""Remove 50 Hz power line interference with a 48-52 Hz bandstop.
 
-This example demonstrates how to use a bandstop filter (also known as a notch
-filter) to remove power line interference from a signal while preserving the
-rest of the frequency spectrum. This is a common preprocessing step in BCI
-and EEG signal processing.
+50 Hz is the European mains frequency; where the mains runs at 60 Hz,
+use 58-62 Hz instead. This is the complement of example_basic_bandpass.py:
+a bandstop keeps everything except the stated band.
 
-What this example shows:
-- Creating a synthetic signal with 50 Hz power line interference and noise
-- Applying a bandstop filter (48-52 Hz) to remove the power line component
-- Real-time visualization showing clean signal with interference removed
-- Basic pipeline construction: Generator -> Bandstop -> Scope
-
-Expected output:
-When you run this example, you'll see that the strong 50 Hz power line
-interference is completely removed from the signal, leaving primarily
-the background noise. This demonstrates the practical application of bandstop
-filters for cleaning BCI signals contaminated by electrical interference.
-
-Usage:
-    python example_basic_bandstop.py
-
-Real-world application:
-    Power line interference (50 Hz in Europe, 60 Hz in North America) is one
-    of the most common artifacts in EEG/BCI recordings. This example shows
-    how to effectively remove it while preserving the neural signals of
-    interest.
-
-Note:
-    Compare this with example_basic_bandpass.py to see the complementary
-    effect:
-    - Bandpass: keeps specific frequencies, removes everything else
-    - Bandstop: removes specific frequencies, keeps everything else
+Requires: pip install gpype[gui]
+Run: python example_basic_bandstop.py
 """
 
 import gpype as gp

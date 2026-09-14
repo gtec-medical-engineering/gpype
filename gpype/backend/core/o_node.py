@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from abc import abstractmethod
-
 import ioiocore as ioc
 import numpy as np
 
@@ -48,20 +46,3 @@ class ONode(ioc.ONode, Node):
         """
         # Delegate to parent class for output port context setup
         return super().setup(data=data, port_context_in=port_context_in)
-
-    @abstractmethod
-    def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
-        """Generate output data at each discrete time step.
-
-        Abstract method that must be implemented by subclasses to define
-        their specific data generation behavior.
-
-        Args:
-            data: Dictionary mapping input port names to numpy arrays.
-                Typically empty for output-only nodes.
-
-        Returns:
-            Dictionary mapping output port names to numpy arrays containing
-            the generated output data.
-        """
-        pass  # pragma: no cover

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Data  xmlns="xsd" xmlns:ns="http://www.w3.org/2001/XMLSchema-instance" ns:schemaLocation="xsd ../ParadigmSchema.xsd">
+  <Paradigm BaseFolder="media/" TaskOrder="Deterministic" UdpAddress="127.0.0.1" UdpPort="1000">
+    <Task ns:type="SingleTask" ID="ST_PreParadigm" DurationSeconds="5" Group="0">
+      <Stimulus ns:type="PictureStimulus" FileName="Checkerboard_Rest.png" HorizontalAlignment="Center" VerticalAlignment="Center" Scaling="Fit" />
+    </Task>
+	<Task ns:type="MultiTask" ID="MT_Wrapper" TaskOrder="Deterministic" SampleSize="100">
+	
+	
+		<!-- COPY ME IN HERE -->
+		<Task ns:type="MultiTask" ID="MT_Stim" TaskOrder="RandomWithoutReplacement" SampleSize="1">
+		 <Task ns:type="SingleTask" ID="Beep_50ms_1000Hz" DurationSeconds="0.20" Group="1">
+		  <Stimulus ns:type="AudioStimulus" FileName="Beep_50ms_1000Hz.wav" UdpMessage="1"/>
+		 </Task>
+		</Task>
+		
+		
+		<Task ns:type="MultiTask" ID="MT_Rest" TaskOrder="RandomWithReplacement" SampleSize="1">
+			<Task ns:type="SingleTask" ID="ST_Rest1" DurationSeconds="0.30" Group="0">
+			  <Stimulus ns:type="TextStimulus" Caption="" />
+			</Task>
+		</Task>
+	</Task>
+  </Paradigm>
+</Data>

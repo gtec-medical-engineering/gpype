@@ -1,56 +1,14 @@
 """
-Unicorn Hybrid Black Device Example - Real-time EEG Acquisition and Processing
+Unicorn Hybrid Black - EEG plus accelerometer, gyroscope and aux
 
-This example demonstrates how to connect to and process real-time EEG data from
-a g.tec Unicorn Hybrid Black amplifier system. It showcases EEG
-signal processing with standard filtering techniques commonly used in clinical
-and research BCI applications.
+With every optional stream on the device delivers 17 channels: 8 EEG,
+3 accelerometer, 3 gyroscope, 3 auxiliary (battery, counter,
+validation). A Router splits them so only the EEG is filtered; a second
+Router recombines them for one scope, where the non-EEG channels rail
+against the ±50 µV limit.
 
-What this example shows:
-- Real-time data acquisition from Unicorn Hybrid Black hardware
-- Bandpass filtering for EEG frequency band selection
-- Power line interference removal with notch filters
-- Real-time visualization of EEG signals
-- Hardware integration with g.Pype framework
-
-Hardware requirements:
-- g.tec Unicorn Hybrid Black EEG amplifier
-- Windows operating system
-- Unicorn Suite installed (including Python API)
-
-Expected behavior:
-When you run this example:
-- Connects to Unicorn Hybrid Black amplifier automatically via Bluetooth
-- Displays real-time EEG from 8 channels
-- Shows filtered signals in real-time scope
-- Amplitude range: ±50 µV (typical EEG range)
-- Time window: 10 seconds of continuous data
-
-Signal processing pipeline:
-1. Raw EEG acquisition (8 channels, 250 Hz)
-2. Bandpass filtering (1-30 Hz) - standard EEG band
-3. 50 Hz notch filter - removes European power line noise
-4. 60 Hz notch filter - removes American power line noise
-5. Real-time visualization
-
-Real-world applications:
-- Mobile EEG monitoring and research
-- BCI system development and testing
-- Neurofeedback training applications
-- Cognitive state monitoring research
-- Consumer neurotechnology applications
-- Attention and meditation training
-
-Usage:
-    1. Pair Unicorn Hybrid Black via Bluetooth
-    2. Power on the device
-    3. Run: python example_devices_hybrid_black.py
-    4. Monitor real-time EEG signals
-
-Note:
-    This example provides the foundation for all BCI applications
-    requiring real-time EEG data acquisition and processing with
-    the Unicorn Hybrid Black wireless amplifier.
+Requires: a paired Unicorn Hybrid Black and Unicorn Suite (Windows)
+Run: python example_devices_hybrid_black.py
 """
 import gpype as gp
 
@@ -78,7 +36,7 @@ if __name__ == "__main__":
     source = gp.HybridBlack(
         include_accel=True,  # Enable accelerometer (channels 9-11)
         include_gyro=True,   # Enable gyroscope (channels 12-14)
-        include_aux=True,    # Enable battery/counter/validation (channels 15-17)
+        include_aux=True,  # Battery/counter/validation, channels 15-17
     )
 
     splitter = gp.Router(input_channels=gp.Router.ALL,

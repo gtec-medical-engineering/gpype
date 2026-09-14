@@ -22,12 +22,23 @@ class Highpass(Butterworth):
             #: Cutoff frequency configuration key
             F_C = "f_c"
 
-    def __init__(self, f_c: float, order: int = None, **kwargs):
+    def __init__(
+        self,
+        f_c: float,
+        order: int = None,
+        phase: str = None,
+        **kwargs,
+    ):
         """Initialize the highpass filter with cutoff frequency.
 
         Args:
             f_c: Cutoff frequency in Hz. Must be positive.
             order: Filter order. Defaults to DEFAULT_ORDER from parent class.
+            phase: ``causal`` (default) filters forwards only and
+                carries the filter's group delay. ``zero`` filters
+                forwards and backwards, leaving no group delay --
+                which needs the whole recording, so it runs in a
+                batch pipeline and is refused in a realtime one.
             **kwargs: Additional arguments passed to parent Butterworth class.
 
         Raises:
@@ -49,4 +60,6 @@ class Highpass(Butterworth):
         btype = kwargs.pop(Butterworth.Configuration.Keys.BTYPE, btype)
 
         # Initialize parent Butterworth filter with highpass configuration
-        super().__init__(fn=fn, f_c=f_c, btype=btype, order=order, **kwargs)
+        super().__init__(
+            fn=fn, f_c=f_c, btype=btype, order=order, phase=phase, **kwargs
+        )

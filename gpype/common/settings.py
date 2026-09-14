@@ -102,8 +102,11 @@ class _Settings(dict):
             # macOS: Use user's Application Support directory
             base = Path.home() / "Library" / "Application Support"
         else:
-            # Unsupported platform
-            raise RuntimeError("Unsupported OS")
+            # Everything else follows the XDG convention. Settings is
+            # constructed at import, so raising here would make the whole
+            # package unimportable rather than merely unsupported, and
+            # ioiocore itself runs on Linux.
+            base = Path(os.getenv("XDG_CONFIG_HOME", Path.home() / ".config"))
 
         return base / "gtec" / "gPype" / "settings.xml"
 

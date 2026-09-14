@@ -1,60 +1,11 @@
-"""
-Basic Trigger Example - Event-Related Potential (ERP) Analysis
+"""Extracting signal epochs time-locked to keyboard events.
 
-This example demonstrates how to use the Trigger node to extract time-locked
-signal segments around specific events. This is fundamental for analyzing
-Event-Related Potentials (ERPs) in BCI applications, where brain responses
-to stimuli or user actions are studied.
+Each Up (38) or Right (39) key press emits one epoch spanning 0.2 s
+before to 0.7 s after it. TriggerScope overlays the epochs; the
+TimeSeriesScope keeps showing the continuous signal.
 
-What this example shows:
-- Generating continuous EEG-like signals with background noise
-- Capturing keyboard events as experimental triggers
-- Extracting signal epochs around trigger events (time-locked segments)
-- Dual visualization: continuous signal + triggered epochs
-- Real-time ERP analysis capabilities
-
-Expected output:
-When you run this example, you'll see two displays:
-1. Time Series Scope: Continuous signal with real-time updates
-2. Trigger Scope: Event-locked signal epochs overlaid for comparison
-
-Interactive behavior:
-- Press ↑ (Up) or → (Right) arrow keys to trigger epoch extraction
-- Each key press extracts a 0.9-second epoch (0.2s pre + 0.7s post event)
-- Epochs are averaged in the Trigger Scope
-- Continuous signal keeps running in the Time Series Scope
-
-Epoch configuration:
-- Pre-trigger: 0.2 seconds (baseline period before event)
-- Post-trigger: 0.7 seconds (response period after event)
-- Target events: Up arrow (38) and Right arrow (39) key codes
-- Total epoch length: 0.9 seconds per trigger
-
-Real-world applications:
-- P300 speller analysis (visual stimulus responses)
-- Auditory ERP studies (sound stimulus processing)
-- Visual evoked potential analysis (image/pattern responses)
-
-ERP analysis concepts:
-- Time-locking: Aligning signals to specific event times
-- Baseline correction: Using pre-trigger period for normalization
-- Epoch averaging: Overlaying multiple trials for pattern detection
-- Event-related changes: Identifying stimulus-response relationships
-
-Technical details:
-- Trigger node monitors event stream for target codes
-- Automatic epoch extraction when target events detected
-- Signal buffering ensures complete epoch capture
-- Real-time display updates for immediate feedback
-
-Usage:
-    python example_basic_trigger.py
-    Press Up or Right arrow keys to generate triggered epochs
-    Observe epoch overlays in the Trigger Scope window
-
-Note:
-    This example forms the foundation for more advanced ERP analysis
-    and BCI classification systems that rely on event-related signals.
+Requires: gpype[gui,devices]
+Run: python example_basic_trigger.py
 """
 import gpype as gp
 

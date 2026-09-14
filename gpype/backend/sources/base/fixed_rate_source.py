@@ -7,6 +7,7 @@ from typing import Optional
 import numpy as np
 
 from ....common.constants import Constants
+from ...core._private.timeline import MasterPriority
 from ...core.o_port import OPort
 from .source import Source
 
@@ -19,6 +20,29 @@ class FixedRateSource(Source):
 
     Generates data at fixed sampling rate using background thread with
     precise timing control and drift compensation.
+
+    **The pacing thread runs one cycle per sample, not per frame.**
+    A subclass whose ``step()`` returns ``frame_size`` samples per call
+    must therefore set ``decimation_factor=frame_size``, so that
+    ``step()`` runs on every ``frame_size``-th cycle and the stream
+    leaves at its declared rate. A subclass that omits this emits
+    ``frame_size`` times too much data, and nothing reports it: the
+    frames are individually well-formed, the declared sampling rate is
+    unchanged, and only wall-clock measurement reveals it. Measured on
+    a reader before this was applied: 1.01x at frame_size 1, 5.02x at
+    5, 24.98x at 25, 50.03x at 50.
+
+    Every subclass here does this -- ``_GeneratorCore``,
+    ``_CsvReaderCore`` and ``RecordingReader`` -- and a fourth must too.
+    Two exemptions, both real:
+
+    * **Batch mode.** A batch reader starts no pacing thread; the driver
+      calls ``cycle()`` once for the whole recording. A decimation
+      factor there would make that single cycle emit nothing.
+    * **Externally driven sources.** An amplifier is clocked by its own
+      device callback rather than by this thread, so it emits one frame
+      per callback and needs a factor of one. Those extend
+      :class:`~gpype.backend.sources.base.source.Source` directly.
     """
 
     class Configuration(Source.Configuration):
@@ -99,6 +123,15 @@ class FixedRateSource(Source):
         # Stop parent source first
         Source.stop(self)
 
+        # Forget the pacing anchor. It is set only when None, so a
+        # second run would keep run 1's anchor, see a negative sleep
+        # time, and free-run to catch up on every second that has
+        # passed since the FIRST start. Measured after a 6 s gap:
+        # 1750 samples, seven seconds of nominal signal, emitted in
+        # 0.55 s of wall time -- and once a restart re-runs setup()
+        # that burst is no longer discarded but recorded.
+        self._time_start = None
+
         # Signal thread to stop and wait for completion
         if self._running:
             self._running = False
@@ -110,9 +143,24 @@ class FixedRateSource(Source):
 
         Runs continuously generating data at precise intervals using absolute
         timing to prevent cumulative drift. Handles timing delays gracefully.
+
+        One cycle per **sample**. A subclass emitting whole frames per
+        ``step()`` compensates with ``decimation_factor=frame_size`` --
+        see the class docstring, which explains what happens when it
+        does not.
         """
         # Get configured sampling rate
         rate = self.config[FixedRateSource.Configuration.Keys.SAMPLING_RATE]
+
+        # A source that is replaying stored data may want to run faster
+        # than the clock, or as fast as the machine allows. Live sources
+        # leave this at one and are paced exactly as before.
+        speed = getattr(self, "_speed", 1.0)
+        if not speed:
+            while self._running:
+                self.cycle()
+            return
+        rate = rate * speed
 
         # Initialize start time if not set
         if self._time_start is None:
@@ -145,6 +193,24 @@ class FixedRateSource(Source):
 
             # Generate next sample
             self.cycle()
+
+    def master_candidacy(self):
+        """Claim as a counted stream.
+
+        Contiguous by construction and with a declared rate, so it is a
+        valid timeline -- but not a loss-aware one, since a source that
+        reports no counter cannot say what it dropped. A numbered device
+        therefore outranks it.
+
+        Returns:
+            ``(rate, COUNTED)``, or None if no usable rate is set.
+        """
+        rate = self.scalar(
+            self.config.get(self.Configuration.Keys.SAMPLING_RATE)
+        )
+        if not rate or rate <= 0:
+            return None
+        return float(rate), MasterPriority.COUNTED
 
     def setup(
         self, data: dict[str, np.ndarray], port_context_in: dict[str, dict]

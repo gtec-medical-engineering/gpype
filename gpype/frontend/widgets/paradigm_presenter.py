@@ -3,18 +3,23 @@ import glob
 import os
 import sys
 
-# Platform check - this module is Windows-only
-if sys.platform != "win32":
-    raise NotImplementedError("This module is only supported on Windows.")
-
 # Third-party imports
-from PySide6.QtWidgets import (QComboBox, QFileDialog, QHBoxLayout, QLabel,
-                               QMessageBox, QPushButton, QSizePolicy,
-                               QSpacerItem, QWidget)
+from PySide6.QtWidgets import (
+    QComboBox,
+    QFileDialog,
+    QHBoxLayout,
+    QLabel,
+    QMessageBox,
+    QPushButton,
+    QSizePolicy,
+    QSpacerItem,
+    QWidget,
+)
 
 from ...backend.sources.udp_receiver import UDPReceiver
+
 # Local imports
-from .base.widget import Widget
+from .base.widget import Widget, _require_qt_application
 
 # UI constants
 MINIMUM_BUTTON_WIDTH = 120
@@ -30,10 +35,28 @@ class ParadigmPresenter(Widget, UDPReceiver):
     Note that Paradigm Presenter must be installed and licensed separately.
     """
 
-    # Source code fingerprint
-    FINGERPRINT = "6c6e1c976c83a48de76571e3d685c6a4"
+    class Configuration(UDPReceiver.Configuration):
+        """Configuration class for Paradigm Presenter parameters."""
 
-    def __init__(self, paradigm: str = None):
+        class OptionalKeys(UDPReceiver.Configuration.OptionalKeys):
+            """Optional configuration keys.
+
+            Optional rather than required: a key listed in Keys must be
+            present and non-None, and a presenter may legitimately be
+            created without a paradigm so the user can pick one.
+            """
+
+            #: Path to the paradigm file or folder. Recorded so that a
+            #: presenter rebuilt from its configuration opens the same
+            #: paradigm instead of falling back to the file dialog.
+            PARADIGM = "paradigm"
+
+    def __init__(
+        self,
+        paradigm: str = None,
+        refresh_rate: float = None,
+        **kwargs,
+    ):
         """Initialize the Paradigm Presenter control widget.
 
         Initializes both the Widget UI components and UDPReceiver for
@@ -42,7 +65,41 @@ class ParadigmPresenter(Widget, UDPReceiver):
         Args:
             paradigm (str, optional): Path to paradigm file (.xml) or folder
                 containing paradigm files. If None, uses file dialog.
+            refresh_rate (float, optional): Repaints per second. Defaults
+                to DEFAULT_REFRESH_RATE.
+            **kwargs: Additional configuration, including the values a
+                stored configuration supplies when this widget is rebuilt.
+
+        Raises:
+            NotImplementedError: If not running on Windows.
         """
+        # gtec_pp is a natively licensed Windows product, and this
+        # refusal used to sit at module scope, so importing this module
+        # on macOS raised before the class was even defined. Nothing in
+        # the module body needs gtec_pp -- it is imported a few lines
+        # below, inside this constructor -- so the guard belongs where
+        # the licensed library is actually reached. Measured with
+        # sys.platform faked to darwin: with the guard at import time,
+        # scripts/generate_catalog.py silently wrote a catalog four nodes
+        # short and three of the catalog tests died on the uncaught
+        # NotImplementedError; with it here, the class describes itself
+        # identically on every platform.
+        #
+        # It goes ahead of the Qt check below rather than after it: a
+        # non-Windows caller is owed the reason that actually applies,
+        # not a complaint about a missing QApplication it could fix and
+        # still get nowhere.
+        if sys.platform != "win32":
+            raise NotImplementedError(
+                "ParadigmPresenter is only supported on Windows."
+            )
+
+        # Before anything Qt, and before gtec_pp: the QWidget() below is
+        # an argument, so it is built before Widget.__init__ can check
+        # anything -- and Qt aborts the process when a widget is built
+        # with no QApplication, without raising.
+        _require_qt_application(type(self).__name__)
+
         # Import gtec_pp here to avoid issues if not installed
         import gtec_pp as pp
 
@@ -52,10 +109,20 @@ class ParadigmPresenter(Widget, UDPReceiver):
             widget=QWidget(),
             name="Paradigm Presenter Control",
             layout=QHBoxLayout,
+            refresh_rate=refresh_rate,
         )
 
-        # Initialize the UDP receiver
-        UDPReceiver.__init__(self)
+        # Initialize the UDP receiver. The paradigm path travels with the
+        # configuration; without it a rebuilt presenter would silently
+        # forget which paradigm it was given.
+        # A configuration field may not be None, so the key is only set
+        # when there is a path to record.
+        pd_key = self.Configuration.OptionalKeys.PARADIGM
+        if paradigm is None:
+            paradigm = kwargs.pop(pd_key, None)
+        if paradigm:
+            kwargs[pd_key] = paradigm
+        UDPReceiver.__init__(self, **kwargs)
 
         # Initialize the Paradigm Presenter instance
         self.paradigm_presenter = pp.ParadigmPresenter()

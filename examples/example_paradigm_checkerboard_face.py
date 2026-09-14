@@ -19,22 +19,22 @@ if __name__ == "__main__":
     app = gp.MainApp()
     p = gp.Pipeline()
 
-    # Amplifier: BCI Core-8 (uncomment if you want to use it)
-    # amp = gp.BCICore8()
+    # Amplifier: BCI Core-4/8 (uncomment if you want to use it)
+    amp = gp.BCICore()
 
     # Amplifier: g.Nautilus (uncomment if you want to use it)
     # amp = gp.GNautilus(sampling_rate=sampling_rate,
     #                    channel_count=channel_count)
 
     # Signal generator (uncomment if you want to use it)
-    amp = gp.Generator(
-        sampling_rate=sampling_rate,
-        channel_count=channel_count,
-        signal_frequency=10,
-        signal_amplitude=15,
-        signal_shape="sine",
-        noise_amplitude=10,
-    )
+    # amp = gp.Generator(
+    #     sampling_rate=sampling_rate,
+    #     channel_count=channel_count,
+    #     signal_frequency=10,
+    #     signal_amplitude=15,
+    #     signal_shape="sine",
+    #     noise_amplitude=10,
+    # )
 
     # Bandpass from 1 to 30 Hz
     bandpass = gp.Bandpass(f_lo=1, f_hi=30)

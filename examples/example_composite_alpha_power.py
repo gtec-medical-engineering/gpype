@@ -1,77 +1,13 @@
-"""
-Composite Alpha Power Analysis Example - Real-time EEG Alpha Band Processing
+"""Alpha power from synthetic EEG, every stage shown side by side.
 
-This example demonstrates a complete alpha power analysis pipeline that
-simulates ps EEG data with modulated alpha activity and processes it
-through multiple signal processing stages. It showcases g.Pype features
-including signal generation, filtering, power computation, and multi-channel
-visualization.
+Noise is amplitude-modulated at 0.5 Hz, bandpassed to 8-12 Hz, squared,
+smoothed, decimated to 5 Hz, and interpolated back up so the Router can
+display it beside the full-rate stages. Router requires every input to
+agree on sampling rate *and* frame size, which is why the feature returns
+through an Interpolator instead of being shown at 5 Hz.
 
-What this example shows:
-- Pseudo EEG signal simulation with modulated alpha activity
-- Alpha band filtering (8-12 Hz) for brain rhythm analysis
-- Power extraction using signal squaring
-- Temporal smoothing with moving averages
-- Data decimation for computational efficiency
-- Multi-stage pipeline visualization with Router node
-- Real-time processing of neurophysiological signals
-
-Pipeline architecture:
-1. Signal Generation: Creates 8-channel noise + alpha modulation
-2. Alpha Filtering: Extracts 8-12 Hz frequency band
-3. Power Analysis: Computes instantaneous power (signal squared)
-4. Temporal Smoothing: Moving average for stable power estimates
-5. Data Reduction: Decimation for efficient downstream processing
-6. Multi-channel Display: Router combines all processing stages
-
-Expected behavior:
-When you run this example:
-- Opens time-series visualization showing 7 processing stages
-- Channel 1: Raw noisy signal with modulated alpha
-- Channel 2: 0.5 Hz modulation signal (low-frequency envelope)
-- Channel 3: Modulated signal (noise × (1 + modulation))
-- Channel 4: Alpha-filtered signal (8-12 Hz band)
-- Channel 5: Instantaneous alpha power (squared signal)
-- Channel 6: Smoothed alpha power (moving average)
-- Channel 7: Decimated power (reduced sampling rate)
-
-Real-world applications:
-- EEG alpha rhythm analysis for neurofeedback systems
-- Brain state monitoring and cognitive load assessment
-- Sleep stage detection using alpha power dynamics
-- Attention and relaxation state classification
-- Real-time BCI applications using alpha modulation
-- Clinical EEG analysis for neurological assessment
-
-Scientific background:
-Alpha waves (8-12 Hz) are prominent EEG rhythms associated with:
-- Relaxed wakefulness and eyes-closed states
-- Attention regulation and cognitive processing
-- Sensorimotor idle states and cortical inhibition
-- Individual differences in cognitive performance
-- Pathological changes in neurological disorders
-
-Technical features:
-- Realistic signal modeling with controlled alpha modulation
-- Multi-stage filtering and power analysis pipeline
-- Efficient data processing with decimation
-- Real-time parameter monitoring across processing stages
-
-Pipeline components explained:
-- Generator: Creates controllable synthetic EEG-like signals
-- Equation: Performs mathematical operations (modulation, power)
-- Bandpass: Implements digital filtering for frequency selection
-- MovingAverage: Temporal smoothing for stable estimates
-- Decimator: Reduces data rate while preserving information
-- Router: Combines multiple signals for comparative visualization
-- TimeSeriesScope: Real-time multi-channel display
-
-Usage:
-    python example_composite_alpha_power.py
-
-Prerequisites:
-    - g.Pype framework with signal processing modules
-    - Real-time visualization capabilities
+Requires: the gui extra (TimeSeriesScope)
+Run: python example_composite_alpha_power.py
 """
 import gpype as gp
 
@@ -89,8 +25,15 @@ if __name__ == "__main__":
     # === SIGNAL GENERATION STAGE ===
     # Generate 8-channel background noise simulating baseline EEG activity
     noise = gp.Generator(
-        sampling_rate=fs, channel_count=8, noise_amplitude=5
-    )  # 5 µV RMS noise level
+        sampling_rate=fs,
+        channel_count=8,
+        noise_amplitude=5,  # 5 µV RMS noise level
+        # Explicit, and it has to be: a source left without one picks a
+        # frame size from its rate (4 at 250 Hz), while the decimated
+        # branch comes back at 1 -- and Router refuses inputs whose
+        # frame sizes disagree. Stating 1 everywhere makes them agree.
+        frame_size=1,
+    )
 
     # Generate low-frequency modulation signal (0.5 Hz sine wave)
     # This simulates natural alpha power fluctuations
@@ -100,6 +43,7 @@ if __name__ == "__main__":
         signal_frequency=0.5,  # 0.5 Hz modulation
         signal_amplitude=1,  # Modulation depth
         signal_shape="sine",
+        frame_size=1,  # Matches the noise source; see above.
     )
 
     # === SIGNAL MODULATION STAGE ===
@@ -127,8 +71,14 @@ if __name__ == "__main__":
     # Factor 50: 250 Hz → 5 Hz (adequate for alpha power tracking)
     decimator = gp.Decimator(decimation_factor=50)
 
-    # Hold last value for stable display between updates
-    hold = gp.Hold()
+    # Bring the 5 Hz feature back up to the signal rate so it can be
+    # displayed alongside the full-rate stages below. The Router needs
+    # every input to agree on sampling rate *and* frame size, and
+    # Interpolator satisfies both by emitting 50 frames per input frame
+    # rather than one frame 50 rows long. "hold" repeats the last
+    # computed value, which is what a windowed estimate actually is --
+    # see gp.Interpolator for why that is the default.
+    upsampler = gp.Interpolator(interpolation_factor=50)
 
     # === VISUALIZATION ROUTING STAGE ===
     # Router combines all processing stages for comparative analysis
@@ -141,7 +91,7 @@ if __name__ == "__main__":
             "alpha_filter": [0],  # Alpha-filtered
             "power": [0],  # Power signal
             "moving_average": [0],  # Smoothed power
-            "hold": [0],
+            "upsampled": [0],  # Decimated feature, back at 250 Hz
         },  # Final output
         output_channels=[gp.Router.ALL],
     )
@@ -161,7 +111,7 @@ if __name__ == "__main__":
     p.connect(alpha_filter, power)  # Filtered signal to power analysis
     p.connect(power, moving_average)  # Power to temporal smoothing
     p.connect(moving_average, decimator)  # Smoothed power to decimation
-    p.connect(decimator, hold)  # Decimated signal to hold buffer
+    p.connect(decimator, upsampler)  # Decimated feature back to 250 Hz
 
     # Connect all processing stages to router for visualization
     p.connect(noise, merger["noise"])  # Stage 1: Raw noise
@@ -170,7 +120,7 @@ if __name__ == "__main__":
     p.connect(alpha_filter, merger["alpha_filter"])  # Stage 4: Filtered
     p.connect(power, merger["power"])  # Stage 5: Power
     p.connect(moving_average, merger["moving_average"])  # Stage 6: Smoothed
-    p.connect(hold, merger["hold"])  # Stage 7: Final
+    p.connect(upsampler, merger["upsampled"])  # Stage 7: Final
 
     # Connect router output to visualization scope
     p.connect(merger, scope)

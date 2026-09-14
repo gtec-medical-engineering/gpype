@@ -11,6 +11,7 @@ from typing import Optional
 import ioiocore as ioc
 import numpy as np
 
+from ....common._private.naming import public_name
 from ....common.constants import Constants
 from ...core.i_node import INode
 from ...core.i_port import IPort
@@ -25,6 +26,21 @@ class FileWriter(INode):
 
     Subclasses must implement format-specific file operations.
     """
+
+    #: Whether this run's output must carry the non-commercial mark. Set by
+    #: the pipeline before anything starts, because a header written first
+    #: would carry the wrong answer. False when no pipeline set it, so a
+    #: writer used standalone produces an unmarked file rather than
+    #: claiming a restriction nobody established.
+    _marked: bool = False
+
+    def attach_entitlement(self, verdict) -> None:
+        """Record whether this run's artifacts must be marked.
+
+        Args:
+            verdict: The pipeline's resolved Entitlement.
+        """
+        self._marked = bool(verdict.marked)
 
     class Configuration(ioc.INode.Configuration):
         """Configuration class for FileWriter parameters."""
@@ -50,6 +66,13 @@ class FileWriter(INode):
         # Initialize parent INode with configuration
         INode.__init__(self, file_name=file_name, **kwargs)
 
+        # The extension is a property of the name the author wrote, so it
+        # is knowable now -- and it used to be checked in start(), which
+        # meant a document naming "recording.txt" loaded cleanly and then
+        # refused to run. An authoring tool asking the server whether a
+        # document is valid would have been told yes.
+        self._check_extension(file_name)
+
         # Initialize threading components for background file operations
         self._file_queue = queue.Queue()  # Thread-safe data queue
         self._stop_event = threading.Event()  # Shutdown coordination
@@ -57,6 +80,24 @@ class FileWriter(INode):
         self._sample_counter = 0  # Global sample index counter
         self._sampling_rate = None  # Sampling rate from port context
         self._file_path = None  # Full path to output file
+
+    def _check_extension(self, file_name: str) -> None:
+        """Refuse a name whose extension this writer cannot produce.
+
+        Args:
+            file_name: The configured name.
+
+        Raises:
+            ValueError: If the extension is not this writer's.
+        """
+        _, ext = os.path.splitext(file_name)
+        expected = self.file_extension
+        if ext.lower() != expected.lower():
+            raise ValueError(
+                f"Invalid file extension '{ext}'. "
+                f"Expected '{expected}' for "
+                f"{public_name(type(self).__name__)}."
+            )
 
     def _generate_file_path(self) -> str:
         """Generate the output file path with timestamp.
@@ -73,17 +114,32 @@ class FileWriter(INode):
         file_name = self.config[self.Configuration.Keys.FILE_NAME]
         name, ext = os.path.splitext(file_name)
 
-        # Validate file extension
-        expected_ext = self.file_extension
-        if ext.lower() != expected_ext.lower():
-            raise ValueError(
-                f"Invalid file extension '{ext}'. "
-                f"Expected '{expected_ext}' for {self.__class__.__name__}."
-            )
+        # Checked at construction as well, and this call stays so that a
+        # name changed in the configuration after construction cannot slip
+        # past. One implementation either way.
+        self._check_extension(file_name)
 
-        # Insert timestamp before extension
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        return f"{name}_{timestamp}{ext}"
+        # Insert a timestamp before the extension, then make sure the name
+        # is actually free.
+        #
+        # setup() opens this path with mode "w", so a name that repeats does
+        # not append -- it truncates the previous recording. A timestamp
+        # alone does not prevent that: at second resolution a stop()/start()
+        # within one second collides, and even at millisecond resolution a
+        # tight restart can. Measurable today on the error-restart path,
+        # where ioiocore re-runs setup() and a fast retry loop overwrites
+        # what it just recorded.
+        #
+        # So the clock is for readability and the existence check is for
+        # correctness. Losing recorded data is the one outcome worth extra
+        # code to prevent.
+        stamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]
+        candidate = f"{name}_{stamp}{ext}"
+        suffix = 1
+        while os.path.exists(candidate):
+            candidate = f"{name}_{stamp}_{suffix}{ext}"
+            suffix += 1
+        return candidate
 
     def start(self):
         """Start the file writer and initialize background thread.
@@ -155,7 +211,20 @@ class FileWriter(INode):
         sr_key = Constants.Keys.SAMPLING_RATE
         self._sampling_rate = port_context_in[PORT_IN].get(sr_key, None)
         if self._sampling_rate is None:
-            raise RuntimeError("Sampling rate not provided in port context.")
+            cls_name = type(self).__name__
+            label = public_name(cls_name)
+            if self.name and self.name != cls_name:
+                label = f"{label} '{self.name}'"
+            got = ", ".join(sorted(port_context_in[PORT_IN]))
+            raise RuntimeError(
+                f"Sampling rate not provided in port context; {label} "
+                f"read port '{PORT_IN}' and got "
+                f"{got or 'an empty context'}. Every sample is "
+                f"timestamped from that rate, so the file cannot be "
+                f"opened without one. Connect the writer downstream of "
+                f"a source, which is what puts sampling_rate into the "
+                f"port context."
+            )
 
         # Open file using format-specific implementation
         self._open_file(self._file_path, port_context_in)

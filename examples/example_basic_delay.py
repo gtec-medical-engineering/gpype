@@ -1,41 +1,12 @@
-"""
-Basic Delay Example - Signal Time Shifting and Synchronization
+"""Delay one channel by 125 samples (0.5 s at 250 Hz) and plot both.
 
-This example demonstrates how to use the Delay node to introduce controlled
-time delays in signal processing pipelines. This is useful for synchronization,
-timing alignment, and creating phase-shifted signals for analysis.
+A Router splits the generator's two channels into separate paths, one of
+them through the Delay, and a second Router merges them for display.
+Both carry the same 1 Hz sine, so half a period of delay puts the traces
+in antiphase. The noise is drawn per channel and does not match.
 
-What this example shows:
-- Generating a dual-channel 1 Hz sine wave signal
-- Splitting the signal into two separate paths using Router
-- Applying a 0.5-second delay (125 samples at 250 Hz) to one path
-- Merging the original and delayed signals for comparison
-- Visualizing both signals simultaneously to see the phase shift
-
-Expected output:
-When you run this example, you'll see two sine waves in the scope:
-- Channel 1: Original signal
-- Channel 2: Same signal delayed by 0.5 seconds (180° phase shift at 1 Hz)
-
-The delayed signal will appear to "lag behind" the original, creating a clear
-visual demonstration of the time delay effect.
-
-Real-world applications:
-- Signal synchronization between different data sources
-- Creating reference signals for cross-correlation analysis
-- Compensating for processing delays in real-time systems
-- Phase shift analysis in BCI applications
-- Latency compensation in multi-channel recordings
-
-Usage:
-    python example_basic_delay.py
-
-Technical details:
-- Sampling rate: 250 Hz
-- Signal frequency: 1 Hz (easy to visualize delay effects)
-- Delay: 125 samples = 0.5 seconds = 180° phase shift
-- Pipeline: Generator -> Splitter -> [Path1: Direct, Path2: Delay]
-            -> Merger -> Scope
+Requires: pip install gpype[gui]
+Run: python example_basic_delay.py
 """
 import gpype as gp
 

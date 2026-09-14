@@ -1,29 +1,10 @@
-"""
-Basic Bandpass Filter Example
+"""Isolate a 10 Hz sine from noise with a 9-11 Hz bandpass.
 
-This example demonstrates the fundamental concepts of g.Pype by creating a
-simple signal processing pipeline that generates a synthetic signal, applies
-bandpass filtering, and visualizes the results in real-time.
+The generator's noise is broadband, so the scope shows the filter doing
+the work: a clean 10 Hz wave where the unfiltered signal looks ragged.
 
-What this example shows:
-- Creating a synthetic 10 Hz sine wave with background noise
-- Applying a narrow bandpass filter (9-11 Hz) to isolate the target frequency
-- Real-time visualization of the filtered signal using TimeSeriesScope
-- Basic pipeline construction: Generator -> Bandpass -> Scope
-
-Expected output:
-When you run this example, you'll see a clean 10 Hz sine wave displayed in the
-scope window, with most of the background noise filtered out. This demonstrates
-how bandpass filters can isolate specific frequency components from noisy
-signals, which is essential for BCI applications like detecting brain rhythms
-or motor imagery patterns.
-
-Usage:
-    python example_basic_bandpass.py
-
-Dependencies:
-    - g.Pype framework
-    - PyQt5/PySide for GUI visualization
+Requires: pip install gpype[gui]
+Run: python example_basic_bandpass.py
 """
 
 import gpype as gp
@@ -44,6 +25,7 @@ if __name__ == "__main__":
         signal_amplitude=10,
         signal_shape="sine",
         noise_amplitude=1,
+        frame_size=10,
     )
 
     # bandpass

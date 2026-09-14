@@ -14,8 +14,8 @@ if __name__ == "__main__":
     app = gp.MainApp()
     p = gp.Pipeline()
 
-    # Amplifier: BCI Core-8 (uncomment if you want to use it)
-    # amp = gp.BCICore8()
+    # Amplifier: BCI Core-4/8 (uncomment if you want to use it)
+    # amp = gp.BCICore()
 
     # Amplifier: g.Nautilus (uncomment if you want to use it)
     # amp = gp.GNautilus(sampling_rate=sampling_rate,

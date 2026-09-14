@@ -1,57 +1,11 @@
-"""
-Basic Router Example - Channel Selection and Data Stream Routing
+"""Combining channels from two sources into one stream.
 
-This example demonstrates how to use the Router node to selectively combine
-channels from multiple data sources into a single output stream. The Router
-is essential for flexible data management in complex BCI pipelines where
-different signal sources need to be combined or specific channels selected.
+Router takes channels 0 and 1 from the sine generator and 3, 4, 5 from
+the rectangular one, giving a 5-channel output. Input channels are
+counted from 0; the scope labels its channels from 1.
 
-What this example shows:
-- Creating two different signal generators (sine and rectangular waves)
-- Using Router to select specific channels from each source
-- Combining selected channels into a unified output stream
-- Flexible channel mapping and data stream management
-
-Expected output:
-When you run this example, you'll see:
-- 5 total channels in the scope (2 from sine + 3 from rectangular)
-- Channels 1-2: 10 Hz sine waves from first generator
-- Channels 3-5: 2 Hz rectangular waves from second generator
-- Clear visual distinction between the two signal types
-- Demonstrates how Router preserves signal characteristics while combining
-
-Router configuration:
-- Input 1: Channels 0,1 from sine wave generator (-> output channels 1-2)
-- Input 2: Channels 3,4,5 from square-wave generator (-> output channels 3-5)
-- Total output: 5 channels with mixed signal types
-
-Real-world applications:
-- Multi-device integration (combining EEG + EMG + EOG signals)
-- Channel subset selection (choosing specific electrode locations)
-- Signal source switching (alternating between different input sources)
-- Data stream merging (combining multiple acquisition systems)
-- Feature channel selection (using only relevant channels for analysis)
-
-Advanced routing scenarios:
-- Spatial filtering (selecting channels by brain region)
-- Artifact channel isolation (separating signal from noise channels)
-- Multi-modal BCI (combining different signal modalities)
-- Dynamic channel reconfiguration during experiments
-- Cross-validation with different channel subsets
-
-Technical details:
-- Router automatically handles different sampling rates (if matched)
-- Channel indexing starts from 0 in input, 1 in display
-- Input channels can be reordered or duplicated in output
-- Router preserves data types and timing information
-- Multiple Router nodes can be chained for complex routing
-
-Usage:
-    python example_basic_router.py
-
-Note:
-    The Router is one of the most versatile nodes in g.Pype, enabling
-    sophisticated data flow management essential for complex BCI systems.
+Requires: gpype[gui]
+Run: python example_basic_router.py
 """
 import gpype as gp
 

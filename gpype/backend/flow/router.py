@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import copy
-from collections import deque
 from typing import Union
 
 import ioiocore as ioc
 import numpy as np
 
+from ...common._private import channels
+from ...common._private.naming import node_label
 from ...common.constants import Constants
 from ..core.i_port import IPort
 from ..core.io_node import IONode
@@ -22,8 +23,21 @@ class Router(IONode):
     (index lists) and complex multi-port routing (dictionary mapping).
     """
 
+    #: Both port sets come from the keys of the channel maps: given
+    #: ``input_channels={"a": [0], "b": [1]}`` the inputs are 'a' and
+    #: 'b'. With neither map the node has the default single in/out,
+    #: which is the shape the catalog records.
+    INPUT_PORTS_FROM = "input_channels"
+    OUTPUT_PORTS_FROM = "output_channels"
+
     #: Special constant for selecting all available channels
     ALL: list = [-1]
+
+    #: One port carrying every channel, which is what a Router does
+    #: when told nothing. Copied at use, not shared: a class attribute
+    #: handed out as a default would be mutated by whoever received it.
+    DEFAULT_INPUT_CHANNELS: dict = {Constants.Defaults.PORT_IN: ALL}
+    DEFAULT_OUTPUT_CHANNELS: dict = {Constants.Defaults.PORT_OUT: ALL}
 
     # Type annotation for the internal routing map
     _map: dict
@@ -31,15 +45,10 @@ class Router(IONode):
     # Type annotation for output channel counts
     _channel_count_out: dict
 
-    # Type annotation for SYNC/ASYNC port tracking
-    _sync_ports: set
-    _async_ports: set
-
-    # Type annotation for ASYNC data buffers (queues)
-    _async_buffers: dict[str, deque]
-
-    # Type annotation for last known ASYNC values (used when queue is empty)
-    _async_last_values: dict[str, np.ndarray]
+    #: Per output port, the input ports it draws from. Readiness is
+    #: decided per port from this, not globally: one unrelated input
+    #: with nothing to say used to silence every output.
+    _contributors: dict
 
     class Configuration(ioc.IONode.Configuration):
         """Configuration class for Router parameters."""
@@ -73,7 +82,7 @@ class Router(IONode):
         """
         # Set default input channels to all channels on default port
         if input_channels is None:
-            input_channels = {Constants.Defaults.PORT_IN: Router.ALL}
+            input_channels = dict(Router.DEFAULT_INPUT_CHANNELS)
 
         # Convert list format to dictionary format for input channels
         if type(input_channels) is list:
@@ -98,11 +107,12 @@ class Router(IONode):
             for name in input_channels.keys()
         ]
         input_ports = kwargs.pop(
-            Router.Configuration.Keys.INPUT_PORTS, input_ports)
+            Router.Configuration.Keys.INPUT_PORTS, input_ports
+        )
 
         # Set default output channels to all channels on default port
         if output_channels is None:
-            output_channels = {Constants.Defaults.PORT_OUT: Router.ALL}
+            output_channels = dict(Router.DEFAULT_OUTPUT_CHANNELS)
 
         # Convert list format to dictionary format for output channels
         if type(output_channels) is list:
@@ -126,7 +136,8 @@ class Router(IONode):
             OPort.Configuration(name=name) for name in output_channels.keys()
         ]
         output_ports = kwargs.pop(
-            Router.Configuration.Keys.OUTPUT_PORTS, output_ports)
+            Router.Configuration.Keys.OUTPUT_PORTS, output_ports
+        )
 
         # Initialize internal routing map
         self._map = {}
@@ -134,15 +145,8 @@ class Router(IONode):
         # Store output channel counts for use in step()
         self._channel_count_out: dict = {}
 
-        # Initialize SYNC/ASYNC port tracking
-        self._sync_ports: set = set()
-        self._async_ports: set = set()
-
-        # Initialize ASYNC data buffers (queues)
-        self._async_buffers: dict[str, deque] = {}
-
-        # Initialize last known ASYNC values
-        self._async_last_values: dict[str, np.ndarray] = {}
+        # Which inputs feed each output, filled in during setup.
+        self._contributors: dict = {}
 
         # Initialize parent IONode with all configurations
         IONode.__init__(
@@ -191,8 +195,20 @@ class Router(IONode):
             sel = self.config[ic_key][name]
 
             # Expand "ALL" to actual channel range
+            available = port_context_in[name].get(cc_key)
             if sel == Router.ALL:
-                sel = range(port_context_in[name][cc_key])
+                sel = range(available)
+            elif available is not None:
+                # Reject an out-of-range index here rather than letting the
+                # copy fail later: the copy is per group, so one bad index
+                # silently left a whole output port full of zeros.
+                bad = [n for n in sel if n < 0 or n >= available]
+                if bad:
+                    raise ValueError(
+                        f"input_channels for port '{name}' selects "
+                        f"channel(s) {bad}, but the port has "
+                        f"{available} channel(s)."
+                    )
             # Add each selected channel to the input map
             input_map.extend([{name: [n]} for n in sel])
 
@@ -212,6 +228,7 @@ class Router(IONode):
             map = [input_map[n] for n in sel]
             map_grouped = []
             from itertools import groupby
+
             for key, group in groupby(map, key=lambda x: list(x.keys())[0]):
                 values = []
                 for item in group:
@@ -219,49 +236,87 @@ class Router(IONode):
                 map_grouped.append({key: values})
             self._map[name] = map_grouped
 
-        # Identify SYNC vs ASYNC ports and initialize buffers
+        # An asynchronous input reaching a router is a configuration
+        # problem, not something to paper over.
+        #
+        # Placement rewrites a positioned async port to SYNC *before*
+        # setup() runs, so anything still declaring ASYNC here is a
+        # sparse stream that carries no position -- and there is no
+        # honest value to route from it between observations. This node
+        # used to fill the gap with zeros and then repeat the last value
+        # forever, which reported a trigger on every frame after the
+        # first one.
         timing_key = IPort.Configuration.Keys.TIMING
-        self._sync_ports = set()
-        self._async_ports = set()
-        self._async_buffers = {}
+        unplaced = sorted(
+            name
+            for name, context in port_context_in.items()
+            if context.get(timing_key, Constants.Timing.SYNC)
+            == Constants.Timing.ASYNC
+        )
+        if unplaced:
+            raise ValueError(
+                f"Router received asynchronous input on "
+                f"{', '.join(repr(n) for n in unplaced)}, which carries "
+                f"no master-timeline position and so cannot be placed on "
+                f"a sample grid: between observations there is no value "
+                f"to route, and inventing one reports an event at a time "
+                f"it did not happen. Every source built on EventSource "
+                f"gets a position from the Sync in its chain and is "
+                f"placed automatically; a node emitting sparse frames "
+                f"without one cannot be combined with a continuous "
+                f"stream."
+            )
 
-        for port_name, context in port_context_in.items():
-            port_timing = context.get(timing_key, Constants.Timing.SYNC)
-            if port_timing == Constants.Timing.ASYNC:
-                self._async_ports.add(port_name)
-                # Initialize buffer queue and last value with zeros
-                cc = context.get(Constants.Keys.CHANNEL_COUNT, 1)
-                self._async_buffers[port_name] = deque()
-                self._async_last_values[port_name] = np.zeros(
-                    (1, cc), dtype=Constants.DATA_TYPE
-                )
-            else:
-                self._sync_ports.add(port_name)
+        # Which inputs each output actually draws from, so readiness is
+        # decided per output port.
+        self._contributors = {
+            name: {port for group in mapping for port in group}
+            for name, mapping in self._map.items()
+        }
 
-        # Validate sampling rate consistency across SYNC input ports only
+        # Every port is synchronous by this point -- the check above
+        # refused anything else -- so these apply to all of them rather
+        # than to a subset.
+        # Router keeps its own copies of the port-contract checks
+        # because it accepts inputs IONode would have refused. They name
+        # the same things IONode's do: a message that says only "all
+        # ports" identifies no pair once a Router has eight of them, and
+        # a Router is the node most users reach a mismatch through.
+        label = node_label(self)
+
         sr_key = Constants.Keys.SAMPLING_RATE
-        sampling_rates = [
-            md.get(sr_key, None)
+        rates = {
+            name: md[sr_key]
             for name, md in port_context_in.items()
-            if name in self._sync_ports
-        ]
-        sampling_rates = [sr for sr in sampling_rates if sr is not None]
-        if len(set(sampling_rates)) > 1:
-            err_msg = "All SYNC ports must have the same sampling rate."
-            raise ValueError(err_msg)
-        sr = sampling_rates[0] if sampling_rates else None
+            if md.get(sr_key) is not None
+        }
+        if len(set(rates.values())) > 1:
+            detail = ", ".join(f"{n}={v}" for n, v in rates.items())
+            raise ValueError(
+                f"All ports must have the same sampling rate; {label} "
+                f"got {detail}. One step reads one frame from every "
+                f"input at once, so the inputs cannot run at different "
+                f"rates. Insert a Decimator on the faster branch, or "
+                f"take both inputs from the same source."
+            )
+        sr = next(iter(rates.values()), None)
 
-        # Validate frame size consistency across SYNC input ports only
         fsz_key = Constants.Keys.FRAME_SIZE
-        frame_sizes = [
-            md.get(fsz_key, None)
+        sizes = {
+            name: md[fsz_key]
             for name, md in port_context_in.items()
-            if name in self._sync_ports
-        ]
-        frame_sizes = [fsz for fsz in frame_sizes if fsz is not None]
-        if len(set(frame_sizes)) > 1:
-            raise ValueError("All SYNC ports must have the same frame size.")
-        fsz = frame_sizes[0] if frame_sizes else 1
+            if md.get(fsz_key) is not None
+        }
+        if len(set(sizes.values())) > 1:
+            detail = ", ".join(f"{n}={v}" for n, v in sizes.items())
+            raise ValueError(
+                f"All ports must have the same frame size; {label} got "
+                f"{detail}. Frames are combined row for row, so a "
+                f"shorter one has nothing to pair with. Set the same "
+                f"frame_size on both sources, or put a Framer on the "
+                f"branch with the smaller frame."
+            )
+        fsz = next(iter(sizes.values()), 1)
 
         # Validate data type consistency across all input ports
         type_key = IPort.Configuration.Keys.TYPE
@@ -305,111 +360,98 @@ class Router(IONode):
             context[fsz_key] = fsz
             context[type_key] = tp
             context[timing_key] = op[timing_key]
+
+            # Carry the per-channel description across the mapping. This
+            # node exists to select and reorder channels, so losing what
+            # each channel is would strip every downstream consumer -- a
+            # file header, a stream's channel names, a filter deciding
+            # what it may touch -- of the only thing that identifies them.
+            roles: list[str] = []
+            labels: list = []
+            systems = set()
+            any_labelled = False
+            for entry in self._map[op[name_key]]:
+                for port_in, ch_in in entry.items():
+                    src = port_context_in[port_in]
+                    src_roles = channels.roles_of(src)
+                    roles.extend(src_roles[c] for c in ch_in)
+                    if channels.has_labels(src):
+                        any_labelled = True
+                        src_labels = channels.labels_of(src)
+                        labels.extend(src_labels[c] for c in ch_in)
+                        systems.add(channels.montage_system(src))
+                    else:
+                        # Nothing to carry for these, but the inputs that
+                        # do have names must not lose them: one
+                        # unlabelled input used to blank the whole
+                        # output, so merging a montage with a trigger
+                        # threw away Fz..Pz. Numbered by their place in
+                        # this output once the rest is known, which is
+                        # also what keeps the name unique -- an event
+                        # stream's own "Ch01" collided with the
+                        # amplifier's.
+                        labels.extend(None for _ in ch_in)
+            if any_labelled:
+                labels = [
+                    name if name is not None else f"Ch{i + 1:02d}"
+                    for i, name in enumerate(labels)
+                ]
+            system = systems.pop() if len(systems) == 1 else None
+            context.update(
+                channels.describe(
+                    roles,
+                    labels if any_labelled and labels else None,
+                    system if any_labelled else None,
+                )
+            )
             port_context_out[op[name_key]] = context
             self._channel_count_out[op[name_key]] = context[cc_key]
 
         return port_context_out
 
     def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
-        """Process one frame of data by routing channels according to mapping.
+        """Route channels from the inputs to each output port.
 
-        Routes channels from input ports to output ports based on the channel
-        mapping established during setup. Each output port receives data from
-        its configured subset of input channels.
+        Readiness is per output port. An output is emitted when every
+        input it draws from has data this cycle, and omitted otherwise --
+        so two outputs reading disjoint inputs are independent, and one
+        unrelated input with nothing to say no longer silences the rest.
 
-        For mixed SYNC/ASYNC inputs:
-        - ASYNC data is buffered when it arrives
-        - Output is only produced when SYNC data is available
-        - Buffered ASYNC data is used when SYNC data triggers output
+        Nothing is fabricated. There is no fill value, no held previous
+        sample and no queue, because a router has no basis for inventing
+        any of them: by the time a frame arrives here, whatever had to be
+        placed on the grid has been.
 
         Args:
-            data: Dictionary containing input data arrays for each port.
-                Keys are port names, values are arrays with shape
-                (frame_size, channel_count).
+            data: Input frames keyed by port name.
 
         Returns:
-            Dictionary containing output data arrays for each output port.
-            Keys are output port names, values are arrays with shape
-            (frame_size, selected_channel_count). Returns empty dict if
-            no SYNC data is available.
+            One frame per output port whose inputs are all present.
+            Empty when none are.
         """
-        # Enqueue any new ASYNC data
-        for port_name in self._async_ports:
-            if port_name in data and data[port_name] is not None:
-                self._async_buffers[port_name].append(data[port_name])
-
-        # Check if any SYNC data is available
-        sync_data_available = all(
-            port_name in data and data[port_name] is not None
-            for port_name in self._sync_ports
-        )
-
-        # Only produce output when SYNC data is available
-        # (or if there are no SYNC ports at all)
-        if not sync_data_available and len(self._sync_ports) > 0:
-            return {}
-
-        # Build merged data dict: SYNC data + dequeued ASYNC data
-        merged_data = {}
-        for port_name in data:
-            if port_name in self._sync_ports:
-                merged_data[port_name] = data[port_name]
-
-        # Dequeue next ASYNC sample for each ASYNC port (or use last value)
-        for port_name in self._async_ports:
-            if self._async_buffers[port_name]:
-                # Consume next sample from queue and update last value
-                self._async_last_values[port_name] = (
-                    self._async_buffers[port_name].popleft()
-                )
-            merged_data[port_name] = self._async_last_values[port_name]
-
         data_out: dict = {}
 
-        # Process each output port mapping
         for port_out, mapping in self._map.items():
-            # Calculate total output channels
-            channel_count = self._channel_count_out[port_out]
+            sources = self._contributors[port_out]
+            if any(data.get(name) is None for name in sources):
+                # Not this port's turn. Emitting a partial frame would
+                # mean inventing the missing half.
+                continue
 
-            # Get frame size from first available SYNC input, or default to 1
-            frame_size = 1
-            for port_name in self._sync_ports:
-                if (
-                    port_name in merged_data
-                    and merged_data[port_name] is not None
-                ):
-                    frame_size = merged_data[port_name].shape[0]
-                    break
-
-            # Pre-allocate output array
-            output_array = np.zeros(
-                (frame_size, channel_count), dtype=Constants.DATA_TYPE
+            frame_size = data[next(iter(sources))].shape[0]
+            output_array = np.empty(
+                (frame_size, self._channel_count_out[port_out]),
+                dtype=Constants.DATA_TYPE,
             )
 
-            # Fill output array using direct slicing
             col_idx = 0
-            for m in mapping:
-                for port_in, ch_in in m.items():
-                    try:
-                        num_ch = len(ch_in)
-                        port_data = merged_data.get(port_in)
-                        if port_data is not None:
-                            # Broadcast ASYNC data (1 row) to match frame_size
-                            if port_data.shape[0] == 1 and frame_size > 1:
-                                output_array[:, col_idx:col_idx + num_ch] = (
-                                    np.broadcast_to(
-                                        port_data[:, ch_in],
-                                        (frame_size, num_ch)
-                                    )
-                                )
-                            else:
-                                output_array[:, col_idx:col_idx + num_ch] = (
-                                    port_data[:, ch_in]
-                                )
-                        col_idx += num_ch
-                    except Exception:
-                        # Handle missing data with zeros
-                        col_idx += len(ch_in)
+            for group in mapping:
+                for port_in, ch_in in group.items():
+                    num_ch = len(ch_in)
+                    output_array[:, col_idx : col_idx + num_ch] = data[
+                        port_in
+                    ][:, ch_in]
+                    col_idx += num_ch
 
             data_out[port_out] = output_array
 

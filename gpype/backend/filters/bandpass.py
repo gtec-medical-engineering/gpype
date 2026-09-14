@@ -25,13 +25,25 @@ class Bandpass(Butterworth):
             #: Lower cutoff frequency configuration key
             F_LO = "f_lo"
 
-    def __init__(self, f_lo: float, f_hi: float, order: int = None, **kwargs):
+    def __init__(
+        self,
+        f_lo: float,
+        f_hi: float,
+        order: int = None,
+        phase: str = None,
+        **kwargs,
+    ):
         """Initialize the bandpass filter with cutoff frequencies.
 
         Args:
             f_lo: Lower cutoff frequency in Hz.
             f_hi: Upper cutoff frequency in Hz.
             order: Filter order. Defaults to DEFAULT_ORDER from parent class.
+            phase: ``causal`` (default) filters forwards only and
+                carries the filter's group delay. ``zero`` filters
+                forwards and backwards, leaving no group delay --
+                which needs the whole recording, so it runs in a
+                batch pipeline and is refused in a realtime one.
             **kwargs: Additional arguments passed to parent Butterworth class.
 
         Raises:
@@ -59,5 +71,11 @@ class Bandpass(Butterworth):
 
         # Initialize parent Butterworth filter with bandpass configuration
         super().__init__(
-            fn=fn, f_lo=f_lo, f_hi=f_hi, btype=btype, order=order, **kwargs
+            fn=fn,
+            f_lo=f_lo,
+            f_hi=f_hi,
+            btype=btype,
+            order=order,
+            phase=phase,
+            **kwargs,
         )

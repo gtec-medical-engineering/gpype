@@ -20,6 +20,12 @@ class FFT(IONode):
     processing and proper amplitude scaling for spectral analysis.
     """
 
+    #: Applied when the author does not choose. Declared rather than
+    #: left as a literal in the constructor body, so the catalog can
+    #: publish it without building an FFT to find out.
+    DEFAULT_WINDOW_FUNCTION: str = "boxcar"
+    DEFAULT_OVERLAP: float = 0.5
+
     # Type annotation for the rolling buffer
     _buf: np.ndarray
 
@@ -35,10 +41,14 @@ class FFT(IONode):
             WINDOW_FUNCTION = "window_function"
             #: Overlap configuration key
             OVERLAP = "overlap"
+            #: Buffer length, defaulting to the window size. Accepted
+            #: through kwargs and stored, so it is declared here rather
+            #: than travelling in the configuration undocumented.
+            FRAME_SIZE = "frame_size"
 
     def __init__(
         self,
-        window_size: int = None,
+        window_size: int,
         window_function: str = None,
         overlap: float = None,
         **kwargs,
@@ -66,17 +76,24 @@ class FFT(IONode):
             raise ValueError("window_size must be greater than 1.")
         frame_size = window_size
 
-        # Allow overriding of frame size via kwargs
-        frame_size = kwargs.pop(
-            Constants.Keys.FRAME_SIZE, frame_size)
+        # Accepted so a serialized document round-trips, refused when it
+        # disagrees: the window is (window_size, 1) and the buffer
+        # (frame_size, channels), so any other value fails to broadcast
+        # on the first step() -- a long way from where it was written.
+        supplied = kwargs.pop(Constants.Keys.FRAME_SIZE, frame_size)
+        if supplied != frame_size:
+            raise ValueError(
+                f"frame_size is derived from window_size and must be "
+                f"{frame_size}, not {supplied}. Set window_size instead."
+            )
 
         # Set default window function if not provided
         if window_function is None:
-            window_function = "boxcar"  # Rectangular window (no windowing)
+            window_function = self.DEFAULT_WINDOW_FUNCTION
 
         # Set default overlap if not provided
         if overlap is None:
-            overlap = 0.5  # 50% overlap is common for spectral analysis
+            overlap = self.DEFAULT_OVERLAP
 
         # Validate overlap parameter
         if type(overlap) is not float:
@@ -88,15 +105,26 @@ class FFT(IONode):
         # Step size determines how many samples to advance between windows
         self._step_size = int(np.round(window_size * (1 - overlap)))
 
-        # Recalculate actual overlap based on integer step size
-        overlap = self._step_size / window_size
+        # Recalculate the actual overlap from the integer step size. The
+        # step advances by the non-overlapping part, so the overlap is
+        # what remains; storing the step ratio would invert the value and
+        # a stored configuration would not round-trip.
+        overlap = 1.0 - self._step_size / window_size
 
         # Calculate decimation factor for processing
         decimation_factor = self._step_size
 
-        # Allow overriding of decimation factor via kwargs
-        decimation_factor = kwargs.pop(
-            self.Configuration.Keys.DECIMATION_FACTOR, decimation_factor)
+        # Derived from window_size and overlap; accepted and checked
+        # for the same reason as frame_size above.
+        supplied = kwargs.pop(
+            self.Configuration.Keys.DECIMATION_FACTOR, decimation_factor
+        )
+        if supplied != decimation_factor:
+            raise ValueError(
+                f"decimation_factor is derived from window_size and "
+                f"overlap and must be {decimation_factor}, not "
+                f"{supplied}. Set overlap instead."
+            )
 
         # Initialize parent IONode with windowing configuration
         super().__init__(
@@ -111,6 +139,7 @@ class FFT(IONode):
         # Initialize internal state variables
         self._buf = None  # Rolling input buffer for windowing
         self._w = None  # Precomputed window function weights
+        self._since_last = 0  # Samples since the last window was emitted
 
     def setup(
         self, data: dict[str, np.ndarray], port_context_in: dict[str, dict]
@@ -130,10 +159,32 @@ class FFT(IONode):
         # Call parent setup to get base output context
         port_context_out = super().setup(data, port_context_in)
 
-        # Validate input frame size requirement for windowing
+        # The hop between windows is counted in SAMPLES, and a cycle
+        # carries frame_size_in of them.
+        #
+        # This used to demand frame_size_in == 1, because the hop was
+        # applied through ioiocore's is_decimation_step(), which counts
+        # cycles -- the two coincide only at one sample per cycle. The
+        # buffer now ingests every row of a frame and the hop is counted
+        # in samples, so any frame size works.
+        #
+        # One shape genuinely cannot be served: a frame longer than the
+        # hop would cross more than one window boundary in a single
+        # cycle, and only one spectrum can be emitted per cycle.
         frame_size_in = port_context_in[PORT_IN][Constants.Keys.FRAME_SIZE]
-        if frame_size_in != 1:
-            raise ValueError("Input frame size must be 1.")
+        if frame_size_in is None:
+            raise ValueError(
+                "FFT needs a frame size in the input context; got none."
+            )
+        if frame_size_in > self._step_size:
+            raise ValueError(
+                f"FFT advances {self._step_size} samples between windows "
+                f"but a frame carries {frame_size_in}, so a cycle would "
+                f"cross more than one window. Reduce the source's "
+                f"frame_size to {self._step_size} or less, or lower "
+                f"overlap so the step is at least {frame_size_in}."
+            )
+        self._since_last = 0
 
         # Get configuration parameters
         frame_size_out = self.config[Constants.Keys.FRAME_SIZE]
@@ -149,8 +200,12 @@ class FFT(IONode):
         sampling_rate = port_context_in[PORT_IN][Constants.Keys.SAMPLING_RATE]
         frame_rate = sampling_rate / self._step_size
 
-        # Update output context with FFT frame size
-        port_context_out[PORT_OUT][Constants.Keys.FRAME_SIZE] = frame_size_out
+        # Update the output context. A step emits one row per frequency
+        # bin of the one-sided spectrum, not one row per windowed sample,
+        # so the declared frame size has to be the bin count or every
+        # downstream node sizes its buffers wrongly.
+        bin_count = frame_size_out // 2 + 1
+        port_context_out[PORT_OUT][Constants.Keys.FRAME_SIZE] = bin_count
         port_context_out[PORT_OUT][Constants.Keys.FRAME_RATE] = frame_rate
 
         # Get window function configuration
@@ -179,14 +234,25 @@ class FFT(IONode):
                 is (frequency_bins, channel_count) where frequency_bins
                 is (window_size // 2 + 1).
         """
-        # Update rolling buffer with new data sample
-        # Efficiently shift all samples: move rows up by one position
-        self._buf[:-1] = self._buf[1:]
-        self._buf[-1] = data[PORT_IN][-1]  # Add newest sample at end
+        # Ingest every row of the frame, oldest first, so the window
+        # sees the signal that actually arrived. Taking only the last row
+        # -- which is what this did while frames were single samples --
+        # silently decimates the window's content by the frame size.
+        block = data[PORT_IN]
+        rows = block.shape[0]
+        window = self._buf.shape[0]
+        if rows >= window:
+            self._buf[:] = block[-window:]
+        elif rows:
+            self._buf[:-rows] = self._buf[rows:]
+            self._buf[-rows:] = block
 
-        # Check if this is a decimation step (based on overlap configuration)
-        if not self.is_decimation_step():
-            return None  # Skip FFT computation for this frame
+        # Emit once the window has advanced by a whole hop, counted in
+        # samples rather than in cycles.
+        self._since_last += rows
+        if self._since_last < self._step_size:
+            return None
+        self._since_last -= self._step_size
 
         # Apply window function to the buffered data
         # Broadcasting: (window_size, channels) * (window_size, 1)
@@ -212,9 +278,10 @@ class FFT(IONode):
         # Normalize by window sum to preserve signal power
         magnitude = np.abs(fft) / np.sum(self._w)
 
-        # Apply proper amplitude scaling for single-sided spectrum
-        # Factor of 2 accounts for negative frequencies in two-sided spectrum
-        amplitude = magnitude * scale_arr[np.newaxis, :] * 2
+        # Apply proper amplitude scaling for single-sided spectrum.
+        # scale_arr already carries the factor of two that accounts for the
+        # negative frequencies; a second one here would double every bin.
+        amplitude = magnitude * scale_arr[np.newaxis, :]
 
         # Return transposed result: (frequency_bins, channels)
         return {PORT_OUT: amplitude.T}

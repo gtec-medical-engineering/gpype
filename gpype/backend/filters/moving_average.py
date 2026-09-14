@@ -17,6 +17,9 @@ class MovingAverage(GenericFilter):
     including rectangular, Hamming, Hanning, and others.
     """
 
+    #: See FFT: declared so the catalog can read it.
+    DEFAULT_WINDOW_FUNCTION: str = "boxcar"
+
     class Configuration(GenericFilter.Configuration):
         """Configuration class for MovingAverage filter parameters."""
 
@@ -30,7 +33,7 @@ class MovingAverage(GenericFilter):
 
     def __init__(
         self,
-        window_size: Optional[int] = None,
+        window_size: int,
         window_function: Optional[str] = None,
         **kwargs,
     ):
@@ -57,7 +60,7 @@ class MovingAverage(GenericFilter):
 
         # Set default window function
         if window_function is None:
-            window_function = "boxcar"  # Rectangular window
+            window_function = self.DEFAULT_WINDOW_FUNCTION
 
         # Generate window coefficients using scipy
         try:
@@ -76,10 +79,20 @@ class MovingAverage(GenericFilter):
         b = kwargs.pop(MovingAverage.Configuration.Keys.B, b)
         a = kwargs.pop(MovingAverage.Configuration.Keys.A, a)
 
+        # Configuration must stay JSON-representable, and a numpy array is
+        # not: it would make this node the one filter that cannot be
+        # serialised. setup() calls np.asarray on them anyway.
+        def as_list(coefficients):
+            return (
+                coefficients.tolist()
+                if isinstance(coefficients, np.ndarray)
+                else [float(value) for value in coefficients]
+            )
+
         # Initialize parent generic filter with computed coefficients
         super().__init__(
-            b=b,
-            a=a,
+            b=as_list(b),
+            a=as_list(a),
             window_size=window_size,
             window_function=window_function,
             **kwargs,

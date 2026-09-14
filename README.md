@@ -8,7 +8,7 @@
 [![License](https://img.shields.io/badge/license-GNCL-003e6b)](https://github.com/gtec-medical-engineering/gpype/blob/main/LICENSE-GNCL.txt)
 [![Documentation](https://img.shields.io/badge/doc-gpype.gtec.at-003e6b)](https://gpype.gtec.at/)
 
-g.Pype is a Python Software Development Kit (SDK) for building neuroscience and Brain-Computer Interface (BCI) applications. It is designed to be simple to use, with a clear and well-documented coding interface with many examples that help you get started quickly. It provides essential building blocks that can be combined and adapted to your needs, while remaining open to integration with other Python packages. g.Pype runs on Windows and macOS.
+g.Pype is a Python Software Development Kit (SDK) for building neuroscience and Brain-Computer Interface (BCI) applications. It is designed to be simple to use, with a clear and well-documented coding interface with many examples that help you get started quickly. It provides essential building blocks that can be combined and adapted to your needs, while remaining open to integration with other Python packages. g.Pype runs on Windows, macOS and Linux.
 
 
 # Quickstart
@@ -16,7 +16,7 @@ g.Pype is a Python Software Development Kit (SDK) for building neuroscience and 
 Install `gpype` and clone the GitHub repository:
 
 ```shell
-pip install gpype
+pip install gpype[all]
 git clone https://github.com/gtec-medical-engineering/gpype.git
 ```
 

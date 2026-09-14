@@ -1,41 +1,12 @@
-"""
-Basic FFT (Fast Fourier Transform) Example - Frequency Domain Analysis
+"""Show the live spectrum of a 10 Hz rectangular wave.
 
-This example demonstrates how to perform frequency domain analysis using FFT
-to convert time-domain signals into their frequency components. This is
-fundamental for BCI applications that analyze spectral content of neural
-signals.
+A rectangular wave carries odd harmonics, so peaks appear at 30, 50 and
+70 Hz as well as at the fundamental -- a pure sine would show one peak.
+The 250-sample window at 250 Hz gives 1 Hz resolution, and the 50%
+overlap updates the display twice per window.
 
-What this example shows:
-- Generating a 10 Hz rectangular wave signal with noise
-- Applying FFT with windowing to convert to frequency domain
-- Real-time spectrum visualization showing frequency peaks
-- Pipeline: Generator -> FFT -> Spectrum Scope
-
-Expected output:
-The spectrum scope will display:
-- Strong peak at 10 Hz (fundamental frequency)
-- Additional peaks at 30, 50, 70 Hz... (odd harmonics of rectangular wave)
-- Background noise floor across all frequencies
-
-This demonstrates how rectangular waves contain multiple frequency components
-(harmonics), unlike pure sine waves which show only a single peak.
-
-Real-world applications:
-- EEG rhythm analysis (alpha, beta, gamma bands)
-- Motor imagery classification (mu/beta suppression)
-- SSVEP detection (steady-state visual evoked potentials)
-- Artifact identification in frequency domain
-- Power spectral density analysis
-
-Technical details:
-- Window size: 250 samples (1 second at 250 Hz)
-- Overlap: 50% (smooth spectral updates)
-- Window function: Hamming (reduces spectral leakage)
-- Frequency resolution: 1 Hz (250 Hz / 250 samples)
-
-Usage:
-    python example_basic_fft.py
+Requires: pip install gpype[gui]
+Run: python example_basic_fft.py
 """
 import gpype as gp
 
