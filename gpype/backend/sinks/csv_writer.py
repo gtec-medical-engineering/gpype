@@ -1,38 +1,36 @@
 from __future__ import annotations
 
-from typing import List
+from typing import Optional
 
-import ioiocore as ioc
 import numpy as np
 
 from ...common._private import channels
 from ...common._private.entitlement import MARK
 from ...common.constants import Constants
-from ..core._private.chain_params import stream_id_for, strip_chain_keys
-from ..core._private.link import Link
-from ..core.i_port import IPort
 from .base.file_writer import FileWriter
 
 
-class _CsvWriterCore(FileWriter):
-    """Internal node implementing CSV file writing logic.
-
-    This is the actual CSV writer node (pure INode inheritance via FileWriter).
-    It is wrapped by the CsvWriter chain for distributed operation.
+class CsvWriter(FileWriter):
+    """CSV file writer for real-time data logging.
 
     Writes multi-channel data to CSV files with timestamps in the first
     column. Automatically generates channel headers (Time, Ch01, Ch02, etc.).
     """
 
-    def __init__(self, file_name: str, **kwargs):
+    def __init__(
+        self, file_name: str, edge_id: Optional[str] = None, **kwargs
+    ):
         """Initialize the CSV writer core.
 
         Args:
             file_name: Base filename for CSV output. Must have .csv extension.
                 A timestamp will be automatically appended.
+            edge_id: Which edge runs this node, matched against the
+                edge process's --edge-id. None, the default, is every
+                edge; ignored when the pipeline is not distributed.
             **kwargs: Additional arguments passed to parent FileWriter class.
         """
-        super().__init__(file_name=file_name, **kwargs)
+        super().__init__(file_name=file_name, edge_id=edge_id, **kwargs)
         self._file_handle = None
         self._header_written = False
 
@@ -114,11 +112,18 @@ class _CsvWriterCore(FileWriter):
         # Combine timestamps with data (first column)
         full_block = np.column_stack((timestamps, block))
 
-        # Write to CSV with reasonable precision formatting
+        # The time column needs as much care as the data. It was written
+        # with bare "%g" -- six significant digits -- which is exact only
+        # while a timestamp is short: past about 17 minutes at 250 Hz the
+        # step between rows exceeds a whole sample period, and a 256 Hz
+        # recording read back as 255.95 Hz. "%.15g" keeps every float64
+        # timestamp a recording can reach, and unlike "%.17g" it does not
+        # print the binary noise that turns 0.004 into
+        # 0.0040000000000000001.
         np.savetxt(
             self._file_handle,
             full_block,
-            fmt=["%g", *(["%.17g"] * block.shape[1])],
+            fmt=["%.15g", *(["%.17g"] * block.shape[1])],
             delimiter=",",
             header=header,
             comments="",
@@ -133,73 +138,3 @@ class _CsvWriterCore(FileWriter):
             self._file_handle.close()
             self._file_handle = None
         self._header_written = False
-
-
-class CsvWriter(ioc.IChain):
-    """CSV file writer chain for real-time data logging.
-
-    This is an IChain that contains:
-    - Link: Bridge for distributed operation (passthrough in standalone)
-    - _CsvWriterCore: The actual CSV writing node
-
-    The chain structure enables distributed edge/server operation while
-    keeping node inheritance clean (no chain mixing in node path).
-
-    Writes multi-channel data to CSV files with timestamps in the first
-    column. Automatically generates channel headers (Time, Ch01, Ch02, etc.).
-    """
-
-    def __init__(self, file_name: str, **kwargs):
-        """Initialize the CSV writer chain.
-
-        Args:
-            file_name: Base filename for CSV output. Must have .csv extension.
-                A timestamp will be automatically appended. Optional only so
-                that a stored configuration can supply it; one of the two
-                must be given.
-            **kwargs: Additional arguments.
-
-        Raises:
-            ValueError: If no file name is available from either source.
-        """
-        # Store parameters for create_internal_nodes
-        self._link_stream_id = stream_id_for(kwargs)
-        fn_key = _CsvWriterCore.Configuration.Keys.FILE_NAME
-        if file_name is None:
-            file_name = kwargs.get(fn_key)
-        if file_name is None:
-            raise ValueError("file_name must be provided.")
-        self._core_params = {"file_name": file_name}
-        self._core_params.update(strip_chain_keys(kwargs))
-
-        # Initialize IChain (calls create_internal_nodes). The file name
-        # goes into the configuration as well: a chain that does not record
-        # it cannot be rebuilt from what it stored.
-        kwargs.setdefault(fn_key, file_name)
-        kwargs.setdefault(
-            self.Configuration.Keys.INPUT_PORTS,
-            [IPort.Configuration()],
-        )
-        # file_name is already forwarded above via kwargs.setdefault;
-        # only stream_id needs adding here. See Generator for the
-        # rationale behind forwarding a chain's own parameters.
-        ioc.IChain.__init__(
-            self,
-            stream_id=self._link_stream_id,
-            **kwargs,
-        )
-
-    def create_internal_nodes(self) -> List[ioc.Node]:
-        """Create the internal node chain.
-
-        Returns:
-            List containing [Link, _CsvWriterCore].
-        """
-        return [
-            Link(
-                sender=Constants.Residency.SERVER,
-                receiver=Constants.Residency.EDGE,
-                stream_id=self._link_stream_id,
-            ),
-            _CsvWriterCore(**self._core_params),
-        ]

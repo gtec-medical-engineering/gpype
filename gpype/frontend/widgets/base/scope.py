@@ -1,21 +1,27 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
-import pyqtgraph as pg
-from PySide6.QtCore import QObject, Signal
-from PySide6.QtGui import QPalette
-from PySide6.QtWidgets import QWidget
-
+from ....backend.core._private import assembly
 from ....backend.core.i_node import INode
 from ....backend.core.i_port import IPort
 from ....common._private import channels
-from .widget import Widget, _require_qt_application
+from ....common.constants import Constants
+from .widget import Widget, _require_qt_application, _weak_slot
+
+if TYPE_CHECKING:  # annotations only; never imported at runtime
+    import pyqtgraph as pg
 
 
-class _PlotRelay(QObject):
-    """Carries "setup has run" from the pipeline thread to the GUI thread.
+#: Built once, on first use. See :func:`_plot_relay_class`.
+_PLOT_RELAY: Optional[type] = None
+
+
+def _plot_relay_class() -> type:
+    """Return the relay class, defining it on first call.
+
+    Carries "setup has run" from the pipeline thread to the GUI thread.
 
     :meth:`Scope.setup` runs on the first cycle, which under direct
     execution is the source's own thread, and a graphics item may only be
@@ -31,10 +37,32 @@ class _PlotRelay(QObject):
     curves were built and filled, and the plot item stayed hidden for the
     whole run -- so every scope in the package displayed nothing, with
     nothing anywhere saying why.
-    """
 
-    #: Emitted from the pipeline thread once setup has run.
-    ready = Signal()
+    Defined inside a function rather than at module scope, and that is
+    load-bearing rather than tidy: a class statement evaluates its bases
+    at **import** time, so ``class _PlotRelay(QObject)`` made this module
+    unimportable without Qt. A server has no screen and, since 4.0.0's
+    layered install, may have no PySide6 at all -- and it must still be
+    able to import a module naming a scope in order to deserialise a
+    document that mentions one. Everything else in this file needs Qt
+    only inside a method, where an import can be deferred; a base class
+    cannot be.
+
+    Returns:
+        The ``_PlotRelay`` class, cached after the first call.
+    """
+    global _PLOT_RELAY
+    if _PLOT_RELAY is None:
+        from PySide6.QtCore import QObject, Signal
+
+        class _PlotRelay(QObject):
+            """Carries "setup has run" to the GUI thread."""
+
+            #: Emitted from the pipeline thread once setup has run.
+            ready = Signal()
+
+        _PLOT_RELAY = _PlotRelay
+    return _PLOT_RELAY
 
 
 class Scope(INode, Widget):
@@ -44,6 +72,9 @@ class Scope(INode, Widget):
     plotting of BCI signals. Uses PyQtGraph for high-performance plotting
     with configurable appearance and multiple curve support. Note that
     subclasses must implement the _update() method.
+
+    Public as ``gp.Scope``: subclass it for a plot of your own, and the
+    pipeline builds the chain a widget needs.
     """
 
     #: List of plot curves for multi-channel data display
@@ -62,12 +93,25 @@ class Scope(INode, Widget):
             #: Configuration key for plot axis/background color
             AXIS_COLOR = "axis_color"
 
+    #: Colours a headless scope records when the author named none.
+    #:
+    #: Normally taken from the running Qt palette. A SERVER has none, and
+    #: a scope constructed there is describing a display on another
+    #: process -- which, if it was authored on an edge, carries the real
+    #: pair in the document anyway. Mid grey on near-black: legible if it
+    #: is ever actually drawn, and obviously a default if it is not.
+    DEFAULT_HEADLESS_LINE_COLOR = (200, 200, 200)
+    DEFAULT_HEADLESS_AXIS_COLOR = (30, 30, 30)
+
+    #: Group box caption when the author names the scope nothing.
+    CAPTION = "Scope"
+
     def __init__(
         self,
         input_ports: list[IPort.Configuration] = None,
         line_color: tuple[int, int, int] = None,
         axis_color: tuple[int, int, int] = None,
-        name="Scope",
+        name: str = None,
         refresh_rate: float = None,
         **kwargs,
     ):
@@ -80,42 +124,100 @@ class Scope(INode, Widget):
                 plot line color. Uses system text color if None.
             axis_color (tuple[int, int, int], optional): RGB values for
                 plot background color. Uses system window color if None.
-            name (str): Widget group box title.
+            name (str, optional): The node's name, and the group box
+                caption. With none the node takes its class name and the
+                box says CAPTION.
+            refresh_rate (float, optional): Repaints per second.
             **kwargs: Additional configuration passed to parent classes.
         """
-        # Before the first Qt object, not after: Qt aborts the process
-        # when a QWidget is built with no QApplication -- not an
-        # exception, the interpreter dies with no traceback and no
-        # message -- and this line is where that used to happen. The
-        # guard in Widget.__init__ was too late to be reached.
-        _require_qt_application(type(self).__name__)
-
-        # Create the main plot widget
-        widget = pg.PlotWidget()
-
-        # Determine line color from system theme if not specified
-        if line_color is None:
-            palette = widget.palette()
-            c = palette.color(QPalette.ColorRole.WindowText)
-            line_color = (c.red(), c.green(), c.blue())
-
-        # Determine axis/background color from system theme if not specified
-        if axis_color is None:
-            palette = widget.palette()
-            c = palette.color(QPalette.ColorRole.Window)
-            axis_color = (c.red(), c.green(), c.blue())
-
-        # Initialize parent classes with configuration
-        Widget.__init__(
-            self, widget=QWidget(), name=name, refresh_rate=refresh_rate
+        # **A server draws nothing, and must not import Qt to establish
+        # it.** Under `chain-assembly` step 4 a document naming a scope
+        # is constructed by every process that reads it, including a
+        # SERVER with no screen and, since the layered install, very
+        # possibly no PySide6 -- the container sets `GPYPE_EXTRAS=""`.
+        # An edge the scope does not belong to draws it no more than the
+        # server does. `assembly.widget_nodes` already declines to run
+        # the core in both; this is the same answer one step earlier, so
+        # the node can describe what the owning edge will draw without
+        # pretending it can draw it.
+        headless = not assembly.builds_core_for(
+            kwargs.get(Constants.Keys.EDGE_ID)
         )
+
+        # One name, two uses: a document refers to the node by it, and
+        # the box shows it. Leaving the node's own name to ioiocore when
+        # the author gave none keeps two unnamed scopes distinguishable
+        # by class, which a caption shared by every scope would not.
+        caption = self.CAPTION if name is None else name
+        if name is not None:
+            kwargs["name"] = name
+
+        if headless:
+            # Colours normally come from the running Qt palette. There is
+            # none, and an author constructing a scope on a server is
+            # already describing a display somewhere else -- so a neutral
+            # pair stands in, and a document written by an edge carries
+            # the real ones anyway.
+            if line_color is None:
+                line_color = self.DEFAULT_HEADLESS_LINE_COLOR
+            if axis_color is None:
+                axis_color = self.DEFAULT_HEADLESS_AXIS_COLOR
+            widget = None
+            Widget.__init__(
+                self, widget=None, name=caption, refresh_rate=refresh_rate
+            )
+        else:
+            import pyqtgraph as pg
+            from PySide6.QtGui import QPalette
+            from PySide6.QtWidgets import QWidget
+
+            # Before the first Qt object, not after: Qt aborts the
+            # process when a QWidget is built with no QApplication -- not
+            # an exception, the interpreter dies with no traceback and no
+            # message -- and this line is where that used to happen. The
+            # guard in Widget.__init__ was too late to be reached.
+            _require_qt_application(type(self).__name__)
+
+            Widget.__init__(
+                self,
+                widget=QWidget(),
+                name=caption,
+                refresh_rate=refresh_rate,
+            )
+
+            # Create the main plot widget
+            widget = pg.PlotWidget()
+
+            # Determine line color from system theme if not specified
+            if line_color is None:
+                palette = widget.palette()
+                c = palette.color(QPalette.ColorRole.WindowText)
+                line_color = (c.red(), c.green(), c.blue())
+
+            # Determine axis/background color from system theme if not
+            # specified
+            if axis_color is None:
+                palette = widget.palette()
+                c = palette.color(QPalette.ColorRole.Window)
+                axis_color = (c.red(), c.green(), c.blue())
+
+            # Into the tree now, not last: a constructor raising below
+            # then leaves the plot where the tree's deletion reaches it,
+            # and the suite's teardown too (D-NODE-75).
+            self._layout.addWidget(widget)
+
         INode.__init__(
             self,
             input_ports=input_ports,
             line_color=line_color,
             axis_color=axis_color,
+            refresh_rate=refresh_rate,
             **kwargs,
         )
+
+        if headless:
+            self._plot_item = None
+            return
 
         # Configure plot appearance
         widget.setBackground(self.config[self.Configuration.Keys.AXIS_COLOR])
@@ -149,9 +251,9 @@ class Scope(INode, Widget):
         # Built here, on the GUI thread, so that an emit from the
         # pipeline thread is queued to this one. Held on the instance: a
         # relay that is collected takes its connection with it, and the
-        # plot would never be shown.
-        self._plot_relay = _PlotRelay()
-        self._plot_relay.ready.connect(self._show_plot)
+        # plot would never be shown. Deleted on this thread too.
+        self._plot_relay = self._delete_with_tree(_plot_relay_class()())
+        self._plot_relay.ready.connect(_weak_slot(self._show_plot))
 
         # Initialize plot data structures
         #: Per-channel labels from the stream, or None when it names no
@@ -166,9 +268,6 @@ class Scope(INode, Widget):
         self._pen = pg.mkPen(
             color=self.config[self.Configuration.Keys.LINE_COLOR], width=1
         )
-
-        # Add the plot widget to the layout
-        self._layout.addWidget(widget)
 
     def set_labels(self, x_label: str, y_label: str):
         """Set axis labels for the plot.
@@ -190,6 +289,8 @@ class Scope(INode, Widget):
         Returns:
             pg.PlotCurveItem: The newly created curve item for data updates.
         """
+        import pyqtgraph as pg
+
         # Use default pen if none provided
         if pen is None:
             pen = self._pen
@@ -243,7 +344,7 @@ class Scope(INode, Widget):
 
         For a scope fed by more than one port. Every port of one scope
         carries the same channels -- its own setup has already refused
-        the graph otherwise -- so the first port that names them names
+        the pipeline otherwise -- so the first port that names them names
         them all, and a port that stays silent is not evidence of
         anything.
 

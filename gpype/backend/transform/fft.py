@@ -3,6 +3,8 @@ from __future__ import annotations
 import numpy as np
 from scipy.signal import get_window
 
+from ...common._private import channels
+from ...common._private.naming import node_label
 from ...common.constants import Constants
 from ..core.io_node import IONode
 
@@ -18,6 +20,10 @@ class FFT(IONode):
     Performs windowed FFT on input data with configurable window size,
     overlap, and window functions. Uses rolling buffer for continuous
     processing and proper amplitude scaling for spectral analysis.
+
+    A channel's unit is unchanged: the output is a one-sided amplitude
+    spectrum, in the same unit as the input signal, not a power spectral
+    density, so no unit conversion applies (D-BATCH-43).
     """
 
     #: Applied when the author does not choose. Declared rather than
@@ -219,6 +225,14 @@ class FFT(IONode):
         # Reshape for broadcasting with multi-channel data
         self._w = w[:, np.newaxis]  # Shape: (window_size, 1)
 
+        # A row is now a frequency bin, not a sample: a marker or gap
+        # naming an input sample would name a meaningless bin
+        # (D-BATCH-86).
+        warning = channels.drop_grid(
+            port_context_out[PORT_OUT], node_label(self)
+        )
+        if warning:
+            self.log(warning, type=Constants.LogTypes.WARNING)
         return port_context_out
 
     def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:

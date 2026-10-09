@@ -35,7 +35,15 @@ class Apply(IONode):
     which a function has no way to declare, so it is refused rather than
     misconfiguring whatever is downstream -- write a node class for that.
     A function is not a configuration value either, so a pipeline holding
-    an ``Apply`` cannot be written to a document and rebuilt elsewhere.
+    an ``Apply`` cannot be written to a document: ``serialize()`` refuses
+    it, naming this node.
+
+    A channel's declared unit is carried through unchanged: the shape
+    and dtype check already refuses a function that resizes the output,
+    and a bare callable has no way to say what its scale did to the
+    unit, so it is not this node's place to guess (D-BATCH-43). Wrap a
+    scale-changing function in a proper node class to declare the new
+    unit.
 
     Args:
         function: Called once with the whole recording as a
@@ -53,6 +61,11 @@ class Apply(IONode):
     #: arrives from ``start()`` with the node named -- and not on the
     #: first cycle, by which point a source may already hold a device.
     BATCH_ONLY: bool = True
+
+    #: Refused by ``Pipeline.serialize()``. The function is instance
+    #: state, so a document naming this node would rebuild it without
+    #: one (D-BATCH-70).
+    SCRIPT_ONLY: bool = True
 
     def __init__(self, function: Callable, **kwargs):
         if not callable(function):
@@ -115,7 +128,7 @@ class Apply(IONode):
                 f"input of {block.dtype}. Cast it back -- a change of "
                 f"dtype is the same kind of contract change as a change "
                 f"of shape, and Constants.DATA_TYPE is what the rest of "
-                f"the graph is built on."
+                f"the pipeline is built on."
             )
         return {PORT_OUT: result}
 

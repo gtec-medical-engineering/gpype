@@ -7,20 +7,18 @@ import time
 from collections import deque
 from typing import List, Optional
 
-import ioiocore as ioc
 import numpy as np
 
-from ...common._private import channels, driver_usage
+from ...common._private import channels, device_probe, driver_usage
 from ...common.constants import Constants
 from ...common.montage import Montage
-from ..core._private.chain_params import stream_id_for, strip_chain_keys
-from ..core._private.link import Link
-from ..core._private.oscar import Oscar
-from ..core._private.sync import Sync
 from ..core._private.timeline import MasterPriority
 from ..core.o_port import OPort
-from .base import raw
-from .base.amplifier_source import AmplifierSource, as_whole_number
+from .base.amplifier_source import (
+    AmplifierSource,
+    apply_channel_units,
+    as_whole_number,
+)
 
 #: Default output port identifier
 PORT_OUT = Constants.Defaults.PORT_OUT
@@ -30,7 +28,52 @@ PORT_IN = Constants.Defaults.PORT_IN
 #: Device-name prefixes advertised by g.tec BLE amplifiers. A BLE scan
 #: reports every peripheral in range, so the discovery list has to be
 #: filtered before a device is opened.
-GTEC_NAME_PREFIXES = ("UN-", "U8-", "U4-")
+#:
+#: All of equal standing: a gCore (``SE-``) is preferred over an unrelated
+#: peripheral exactly as a Core-8 (``U8-``) is, and among several g.tec
+#: units the first the scan lists is opened. ``SE-`` was missing, so a
+#: gCore was opened only when nothing else answered the scan.
+#:
+#: ``UN-`` is not here: it is a Unicorn Hybrid Black, which is
+#: `HybridBlack`'s device, not a member of this family. It advertises over
+#: BLE too, so it answers this scan; while ``UN-`` was listed, a node with
+#: no serial opened a Unicorn in range ahead of a gCore and failed with
+#: ``br-connection-page-timeout``.
+GTEC_NAME_PREFIXES = ("U8-", "U4-", "SE-")
+
+#: Name prefix of a Unicorn Hybrid Black. Never taken without a serial,
+#: not even as the fallback when no family name answered.
+UNICORN_NAME_PREFIX = "UN-"
+
+# Sampling rates a gCore amplifier can be configured to, and the channel
+# count each one implies.
+#
+# The two are one setting, not two: the device derives its rate from the
+# channel-mode straps, and it refuses a rate contradicting the active
+# mode. There is no 2-channel mode and no 2000 Hz rate, however natural
+# the halving pattern makes them look.
+#
+# The generation is clocked on a 250 Hz base (the owner, 2026-09-25;
+# D-NODE-59). Firmware 0.1.0.36 reported 256, 512 and 1024 over 0x44,
+# which is what this table used to say; the rate a stream runs at is
+# still whatever the device reports, so a device reporting those is
+# followed, and a declared 512 is checked rather than switched.
+#
+# The device also has a 1-channel mode, which is deliberately absent
+# (D-NODE-73). Sent as a sized payload its 160 rows exceed the native
+# library's 64-row allocation; sent as an event packet it fits, but runs
+# below the 4000 Hz it reports, so a stream timed at that rate would be
+# wrong. Without a mode, a declared 4000 Hz falls through to the ordinary
+# rate check. See gtec_ble.amplifier.GCORE_CHANNEL_MODES, the authority.
+#
+# Deliberately a copy of that map rather than an import of it. This is
+# read in __init__, to fix the port geometry, and a core must be
+# constructible in every residency -- a server builds one to describe a
+# stream it is receiving, where the driver is not installed. Importing
+# the driver here to learn the pairs would undo that. The driver stays
+# the authority at connect, where it is loaded anyway: whatever the
+# device actually reports is what the node follows.
+GCORE_MODES = {250: 16, 500: 8, 1000: 4}
 
 #: Guards the process-wide BLE runtime state.
 _ble_lock = threading.Lock()
@@ -68,6 +111,22 @@ def _ble_acquire() -> None:
         _ble_used = True
 
 
+def _registration_fault() -> str:
+    """Name a failed BLE usage-key registration, or return "".
+
+    It touches no radio, so it fails as instantly as an unusable adapter
+    and has to be ruled out before timing means anything.
+    """
+    cause = driver_usage.last_error.get("ble")
+    if cause is None and driver_usage.registered("ble"):
+        return ""
+    because = "" if cause is None else f" ({cause})"
+    return (
+        f" The BLE usage key was never registered with the driver"
+        f"{because}, so this is a g.Pype fault rather than a hardware one."
+    )
+
+
 @atexit.register
 def _ble_shutdown_at_exit() -> None:  # pragma: no cover - exit hook
     """Release the BLE runtime once, at process exit.
@@ -76,7 +135,8 @@ def _ble_shutdown_at_exit() -> None:  # pragma: no cover - exit hook
     skipping it leaves the Bluetooth adapter claimed, so the next run
     fails to discover or open the device. It must not be called between
     acquisitions: the native runtime cannot be re-initialised afterwards,
-    and every later scan would silently return no devices.
+    so every later scan or open in this process raises gtec_ble's
+    RuntimeShutDown (before 2.9.1, a scan silently returned no devices).
     """
     global _ble_used
     with _ble_lock:
@@ -89,16 +149,21 @@ def _ble_shutdown_at_exit() -> None:  # pragma: no cover - exit hook
             pass
 
 
-class _BCICoreCore(AmplifierSource):
-    """Internal node implementing BCI Core amplifier acquisition logic.
+class BCICore(AmplifierSource):
+    """BCI Core amplifier for wireless EEG acquisition.
 
-    This is the actual BCI Core node (pure ONode inheritance).
-    It is wrapped by the BCICore chain for distributed operation.
+    Interface to the g.tec BCI Core family of wireless EEG amplifiers
+    over BLE. By default it acquires every EEG channel the amplifier
+    reports at 250 Hz; ``channel_count``, ``channels`` and
+    ``sampling_rate`` narrow, reorder or redeclare that.
 
-    Interface to g.tec BCI Core-8 wireless EEG amplifier using BLE. By
-    default it acquires every EEG channel the amplifier reports at
-    250 Hz; ``channel_count``, ``channels`` and ``sampling_rate`` narrow,
-    reorder or redeclare that.
+    The node is named for the family, not for one member of it. It was
+    ``BCICore8``, which read as the name of the 8-channel product --
+    but a BCI Core-4 speaks the same protocol, reports itself the same
+    way and is driven by exactly this code, so the 8 named a device
+    rather than a node and made the node look inapplicable to half the
+    devices it already supported. ``BCICore8`` still resolves, with a
+    DeprecationWarning; see ``bci_core8.py``.
     """
 
     #: Bluetooth scanning timeout in seconds
@@ -111,7 +176,7 @@ class _BCICoreCore(AmplifierSource):
     #: Maximum number of supported EEG channels
     MAX_NUM_CHANNELS = 8
     #: Capacity of the hand-off queue between the BLE callback thread and
-    #: the worker that drives the pipeline, in samples.
+    #: the worker that drives the pipeline, in seconds of signal.
     #:
     #: This is not a jitter buffer and it is not held at any fill level:
     #: the worker drains it as data arrives, so it normally sits near
@@ -119,26 +184,66 @@ class _BCICoreCore(AmplifierSource):
     #: slack between the two threads, and one second of room makes
     #: overflow a symptom of something genuinely wrong rather than a
     #: tuning question.
-    QUEUE_CAPACITY_SAMPLES = 250
-    #: Number of discovery/open attempts before giving up.
-    #: One: a second scan of a radio that just answered
-    #: nothing costs the whole timeout again, and start()
-    #: blocks the calling thread for all of it.
-    CONNECT_ATTEMPTS = 1
+    #:
+    #: In seconds, not samples. It was 250 samples: one second at 250 Hz,
+    #: a quarter of one at 1000, where one gCore payload is 40 samples.
+    #: Converted at start(), after the connect, since a rate left
+    #: undeclared is only known once the device has answered.
+    QUEUE_CAPACITY_S = 1.0
+    # Scans before discovery gives up, and opens before an open does.
+    #
+    # **Three, because one is not enough and two is not either.** Measured
+    # 2026-09-22 on a bench with nothing else touching the radio: a
+    # powered-on, idle, healthy amplifier is missed by **6.1%** of scans
+    # (5 of 82), and **two consecutive misses** were observed -- about
+    # twelve seconds of apparent absence with nothing wrong. A BLE
+    # peripheral advertises in bursts; a scan that happens to fall between
+    # them hears nothing and cannot tell itself apart from one pointed at
+    # a device that is switched off.
+    #
+    # This was 1, so a single unlucky scan reported `Devices seen: none`
+    # and advised checking the battery -- roughly one connection in
+    # sixteen, against a perfectly good amplifier. Worse, the retry was
+    # already written: the cache-clearing rescan below sat behind
+    # `attempt > 0` and never ran.
+    #
+    # Three covers every run of misses observed, with margin. The cost is
+    # paid only by a device that really is absent, which waits about
+    # twenty seconds to be told so: three scans of SCANNING_TIMEOUT_S and
+    # one CONNECT_RETRY_DELAY_S, **once per start()**. The election (no
+    # rate declared) and the entitlement gate connect before start()
+    # does, and a failure of theirs is remembered for the rest of that
+    # start (_connect_early), so nothing repeats the discovery. Before it
+    # was, an absent amplifier cost a fresh process two discoveries with
+    # a rate declared, three without and four under save_as: 40 to 80 s.
+    #
+    # See `misc/diagnostics/ble_advertising_2026-09-22.jsonl` and
+    # `devdoc/workpackages/ble-adapter-wedge.md`.
+    CONNECT_ATTEMPTS = 3
     #: Pause between connection attempts in seconds
     CONNECT_RETRY_DELAY_S = 1.0
+    #: An open that fails faster than this never paged the amplifier, so
+    #: the host's adapter is the suspect. Timed per attempt, and without
+    #: the retry's pause and rescan, either of which would hide it.
+    INSTANT_FAILURE_S = 0.25
     #: Minimum seconds between repeated packet-loss warnings
     LOSS_LOG_INTERVAL_S = 10.0
-    #: Samples lost in one dropout above which it is reported as a
-    #: warning rather than a note. A lost BLE payload is four samples,
-    #: so 25 -- 100 ms at this rate -- is well clear of the
+    #: Signal lost in one dropout, in seconds, above which it is reported
+    #: as a warning rather than a note. 100 ms is well clear of the
     #: single-payload dropouts an ordinary link produces, and short
     #: enough that anything above it is worth an operator's attention.
-    LOSS_WARN_SAMPLES = 25
+    #:
+    #: In seconds, because a payload is a span of time, not a fixed
+    #: count: a legacy payload is four samples, 16 ms at 250 Hz; a gCore
+    #: event packet (firmware 0.2.1.1 on) covers one 10 ms connection
+    #: event in every mode, and its sized predecessor 40 ms. It was 25
+    #: samples, which is this at 250 Hz and made every single lost
+    #: payload a warning at 1000.
+    LOSS_WARN_S = 0.1
     #: Dropouts within LOSS_WARN_WINDOW_S above which the link is
     #: reported as degrading, however small each one is on its own.
-    #: Repetition is the signal there: one four-sample dropout says
-    #: nothing, five of them in a minute say the radio is struggling.
+    #: Repetition is the signal there: one short dropout says nothing,
+    #: five of them in a minute say the radio is struggling.
     LOSS_WARN_BURSTS = 5
     #: Window over which repeated dropouts are counted, in seconds.
     LOSS_WARN_WINDOW_S = 60.0
@@ -155,6 +260,78 @@ class _BCICoreCore(AmplifierSource):
     #: seconds. Twice the driver's one-second back-fill horizon, so an
     #: ordinary dropout the driver repairs itself never trips this.
     STALL_TIMEOUT_S = 2.0
+    # How long a run may wait for its first sample, while the link reads
+    # connected, before the silence is reported, in seconds.
+    #
+    # STALL_TIMEOUT_S measures a stream that stopped; this one a stream
+    # that has not begun, and a gCore begins late after its channel mode
+    # is switched. Measured 2026-10-01 on SE-2026.09.01 (firmware
+    # 0.2.1.4): 0.6 to 2.4 s from start() to the first sample after a
+    # switch, so a healthy run switched from 250 to 500 Hz opened with
+    # "No data for 2.0 s". Twice the longest. A link reported down is
+    # still reported at STALL_TIMEOUT_S: that is no late start.
+    FIRST_SAMPLE_TIMEOUT_S = 5.0
+
+    # Silence, with the link still reporting *connected*, above which
+    # the stall stops being a warning and becomes an error. A warning is
+    # what a two-second dropout looks like, and an application watching
+    # the condition cannot tell that apart from an amplifier that is
+    # gone -- which is the one distinction it has to make.
+    #
+    # Both link states escalate, because neither tells a dropout from
+    # the end: time is the only discriminator (D-NODE-44). A link the
+    # driver reports *down* was once exempt, on the reasoning that it
+    # recovers by itself -- but a gCore switched off reads down within
+    # about 10 s rather than connected, so it warned "it reconnects by
+    # itself" for as long as anyone watched (M2, 2026-10-01; D-NODE-74).
+    #
+    # Measured 2026-09-23 on a BCI Core switched off mid-run: the link
+    # read connected and warned at 2, 12, 22 and 32 s without ever
+    # escalating, while the amplifier had been dead throughout.
+    #
+    # But walking out of range reads connected too, until the radio's
+    # supervision timeout expires -- still connected 12 s into a walk
+    # away on 2026-09-24, when 10 s here escalated, and ioiocore stops a
+    # pipeline on an error. So the threshold has to outlast a dropout
+    # that recovers, and the longest measured is 38.1 s (M1, 2026-09-22).
+    # The driver reconnects without a horizon of its own to follow.
+    STALL_ERROR_S = 60.0
+
+    #: Link conditions a gCore's event packets report (gtec-ble 2.9.3,
+    #: ``Amplifier.stream_status``): the field, the warning when it turns
+    #: on, the note when it clears. A warning goes out at most once per
+    #: LOSS_LOG_INTERVAL_S for each, so a condition hovering at its
+    #: threshold cannot flood the log, and a note only after a warning.
+    LINK_CONDITIONS = (
+        (
+            "interval_off",
+            "The BLE connection interval is not the 10 ms the stream is "
+            "paced for, so samples arrive later and in larger bursts.",
+            "The BLE connection interval is back at 10 ms.",
+        ),
+        (
+            "phy_off",
+            "The BLE link is not on the 2M PHY and carries half the data "
+            "it could; at the higher rates the amplifier may fall behind.",
+            "The BLE link is on the 2M PHY again.",
+        ),
+        (
+            "backlog",
+            "The amplifier is 100 ms or more behind with sending its "
+            "samples; they arrive late, not lost.",
+            "The amplifier has caught up with sending its samples.",
+        ),
+        (
+            # The only signal of a gap the driver cannot fill: a gCore
+            # numbers no samples in band, so a jump longer than the
+            # driver's one-second back-fill shortens the timeline unseen.
+            "dropped",
+            "The amplifier reports dropped samples. A gap of up to a "
+            "second is filled and marked invalid; a longer one is missing "
+            "from the timeline, which runs that much short.",
+            "The amplifier reports no further dropped samples.",
+        ),
+    )
     #: Channels carrying the timeline: master index, sample
     #: validity, and the host time the sample arrived at, in that
     #: order. Appended to the EEG channels in band, and stripped
@@ -242,6 +419,8 @@ class _BCICoreCore(AmplifierSource):
         frame_size: Optional[int] = None,
         montage: Optional[Montage] = None,
         sampling_rate: Optional[int] = None,
+        enable_oscar: bool = False,
+        edge_id: Optional[str] = None,
         **kwargs,
     ):
         """Initialize BCI Core-8 amplifier source.
@@ -262,23 +441,52 @@ class _BCICoreCore(AmplifierSource):
             sampling_rate: Rate the device runs at, in Hz. Leave it
                 unset and the device is asked: the node connects during
                 the master-timeline election and adopts whatever rate the
-                amplifier reports. That is the only way a gCore device can
-                work unattended, because it is runtime-configurable --
-                16 channels with 256 Hz, 8 with 512, 4 with 1024, 1 with
-                4096 -- and nothing outside the device knows which.
+                amplifier reports.
 
-                Give a value only to assert one. It is then checked
-                against the device at connect and a disagreement is an
-                error rather than a silent re-interpretation.
+                Give a value to choose one. On a gCore device the rate is
+                the channel mode -- the device derives one from the other
+                -- so the three rates below are the whole configuration
+                space, and the device is switched into the matching mode
+                at connect:
+
+                =============  ============
+                sampling_rate  EEG channels
+                =============  ============
+                250 Hz         16
+                500 Hz          8
+                1000 Hz         4
+                =============  ============
+
+                There is no 2-channel mode and no 2000 Hz rate, however
+                natural the halving pattern makes them look. The device's
+                own 1-channel mode is not offered either: it runs below
+                the rate it reports; see :data:`GCORE_MODES`.
+
+                ``channel_count`` need not be given with a rate: it
+                follows from the mode. Give it only to take *fewer*
+                channels than the mode provides. The node acquires at
+                most eight, so at 250 Hz it takes the first eight of the
+                sixteen.
+
+                On a legacy BCI Core-8 the rate is fixed in hardware, so
+                a declared rate is checked rather than applied and a
+                disagreement is an error.
+            enable_oscar: Run OSCAR artifact removal on this stream.
+            edge_id: Which edge runs this node, matched against the
+                edge process's --edge-id. None, the default, is every
+                edge; ignored when the pipeline is not distributed.
             **kwargs: Additional arguments for parent AmplifierSource.
 
         Raises:
             ValueError: If montage size and channel_count disagree.
         """
-        # The library is imported here, not at module scope: this core is
-        # built only where the hardware is, while the chain that names it
-        # is built in every residency.
-        _load()
+        # gtec_ble is imported in start(), not here and not at module
+        # scope. A core has to be *constructible* in every residency --
+        # a server builds one to describe the stream it is receiving,
+        # and a document is deserialised wherever it is read -- while
+        # only the process holding the amplifier ever starts one.
+        # Nothing below this point touches the driver; every `ble.` use
+        # in this class is in a method.
         keys = self.Configuration.Keys
 
         # Restoring from a stored configuration: the EEG count and the
@@ -306,6 +514,30 @@ class _BCICoreCore(AmplifierSource):
         # rejected, so it must not travel as "".
         serial = serial or None
 
+        # The rate is a property of the device, but not one this node can
+        # discover before it has to be declared: the pipeline elects its
+        # master timeline from the *configured* rate, and that election
+        # runs before any device handle is opened. So it is declared here
+        # and verified against the device at connect, where a disagreement
+        # is either acted on -- see _apply_channel_mode -- or an error.
+        #
+        # It is also read back from a stored configuration, unlike before.
+        # Dropping it made a document authoritative about the channel count
+        # and silent about the rate, so a session saved at one rate
+        # reloaded at the class default without anything reporting it.
+        #
+        # Resolved before the channel count because on a gCore device the
+        # two are one setting: the rate follows from the channel-mode
+        # straps, so a declared rate already names a channel count.
+        restored_rate = self.scalar(kwargs.pop(keys.SAMPLING_RATE, None))
+        if sampling_rate is None:
+            sampling_rate = restored_rate
+        #: Whether a rate was asked for, as opposed to defaulted to. It
+        #: decides what a disagreement with the device means: a declared
+        #: rate that does not match is acted on or refused, while a
+        #: defaulted one is simply replaced by what the device reports.
+        self._rate_declared = sampling_rate is not None
+
         # A montage describes exactly the EEG channels, so it can supply
         # the channel count when one was not requested explicitly.
         if montage is not None:
@@ -317,11 +549,34 @@ class _BCICoreCore(AmplifierSource):
                     f"channel_count is {channel_count}."
                 )
 
+        # A declared gCore rate names its own channel count, and the port
+        # geometry is fixed here -- it cannot be widened at connect once
+        # the device has answered. So the mode is resolved now, from the
+        # rate alone, which is the one thing that can be known without a
+        # device. Without this, the 4-channel rate (then 1024) kept the
+        # default of eight channels and then failed at connect with "Amplifier
+        # reports 4 EEG channels but 8 were requested", naming neither
+        # the mode nor the rate that caused it.
+        #
+        # An explicit channel_count or montage still wins: it is the more
+        # specific statement, and narrowing to fewer channels than the
+        # mode provides is legitimate.
+        if channel_count is None and self._rate_declared:
+            channel_count = GCORE_MODES.get(int(sampling_rate))
+
         # Validate and set channel count (1-8 channels supported)
         if channel_count is None:
             channel_count = self.MAX_NUM_CHANNELS
         channel_count = max(1, min(channel_count, self.MAX_NUM_CHANNELS))
         num_eeg_channels = channel_count
+
+        if sampling_rate is None:
+            sampling_rate = self.SAMPLING_RATE
+        sampling_rate = int(sampling_rate)
+        #: The rate this node runs at. Every timeline computation reads
+        #: this rather than the class constant, which is only the value
+        #: used until the device says otherwise.
+        self._sampling_rate = sampling_rate
 
         if montage is not None and len(montage) != num_eeg_channels:
             raise ValueError(
@@ -349,42 +604,18 @@ class _BCICoreCore(AmplifierSource):
         # as an explicit keyword: on a round trip the stored configuration
         # arrives in kwargs too, and passing both is a duplicate keyword.
         kwargs.setdefault(keys.OUTPUT_PORTS, [OPort.Configuration()])
-        # The rate is a property of the device, but not one this node can
-        # discover before it has to be declared: the pipeline elects its
-        # master timeline from the *configured* rate, and that election
-        # runs before any device handle is opened. So it is declared here
-        # and verified against the device at connect, where a disagreement
-        # is an error rather than a warning.
-        #
-        # It is also read back from a stored configuration, unlike before.
-        # Dropping it made a document authoritative about the channel count
-        # and silent about the rate, so a session saved at one rate
-        # reloaded at the class default without anything reporting it.
-        restored_rate = self.scalar(kwargs.pop(keys.SAMPLING_RATE, None))
-        if sampling_rate is None:
-            sampling_rate = restored_rate
-        #: Whether a rate was asked for, as opposed to defaulted to. It
-        #: decides what a disagreement with the device means: a declared
-        #: rate that does not match is an error, while a defaulted one is
-        #: simply replaced by what the device reports.
-        self._rate_declared = sampling_rate is not None
-        if sampling_rate is None:
-            sampling_rate = self.SAMPLING_RATE
-        sampling_rate = int(sampling_rate)
-        #: The rate this node runs at. Every timeline computation reads
-        #: this rather than the class constant, which is only the value
-        #: used until the device says otherwise.
-        self._sampling_rate = sampling_rate
         # A property of this device, so a stored copy carries no
         # information; dropping it keeps it from arriving twice.
         kwargs.pop(keys.DECIMATION_FACTOR, None)
 
         if montage is not None:
             kwargs[opt.MONTAGE_LABELS] = list(montage.labels)
-        if serial:
-            kwargs[opt.SERIAL] = serial
+        # None included: an optional key may be None, not empty, and a
+        # document says "any device" by recording it.
+        kwargs[opt.SERIAL] = serial
 
         super().__init__(
+            enable_oscar=enable_oscar,
             sampling_rate=sampling_rate,
             frame_size=frame_size,
             # The worker cycles once per frame, so no decimation applies.
@@ -392,13 +623,11 @@ class _BCICoreCore(AmplifierSource):
             channel_count=channel_count,
             # Recorded so a round trip can rebuild both exactly.
             eeg_channel_count=num_eeg_channels,
+            edge_id=edge_id,
             **kwargs,
         )
 
         self._frame_size = self.config[self.Configuration.Keys.FRAME_SIZE][0]
-        buf_size_frames = int(
-            np.ceil(self.QUEUE_CAPACITY_SAMPLES / self._frame_size)
-        )
 
         # Store device configuration
         self._target_sn = serial
@@ -406,6 +635,11 @@ class _BCICoreCore(AmplifierSource):
 
         # Initialize device connection (will be established in start())
         self._device = None
+        #: The serial this source holds open, told to the presence probe.
+        self._held_serial: Optional[str] = None
+        #: Why a connect ahead of start() failed, kept until this start()
+        #: has reported it. See _connect_early.
+        self._connect_failure: Optional[Exception] = None
 
         # Sample layout, resolved from the device once it is opened. The
         # amplifier streams EEG together with accelerometer, battery and
@@ -435,7 +669,6 @@ class _BCICoreCore(AmplifierSource):
         self._in_sample_counter: int = 0
         self._frame_buffer: Optional[queue.Queue] = None
         self._sample_buffer: Optional[np.ndarray] = None
-        self._buffer_size_frames: int = buf_size_frames
         #: Frames discarded because the queue was full.
         self._overflow_count: int = 0
         self._last_overflow_log: float = 0.0
@@ -450,12 +683,16 @@ class _BCICoreCore(AmplifierSource):
             ConnectionError: If amplifier connection fails.
             RuntimeError: If background thread creation fails.
         """
+        # Where the driver is actually needed, and the first point at
+        # which this process has declared it owns the amplifier. See
+        # __init__ for why it is not imported there.
+        _load()
+
         # Get configuration parameters
         frame_size = self.config[self.Configuration.Keys.FRAME_SIZE]
         # Initialize data buffers for frame-based processing. The sample
         # buffer holds EEG only; timeline position and validity travel
         # alongside it so they can never drift apart from their samples.
-        self._frame_buffer = queue.Queue(maxsize=self._buffer_size_frames)
         self._sample_buffer = np.zeros((frame_size[0], self._num_eeg_channels))
         self._meta_buffer = np.zeros(
             (frame_size[0], self.NUM_TIMELINE_CHANNELS)
@@ -470,14 +707,24 @@ class _BCICoreCore(AmplifierSource):
         self._reset_timeline()
 
         # Connect before the worker starts consuming, so that a failed
-        # connection does not leave a thread spinning.
+        # connection does not leave a thread spinning. A connect the
+        # election or the entitlement gate already tried and failed is
+        # not tried again: its error is this start's error, and another
+        # discovery only makes an absent amplifier slower to report.
+        # Taken, so the next start() looks afresh.
         if self._device is None:
+            failure, self._connect_failure = self._connect_failure, None
+            if failure is not None:
+                raise failure
             self._connect()
 
+        # Sized after the connect, which adopts the device's rate when
+        # none was declared. Nothing reaches the data callback before
+        # device.start() below: that is where gtec-ble subscribes.
+        self._frame_buffer = queue.Queue(maxsize=self._queue_capacity())
+
         # Bring the base class up before the worker starts cycling, so
-        # the worker never drives a node that is not fully started. The
-        # device already streams by this point; its frames simply wait in
-        # the queue.
+        # the worker never drives a node that is not fully started.
         super().start()
 
         # Start the worker that drives pipeline cycles from arrival.
@@ -491,10 +738,21 @@ class _BCICoreCore(AmplifierSource):
         # Begin data acquisition from amplifier
         self._device.start()
         # Anchors the silence watchdog, so a stream that never delivers a
-        # first sample is reported rather than waited on forever.
+        # first sample is reported -- after FIRST_SAMPLE_TIMEOUT_S, since a
+        # gCore starts late after a mode switch -- rather than waited on
+        # forever.
         self._stream_since = channels.stamp_clock()
         self._stalled = False
         self._last_stall_log = 0.0
+
+    def _queue_capacity(self) -> int:
+        """Frames the hand-off queue holds: QUEUE_CAPACITY_S at this rate.
+
+        Returns:
+            The queue's maximum size in frames, at least one.
+        """
+        samples = self.QUEUE_CAPACITY_S * self._sampling_rate
+        return max(1, int(np.ceil(samples / self._frame_size)))
 
     def open_for_attestation(self) -> None:
         """Connect before the entitlement gate runs. See the base class.
@@ -506,19 +764,54 @@ class _BCICoreCore(AmplifierSource):
         refused anyway -- the device is exclusive.
 
         Never raises. A Core-8 that is out of range or off is not an
-        entitlement question: the run stays unattested and `start()`
-        reports the connection failure with its own error.
+        entitlement question: the run stays unattested, and `start()`
+        raises the failure remembered here without a second discovery
+        (`_connect_early`).
+
+        Loads the driver first. The gate runs before `start()`, which is
+        where the driver used to be loaded, so in a fresh process
+        `_connect` scanned with ``ble`` still None, failed on the
+        attribute, and a licensed run was marked non-commercial while
+        `start()` then connected without complaint.
         """
         if self._device is not None:
             return
         try:
-            self._connect()
+            self._connect_early()
         except Exception as error:  # noqa: BLE001
             self.log(
                 f"could not open the amplifier before the entitlement "
                 f"gate, so this run is unattested: {error}",
                 type=Constants.LogTypes.WARNING,
             )
+
+    def _connect_early(self) -> None:
+        """Connect ahead of `start()`, at most once per start.
+
+        The election (`master_candidacy`, no rate declared) and the
+        entitlement gate (`open_for_attestation`) connect before `start()`
+        does. A handle they open is kept for every later caller, and so
+        is a failure: raised again to a later early caller without a
+        scan, and by `start()` as its own error. Before the failure was
+        kept, each caller ran its own discovery -- with an absent
+        amplifier in a fresh process 6 scans with a rate declared and 9
+        without, against 3 before either early connect existed.
+
+        Kept for one start only. `attach_timeline`, which the pipeline
+        calls as each start begins, `start()` and `stop()` let it go, so
+        a device switched on before the next start is looked for.
+
+        Raises:
+            Exception: This start's connect failure, new or remembered.
+        """
+        if self._connect_failure is not None:
+            raise self._connect_failure
+        try:
+            _load()
+            self._connect()
+        except Exception as error:
+            self._connect_failure = error
+            raise
 
     def _discover(self) -> str:
         """Scan for a BCI Core-8 and return the device name to open.
@@ -530,25 +823,38 @@ class _BCICoreCore(AmplifierSource):
             ConnectionError: If no suitable device is discovered.
         """
         seen: List[str] = []
+        failure: Optional[Exception] = None
+        started = time.monotonic()
         for attempt in range(self.CONNECT_ATTEMPTS):
             try:
                 if attempt == 0:
                     # Fast path: reuse the process-wide cache if a previous
                     # scan already found the device.
-                    devices = list(ble.Amplifier.get_connected_devices())
+                    devices = list(
+                        ble.Amplifier.get_connected_devices(
+                            scan_timeout=self.SCANNING_TIMEOUT_S
+                        )
+                    )
                 else:
                     # gtec-ble caches empty results too, so one unlucky
                     # scan would otherwise make every later attempt fail
                     # without ever touching the radio again.
                     ble.Amplifier.clear_device_cache()
                     devices = list(
-                        ble.Amplifier.get_connected_devices(rescan=True)
+                        ble.Amplifier.get_connected_devices(
+                            rescan=True, scan_timeout=self.SCANNING_TIMEOUT_S
+                        )
                     )
             except Exception as exc:
                 self.log(
                     f"BLE scan failed: {exc}",
                     type=Constants.LogTypes.WARNING,
                 )
+                # Kept, not just logged. Reported as an empty list this
+                # was indistinguishable from a device that is switched
+                # off, and the message below then blamed the hardware for
+                # what is usually a host-side or registration fault.
+                failure = exc
                 devices = []
             seen = devices
 
@@ -558,9 +864,13 @@ class _BCICoreCore(AmplifierSource):
             else:
                 # The scan returns as soon as any peripheral answers, so
                 # the list can contain unrelated BLE devices. Prefer names
-                # that look like a g.tec amplifier.
+                # that look like a g.tec amplifier. A Unicorn is a g.tec
+                # amplifier of another family, so it is left out of both.
                 gtec = [d for d in devices if d.startswith(GTEC_NAME_PREFIXES)]
-                candidates = gtec or devices
+                others = [
+                    d for d in devices if not d.startswith(UNICORN_NAME_PREFIX)
+                ]
+                candidates = gtec or others
                 if candidates:
                     if len(candidates) > 1:
                         self.log(
@@ -576,9 +886,81 @@ class _BCICoreCore(AmplifierSource):
 
         target = self._target_sn or "BCI Core-8"
         raise ConnectionError(
-            f"Could not discover {target}. Devices seen: "
-            f"{seen if seen else 'none'}. Check that the amplifier is "
-            f"powered on, charged and not connected elsewhere."
+            self._discovery_failure(target, seen, failure, started)
+        )
+
+    def _discovery_failure(
+        self,
+        target: str,
+        seen: List[str],
+        failure: Optional[Exception],
+        started: float,
+    ) -> str:
+        """Say which of three things went wrong, rather than guessing.
+
+        The old message named one cause -- "check that the amplifier is
+        powered on, charged and not connected elsewhere" -- for three
+        situations it could not tell apart, and it was the wrong one in
+        two of them. Measured 2026-09-22, the scan itself distinguishes
+        them and the information was being thrown away.
+
+        Args:
+            target: What was being looked for.
+            seen: Devices the last scan returned.
+            failure: The exception the last scan raised, if it raised.
+            started: When discovery began, for reporting how long it tried.
+
+        Returns:
+            The message to raise.
+        """
+        elapsed = time.monotonic() - started
+        tried = (
+            f"{self.CONNECT_ATTEMPTS} scans over {elapsed:.0f} s"
+            if self.CONNECT_ATTEMPTS > 1
+            else f"a scan over {elapsed:.0f} s"
+        )
+
+        # 1. The scan could not run. Nothing about the amplifier is known,
+        #    and the usual cause is that this process never registered its
+        #    usage key -- a g.Pype fault that reads exactly like a flat
+        #    battery unless it is named.
+        if failure is not None:
+            return (
+                f"Could not discover {target}: the Bluetooth scan failed "
+                f"after {tried} ({type(failure).__name__}: {failure})."
+                f"{_registration_fault()}"
+            )
+
+        # 2. The radio worked and heard peripherals, so the host is fine
+        #    and the amplifier is the thing that is not there. Which
+        #    amplifier matters: naming "no g.tec amplifier" while listing
+        #    one is the sort of sentence this whole message exists to stop.
+        if seen:
+            amplifiers = [d for d in seen if d.startswith(GTEC_NAME_PREFIXES)]
+            if amplifiers:
+                return (
+                    f"Could not discover {target}: {tried} heard "
+                    f"{amplifiers}, but not {target}. The Bluetooth "
+                    f"adapter and the amplifiers it can see are working -- "
+                    f"check the serial, or leave it unset to take whichever "
+                    f"amplifier answers."
+                )
+            return (
+                f"Could not discover {target}: {tried} heard "
+                f"{seen}, but no g.tec amplifier among them. The Bluetooth "
+                f"adapter is working -- check that the amplifier is "
+                f"powered on, in range, and not already connected "
+                f"elsewhere."
+            )
+
+        # 3. The radio heard nothing at all. Still the amplifier's most
+        #    likely fault, but an adapter with no antenna looks the same,
+        #    so it is offered rather than asserted.
+        return (
+            f"Could not discover {target}: {tried} heard no Bluetooth "
+            f"peripheral at all. Most likely the amplifier is off, out of "
+            f"range or flat; if other Bluetooth devices are also missing, "
+            f"the adapter is the thing to check."
         )
 
     def _connect(self) -> None:
@@ -594,23 +976,28 @@ class _BCICoreCore(AmplifierSource):
 
         serial = self._discover()
         last_error: Optional[Exception] = None
+        slowest = 0.0
+        # False once a retry's scan missed the device: the constructor
+        # then refuses without an open, which says nothing of the adapter.
+        reached = True
 
         for attempt in range(self.CONNECT_ATTEMPTS):
+            began = time.monotonic()
             try:
                 device = ble.Amplifier(serial=serial)
             except Exception as exc:
+                slowest = max(slowest, time.monotonic() - began)
                 last_error = exc
                 if attempt + 1 < self.CONNECT_ATTEMPTS:
-                    # The name may have come from a stale cache entry;
-                    # force the next discovery to hit the radio.
-                    try:
-                        ble.Amplifier.clear_device_cache()
-                    except Exception:
-                        pass
                     time.sleep(self.CONNECT_RETRY_DELAY_S)
+                    if not self._rescan(serial):
+                        reached = False
                 continue
 
             try:
+                # Before the channels are resolved, because the mode is
+                # what decides how many there are.
+                self._apply_channel_mode(device)
                 self._resolve_channels(device)
                 self._register_link_state(device)
                 device.set_data_callback(self._data_callback)
@@ -622,12 +1009,74 @@ class _BCICoreCore(AmplifierSource):
                 raise
 
             self._device = device
+            # The presence probe must not open a second handle on a device
+            # this source streams from (D-ENT-98).
+            self._held_serial = str(serial)
+            device_probe.hold(self._held_serial)
             _ble_acquire()
             return
 
         raise ConnectionError(
-            f"Could not open BCI Core-8 '{serial}': {last_error}"
+            self._open_failure(
+                serial, last_error, slowest if reached else None
+            )
         )
+
+    @classmethod
+    def _rescan(cls, serial: str) -> bool:
+        """Scan again before a retried open.
+
+        The name may have come from a stale cache entry. Scanned here, not
+        left to the constructor, which rescans an empty cache itself --
+        for up to SCANNING_TIMEOUT_S, inside the open being timed.
+
+        Args:
+            serial: Device about to be opened.
+
+        Returns:
+            Whether the scan heard it.
+        """
+        try:
+            ble.Amplifier.clear_device_cache()
+            return serial in ble.Amplifier.get_connected_devices(
+                rescan=True, scan_timeout=cls.SCANNING_TIMEOUT_S
+            )
+        except Exception:
+            # The constructor meets the same fault and reports it.
+            return False
+
+    def _open_failure(
+        self,
+        serial: str,
+        error: Optional[Exception],
+        slowest: Optional[float],
+    ) -> str:
+        """Say whether a failed open ever reached the amplifier.
+
+        Args:
+            serial: Device that was being opened.
+            error: The exception the last attempt raised.
+            slowest: Longest any attempt took to fail, in seconds, or
+                None if an attempt never reached the driver's open.
+
+        Returns:
+            The message to raise.
+        """
+        message = (
+            f"Could not open BCI Core-8 '{serial}' "
+            f"({type(error).__name__}: {error})."
+        )
+        registration = _registration_fault()
+        if registration:
+            return message + registration
+        if slowest is not None and slowest < self.INSTANT_FAILURE_S:
+            return (
+                f"{message} All {self.CONNECT_ATTEMPTS} opens failed within "
+                f"{slowest:.3f} s, too fast to have paged the amplifier: "
+                f"the host's Bluetooth adapter is probably unusable. "
+                f"Power-cycle it, or reboot, before trusting a later scan."
+            )
+        return message
 
     def _register_link_state(self, device) -> None:
         """Use the driver's link-state notification as the reconnect signal.
@@ -769,16 +1218,26 @@ class _BCICoreCore(AmplifierSource):
             now: Current stamp, from the clock arrivals are stamped with.
         """
         try:
+            self._service_status(now)
             since = self._stream_since
             if since is None:
                 return
             last = self._last_arrival
             reference = since if last is None else max(since, last)
             silent = now - reference
+            # A run that has not delivered yet is starting, not stalled,
+            # unless the driver says the link is down.
+            starting = last is None and self._link_up is not False
+            limit = (
+                self.FIRST_SAMPLE_TIMEOUT_S
+                if starting
+                else self.STALL_TIMEOUT_S
+            )
 
-            if silent < self.STALL_TIMEOUT_S:
+            if silent < limit:
                 if self._stalled:
                     self._stalled = False
+                    self._stall_error_logged = False
                     self.log("Amplifier data resumed.")
                 return
 
@@ -787,7 +1246,28 @@ class _BCICoreCore(AmplifierSource):
             self._last_stall_log = now
             self._stalled = True
 
-            if self._link_up is False:
+            down = self._link_up is False
+            if silent >= self.STALL_ERROR_S:
+                # Once, per stall. The condition is sticky -- only
+                # reset_run_state clears it -- which is the intent: a
+                # session that lost its amplifier for this long did not
+                # recover just because samples appear again later.
+                if not self._stall_error_logged:
+                    self._stall_error_logged = True
+                    link = (
+                        "the driver reports the BLE link down"
+                        if down
+                        else "the BLE link reports connected"
+                    )
+                    self.log(
+                        f"No data for {silent:.1f} s while {link}. The "
+                        f"amplifier has stopped delivering and is not "
+                        f"coming back on its own: check that it is "
+                        f"powered and in range, then restart the "
+                        f"pipeline.",
+                        type=Constants.LogTypes.ERROR,
+                    )
+            elif down:
                 self.log(
                     f"No data for {silent:.1f} s: the driver reports the "
                     f"BLE link is down. It reconnects by itself, and the "
@@ -808,6 +1288,36 @@ class _BCICoreCore(AmplifierSource):
             # watchdog: the acquisition would stop with it.
             pass
 
+    def _service_status(self, now: float) -> None:
+        """Report a link condition the amplifier's packets turned on or off.
+
+        Only a gCore on event-packet firmware reports any, and only
+        through gtec-ble 2.9.3 and later; everywhere else
+        ``stream_status`` is absent or None and this says nothing. Runs on
+        the worker, under :meth:`_service_link`'s guard.
+
+        Compared against what was reported rather than against the last
+        packet, so a condition that stays on after a suppressed flap is
+        still warned about once its interval has passed.
+
+        Args:
+            now: Current stamp, as :meth:`_service_link` was given it.
+        """
+        status = getattr(self._device, "stream_status", None)
+        if status is None:
+            return
+        for field, warning, cleared in self.LINK_CONDITIONS:
+            on = bool(getattr(status, field, False))
+            if on and field not in self._status_reported:
+                last = self._status_warned_at.get(field)
+                if last is None or now - last >= self.LOSS_LOG_INTERVAL_S:
+                    self._status_warned_at[field] = now
+                    self._status_reported.add(field)
+                    self.log(warning, type=Constants.LogTypes.WARNING)
+            elif not on and field in self._status_reported:
+                self._status_reported.discard(field)
+                self.log(cleared)
+
     def master_candidacy(self):
         """Claim the master timeline, at the rate the device actually runs.
 
@@ -818,19 +1328,31 @@ class _BCICoreCore(AmplifierSource):
         is to have asked it -- which is why this connects first when no
         rate was given.
 
-        Connecting here moves the same work a few lines earlier inside the
-        same ``start()`` call: ``_connect()`` is idempotent and ``start()``
-        reuses the handle it opens. A failure is swallowed rather than
-        raised, because ``start()`` reports it with far more context a
-        moment later; declining candidacy here would only mean a synthetic
-        source took the timeline before that happened.
+        Connecting here moves the connect earlier inside the same
+        ``start()`` call; it does not add one. A handle it opens is the
+        one ``start()`` uses, and a failure is remembered for the rest of
+        that start (`_connect_early`), so neither the entitlement gate nor
+        ``start()`` repeats the discovery. The failure is swallowed here
+        and raised by ``start()`` a moment later; declining candidacy
+        would only let a synthetic source take the timeline first.
+
+        Asked by the election, and under ``save_as`` by the raw tap when
+        it writes its metadata, by which time the handle is open. The tap
+        used to ask at pipeline construction, which connected from inside
+        ``connect()`` -- with the device absent, a discovery no start
+        could remember (``_RawTap.attach_candidacy``).
+
+        The driver is loaded here for the reason `open_for_attestation`
+        gives: the election runs before `start()`, and without it the
+        connect failed in a fresh process, so the timeline was elected at
+        the default rate while the device ran at its own.
 
         Returns:
             ``(rate, DEVICE)``, or None if no usable rate is known.
         """
         if not self._rate_declared and self._device is None:
             try:
-                self._connect()
+                self._connect_early()
             except Exception:
                 pass
         rate = self._sampling_rate
@@ -841,10 +1363,17 @@ class _BCICoreCore(AmplifierSource):
     def attach_timeline(self, timeline) -> None:
         """Bind this source to the pipeline's master timeline.
 
+        The pipeline calls this as each ``start()`` begins, before the
+        election, so it also lets go of a connect failure remembered by
+        the previous start (`_connect_early`). A start refused before this
+        node's own ``start()`` ran would otherwise hand its failure on,
+        and a device switched on in between would not be looked for.
+
         Args:
             timeline: Timeline manager owned by the pipeline.
         """
         self._timeline = timeline
+        self._connect_failure = None
 
     @staticmethod
     def _channel_of(types: list, role_name: str) -> Optional[int]:
@@ -911,8 +1440,11 @@ class _BCICoreCore(AmplifierSource):
         #: down" from "no data while the radio says it is fine", which
         #: are different faults with different remedies.
         self._link_up: Optional[bool] = None
-        #: Stamp taken when acquisition began, so silence can be measured
-        #: before the first sample has ever arrived.
+        #: Whether this stall has already been escalated, so a device
+        #: that stays gone reports once rather than every interval.
+        self._stall_error_logged: bool = False
+        # Stamp taken when acquisition began, so silence can be measured
+        # before the first sample has ever arrived.
         self._stream_since: Optional[float] = None
         #: True while a stall is being reported, so its end can be too.
         self._stalled: bool = False
@@ -920,6 +1452,88 @@ class _BCICoreCore(AmplifierSource):
         self._last_stall_log: float = 0.0
         #: Host times of recently ended dropouts, for the repeat test.
         self._burst_times: deque = deque()
+        #: Link conditions warned about and not yet cleared, and when
+        #: each was last warned about; see LINK_CONDITIONS.
+        self._status_reported: set = set()
+        self._status_warned_at: dict = {}
+
+    def _apply_channel_mode(self, device) -> None:
+        """Put a gCore device into the mode the declared rate asks for.
+
+        A gCore amplifier is runtime-configurable, and its rate and
+        channel count are one setting: the rate is derived from the
+        channel-mode straps. So a declared ``sampling_rate`` is not only
+        an assertion to check, it is a configuration to apply -- and
+        applying it is the only way an author can choose a rate at all.
+
+        Does nothing unless all of these hold, because each one means the
+        author has not asked for a mode change:
+
+        * a rate was declared (a defaulted one follows the device);
+        * the device is already on another rate;
+        * the declared rate is a real mode (see :data:`GCORE_MODES`);
+        * the device speaks gCore, i.e. has a mode to set.
+
+        Where it does nothing, the existing check in
+        :meth:`_resolve_channels` still runs and still refuses a genuine
+        disagreement -- a declared rate no gCore mode provides, or a
+        legacy device whose rate is fixed in hardware. Switching is
+        strictly the case that used to be an error and now has an answer.
+
+        A failure to switch is raised, not warned. The alternative is a
+        recording that is correctly framed and wrongly timed: every
+        filter detuned by the ratio, every marker in the wrong place, and
+        a file stating a duration it does not have.
+
+        Args:
+            device: Opened amplifier instance.
+
+        Raises:
+            ConnectionError: If the device refused the mode, or settled
+                into one other than the one asked for.
+        """
+        if not self._rate_declared:
+            return
+        wanted = GCORE_MODES.get(self._sampling_rate)
+        if wanted is None:
+            return
+        # Already there: the common case on a second run, and the switch
+        # costs a 600 ms reset pulse, so it is worth not doing.
+        if int(getattr(device, "sampling_rate", 0) or 0) == (
+            self._sampling_rate
+        ):
+            return
+        switch = getattr(device, "set_channel_mode", None)
+        if switch is None:
+            # An older driver. Say what is missing rather than letting
+            # the rate check below report only the symptom.
+            self.log(
+                f"This node was told {self._sampling_rate} Hz, which "
+                f"needs the amplifier in its {wanted}-channel mode, but "
+                f"the installed gtec-ble cannot switch modes. Upgrade "
+                f"gtec-ble, or configure the device separately.",
+                type=Constants.LogTypes.WARNING,
+            )
+            return
+        if not getattr(device, "is_gcore", False):
+            # A legacy BCI Core-8: fixed geometry, nothing to set. The
+            # rate check reports the disagreement properly.
+            return
+
+        was = int(getattr(device, "sampling_rate", 0) or 0)
+        try:
+            layout = switch(wanted)
+        except Exception as error:
+            raise ConnectionError(
+                f"Could not put the amplifier into its {wanted}-channel "
+                f"mode for {self._sampling_rate} Hz: {error}"
+            ) from error
+
+        self.log(
+            f"Amplifier switched from {was} Hz to "
+            f"{layout.sampling_rate} Hz ({layout.channel_count} "
+            f"channels), as asked."
+        )
 
     def _resolve_channels(self, device) -> None:
         """Determine which columns of a device sample carry EEG data.
@@ -999,13 +1613,37 @@ class _BCICoreCore(AmplifierSource):
                 # not have. Warning and continuing produced exactly that,
                 # and a warning in a log is not a defence against a
                 # plausible-looking result.
+                # A rate this device has no mode for is the usual cause
+                # now that a real one is applied rather than checked, so
+                # the message names the modes that exist. 2000 Hz is the
+                # one people reach for and the one that does not exist;
+                # 512, from firmware that reported it, is the other.
+                modes = ", ".join(
+                    f"{r} Hz ({c} ch)" for r, c in sorted(GCORE_MODES.items())
+                )
+                hint = (
+                    f" This amplifier offers {modes}."
+                    if getattr(device, "is_gcore", False)
+                    else ""
+                )
                 raise ConnectionError(
                     f"Amplifier reports {rate} Hz but this node was told "
                     f"{self._sampling_rate} Hz, so timing would be wrong "
                     f"by {rate / self._sampling_rate:.3f}x with nothing "
-                    f"to show for it. Pass sampling_rate={rate}, or omit "
-                    f"it and the device is followed."
+                    f"to show for it.{hint} Pass sampling_rate={rate}, or "
+                    f"omit it and the device is followed."
                 )
+
+    def channel_units(self) -> Optional[list]:
+        """One 'uV' per EEG channel (gtec-ble's ``to_microvolts``, and
+        ``Amplifier(microvolts=True)`` is this node's default), 'count'
+        for the device sample index, and None for the validity flag and
+        the arrival stamp -- the order :attr:`TIMELINE_LABELS` fixes."""
+        return (
+            ["uV"] * self._num_eeg_channels
+            + ["count"]
+            + [None] * (self.NUM_TIMELINE_CHANNELS - 1)
+        )
 
     def setup(
         self, data: dict[str, np.ndarray], port_context_in: dict[str, dict]
@@ -1068,6 +1706,7 @@ class _BCICoreCore(AmplifierSource):
         labels = labels + list(self.TIMELINE_LABELS)
 
         eeg.update(channels.describe(roles, labels, system))
+        apply_channel_units(eeg, self.channel_units())
 
         # The master-timeline claim itself is made by AmplifierSource,
         # which every g.tec amplifier shares, so all of them outrank a
@@ -1090,6 +1729,8 @@ class _BCICoreCore(AmplifierSource):
         # Detach the device first so the data callback stops feeding the
         # buffers while the pipeline is being torn down.
         device, self._device = self._device, None
+        # A run is over; the next one looks for the device again.
+        self._connect_failure = None
 
         # Stop amplifier data acquisition
         if device is not None:
@@ -1127,6 +1768,10 @@ class _BCICoreCore(AmplifierSource):
                 device.close()
             except Exception:
                 pass
+        held = getattr(self, "_held_serial", None)
+        if held is not None:
+            device_probe.release(held)
+            self._held_serial = None
 
         # Under the lock: an in-flight notification is reading these, and
         # clearing them from another thread would have it index with None.
@@ -1317,7 +1962,7 @@ class _BCICoreCore(AmplifierSource):
         ):
             self._burst_times.popleft()
 
-        large = burst > self.LOSS_WARN_SAMPLES
+        large = burst > self.LOSS_WARN_S * self._sampling_rate
         repeated = len(self._burst_times) >= self.LOSS_WARN_BURSTS
         warn = large or repeated
 
@@ -1547,140 +2192,3 @@ class _BCICoreCore(AmplifierSource):
                 continue
             self.cycle()
             self._service_link(channels.stamp_clock())
-
-
-class BCICore(ioc.OChain):
-    """BCI Core amplifier chain for wireless EEG acquisition.
-
-    This is an OChain that contains:
-    - _BCICoreCore: the acquisition node
-    - Link: bridge for distributed operation (absent in standalone)
-    - Oscar: optional artifact removal
-    - Sync: places the stream on the pipeline's master timeline and
-      strips the in-band timeline channels again
-
-    The chain structure enables distributed edge/server operation while
-    keeping node inheritance clean (no chain mixing in node path).
-
-    Interface to the g.tec BCI Core family of wireless EEG amplifiers
-    over BLE, at 250 Hz.
-
-    The node is named for the family, not for one member of it. It was
-    ``BCICore8``, which read as the name of the 8-channel product --
-    but a BCI Core-4 speaks the same protocol, reports itself the same
-    way and is driven by exactly this code, so the 8 named a device
-    rather than a node and made the node look inapplicable to half the
-    devices it already supported. ``BCICore8`` still resolves, with a
-    DeprecationWarning; see ``bci_core8.py``.
-    """
-
-    # Re-export constants from core
-    SCANNING_TIMEOUT_S = _BCICoreCore.SCANNING_TIMEOUT_S
-    SAMPLING_RATE = _BCICoreCore.SAMPLING_RATE
-    MAX_NUM_CHANNELS = _BCICoreCore.MAX_NUM_CHANNELS
-    #: Re-exported so an author, and a catalog, can read the electrode
-    #: names an unlabelled eight-channel recording will carry without
-    #: having to reach into the private core to find them.
-    DEFAULT_MONTAGE_8 = _BCICoreCore.DEFAULT_MONTAGE_8
-
-    def __init__(
-        self,
-        serial: Optional[str] = None,
-        channel_count: Optional[int] = None,
-        frame_size: Optional[int] = None,
-        montage: Optional[Montage] = None,
-        sampling_rate: Optional[int] = None,
-        enable_oscar: bool = False,
-        **kwargs,
-    ):
-        """Initialize BCI Core-8 amplifier chain.
-
-        Args:
-            serial: Serial number of target device. Uses first discovered
-                if None.
-            channel_count: Number of EEG channels (1-8). Defaults to 8,
-                or to the size of the montage if one is given.
-            frame_size: Samples per processing frame.
-            montage: Electrode labels for the EEG channels.
-            sampling_rate: Rate the device runs at, in Hz. Leave it
-                unset and the device is asked; give a value only to
-                assert one. See the acquisition node.
-            enable_oscar: Enable OSCAR artifact removal processing.
-            **kwargs: Additional arguments.
-        """
-        # Store parameters for create_internal_nodes
-        self._link_stream_id = stream_id_for(kwargs)
-        self._core_params = {
-            "serial": serial,
-            "channel_count": channel_count,
-            "frame_size": frame_size,
-            "montage": montage,
-            "sampling_rate": sampling_rate,
-        }
-        self._core_params.update(strip_chain_keys(kwargs))
-        self._enable_oscar = enable_oscar
-
-        # Initialize OChain (calls create_internal_nodes)
-        kwargs.setdefault(
-            self.Configuration.Keys.OUTPUT_PORTS,
-            [OPort.Configuration()],
-        )
-        # A Montage is an object, and a configuration has to be
-        # JSON-representable or the pipeline cannot be serialized at all.
-        # The labels are the representable form, and the core already
-        # reads them back under this key and rebuilds the Montage -- that
-        # is what MONTAGE_LABELS exists for. Forwarding the object put a
-        # Montage in the chain's own configuration and broke serialize()
-        # outright for any amplifier configured with one.
-        labels_key = _BCICoreCore.Configuration.OptionalKeys.MONTAGE_LABELS
-        if montage is not None:
-            kwargs.setdefault(labels_key, list(montage.labels))
-
-        ioc.OChain.__init__(
-            self,
-            serial=serial,
-            channel_count=channel_count,
-            frame_size=frame_size,
-            sampling_rate=sampling_rate,
-            enable_oscar=enable_oscar,
-            stream_id=self._link_stream_id,
-            **kwargs,
-        )
-
-    def create_internal_nodes(self) -> List[ioc.Node]:
-        """Create the internal node chain.
-
-        Returns:
-            The head of the list is whatever stands in for this chain's
-            core: the core itself, the core followed by a raw tap
-            under ``save_as``, a replay core under ``load_from``,
-            or nothing at all under SERVER residency. Then a Link
-            where the pipeline is distributed, OSCAR where it is
-            enabled, and Sync last.
-        """
-        from ...common.launch_config import LaunchConfig
-
-        nodes = []
-        residency = LaunchConfig.get().residency
-        # Recorded, replaced, or simply built, as the launch
-        # configuration says. Contributes nothing under server
-        # residency: the core lives on the edge, and so does
-        # anything recording or replaying it.
-        nodes.extend(
-            raw.source_stage(self, lambda: _BCICoreCore(**self._core_params))
-        )
-        if residency != Constants.Residency.STANDALONE:
-            nodes.append(
-                Link(
-                    sender=Constants.Residency.EDGE,
-                    receiver=Constants.Residency.SERVER,
-                    stream_id=self._link_stream_id,
-                )
-            )
-        if self._enable_oscar:
-            nodes.append(Oscar())
-        # Sync is last, after OSCAR: OSCAR does not need to be called
-        # uniformly, and when enabled its delay widens the window for
-        # placing late observations from other sources.
-        nodes.append(Sync())
-        return nodes

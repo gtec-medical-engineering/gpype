@@ -1,81 +1,67 @@
 from __future__ import annotations
 
-import os
-import sys
 import threading
 import time
-from typing import List, Optional
+from typing import Optional
 
-import ioiocore as ioc
 import numpy as np
 
-from ...common._private import channels
+from ...common._private import channels, device_probe
 from ...common._private.naming import node_label
 from ...common.constants import Constants
-from ..core._private.chain_params import stream_id_for, strip_chain_keys
-from ..core._private.link import Link
-from ..core._private.oscar import Oscar
-from ..core._private.sync import Sync
 from ..core.o_port import OPort
-from .base import raw
-from .base.amplifier_source import AmplifierSource
+from .base.amplifier_source import AmplifierSource, apply_channel_units
 
 #: Default output port identifier
 PORT_OUT = Constants.Defaults.PORT_OUT
 #: Default input port identifier
 PORT_IN = Constants.Defaults.PORT_IN
 
+#: The gtec_unicorn module, or None until something needs it. Not
+#: imported at module scope: a document naming HybridBlack is
+#: deserialised in every residency, and importing gtec_unicorn loads its
+#: native library, which a server has no use for and an unsupported
+#: platform refuses outright.
+unicorn = None
 
-def _get_unicorn_lib_path() -> str:
-    """Get the path to the Unicorn Python library.
 
-    The UnicornPy module requires the Unicorn.dll to be accessible.
-    This function returns the path to the Lib folder in the user's
-    Documents folder where the Unicorn Suite is typically installed.
+def _load() -> None:
+    """Import gtec_unicorn, once, on first use.
 
-    Returns:
-        Path to the Unicorn Python Lib directory.
+    Only fills the name if it is still None, so a test that has replaced
+    ``unicorn`` with a stand-in keeps it.
+
+    Raises:
+        RuntimeError: If gtec_unicorn is not installed, or cannot load
+            its native library on this platform.
     """
-    # Get user documents folder on Windows
-    documents_path = os.path.join(os.environ["USERPROFILE"], "Documents")
-    unicorn_lib_path = os.path.join(
-        documents_path,
-        "gtec",
-        "Unicorn Suite",
-        "Hybrid Black",
-        "Unicorn Python",
-        "Lib",
-    )
-    return unicorn_lib_path
+    global unicorn
+    if unicorn is not None:
+        return
+    try:
+        import gtec_unicorn
+    except (ImportError, OSError) as error:
+        raise RuntimeError(
+            f"HybridBlack needs gtec_unicorn, which could not be loaded "
+            f"({type(error).__name__}: {error}). It is in the 'devices' "
+            f'extra: pip install "gpype[devices]". Its wheels cover '
+            f"Windows x64, Linux x86_64 and macOS arm64."
+        ) from error
+    unicorn = gtec_unicorn
 
 
-def _ensure_unicorn_path():
-    """Ensure the Unicorn Python library path is in sys.path and PATH.
-
-    Adds the Unicorn Lib directory to sys.path for module import and
-    to the PATH environment variable for DLL loading.
-    """
-    lib_path = _get_unicorn_lib_path()
-
-    # Add to sys.path if not already present
-    if lib_path not in sys.path:
-        sys.path.insert(0, lib_path)
-
-    # Add to PATH for DLL loading
-    current_path = os.environ.get("PATH", "")
-    if lib_path not in current_path:
-        os.environ["PATH"] = lib_path + os.pathsep + current_path
-
-
-class _HybridBlackCore(AmplifierSource):
-    """Internal node implementing Unicorn Hybrid Black amplifier acquisition.
-
-    This is the actual Hybrid Black node (pure ONode inheritance).
-    It is wrapped by the HybridBlack chain for distributed operation.
+class HybridBlack(AmplifierSource):
+    """Unicorn Hybrid Black amplifier for wireless EEG acquisition.
 
     Interface to g.tec Unicorn Hybrid Black wireless EEG amplifier using
     Bluetooth. Supports 8-channel EEG acquisition at 250 Hz, plus optional
     accelerometer, gyroscope, battery, counter, and validation channels.
+
+    On macOS the main thread must run an event loop while the node
+    acquires, as ``MainApp.run()`` does: the driver receives every
+    Bluetooth callback there, and the node reads on its own thread. A
+    script whose main thread only sleeps gets read errors naming that
+    cause.
     """
 
     #: The optional data streams, all off unless asked for.
@@ -101,14 +87,20 @@ class _HybridBlackCore(AmplifierSource):
     #: Total number of acquired channels (EEG + Accel + Gyro + Battery +
     #: Counter + Validation)
     TOTAL_ACQUIRED_CHANNELS = 17
-    #: Measured Bluetooth latency of this device, in milliseconds. Kept
-    #: as a recorded property of the hardware; nothing applies it. Under
-    #: timestamp-based synchronisation a fixed device delay is a constant
-    #: offset of the stream, which belongs in the timeline relation
-    #: rather than in a delay line here.
+    # Measured Bluetooth latency of this device, in milliseconds. Kept
+    # as a recorded property of the hardware; nothing applies it. Under
+    # timestamp-based synchronisation a fixed device delay is a constant
+    # offset of the stream, which belongs in the timeline relation
+    # rather than in a delay line here.
     DEVICE_DELAY_MS = 40
-    #: Maximum allowed consecutive buffer underruns before warning
-    NUM_UNDERRUNS_ALLOWED = 5
+    # How long a whole frame may be waiting in the driver after every
+    # read before that is reported as falling behind, in seconds. A
+    # duration, not a count of reads: Bluetooth classic delivers in
+    # bursts of up to 8 samples (measured 2026-09-24), so a read that
+    # leaves a frame waiting is what an on-time reader of this device
+    # looks like at a small frame size. A backlog that lasts a whole
+    # second is not a burst.
+    BEHIND_BACKLOG_S = 1.0
     #: Consecutive failed reads tolerated before acquisition is given
     #: up. One failure is a Bluetooth hiccup the next read recovers
     #: from, so failing on the first would end a run over nothing;
@@ -116,17 +108,6 @@ class _HybridBlackCore(AmplifierSource):
     #: carrying on then means a pipeline that emits nothing while
     #: reporting Healthy.
     NUM_ACQUISITION_ERRORS_ALLOWED = 3
-    #: Poll interval as a fraction of one frame period, when on time.
-    #: Slightly under 1.0 so the loop stays just ahead of the device.
-    #: These were absolute seconds (0.0039 and 0.003) tuned to a single
-    #: sample at 250 Hz, which silently became the wrong cadence for any
-    #: other frame size; as fractions they hold at every frame size and
-    #: reproduce the original numbers exactly at frame_size 1.
-    WAIT_ON_TIME_RATIO = 0.975
-    #: Poll interval as a fraction of one frame period, when behind.
-    WAIT_BEHIND_RATIO = 0.75
-    #: Threshold for determining if we're behind (GetData blocking time)
-    BEHIND_THRESHOLD_S = 0.001
 
     class Configuration(AmplifierSource.Configuration):
         """Configuration class for Unicorn Hybrid Black specific parameters."""
@@ -145,6 +126,14 @@ class _HybridBlackCore(AmplifierSource):
             INCLUDE_AUX = "include_aux"
             TEST_SIGNAL = "test_signal"
 
+        class OptionalKeys(AmplifierSource.Configuration.OptionalKeys):
+            """Optional configuration keys."""
+
+            #: Serial number of the target device. Recorded because it
+            #: selects which amplifier is opened; absent means the first
+            #: one discovered.
+            SERIAL = "serial"
+
     def __init__(
         self,
         serial: Optional[str] = None,
@@ -154,9 +143,15 @@ class _HybridBlackCore(AmplifierSource):
         include_gyro: Optional[bool] = None,
         include_aux: Optional[bool] = None,
         test_signal: Optional[bool] = None,
+        enable_oscar: bool = False,
+        edge_id: Optional[str] = None,
         **kwargs,
     ):
         """Initialize Unicorn Hybrid Black amplifier source.
+
+        Nothing reaches the device or its driver here: the device is
+        opened when the pipeline starts, so the node constructs in every
+        residency and under ``load_from``.
 
         Args:
             serial: Serial number of target device. Uses first discovered
@@ -168,20 +163,12 @@ class _HybridBlackCore(AmplifierSource):
             include_aux: Include auxiliary channels (battery, counter,
                 validation).
             test_signal: Enable test signal mode instead of live data.
+            enable_oscar: Run OSCAR artifact removal on this stream.
+            edge_id: Which edge runs this node, matched against the
+                edge process's --edge-id. None, the default, is every
+                edge; ignored when the pipeline is not distributed.
             **kwargs: Additional arguments for parent AmplifierSource.
-
-        Raises:
-            NotImplementedError: If not running on Windows.
         """
-        # Platform check - Hybrid Black is only supported on Windows
-        if sys.platform != "win32":
-            raise NotImplementedError(
-                "HybridBlack amplifier is only supported on Windows."
-            )
-
-        # Ensure UnicornPy is importable
-        _ensure_unicorn_path()
-
         # Validate and set channel count (1-8 EEG channels supported)
         keys = self.Configuration.Keys
         # A restored configuration binds to the named parameters, in the
@@ -219,6 +206,10 @@ class _HybridBlackCore(AmplifierSource):
 
         # Configure output ports
         kwargs.setdefault(keys.OUTPUT_PORTS, [OPort.Configuration()])
+        # Recorded, None included, as the chain this replaced recorded it:
+        # a document that lost it would open whichever amplifier answered
+        # first.
+        kwargs[self.Configuration.OptionalKeys.SERIAL] = serial or None
 
         # Initialize parent amplifier source with Hybrid Black specifications
         # Properties of the device, so a stored copy carries no
@@ -240,6 +231,7 @@ class _HybridBlackCore(AmplifierSource):
         # by the next packet. At frame_size 4 that is 75% of the recording.
         # Invisible until now only because frame_size defaulted to 1.
         super().__init__(
+            enable_oscar=enable_oscar,
             channel_count=total_channels,
             eeg_channel_count=channel_count,
             sampling_rate=self.SAMPLING_RATE,
@@ -249,6 +241,7 @@ class _HybridBlackCore(AmplifierSource):
             include_gyro=include_gyro,
             include_aux=include_aux,
             test_signal=test_signal,
+            edge_id=edge_id,
             **kwargs,
         )
 
@@ -263,8 +256,14 @@ class _HybridBlackCore(AmplifierSource):
         self._include_aux = include_aux
         self._test_signal = test_signal
 
-        # Initialize device connection (will be established in start())
+        # The gtec_unicorn.Amplifier, opened before the entitlement gate
+        # (open_for_attestation) or by start(), and closed by stop().
         self._device = None
+        #: Why an open ahead of start() failed, kept until this start()
+        #: has raised it. See _connect_early.
+        self._connect_failure: Optional[Exception] = None
+        #: The serial this process registered as held, for release.
+        self._held_serial: Optional[str] = None
 
         # Initialize threading components
         self._running: bool = False
@@ -279,49 +278,168 @@ class _HybridBlackCore(AmplifierSource):
         #: Consecutive failed reads, cleared by the next good one.
         self._acquisition_error_counter: int = 0
 
+    def attach_timeline(self, timeline) -> None:
+        """Bind to the pipeline's timeline, and forget a previous failure.
+
+        The pipeline calls this as each ``start()`` begins, so an open
+        that failed in the previous start is tried again in this one.
+
+        Args:
+            timeline: Timeline manager owned by the pipeline.
+        """
+        super().attach_timeline(timeline)
+        self._connect_failure = None
+
+    def open_for_attestation(self) -> None:
+        """Open the device before the entitlement gate. See the base class.
+
+        Safe to call twice: the handle opened here is the one ``start()``
+        uses. Never raises. A failure -- the device off, no licence -- is
+        logged once and raised again by ``start()``, without a second
+        open.
+        """
+        if self._device is not None:
+            return
+        try:
+            self._connect_early()
+        except Exception as error:  # noqa: BLE001
+            self.log(
+                f"{node_label(self)}: could not open the Unicorn before "
+                f"the entitlement gate: {error}",
+                type=Constants.LogTypes.WARNING,
+            )
+
+    def _connect_early(self) -> None:
+        """Open ahead of ``start()``, at most once per start.
+
+        Raises:
+            Exception: This start's open failure, new or remembered.
+        """
+        if self._connect_failure is not None:
+            raise self._connect_failure
+        try:
+            self._connect()
+        except Exception as error:
+            self._connect_failure = error
+            raise
+
+    def _connect(self) -> None:
+        """Open and configure the Unicorn.
+
+        A ``gtec_unicorn.LicenseError`` -- no active licence for the
+        product it names -- is raised unchanged: it is not a connection
+        problem, and asking again cannot change the answer (D-NODE-64).
+
+        Raises:
+            RuntimeError: If gtec_unicorn cannot be loaded.
+            ConnectionError: If no Unicorn is available, or the device
+                acquires a width other than the one configured.
+            ValueError: If ``frame_size`` exceeds what one read may ask.
+        """
+        _load()
+        serial = self._target_sn
+        if serial is None:
+            devices = list(unicorn.Amplifier.get_connected_devices() or [])
+            if not devices:
+                raise ConnectionError(
+                    "No Unicorn device available. Please pair with a "
+                    "Unicorn first."
+                )
+            serial = str(devices[0])
+            self.log(f"Using first available device: {serial}")
+
+        # A second open of a serial this process already holds returns
+        # that same session, and whichever closes first ends it for both
+        # (gtec-unicorn-c W-7). Refuse rather than share it; this node's
+        # own hold is the session it already has.
+        if device_probe._is_held(serial) and serial != self._held_serial:
+            raise ConnectionError(
+                f"Unicorn {serial} is already open in this process, by "
+                "another node or pipeline."
+            )
+
+        device = unicorn.Amplifier(serial)
+        try:
+            # The device always sends all 17 channels; this chooses which
+            # ones each scan carries, in configuration order -- EEG,
+            # accelerometer, gyroscope, then battery, counter and
+            # validation -- which is the layout setup() declares.
+            device.configure(
+                eeg_channels=self._eeg_channel_count,
+                accelerometer=bool(self._include_accel),
+                gyroscope=bool(self._include_gyro),
+                battery=bool(self._include_aux),
+                counter=bool(self._include_aux),
+                validation=bool(self._include_aux),
+            )
+            width = int(device.no_of_acquired_channels)
+            if width != self._total_channels:
+                raise ConnectionError(
+                    f"The Unicorn acquires {width} channels where "
+                    f"{self._total_channels} were configured."
+                )
+            limit = int(device.max_scans_per_read)
+            if self._frame_size > limit:
+                raise ValueError(
+                    f"frame_size {self._frame_size} is more than one read "
+                    f"of this Unicorn may ask for ({limit} scans with "
+                    f"{width} channels)."
+                )
+        except Exception:
+            try:
+                device.close()
+            except Exception:
+                pass
+            raise
+
+        self._device = device
+        # Pinned to the unit that answered, so a restart reopens it.
+        self._target_sn = str(device.serial_number)
+        # A second open of this serial in this process would share this
+        # session, and its close would end it (gtec-unicorn-c W-7). The
+        # probe reads this and leaves the serial alone.
+        self._held_serial = self._target_sn
+        device_probe.hold(self._held_serial)
+        self.log(f"Connected to Unicorn Hybrid Black: {self._target_sn}")
+
     def start(self) -> None:
         """Start Unicorn Hybrid Black amplifier and begin data acquisition.
 
-        Establishes Bluetooth connection and starts background thread that
-        acquires data and drives the pipeline via cycle().
+        Opens the device unless the entitlement gate already did, starts
+        acquisition, and starts the thread that reads blocks and drives
+        the pipeline via cycle().
 
         Raises:
-            ConnectionError: If amplifier connection fails.
-            RuntimeError: If background thread creation fails.
+            RuntimeError: If gtec_unicorn cannot be loaded.
+            ConnectionError: If no Unicorn is available.
+            gtec_unicorn.LicenseError: If no licence for the product it
+                names is active on this machine.
+            gtec_unicorn.DeviceError: If the device cannot be opened or
+                started.
         """
-        # Import UnicornPy when actually needed (lazy import)
-        try:
-            import UnicornPy
-        except ImportError as e:
-            raise RuntimeError(
-                f"UnicornPy library not available: {e}. "
-                "Please ensure the Unicorn Suite is installed and the "
-                "library path is correct."
-            ) from e
-
         # Initialize current frame holder
         self._current_frame = None
         self._underrun_counter = 0
         self._acquisition_error_counter = 0
 
-        # Initialize and connect to Unicorn Hybrid Black amplifier
+        # An open the gate already tried and failed is not tried again:
+        # its error is this start's error. Taken, so the next start()
+        # looks afresh.
         if self._device is None:
-            # Get available devices if no serial specified
-            if self._target_sn is None:
-                device_list = UnicornPy.GetAvailableDevices(True)
-                if len(device_list) <= 0 or device_list is None:
-                    raise ConnectionError(
-                        "No Unicorn device available. Please pair with a "
-                        "Unicorn first."
-                    )
-                self._target_sn = device_list[0]
-                print(f"Using first available device: {self._target_sn}")
+            failure, self._connect_failure = self._connect_failure, None
+            if failure is not None:
+                raise failure
+            self._connect()
 
-            # Connect to the device
-            self._device = UnicornPy.Unicorn(self._target_sn)
-            print(f"Connected to Unicorn Hybrid Black: {self._target_sn}")
+        # Bring the base class up before the thread starts cycling, so
+        # the thread never drives a node that is not fully started.
+        super().start()
 
-        # Start single acquisition thread (handles both data and timing)
+        # Started here rather than on the thread, so a device that
+        # refuses to start fails start() instead of a thread nobody
+        # watches.
+        self._device.start(test_signal=bool(self._test_signal))
+
         if not self._running:
             self._running = True
             self._acquisition_thread = threading.Thread(
@@ -329,8 +447,27 @@ class _HybridBlackCore(AmplifierSource):
             )
             self._acquisition_thread.start()
 
-        # Call parent start method
-        super().start()
+    def channel_units(self) -> Optional[list]:
+        """One 'uV' per EEG channel, each enabled block's own unit, and
+        None for the arrival stamp.
+
+        Accelerometer is 'g', gyroscope 'deg/s', and the auxiliary
+        triple is battery '%', then counter and the validation flag --
+        gtec_unicorn's own device configuration reports both of those
+        as '-' (gtec-unicorn-py's ``DEFAULT_CHANNELS``, matching
+        ``Amplifier.get_configuration()``'s per-channel ``unit``), which
+        this passes on rather than inventing g.Pype's own 'count' for a
+        channel the driver itself declines to give a physical unit.
+        """
+        units = ["uV"] * self._eeg_channel_count
+        if self._include_accel:
+            units += ["g"] * self.NUM_ACCEL_CHANNELS
+        if self._include_gyro:
+            units += ["deg/s"] * self.NUM_GYRO_CHANNELS
+        if self._include_aux:
+            units += ["%", "-", "-"]
+        units += [None] * self.NUM_TIMELINE_CHANNELS
+        return units
 
     def setup(
         self, data: dict[str, np.ndarray], port_context_in: dict[str, dict]
@@ -345,9 +482,9 @@ class _HybridBlackCore(AmplifierSource):
         ``config[CHANNEL_COUNT]`` still equals the width the device was
         asked for. Core-8 raises the configuration instead, and survives
         it only because it keeps ``eeg_channel_count`` beside it; here the
-        total is also what ``_acquisition_function`` sizes its receive
-        buffer from, so widening the configuration would ask the device
-        for a channel it does not have.
+        total is also the width the device is configured to and checked
+        against at open, so widening the configuration would ask the
+        device for a channel it does not have.
 
         Args:
             data: Input data arrays (empty for source nodes).
@@ -359,9 +496,9 @@ class _HybridBlackCore(AmplifierSource):
         port_context_out = super().setup(data, port_context_in)
 
         # Describe the channels so a filter does not treat an
-        # accelerometer as EEG. The layout _acquisition_function builds:
-        # EEG first, then accelerometer, then gyroscope, then the
-        # auxiliary triple, each block present only if it was asked for.
+        # accelerometer as EEG. The layout configure() selects: EEG
+        # first, then accelerometer, then gyroscope, then the auxiliary
+        # triple, each block present only if it was asked for.
         #
         # The auxiliary triple is battery, counter and validation. The
         # counter is the device's own sample number and the validation
@@ -385,36 +522,44 @@ class _HybridBlackCore(AmplifierSource):
         stamped = self.NUM_TIMELINE_CHANNELS
         roles += [Constants.ChannelRoles.TIMESTAMP] * stamped
 
+        units = self.channel_units()
         for context in port_context_out.values():
             # Read before the count is raised: the blocks above count the
             # device's channels, and the stamp is not one of them.
             total = channels.channel_count(context)
             context[Constants.Keys.CHANNEL_COUNT] = total + stamped
             context.update(channels.describe(roles))
+            apply_channel_units(context, units)
         return port_context_out
+
+    def _release_device(self) -> None:
+        """Close the device, and let the probe and other nodes open it.
+
+        Every path that releases the handle drops the hold with it, not
+        stop() alone: a hold outliving its session would make another
+        node refuse a Unicorn nobody has open.
+        """
+        super()._release_device()
+        if self._held_serial is not None:
+            device_probe.release(self._held_serial)
+            self._held_serial = None
 
     def stop(self):
         """Stop Unicorn Hybrid Black amplifier and clean up resources.
 
-        Stops data acquisition, terminates background thread, and disconnects
-        from amplifier hardware.
+        Stops the acquisition thread, then stops and closes the device.
         """
-        # Stop background thread and wait for completion
+        # Stop background thread and wait for completion. A read in
+        # flight returns within one frame, or the driver's 2 s timeout.
         if self._running:
             self._running = False
             acq_thread = self._acquisition_thread
             if acq_thread and acq_thread.is_alive():
                 acq_thread.join(timeout=10)
 
-        # Stop amplifier data acquisition
-        if self._device is not None:
-            try:
-                self._device.StopAcquisition()
-            except Exception:
-                pass  # Device may already be stopped
-            # Clean up device connection
-            del self._device
-            self._device = None
+        # A run is over; the next one opens the device again.
+        self._connect_failure = None
+        self._release_device()
 
         # Call parent stop method
         super().stop()
@@ -462,144 +607,77 @@ class _HybridBlackCore(AmplifierSource):
             # Not a decimation step, return None
             return None
 
-    def _acquisition_function(self):
-        """Background thread function for data acquisition and pipeline timing.
+    def behind_reads(self) -> int:
+        """Consecutive backlogged reads that mean a backlog, not a burst."""
+        frames_per_s = self.SAMPLING_RATE / float(self._frame_size)
+        return max(1, int(round(self.BEHIND_BACKLOG_S * frames_per_s)))
 
-        Uses adaptive timing: if GetData is fast (<1ms), we're behind and
-        use shorter wait. If GetData blocks (>=1ms), we're on time and use
-        normal wait interval.
+    def _acquisition_function(self):
+        """Background thread: read a block, stamp it, cycle the pipeline.
+
+        ``get_data`` blocks until the frame has arrived and releases the
+        GIL while it waits, so the loop reads back to back with no
+        pacing sleep and stamps each block the moment the read returns.
+        The sleep UnicornPy needed -- its GetData held the GIL, and a
+        reader that blocked in it starved every other thread -- is gone
+        with it (D-NODE-63).
         """
-        try:
-            import UnicornPy
-        except ImportError:
+        # Resolved once, outside the loop: every message below names
+        # the node the author wrote, by the name they gave it.
+        label = node_label(self)
+        device = self._device
+        if device is None:
             return
 
-        # Resolved once, outside the loop: every message below has to
-        # name the node the author wrote, and type(self).__name__ here
-        # is the chain's private core.
-        label = node_label(self)
-
-        # Get number of acquired channels from device
-        num_acquired_channels = self._device.GetNumberOfAcquiredChannels()
-
-        # Acquisition frame size matches output frame size
-        acq_frame_length = self._frame_size
-        receive_buffer_length = acq_frame_length * num_acquired_channels * 4
-        receive_buffer = bytearray(receive_buffer_length)
-
-        # Build column indices for channel selection
-        col_indices = list(range(self._eeg_channel_count))
-        if self._include_accel:
-            start = self.NUM_EEG_CHANNELS
-            col_indices.extend(range(start, start + 3))
-        if self._include_gyro:
-            start = self.NUM_EEG_CHANNELS + self.NUM_ACCEL_CHANNELS
-            col_indices.extend(range(start, start + 3))
-        if self._include_aux:
-            start = self.NUM_EEG_CHANNELS + self.NUM_ACCEL_CHANNELS + 3
-            col_indices.extend(range(start, num_acquired_channels))
-
-        # Check if we can use fast contiguous slice (EEG only, all 8 channels)
-        use_slice = (
-            not self._include_accel
-            and not self._include_gyro
-            and not self._include_aux
-            and self._eeg_channel_count == self.NUM_EEG_CHANNELS
-        )
-
-        # Start data acquisition from amplifier
-        self._device.StartAcquisition(self._test_signal)
-
-        # Initialize adaptive timing. One GetData returns one frame, so
-        # the cadence to hold is one frame period -- not one sample.
-        frame_period_s = acq_frame_length / float(self.SAMPLING_RATE)
-        wait_on_time_s = self.WAIT_ON_TIME_RATIO * frame_period_s
-        wait_behind_s = self.WAIT_BEHIND_RATIO * frame_period_s
-        wait_interval_s = wait_on_time_s
-        t_last_call = time.perf_counter()
+        frame_length = self._frame_size
+        width = self._total_channels
+        # Filled in place by every read; the published frame is a copy.
+        receive_buffer = np.empty((frame_length, width), dtype=np.float32)
+        frame_period_s = frame_length / float(self.SAMPLING_RATE)
+        behind_reads = self.behind_reads()
 
         while self._running:
             try:
-                # Calculate expected next call time and sleep if needed
-                t_expected_next = t_last_call + wait_interval_s
-                t_now = time.perf_counter()
-                t_remaining = t_expected_next - t_now
-                if t_remaining > 0:
-                    time.sleep(t_remaining)
-
-                # GetData call with timing
-                t_pre_get = time.perf_counter()
-                self._device.GetData(
-                    acq_frame_length, receive_buffer, receive_buffer_length
-                )
-                t_post_get = time.perf_counter()
-                # First sight: GetData returns only once the block is
+                block = device.get_data(frame_length, out=receive_buffer)
+                # First sight: get_data returns only once the block is
                 # complete, so this is the earliest instant it exists on
-                # the host -- taken before the block is reshaped, copied,
-                # selected from or scheduled.
-                #
-                # time.monotonic() and not perf_counter(), because Sync
-                # compares the stamp against its own reading of that
-                # clock. t_post_get stays on perf_counter and is left
-                # alone: it drives the adaptive wait interval, and the
-                # two clocks are not interchangeable for either purpose.
+                # the host -- taken before the block is copied or
+                # scheduled. channels.stamp_clock(), because Sync
+                # compares the stamp against its own reading of it.
                 arrival = channels.wrap_time(channels.stamp_clock())
-                t_last_call = t_post_get
 
-                # Adaptive timing: adjust wait based on GetData blocking
-                # time. The counter follows the *behind* branch, which is
-                # the fast return: the driver already had a block waiting,
-                # so this loop is not keeping up with the device.
-                #
-                # It used to be the other way round, and so reported the
-                # opposite of what happened: the warning fired after six
-                # consecutive healthy cycles and was cleared by the case
-                # it exists to report.
-                blocking_time_s = t_post_get - t_pre_get
-                if blocking_time_s < self.BEHIND_THRESHOLD_S:
-                    # Fast return = buffer had data = we're behind
-                    wait_interval_s = wait_behind_s
+                # A whole frame already waiting after the read means the
+                # reader is behind the device. A burst does that too, so
+                # only a backlog lasting BEHIND_BACKLOG_S is reported.
+                waiting = device.get_stream_status().available_scans
+                if waiting >= frame_length:
                     self._underrun_counter += 1
                 else:
-                    # Slow return = had to wait for data = we're on time
-                    wait_interval_s = wait_on_time_s
                     self._underrun_counter = 0
 
-                if self._underrun_counter > self.NUM_UNDERRUNS_ALLOWED:
+                if self._underrun_counter >= behind_reads:
                     self.log(
-                        f"Falling behind the amplifier: the driver had a "
-                        f"block ready on "
-                        f"{self.NUM_UNDERRUNS_ALLOWED + 1} consecutive "
-                        f"reads. Reduce the work per frame, or raise "
-                        f"frame_size to cycle less often.",
+                        f"Falling behind the amplifier: a whole frame has "
+                        f"been waiting after every read for "
+                        f"{self.BEHIND_BACKLOG_S:.0f} s. Reduce the work "
+                        f"per frame, or raise frame_size to cycle less "
+                        f"often.",
                         type=Constants.LogTypes.WARNING,
                     )
                     self._underrun_counter = 0
 
-                # Convert to numpy array
-                raw_data = np.frombuffer(
-                    receive_buffer,
-                    dtype=np.float32,
-                    count=num_acquired_channels * acq_frame_length,
-                ).reshape(acq_frame_length, num_acquired_channels)
-
-                # Extract selected channels
-                if use_slice:
-                    frame_data = raw_data[:, : self.NUM_EEG_CHANNELS].copy()
-                else:
-                    frame_data = raw_data[:, col_indices].copy()
-
+                frame = np.empty(
+                    (frame_length, width + self.NUM_TIMELINE_CHANNELS),
+                    dtype=Constants.DATA_TYPE,
+                )
+                frame[:, :width] = block
                 # One value for the whole block: the block cannot exist
                 # until its last sample has been acquired, and that last
                 # sample is the one Sync reads the instant back from.
-                stamp = np.full(
-                    (frame_data.shape[0], self.NUM_TIMELINE_CHANNELS),
-                    arrival,
-                    dtype=Constants.DATA_TYPE,
-                )
+                frame[:, width:] = arrival
 
                 # Set current frame and trigger pipeline cycle immediately
-                self._current_frame = np.hstack((frame_data, stamp))
+                self._current_frame = frame
                 self.cycle()
 
                 # Consecutive, so a single hiccup the next read recovers
@@ -624,12 +702,9 @@ class _HybridBlackCore(AmplifierSource):
                         f"failure(s) will end the acquisition.",
                         type=Constants.LogTypes.WARNING,
                     )
-                    # The wait at the top of the loop is measured from
-                    # t_last_call, which a failed read leaves in the
-                    # past, so the retry slept for nothing at all: a
-                    # permanently failing GetData spun this thread flat
-                    # out rather than pacing itself.
-                    t_last_call = time.perf_counter()
+                    # A read that fails at once would otherwise be
+                    # retried at once, and the retry learns nothing.
+                    time.sleep(frame_period_s)
                     continue
 
                 # ERROR, and the loop ends. This used to be a WARNING
@@ -657,173 +732,18 @@ class _HybridBlackCore(AmplifierSource):
                 )
                 break
 
-        # Clean up receive buffer
-        del receive_buffer
-
     @staticmethod
     def get_available_devices() -> list[str]:
         """Get list of available Unicorn Hybrid Black devices.
 
         Returns:
-            List of device serial numbers that are available for connection.
-            Returns empty list on non-Windows platforms.
+            Serial numbers the host can open: the paired devices on
+            Windows, the discoverable ones elsewhere. Empty where
+            gtec_unicorn cannot be loaded, or discovery fails.
         """
-        if sys.platform != "win32":
-            return []
-
-        _ensure_unicorn_path()
         try:
-            import UnicornPy
-
-            device_list = UnicornPy.GetAvailableDevices(True)
-            return device_list if device_list else []
-        except ImportError:
-            return []
+            _load()
+            devices = unicorn.Amplifier.get_connected_devices()
+            return [str(serial) for serial in devices or []]
         except Exception:
             return []
-
-
-class HybridBlack(ioc.OChain):
-    """Unicorn Hybrid Black amplifier chain for wireless EEG acquisition.
-
-    This is an OChain that contains:
-    - _HybridBlackCore: The actual Hybrid Black acquisition node
-    - Link: Bridge for distributed operation (passthrough in standalone)
-    - Oscar: OSCAR artifact removal processing
-
-    The chain structure enables distributed edge/server operation while
-    keeping node inheritance clean (no chain mixing in node path).
-
-    Interface to g.tec Unicorn Hybrid Black wireless EEG amplifier using
-    Bluetooth. Supports 8-channel EEG acquisition at 250 Hz, plus optional
-    accelerometer, gyroscope, battery, counter, and validation channels.
-    """
-
-    # Re-export constants from core
-    DEFAULT_INCLUDE_ACCEL = _HybridBlackCore.DEFAULT_INCLUDE_ACCEL
-    DEFAULT_INCLUDE_GYRO = _HybridBlackCore.DEFAULT_INCLUDE_GYRO
-    DEFAULT_INCLUDE_AUX = _HybridBlackCore.DEFAULT_INCLUDE_AUX
-    DEFAULT_TEST_SIGNAL = _HybridBlackCore.DEFAULT_TEST_SIGNAL
-    SAMPLING_RATE = _HybridBlackCore.SAMPLING_RATE
-    NUM_EEG_CHANNELS = _HybridBlackCore.NUM_EEG_CHANNELS
-    NUM_ACCEL_CHANNELS = _HybridBlackCore.NUM_ACCEL_CHANNELS
-    NUM_GYRO_CHANNELS = _HybridBlackCore.NUM_GYRO_CHANNELS
-
-    def __init__(
-        self,
-        serial: Optional[str] = None,
-        channel_count: Optional[int] = None,
-        frame_size: Optional[int] = None,
-        include_accel: Optional[bool] = None,
-        include_gyro: Optional[bool] = None,
-        include_aux: Optional[bool] = None,
-        test_signal: Optional[bool] = None,
-        enable_oscar: bool = False,
-        **kwargs,
-    ):
-        """Initialize Unicorn Hybrid Black amplifier chain.
-
-        Args:
-            serial: Serial number of target device. Uses first discovered
-                if None.
-            channel_count: Number of EEG channels (1-8). Defaults to 8.
-            frame_size: Samples per processing frame.
-            include_accel: Include accelerometer channels (3 channels).
-            include_gyro: Include gyroscope channels (3 channels).
-            include_aux: Include auxiliary channels (battery, counter,
-                validation).
-            test_signal: Enable test signal mode instead of live data.
-            enable_oscar: Enable OSCAR artifact removal processing.
-            **kwargs: Additional arguments.
-
-        Raises:
-            NotImplementedError: If not running on Windows.
-        """
-        # Store parameters for create_internal_nodes
-        self._link_stream_id = stream_id_for(kwargs)
-        self._core_params = {
-            "serial": serial,
-            "channel_count": channel_count,
-            "frame_size": frame_size,
-            "include_accel": include_accel,
-            "include_gyro": include_gyro,
-            "include_aux": include_aux,
-            "test_signal": test_signal,
-        }
-        self._core_params.update(strip_chain_keys(kwargs))
-        self._enable_oscar = enable_oscar
-
-        # Initialize OChain (calls create_internal_nodes)
-        kwargs.setdefault(
-            self.Configuration.Keys.OUTPUT_PORTS,
-            [OPort.Configuration()],
-        )
-        ioc.OChain.__init__(
-            self,
-            serial=serial,
-            channel_count=channel_count,
-            frame_size=frame_size,
-            include_accel=include_accel,
-            include_gyro=include_gyro,
-            include_aux=include_aux,
-            test_signal=test_signal,
-            enable_oscar=enable_oscar,
-            stream_id=self._link_stream_id,
-            **kwargs,
-        )
-
-    def create_internal_nodes(self) -> List[ioc.Node]:
-        """Create the internal node chain.
-
-        Returns:
-            The head of the list is whatever stands in for this chain's
-            core: the core itself, the core followed by a raw tap
-            under ``save_as``, a replay core under ``load_from``,
-            or nothing at all under SERVER residency. Then a Link
-            where the pipeline is distributed, OSCAR where it is
-            enabled, and Sync last.
-        """
-        from ...common.launch_config import LaunchConfig
-
-        nodes = []
-        residency = LaunchConfig.get().residency
-        # Recorded, replaced, or simply built, as the launch
-        # configuration says. Contributes nothing under server
-        # residency: the core lives on the edge, and so does
-        # anything recording or replaying it.
-        nodes.extend(
-            raw.source_stage(
-                self, lambda: _HybridBlackCore(**self._core_params)
-            )
-        )
-        if residency != Constants.Residency.STANDALONE:
-            nodes.append(
-                Link(
-                    sender=Constants.Residency.EDGE,
-                    receiver=Constants.Residency.SERVER,
-                    stream_id=self._link_stream_id,
-                )
-            )
-        if self._enable_oscar:
-            nodes.append(Oscar())
-        # Sync places this stream on the master timeline. The core
-        # stamps each block at first sight, so Sync fits the relation to
-        # the amplifier's arrival instants rather than to its own clock
-        # -- which matters under EDGE/SERVER residency, where that Sync
-        # runs in the server process and would otherwise be fitting to
-        # the transport. The stamp supplies the *instant* only: this
-        # stream still carries no device counter, so Sync numbers it by
-        # counting samples, and it remains a valid timeline but not a
-        # loss-aware one.
-        nodes.append(Sync())
-        return nodes
-
-    @staticmethod
-    def get_available_devices() -> list[str]:
-        """Get list of available Unicorn Hybrid Black devices.
-
-        Returns:
-            List of device serial numbers that are available for connection.
-            Returns empty list on non-Windows platforms.
-        """
-        return _HybridBlackCore.get_available_devices()

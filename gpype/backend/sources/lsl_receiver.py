@@ -1,19 +1,15 @@
 from __future__ import annotations
 
 import threading
-from typing import List, Optional
+from typing import Optional
 
-import ioiocore as ioc
 import numpy as np
 from pylsl import StreamInlet, resolve_byprop
 
 from ...common._private import channels
 from ...common.constants import Constants
-from ..core._private.chain_params import stream_id_for, strip_chain_keys
-from ..core._private.link import Link
-from ..core._private.sync import Sync
+from ..core._private import assembly
 from ..core.o_port import OPort
-from .base import raw
 from .base.source import Source
 
 #: Default output port identifier
@@ -29,8 +25,20 @@ _ROLE_OF_TYPE = {
 }
 
 
-class _LslReceiverCore(Source):
-    """Internal node pulling samples from an LSL inlet."""
+class LslReceiver(Source):
+    """Reads a Lab Streaming Layer stream into a pipeline.
+
+    The mirror of LSLSender, and the way another vendor's amplifier,
+    MATLAB, a stimulus program or a second g.Pype process gets its data
+    in. Channel names, types and units are read from the stream
+    description, so a g.Pype stream read back keeps what it was
+    published with. Types and units are kept even where the channels
+    are not all named; the names only where every channel has one.
+
+    What arrives this way is somebody else's data: LSL carries no
+    per-sample authentication, so a stream says what it is and cannot
+    prove it.
+    """
 
     #: How long to wait for the stream to appear, in seconds.
     RESOLVE_TIMEOUT_S = 5.0
@@ -57,9 +65,10 @@ class _LslReceiverCore(Source):
         stream_type: Optional[str] = None,
         channel_count: Optional[int] = None,
         sampling_rate: Optional[float] = None,
+        edge_id: Optional[str] = None,
         **kwargs,
     ):
-        """Initialize the receiver core.
+        """Initialize the receiver.
 
         Args:
             stream_name: Name of the stream to resolve.
@@ -68,11 +77,16 @@ class _LslReceiverCore(Source):
                 when not given.
             sampling_rate: Expected rate. Read from the stream when not
                 given.
+            edge_id: Which edge runs this node, matched against the
+                edge process's --edge-id. None, the default, is every
+                edge; ignored when the pipeline is not distributed.
             **kwargs: Additional arguments for the parent Source.
 
         Raises:
             ValueError: If neither a name nor a type is given, or if the
-                stream shape is missing.
+                stream shape is missing on a server.
+            RuntimeError: If the shape has to be read from a stream that
+                does not appear.
         """
         if not stream_name and not stream_type:
             raise ValueError("Give a stream_name or a stream_type to resolve.")
@@ -81,12 +95,25 @@ class _LslReceiverCore(Source):
         channel_count = self.scalar(channel_count)
         sampling_rate = self.scalar(sampling_rate)
         if channel_count is None or sampling_rate is None:
-            raise ValueError(
-                "channel_count and sampling_rate are required. "
-                "LslReceiver resolves them from the stream once and "
-                "passes them in, which is what lets a stored "
-                "configuration be rebuilt with no publisher running."
-            )
+            # Asked once, here, and recorded: a stored configuration then
+            # rebuilds with no publisher running. Not where this process
+            # does not run the node -- a server, or an edge it is not
+            # assigned to -- where the stream is on the owning edge's
+            # network: the shape must come from the document, as a
+            # reader's does.
+            if not assembly.builds_core_for(edge_id):
+                raise ValueError(
+                    "channel_count and sampling_rate must come from the "
+                    "document where this LslReceiver is not built -- on a "
+                    "server, or on an edge it is not assigned to: the "
+                    "stream is resolved where it is published, on its "
+                    "own edge."
+                )
+            info = self._resolve(stream_name, stream_type)
+            if channel_count is None:
+                channel_count = int(info.channel_count())
+            if sampling_rate is None:
+                sampling_rate = float(info.nominal_srate())
         opt = self.Configuration.OptionalKeys
         if stream_name:
             kwargs.setdefault(opt.STREAM_NAME, str(stream_name))
@@ -103,11 +130,14 @@ class _LslReceiverCore(Source):
         self._inlet = None
         self._labels: Optional[list] = None
         self._roles: Optional[list] = None
+        self._units: Optional[list] = None
 
         kwargs.setdefault("frame_size", 1)
         kwargs.setdefault("output_ports", [OPort.Configuration()])
         kwargs.setdefault("channel_count", int(channel_count))
-        super().__init__(sampling_rate=float(sampling_rate), **kwargs)
+        super().__init__(
+            sampling_rate=float(sampling_rate), edge_id=edge_id, **kwargs
+        )
 
         self._thread: Optional[threading.Thread] = None
         self._running = False
@@ -138,35 +168,48 @@ class _LslReceiverCore(Source):
 
     @staticmethod
     def _describe(info) -> tuple:
-        """Read channel names and roles out of a stream description.
+        """Read channel names, roles and units out of a stream description.
 
         Args:
             info: The resolved StreamInfo.
 
         Returns:
-            A tuple of (labels, roles); either may be None when the
-            publisher did not describe its channels.
+            A tuple of (labels, roles, units); every element is None
+            when the publisher did not describe its channels, and labels
+            alone is None when it described them without naming them all.
         """
         labels: list = []
         roles: list = []
+        units: list = []
         try:
             channel = info.desc().child("channels").child("channel")
             while not channel.empty():
                 label = channel.child_value("label")
                 kind = channel.child_value("type")
+                # The XDF convention: desc/channels/channel/unit, beside
+                # label and type. LSLSender writes "" for a channel with
+                # no unit of its own, read back as None.
+                unit = channel.child_value("unit")
                 labels.append(label or "")
                 roles.append(
                     _ROLE_OF_TYPE.get(kind, Constants.ChannelRoles.SIGNAL)
                 )
+                units.append(unit or None)
                 channel = channel.next_sibling()
         except Exception:
             # A publisher is not obliged to describe its channels, and a
             # missing description must not stop the stream being read.
-            return None, None
+            return None, None, None
 
-        if not labels or not all(labels):
-            return None, None
-        return labels, roles
+        # A description of some other number of channels describes
+        # nothing here, and would fail later as a length mismatch.
+        if not roles or len(roles) != int(info.channel_count()):
+            return None, None, None
+        # Roles and units stand without names: LSLSender describes a
+        # stream with a trigger channel whether or not it is named.
+        if not all(labels):
+            labels = None
+        return labels, roles, units
 
     def setup(
         self, data: dict[str, np.ndarray], port_context_in: dict[str, dict]
@@ -195,10 +238,14 @@ class _LslReceiverCore(Source):
             rate / frame_size
         )
 
-        if self._labels:
+        if self._roles:
             port_context_out[PORT_OUT].update(
                 channels.describe(self._roles, self._labels, None)
             )
+            if self._units is not None:
+                port_context_out[PORT_OUT][Constants.Keys.CHANNEL_UNITS] = (
+                    list(self._units)
+                )
         return port_context_out
 
     def start(self):
@@ -216,7 +263,9 @@ class _LslReceiverCore(Source):
             # A resolved StreamInfo carries only the header; the channel
             # description arrives with the inlet.
             self._inlet = StreamInlet(info, max_buflen=1)
-            self._labels, self._roles = self._describe(self._inlet.info())
+            self._labels, self._roles, self._units = self._describe(
+                self._inlet.info()
+            )
         Source.start(self)
         if self._running:
             return
@@ -261,128 +310,3 @@ class _LslReceiverCore(Source):
             return None
         self._pending = None
         return {PORT_OUT: pending}
-
-
-class LslReceiver(ioc.OChain):
-    """Reads a Lab Streaming Layer stream into a pipeline.
-
-    The mirror of LSLSender, and the way another vendor's amplifier,
-    MATLAB, a stimulus program or a second g.Pype process gets its data
-    in. Channel names and types are read from the stream description, so
-    a g.Pype stream read back keeps the names it was published with.
-
-    What arrives this way is somebody else's data: LSL carries no
-    per-sample authentication, so a stream says what it is and cannot
-    prove it.
-    """
-
-    def __init__(
-        self,
-        stream_name: Optional[str] = None,
-        stream_type: Optional[str] = None,
-        channel_count: Optional[int] = None,
-        sampling_rate: Optional[float] = None,
-        **kwargs,
-    ):
-        """Initialize the receiver chain.
-
-        Args:
-            stream_name: Name of the stream to resolve.
-            stream_type: Type to resolve, when no name is given.
-            channel_count: Expected channel count.
-            sampling_rate: Expected sampling rate.
-            **kwargs: Additional arguments.
-
-        Raises:
-            ValueError: If neither a name nor a type is given.
-        """
-        if not stream_name and not stream_type:
-            raise ValueError("Give a stream_name or a stream_type to resolve.")
-        self._link_stream_id = stream_id_for(kwargs)
-
-        # Resolve the stream header once, here, when its shape is not
-        # already known. It belongs at this level rather than in the
-        # core for two reasons:
-        #
-        #  * the chain's configuration is what survives serialisation --
-        #    the internal node is rebuilt from these parameters, not from
-        #    its own stored config -- so recording the discovered channel
-        #    count and rate here is what lets a saved pipeline be rebuilt
-        #    with no publisher running. Without it, `deserialize()` had
-        #    to find the stream live or fail;
-        #  * it happens once per construction rather than once per
-        #    internal node.
-        channel_count = _LslReceiverCore.scalar(channel_count)
-        sampling_rate = _LslReceiverCore.scalar(sampling_rate)
-        if channel_count is None or sampling_rate is None:
-            info = _LslReceiverCore._resolve(stream_name, stream_type)
-            if channel_count is None:
-                channel_count = int(info.channel_count())
-            if sampling_rate is None:
-                sampling_rate = float(info.nominal_srate())
-
-        self._core_params = {
-            "stream_name": stream_name,
-            "stream_type": stream_type,
-            "channel_count": channel_count,
-            "sampling_rate": sampling_rate,
-        }
-        self._core_params.update(strip_chain_keys(kwargs))
-        if stream_name:
-            kwargs.setdefault("stream_name", stream_name)
-        if stream_type:
-            kwargs.setdefault("stream_type", stream_type)
-        # Recorded so a rebuild does not have to ask the network again.
-        kwargs.setdefault("channel_count", int(channel_count))
-        kwargs.setdefault("sampling_rate", float(sampling_rate))
-        kwargs.setdefault(
-            self.Configuration.Keys.OUTPUT_PORTS,
-            [OPort.Configuration()],
-        )
-        # stream_name, stream_type, channel_count and sampling_rate
-        # already reach kwargs via the setdefault calls above.
-        ioc.OChain.__init__(
-            self,
-            stream_id=self._link_stream_id,
-            **kwargs,
-        )
-
-    def create_internal_nodes(self) -> List[ioc.Node]:
-        """Create the internal node chain.
-
-        Returns:
-            The head of the list is whatever stands in for this chain's
-            core: the core itself, the core followed by a raw tap
-            under ``save_as``, a replay core under ``load_from``,
-            or nothing at all under SERVER residency. Then a Link
-            where the pipeline is distributed, and Sync last.
-        """
-        from ...common.launch_config import LaunchConfig
-
-        nodes = []
-        residency = LaunchConfig.get().residency
-        # Recorded, replaced, or simply built, as the launch
-        # configuration says. Contributes nothing under server
-        # residency: the core lives on the edge, and so does
-        # anything recording or replaying it.
-        # SYNC, unlike the other receivers: this core declares a plain
-        # output port and the chain ends in a plain Sync(), so the
-        # stream is continuous however irregularly LSL delivers it.
-        # Declaring the tap ASYNC here would have put an ASYNC port
-        # between two SYNC ones -- invisible until save_as was actually
-        # switched on, because the timing is only read when it is.
-        nodes.extend(
-            raw.source_stage(
-                self, lambda: _LslReceiverCore(**self._core_params)
-            )
-        )
-        if residency != Constants.Residency.STANDALONE:
-            nodes.append(
-                Link(
-                    sender=Constants.Residency.EDGE,
-                    receiver=Constants.Residency.SERVER,
-                    stream_id=self._link_stream_id,
-                )
-            )
-        nodes.append(Sync())
-        return nodes

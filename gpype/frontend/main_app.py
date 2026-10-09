@@ -1,14 +1,60 @@
 from __future__ import annotations
 
+import importlib.util
 import os
 import platform
 import subprocess
 import sys
+import warnings
 from pathlib import Path
 
 from ..common.constants import Constants
 from ..common.launch_config import LaunchConfig
+from . import identity as _identity
 from . import theme as _theme
+from .widgets.base.widget import _weak_slot
+
+#: What a window needs: Qt for MainApp itself, pyqtgraph for the plotting
+#: scopes. Both come with the 'gui' extra.
+_GUI_PACKAGES = ("PySide6", "pyqtgraph")
+
+
+def _present(name: str) -> bool:
+    """Whether ``import name`` would find a top-level package.
+
+    As ``bundle._importable`` asks it: ``sys.modules`` first, since
+    ``find_spec`` raises ValueError for an entry with no spec, such as a
+    stand-in a host or a test suite put there; an entry of None fails the
+    import, and so counts as absent.
+    """
+    if sys.modules.get(name) is not None:
+        return True
+    try:
+        return importlib.util.find_spec(name) is not None
+    except (ImportError, ValueError):
+        return False
+
+
+def _require_gui() -> None:
+    """Refuse, naming the 'gui' extra, when a window cannot be built.
+
+    Without it a missing PySide6 surfaced as a bare ``No module named
+    'PySide6'``, and a missing pyqtgraph got past ``MainApp()`` to fail
+    inside a scope's construction. Both are checked here, before anything
+    is built, as the backend's readers and writers already name the
+    'formats' extra.
+
+    Raises:
+        ModuleNotFoundError: Naming every missing package and the
+            install command; ``name`` is the first one missing.
+    """
+    missing = [name for name in _GUI_PACKAGES if not _present(name)]
+    if missing:
+        raise ModuleNotFoundError(
+            "MainApp needs %s, provided by the 'gui' extra: "
+            'pip install "gpype[gui]"' % " and ".join(missing),
+            name=missing[0],
+        )
 
 
 class MainApp:
@@ -26,7 +72,40 @@ class MainApp:
     DEFAULT_GRID_SIZE = [3, 3]
 
     #: Application icon path
-    ICON_PATH = Path("resources") / "gtec.ico"
+    ICON_PATH = Path("resources") / "gpype.ico"
+
+    #: Futures of the run() calls waiting in a Web Worker; end_run()
+    #: resolves them.
+    _waiting: list = []
+
+    #: An end_run() that came before any run() was waiting, kept for the
+    #: next one. A new MainApp -- the next script -- forgets it.
+    _ended_early: bool = False
+
+    @classmethod
+    def end_run(cls) -> bool:
+        """End a run() that is waiting in a browser's Web Worker.
+
+        The host's counterpart of closing the window. A worker has none,
+        so run() waits there until the page ends it -- its Stop button,
+        through the worker's message handler -- and the script carries
+        on with ``p.stop()`` as on a desktop. A Stop that comes before
+        run() waits -- while the script awaits something on its way to
+        it -- is kept, and that run() returns at once.
+
+        Returns:
+            bool: True if a run() was waiting and now returns; False if
+            none was, and the next one will not wait.
+        """
+        # MainApp's names, not cls's: a subclass must end the same runs.
+        waiting, MainApp._waiting = MainApp._waiting, []
+        ended = False
+        for future in waiting:
+            if not future.done():
+                future.set_result(None)
+                ended = True
+        MainApp._ended_early = not ended
+        return ended
 
     def __init__(
         self,
@@ -36,6 +115,7 @@ class MainApp:
         app=None,
         prevent_sleep: bool = True,
         theme: str = _theme.DARK,
+        icon: str | Path | None = None,
     ):
         """Initialize the main application with window and widget management.
 
@@ -55,6 +135,10 @@ class MainApp:
                 QApplication; "system" leaves Qt's own defaults
                 alone, for a host application that brings its own
                 look.
+            icon: The application's icon file, for its windows and its
+                taskbar button. If None, the one a build names in
+                ``GPYPE_APP_ICON``, else g.Pype's. See
+                gpype.frontend.identity.
         """
         config = LaunchConfig.get()
         self._is_server = config.residency == Constants.Residency.SERVER
@@ -62,9 +146,12 @@ class MainApp:
         if self._is_server:
             # Server residency: no GUI — empty hull
             self._widgets = []
+            # A Stop meant for a previous script's run() is not this one's.
+            MainApp._ended_early = False
             return
 
-        from PySide6.QtGui import QIcon
+        _require_gui()
+
         from PySide6.QtWidgets import (
             QApplication,
             QGridLayout,
@@ -73,6 +160,11 @@ class MainApp:
         )
 
         from .widgets.base.widget import Widget
+
+        # A script's taskbar button is otherwise Python's, whatever icon
+        # the window has; named before the first window. A process that
+        # has an ID already, its host's, keeps it (gpype.frontend.identity).
+        _identity.name_process(_identity.app_id(caption))
 
         # Create or use existing QApplication (composition over inheritance)
         # This allows for better testability and flexibility
@@ -99,10 +191,16 @@ class MainApp:
         self._window = QMainWindow()
         self._window.setWindowTitle(caption)
 
-        # Set application icon if file exists
-        icon_path = Path(__file__).parent / MainApp.ICON_PATH
-        if icon_path.exists():
-            self._window.setWindowIcon(QIcon(str(icon_path)))
+        # The application's icon, application-wide so that every window
+        # and the taskbar button carry it; a host's QApplication keeps
+        # an icon it set itself.
+        qicon = _identity.window_icon(
+            self._app, icon, default=Path(__file__).parent / self.ICON_PATH
+        )
+        if qicon is not None:
+            self._window.setWindowIcon(qicon)
+            if app is None or self._app.windowIcon().isNull():
+                self._app.setWindowIcon(qicon)
 
         # Configure window geometry
         if position is None:
@@ -119,7 +217,7 @@ class MainApp:
         central_widget.setLayout(self._layout)
 
         # Connect cleanup handler for graceful shutdown
-        self._app.aboutToQuit.connect(self._on_quit)
+        self._app.aboutToQuit.connect(_weak_slot(self._on_quit))
 
     def add_widget(self, widget, grid_positions: list[int] = None):
         """Add a widget to the application layout and management system.
@@ -136,6 +234,15 @@ class MainApp:
                 If None, adds to next available position.
         """
         if self._is_server:
+            return
+
+        # Nor on an edge the widget is not assigned to: that edge runs
+        # no core for it and a scope there holds no Qt object, so the
+        # window is the owning edge's to show. A script written for the
+        # whole system runs unchanged on every edge this way.
+        from ..backend.core._private import assembly
+
+        if not assembly.builds_core_here(widget):
             return
 
         # Register widget for lifecycle management
@@ -343,7 +450,7 @@ class MainApp:
             failed = Signal(object)
 
         relay = _Relay()
-        relay.failed.connect(self._show_failure)
+        relay.failed.connect(_weak_slot(self._show_failure))
         # Kept on the instance: a relay that is collected takes the
         # connection with it, and the failure would go nowhere.
         self._failure_relay = relay
@@ -426,6 +533,10 @@ class MainApp:
                 non-zero values indicate errors or abnormal termination.
         """
         if self._is_server:
+            from ..backend.core._private import threads
+
+            if not threads.available():
+                return self._run_in_worker()
             # No GUI on SERVER — block until user presses Enter, then exit
             try:
                 input("SERVER running. Press Enter to stop...\n")
@@ -451,3 +562,45 @@ class MainApp:
 
         # Enter the Qt event loop (blocks until application closes)
         return self._app.exec()
+
+    def _run_in_worker(self) -> int:
+        """Wait in a Web Worker until the host calls end_run().
+
+        Blocking would stop the only thread, and with it every message
+        the pipeline waits for. JSPI's ``run_sync`` suspends this call
+        stack instead, and the worker's loop -- the page's frames, the
+        pipeline, its broker -- runs on underneath, so an unchanged
+        ``p.start(); app.run(); p.stop()`` behaves as on a desktop
+        (D-CORE-130). Where nothing can suspend -- no JSPI, or a script
+        not entered through ``runPythonAsync`` -- it returns at once.
+
+        Returns:
+            int: 0.
+        """
+        from ..backend.core._private import threads
+
+        try:
+            from pyodide.ffi import can_run_sync, run_sync
+        except ImportError:
+            can_run_sync = run_sync = None
+        loop = threads.event_loop()
+        if run_sync is None or loop is None or not can_run_sync():
+            warnings.warn(
+                "MainApp.run() returns at once where no thread can be "
+                "started and this runtime cannot suspend a call (it needs "
+                "JSPI, entered through runPythonAsync): the host owns the "
+                "pipeline's lifetime and calls stop() itself.",
+                stacklevel=3,
+            )
+            return 0
+        if MainApp._ended_early:
+            MainApp._ended_early = False
+            return 0
+        future = loop.create_future()
+        MainApp._waiting.append(future)
+        try:
+            run_sync(future)
+        finally:
+            if future in MainApp._waiting:
+                MainApp._waiting.remove(future)
+        return 0

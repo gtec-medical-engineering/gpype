@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import ast
 import re
+from typing import Optional
 
 import numpy as np
 from sympy import Function, Symbol, lambdify
@@ -147,6 +148,9 @@ class Equation(IONode):
     Applies custom mathematical expressions to input data using SymPy.
     Automatically creates input ports from expression variables and compiles
     to optimized NumPy functions. Handles 'in' keyword via internal aliasing.
+
+    The output records no unit unless ``unit`` names one: an expression
+    can square, divide or mix its inputs, and nothing here can tell which.
     """
 
     #: The input ports are the free variables of the expression, so
@@ -167,7 +171,13 @@ class Equation(IONode):
             #: Configuration key for mathematical expression string
             EXPRESSION = "expression"
 
-    def __init__(self, expression: str, **kwargs):
+        class OptionalKeys(IONode.Configuration.OptionalKeys):
+            """Optional configuration keys."""
+
+            #: Physical unit of every output channel
+            UNIT = "unit"
+
+    def __init__(self, expression: str, unit: Optional[str] = None, **kwargs):
         """Initialize Equation node with mathematical expression.
 
         Parses expression using SymPy, extracts variables to create input
@@ -177,15 +187,24 @@ class Equation(IONode):
             expression: Mathematical expression string. Must be valid SymPy
                 expression. Variables become input port names. 'in' keyword
                 handled via internal aliasing.
+            unit: Physical unit of every output channel, e.g. ``"uV"``.
+                None records no unit.
             **kwargs: Additional configuration parameters for IONode.
 
         Raises:
-            ValueError: If expression is None or empty.
+            ValueError: If expression is None or empty, or unit is not a
+                non-empty string.
             SymPy parsing errors: If expression cannot be parsed.
         """
         # Validate that expression is provided
         if expression is None:
             raise ValueError("Expression must be specified.")
+        if unit is not None:
+            if not isinstance(unit, str) or not unit:
+                raise ValueError(
+                    f"unit must be a non-empty string, got {unit!r}."
+                )
+            kwargs.setdefault(self.Configuration.OptionalKeys.UNIT, unit)
 
         # Handle Python keyword 'in' by replacing with internal alias
         # This allows users to use 'in' as a variable name in expressions
@@ -303,10 +322,17 @@ class Equation(IONode):
         port_context_out = super().setup(data, port_context_in)
 
         # Override channel count in output context based on computed shape
+        unit = self.config.get(self.Configuration.OptionalKeys.UNIT)
         for port_name in port_context_out:
-            port_context_out[port_name][
-                Constants.Keys.CHANNEL_COUNT
-            ] = output_channel_count
+            context = port_context_out[port_name]
+            context[Constants.Keys.CHANNEL_COUNT] = output_channel_count
+            # Whatever the inputs were in, the expression decides what
+            # the output is in, and only the author knows.
+            context.pop(Constants.Keys.CHANNEL_UNITS, None)
+            if unit is not None:
+                context[Constants.Keys.CHANNEL_UNITS] = [
+                    unit
+                ] * output_channel_count
 
         return port_context_out
 

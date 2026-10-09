@@ -5,6 +5,7 @@ from typing import Optional
 import numpy as np
 
 from ...common._private import channels
+from ...common._private.naming import node_label
 from ...common.constants import Constants
 from ..core.i_port import IPort
 from ..core.io_node import IONode
@@ -28,7 +29,7 @@ class Delay(IONode):
     instead of deriving it from an input that does not exist yet, pushes
     one priming frame of ``initial_value`` in :meth:`start`, and reports
     ``BREAKS_CYCLES`` True -- which is what lets ``gpype.Pipeline``
-    accept a cyclic graph at all. The loop delay is then exactly
+    accept a cyclic pipeline at all. The loop delay is then exactly
     num_samples samples, and must be at least frame_size because a node
     pushes a whole frame at a time. :meth:`setup` re-verifies the
     declaration against what comes back round the loop, and refuses a
@@ -403,6 +404,14 @@ class Delay(IONode):
             self._ring = None
             self._frame_fits_in_history = None
         self._write_pos = 0
+
+        # A marker or gap named a sample on the input; the value now
+        # reaches the next node num_samples later (D-BATCH-86).
+        warning = channels.shift_grid(
+            port_context_out[PORT_OUT], self._num_samples, node_label(self)
+        )
+        if warning:
+            self.log(warning, type=Constants.LogTypes.WARNING)
         return port_context_out
 
     def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:

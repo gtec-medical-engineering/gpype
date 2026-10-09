@@ -1,18 +1,12 @@
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import Optional
 
-import ioiocore as ioc
 import numpy as np
 
 from ...common._private import channels
 from ...common._private.entitlement import MARK
 from ...common.constants import Constants
-from ..core._private.chain_params import stream_id_for, strip_chain_keys
-from ..core._private.link import Link
-from ..core._private.sync import Sync
-from ..core.o_port import OPort
-from .base import raw
 from .base.recording_reader import Recording, RecordingReader
 
 #: Default output port identifier
@@ -41,11 +35,11 @@ def _pyedflib():
     """
     try:
         import pyedflib
-    except ImportError as error:  # pragma: no cover - environment
-        raise ImportError(
-            "EDFReader needs pyedflib, provided by the 'formats' extra: "
-            "pip install 'gpype[formats]'"
-        ) from error
+    except ImportError as error:
+        from ... import _missing_extra_hint
+
+        hint = _missing_extra_hint(error) or str(error)
+        raise ImportError(f"EDFReader needs pyedflib. {hint}") from error
     return pyedflib
 
 
@@ -110,7 +104,16 @@ def _read_edf(file_name: str) -> tuple:
                 # default reading for a data channel.
                 roles.append(Constants.ChannelRoles.SIGNAL)
 
+        # The physical dimension EDFWriter writes from the context
+        # (D-BATCH-43); empty where it wrote none, e.g. a trigger. A
+        # foreign file with every dimension empty gives nothing to
+        # publish -- an all-None list would claim it recorded units it
+        # did not.
+        dimensions = [reader.getPhysicalDimension(i) or None for i in range(n)]
+
         extras: dict = {}
+        if any(dimensions):
+            extras[Constants.Keys.CHANNEL_UNITS] = dimensions
         serial = reader.getEquipment()
         if serial:
             extras[Constants.Keys.DEVICE_SERIAL] = str(serial)
@@ -124,14 +127,9 @@ def _read_edf(file_name: str) -> tuple:
             else np.empty((0, 0))
         )
 
-        true_count = None
-        onsets, durations, descriptions = reader.readAnnotations()
-        del onsets, durations
-        for description in descriptions:
-            text = str(description)
-            if text.startswith(_SAMPLES_PREFIX):
-                true_count = int(text[len(_SAMPLES_PREFIX) :])
-                break
+        true_count, markers = _annotations(reader, rate)
+        if markers:
+            extras[Constants.Keys.MARKERS] = markers
 
         padding_undetected = true_count is None
         if true_count is not None:
@@ -152,8 +150,56 @@ def _read_edf(file_name: str) -> tuple:
         reader.close()
 
 
-class _EDFReaderCore(RecordingReader):
-    """Internal node replaying an EDF+ (.edf) recording."""
+def _annotations(reader, rate: Optional[float]) -> tuple:
+    """Split a file's EDF+ annotations into the sample count and markers.
+
+    Args:
+        reader: The open pyedflib reader.
+        rate: The file's sampling rate, or None without signals.
+
+    Returns:
+        ``(true_count, markers)``. The count is None when no
+        ``gpype:samples`` annotation is present. A marker is ``[sample,
+        duration, None, label]``, with onset and duration moved from
+        seconds onto the file's grid; an annotation without a duration
+        is a point. EDF+ annotations name no channel. Without a rate
+        there is no grid, and no markers.
+    """
+    true_count = None
+    markers = []
+    onsets, durations, descriptions = reader.readAnnotations()
+    for onset, duration, description in zip(onsets, durations, descriptions):
+        text = str(description)
+        if text.startswith(_SAMPLES_PREFIX):
+            if true_count is None:
+                true_count = int(text[len(_SAMPLES_PREFIX) :])
+            continue
+        if not rate:
+            continue
+        # pyedflib reads a missing duration as -1.
+        length = 0 if duration < 0 else int(round(float(duration) * rate))
+        markers.append([int(round(float(onset) * rate)), length, None, text])
+    return true_count, markers
+
+
+class EDFReader(RecordingReader):
+    """Replays an EDF+ (.edf) recording as if it were a live source.
+
+    Reads back what :class:`~gpype.EDFWriter` writes: channel roles from
+    the per-signal transducer field, each channel's unit from its
+    physical dimension (None where that field is empty, e.g. a
+    trigger), the device serial from the equipment field, the
+    entitlement mark from the recording-additional field, and the true
+    sample count -- not recoverable from the EDF header itself -- from a
+    ``gpype:samples`` EDF+ annotation. A file without that annotation (a
+    foreign EDF, or one from an earlier draft) is still read, in full,
+    with a logged warning that its tail may carry up to one data record
+    of undetectable padding.
+
+    Every other EDF+ annotation is a marker: its onset and duration, in
+    seconds, are moved onto the file's sample grid, and it names no
+    channel.
+    """
 
     def __init__(
         self,
@@ -163,23 +209,30 @@ class _EDFReaderCore(RecordingReader):
         speed: float = 1.0,
         loop: bool = False,
         mode: str = Constants.ExecutionMode.REALTIME,
+        edge_id: Optional[str] = None,
         **kwargs,
     ):
         """Initialize the reader core.
 
         Args:
             file_name: Path to the .edf recording.
-            sampling_rate: Rate to replay at, if the file cannot say
-                (EDF always can, so this is only a safety net).
-            frame_size: Samples emitted per cycle. Ignored in batch mode.
+            sampling_rate: The recording's rate, if the file cannot say.
+                EDF always can, so one given must agree with it.
+            frame_size: Samples emitted per cycle. In batch mode the
+                frame is the whole recording.
             speed: Replay speed relative to real time.
             loop: Start again at the end of the file.
             mode: ``realtime`` or ``batch``.
+            edge_id: Which edge runs this node, matched against the
+                edge process's --edge-id. None, the default, is every
+                edge; ignored when the pipeline is not distributed.
             **kwargs: Additional arguments for the parent reader.
 
         Raises:
             ImportError: If pyedflib is not installed.
-            ValueError: If signals disagree on their sample frequency.
+            ValueError: If signals disagree on their sample frequency,
+                or a ``sampling_rate``, ``channel_count`` or batch
+                ``frame_size`` given by hand disagrees with the file.
         """
         self._padding_undetected = False
         super().__init__(
@@ -189,6 +242,7 @@ class _EDFReaderCore(RecordingReader):
             speed=speed,
             loop=loop,
             mode=mode,
+            edge_id=edge_id,
             **kwargs,
         )
 
@@ -237,107 +291,3 @@ class _EDFReaderCore(RecordingReader):
                 type=Constants.LogTypes.WARNING,
             )
         return port_context_out
-
-
-class EDFReader(ioc.OChain):
-    """Replays an EDF+ (.edf) recording as if it were a live source.
-
-    Reads back what :class:`~gpype.EDFWriter` writes: channel roles from
-    the per-signal transducer field, the device serial from the
-    equipment field, the entitlement mark from the recording-additional
-    field, and the true sample count -- not recoverable from the EDF
-    header itself -- from a ``gpype:samples`` EDF+ annotation. A file
-    without that annotation (a foreign EDF, or one from an earlier
-    draft) is still read, in full, with a logged warning that its tail
-    may carry up to one data record of undetectable padding.
-    """
-
-    def __init__(
-        self,
-        file_name: str,
-        sampling_rate: Optional[float] = None,
-        frame_size: int = 1,
-        speed: float = 1.0,
-        loop: bool = False,
-        mode: str = Constants.ExecutionMode.REALTIME,
-        **kwargs,
-    ):
-        """Initialize the reader chain.
-
-        Args:
-            file_name: Path to the .edf recording.
-            sampling_rate: Rate to replay at, if the file cannot say.
-            frame_size: Samples emitted per cycle. One by default.
-                Ignored in batch mode.
-            speed: Replay speed relative to real time; zero for as fast
-                as possible.
-            loop: Start again at the end of the file.
-            mode: ``realtime`` (default) or ``batch``.
-            **kwargs: Additional arguments.
-
-        Raises:
-            ValueError: If no file name is available.
-        """
-        self._link_stream_id = stream_id_for(kwargs)
-        if file_name is None:
-            file_name = kwargs.get("file_name")
-        if file_name is None:
-            raise ValueError("file_name must be provided.")
-
-        self._core_params = {
-            "file_name": file_name,
-            "sampling_rate": sampling_rate,
-            "frame_size": frame_size,
-            "speed": speed,
-            "loop": loop,
-            "mode": mode,
-        }
-        self._core_params.update(strip_chain_keys(kwargs))
-
-        kwargs.setdefault("file_name", file_name)
-        kwargs.setdefault(
-            self.Configuration.Keys.OUTPUT_PORTS,
-            [OPort.Configuration()],
-        )
-        ioc.OChain.__init__(
-            self,
-            sampling_rate=sampling_rate,
-            frame_size=frame_size,
-            speed=speed,
-            loop=loop,
-            mode=mode,
-            stream_id=self._link_stream_id,
-            **kwargs,
-        )
-
-    def create_internal_nodes(self) -> List[ioc.Node]:
-        """Create the internal node chain.
-
-        Returns:
-            The head of the list is whatever stands in for this chain's
-            core: the core itself, the core followed by a raw tap
-            under ``save_as``, a replay core under ``load_from``,
-            or nothing at all under SERVER residency. Then a Link
-            where the pipeline is distributed, and Sync last.
-        """
-        from ...common.launch_config import LaunchConfig
-
-        nodes = []
-        residency = LaunchConfig.get().residency
-        # Recorded, replaced, or simply built, as the launch
-        # configuration says. Contributes nothing under server
-        # residency: the core lives on the edge, and so does
-        # anything recording or replaying it.
-        nodes.extend(
-            raw.source_stage(self, lambda: _EDFReaderCore(**self._core_params))
-        )
-        if residency != Constants.Residency.STANDALONE:
-            nodes.append(
-                Link(
-                    sender=Constants.Residency.EDGE,
-                    receiver=Constants.Residency.SERVER,
-                    stream_id=self._link_stream_id,
-                )
-            )
-        nodes.append(Sync())
-        return nodes

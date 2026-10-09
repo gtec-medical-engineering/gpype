@@ -11,13 +11,15 @@ from typing import Optional
 import ioiocore as ioc
 import numpy as np
 
+from ...._installer import refuse_cache_path
 from ....common._private.naming import public_name
 from ....common.constants import Constants
 from ...core.i_node import INode
 from ...core.i_port import IPort
+from .sink import Sink
 
 
-class FileWriter(INode):
+class FileWriter(Sink):
     """Abstract base class for threaded file writers.
 
     Implements a file writer that operates in a separate background thread
@@ -26,21 +28,6 @@ class FileWriter(INode):
 
     Subclasses must implement format-specific file operations.
     """
-
-    #: Whether this run's output must carry the non-commercial mark. Set by
-    #: the pipeline before anything starts, because a header written first
-    #: would carry the wrong answer. False when no pipeline set it, so a
-    #: writer used standalone produces an unmarked file rather than
-    #: claiming a restriction nobody established.
-    _marked: bool = False
-
-    def attach_entitlement(self, verdict) -> None:
-        """Record whether this run's artifacts must be marked.
-
-        Args:
-            verdict: The pipeline's resolved Entitlement.
-        """
-        self._marked = bool(verdict.marked)
 
     class Configuration(ioc.INode.Configuration):
         """Configuration class for FileWriter parameters."""
@@ -62,7 +49,14 @@ class FileWriter(INode):
             file_name: Base filename for data output. A timestamp will be
                 automatically appended.
             **kwargs: Additional arguments passed to parent INode class.
+
+        Raises:
+            ValueError: If no file name is given, its extension is not
+                this writer's, or it lies inside the package cache.
         """
+        if file_name is None:
+            raise ValueError("file_name must be provided.")
+
         # Initialize parent INode with configuration
         INode.__init__(self, file_name=file_name, **kwargs)
 
@@ -72,6 +66,10 @@ class FileWriter(INode):
         # refused to run. An authoring tool asking the server whether a
         # document is valid would have been told yes.
         self._check_extension(file_name)
+
+        # Resolved against the working directory as it is now, and again
+        # for the path actually opened (D-CORE-120).
+        refuse_cache_path(file_name, public_name(type(self).__name__))
 
         # Initialize threading components for background file operations
         self._file_queue = queue.Queue()  # Thread-safe data queue
@@ -109,7 +107,8 @@ class FileWriter(INode):
             Full file path with timestamp inserted.
 
         Raises:
-            ValueError: If file extension doesn't match writer's format.
+            ValueError: If file extension doesn't match writer's format,
+                or the path lies inside the package cache.
         """
         file_name = self.config[self.Configuration.Keys.FILE_NAME]
         name, ext = os.path.splitext(file_name)
@@ -139,6 +138,10 @@ class FileWriter(INode):
         while os.path.exists(candidate):
             candidate = f"{name}_{stamp}_{suffix}{ext}"
             suffix += 1
+
+        # The path about to be opened, resolved now: the working directory
+        # or a link may have changed since construction (D-CORE-120).
+        refuse_cache_path(candidate, public_name(type(self).__name__))
         return candidate
 
     def start(self):
@@ -149,7 +152,8 @@ class FileWriter(INode):
         file opening is deferred to setup() when port context is available.
 
         Raises:
-            ValueError: If the file extension is invalid for this writer.
+            ValueError: If the file extension is invalid for this writer,
+                or the path lies inside the package cache.
         """
         # Generate timestamped file path
         self._file_path = self._generate_file_path()

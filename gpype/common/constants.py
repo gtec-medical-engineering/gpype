@@ -48,6 +48,11 @@ class Constants(ioc.Constants):
         #: Name of the electrode system the labels come from, if any.
         MONTAGE_SYSTEM: str = "montage_system"
 
+        #: Which edge builds a world-facing node, matched against
+        #: ``LaunchConfig.edge_id``. A node configuration key rather than
+        #: a context key; absent or None means every edge.
+        EDGE_ID: str = "edge_id"
+
         #: True on the stream that defines the master timeline.
         MASTER_TIMELINE: str = "master_timeline"
 
@@ -68,6 +73,49 @@ class Constants(ioc.Constants):
         #: leaves nobody claiming either, unless the receiver is told to
         #: claim in the absent source's place. That is what this says.
         REMOTE_MASTER: str = "remote_master"
+
+        #: True on a stream whose source will not feed the rate
+        #: estimator, so whichever node is master here must do it.
+        #:
+        #: Sync's numbered path publishes the position and leaves the
+        #: estimator alone, because the one source that numbers its
+        #: samples in band -- an amplifier -- observes from its own
+        #: acquisition callback, **once per notification**. Sync sees
+        #: frames, and on a BCI Core those differ four-fold, which is
+        #: what makes the source's observation the better one. Not,
+        #: as this used to say, because its arrival time has "not been
+        #: through a queue": that time is carried in band precisely so
+        #: it survives the queue, and measurement put the two within
+        #: the 100 us stamp quantum of each other. See
+        #: ``Sync._observe_samples`` and ``D-TIME-30``.
+        #:
+        #: A replay core is a source that does not observe at all:
+        #: ``load_from`` reproduces the recorded candidacy, the frames
+        #: and their boundaries, but there is no acquisition callback
+        #: behind it.
+        #:
+        #: The consequence is silent and was measured on a BCI Core
+        #: recording: the relation is never solved, the numbered stream
+        #: replays perfectly anyway -- it carries its own positions --
+        #: and every sparse stream beside it is held in
+        #: ``Sync._pending`` for the whole run. Not discarded, so not
+        #: counted and not logged. 52 keystrokes in, 0 out.
+        #:
+        #: Distinct from REMOTE_MASTER, which says the master is real
+        #: but unreachable. Here the master is in this process and
+        #: perfectly reachable; it simply does not observe.
+        UNOBSERVED_SOURCE: str = "unobserved_source"
+
+        #: The clock-sync health of the edge that sent this stream:
+        #: ``{offset, uncertainty, converged, epoch, edge}``, as the
+        #: edge's start converged on it (D-TIME-69). Set by the edge's
+        #: sending Link, read by the server's Sync; absent from a stream
+        #: whose sender does not sync, such as a 4.0 edge.
+        CLOCK_SYNC: str = "clock_sync"
+
+        #: What the server's Sync found wrong with that health, for a
+        #: recording to carry as a note: absent while nothing is wrong.
+        CLOCK_NOTE: str = "clock_note"
 
         #: Serial number of the device that produced this stream.
         #:
@@ -96,6 +144,25 @@ class Constants(ioc.Constants):
         #: defaulted.
         CHANNEL_UNITS: str = "channel_units"
 
+        #: Per-channel calibration, GTC's CHAN field set (D-BATCH-43):
+        #: one entry per channel, None where a channel's own value is
+        #: not recorded.
+        #:
+        #: Gain and offset are exact -- ``[numerator, denominator]``,
+        #: the same shape as SAMPLING_RATE_EXACT -- never a float, so a
+        #: stored calibration round-trips exactly rather than as a
+        #: decimal a second conversion cannot undo.
+        CHANNEL_GAINS: str = "channel_gains"
+        CHANNEL_OFFSETS: str = "channel_offsets"
+        #: ``[low, high]`` in the channel's own unit, the range a value
+        #: was clipped to before storage.
+        CHANNEL_CLIPPING: str = "channel_clipping"
+        #: Hardware filters already applied, as a list of descriptions
+        #: per channel (empty where none were). Free provenance a
+        #: vendor's driver can supply and nothing downstream can
+        #: reconstruct once the data has passed through them.
+        CHANNEL_FILTERS: str = "channel_filters"
+
         #: The sampling rate as ``[numerator, denominator]``, when the
         #: source knows it exactly. SAMPLING_RATE stays the float the
         #: engine computes with; this is what a round trip restores, so
@@ -123,6 +190,36 @@ class Constants(ioc.Constants):
         #: trigger channel is how markers arrive; this is how they are
         #: reasoned about afterwards.
         MARKERS: str = "markers"
+
+        #: Per-trial provenance of a ``(time, channel, trial)`` block,
+        #: as ``[[source_sample, label], ...]``, one entry per trial in
+        #: the trial axis's order. ``source_sample`` is the marker's
+        #: sample in the recording the trial was cut from; ``label`` is
+        #: its condition. Published by :class:`~gpype.Epochs`, which
+        #: also drops MARKERS from the same context -- the time axis no
+        #: longer indexes the source recording, so a marker position
+        #: would name a meaningless row.
+        TRIALS: str = "trials"
+
+        #: The file a reader read, as ``{name, size, mtime, sha256}``:
+        #: the basename, the size in bytes, the modification time as ISO
+        #: 8601 in UTC, and the hex SHA-256 of the whole file. The digest
+        #: is the identity; a copy keeps it under another name and mtime.
+        #: Absent where the reader opened no file: on a server, under
+        #: ``load_from``, on an edge it is not assigned to, and where the
+        #: path names no regular file.
+        INPUT: str = "input"
+
+        #: This run's provenance record: the document (or, when the
+        #: pipeline holds a function node, the names of those instead), its
+        #: content hash, package versions, execution mode, any fitted
+        #: artifacts and what trained them, and this stream's own
+        #: ``INPUT`` nested under ``"input"``. Stamped once by
+        #: ``Pipeline.start()`` (``common._private.provenance``) and
+        #: merged into every source's own output context, so it crosses
+        #: a Link as JSON like everything else here (D-BATCH-14).
+        #: ``Result.provenance`` reads it.
+        PROVENANCE: str = "provenance"
 
     class TimeBase:
         """What a source's sample positions advance against.

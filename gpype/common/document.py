@@ -47,6 +47,14 @@ ID_KEY = "id"
 #: separately is what causes the mismatch.
 UNASSIGNED = "TBG"
 
+#: Where a node's port configurations live inside its ``config``.
+PORT_KEYS = ("input_ports", "output_ports")
+
+#: Where a chain that does not derive its internals
+#: (``INTERNALS_ARE_DERIVED = False``) writes them, ids included, inside
+#: its ``config``: ioiocore's ``Chain.serialize``.
+INTERNAL_NODES_KEY = "_internal_nodes"
+
 
 def _needs_id(config: dict) -> bool:
     """Whether this node's configuration lacks a usable id."""
@@ -110,6 +118,138 @@ def canonicalize(document: dict) -> dict:
             config[ID_KEY] = PortableImp.new_id()
 
     return result
+
+
+def with_fresh_ids(document: dict) -> dict:
+    """Return *document* with a new id on every node and every port.
+
+    For building one document into several live pipelines in one
+    process. ioiocore's id registry is process-wide, and it refuses an
+    object whose id a live one holds, so deserializing the same document
+    twice raises ``ID ... conflict``. ``Portable.reset()`` would clear
+    the registry under every pipeline already built (D-BATCH-72).
+
+    A connection that names a port by id is rewritten to that port's new
+    id. One written by name, ``"eeg.out"`` or ``"eeg"``, is kept: names
+    do not change. A node or port without an id gets one. An explicit
+    ``stream_id`` is kept. The internal nodes a chain writes into its
+    configuration (``INTERNALS_ARE_DERIVED = False``) are renewed the
+    same way, and a connection naming one of their ports follows it.
+
+    Not for the halves of a distributed pipeline: a stream id derived
+    from a node's id would change on one side only. Give both halves one
+    document, as :func:`canonicalize` says.
+
+    The input is not modified.
+
+    Args:
+        document: A pipeline document, as ``serialize()`` wrote it or as
+            loaded from JSON.
+
+    Returns:
+        dict: A copy with fresh ids and its connections rewritten.
+
+    Raises:
+        TypeError: If *document* is not a mapping.
+
+    Note:
+        As with :func:`canonicalize`, malformed entries are left for the
+        loader to refuse. An id repeated in the input stays repeated, so
+        the loader still refuses that document.
+    """
+    if not isinstance(document, dict):
+        raise TypeError(
+            f"a pipeline document is a mapping, not {type(document).__name__}"
+        )
+
+    result = copy.deepcopy(document)
+    nodes = result.get("nodes")
+    if not isinstance(nodes, list):
+        return result
+
+    from ioiocore.imp.portable_imp import PortableImp
+
+    # Old id -> new id, so every reference to one id follows it.
+    minted: dict = {}
+
+    def fresh(old) -> str:
+        if not isinstance(old, str) or not old or old == UNASSIGNED:
+            return PortableImp.new_id()
+        if old not in minted:
+            minted[old] = PortableImp.new_id()
+        return minted[old]
+
+    def renew(node: dict) -> dict:
+        # Plain dicts, as a document loaded from JSON has: `serialize()`
+        # hands out ioiocore's read-only Configuration objects, and a
+        # deep copy keeps their type.
+        config = node.get("config")
+        config = dict(config) if isinstance(config, dict) else {}
+        node["config"] = config
+        config[ID_KEY] = fresh(config.get(ID_KEY))
+        for key in PORT_KEYS:
+            ports = config.get(key)
+            if not isinstance(ports, list):
+                continue
+            config[key] = [
+                (
+                    {**port, ID_KEY: fresh(port.get(ID_KEY))}
+                    if isinstance(port, dict)
+                    else port
+                )
+                for port in ports
+            ]
+        internal = config.get(INTERNAL_NODES_KEY)
+        if isinstance(internal, list):
+            config[INTERNAL_NODES_KEY] = [
+                renew(dict(inner)) if isinstance(inner, dict) else inner
+                for inner in internal
+            ]
+        return node
+
+    for node in nodes:
+        if isinstance(node, dict):
+            renew(node)
+
+    connections = result.get("connections")
+    if isinstance(connections, list):
+        result["connections"] = [
+            (
+                [
+                    minted.get(end, end) if isinstance(end, str) else end
+                    for end in pair
+                ]
+                if isinstance(pair, (list, tuple))
+                else pair
+            )
+            for pair in connections
+        ]
+    return result
+
+
+def omit_unassigned_edge(serialized: dict) -> dict:
+    """Write a world-facing node that names no edge as it was before.
+
+    A node's configuration carries ``edge_id`` even when it is None, so
+    that the node describes itself completely. A document does not: an
+    unassigned node is written with no such key at all, which keeps
+    every document that never assigned one byte-identical to a 4.0
+    document, and keeps the key's presence meaning that somebody chose.
+
+    Args:
+        serialized: One node as ``serialize()`` produced it.
+
+    Returns:
+        The same dict, its ``config`` replaced by a copy without the key
+        when the id was None; untouched otherwise.
+    """
+    from .constants import Constants
+
+    key = Constants.Keys.EDGE_ID
+    config = serialized.get("config")
+    if isinstance(config, dict) and key in config and config[key] is None:
+        serialized["config"] = {k: v for k, v in config.items() if k != key}
+    return serialized
 
 
 def node_ids(document: dict) -> list:

@@ -13,7 +13,7 @@ if __name__ == "__main__":
 
     # Create 4 sources with different frequencies
     source1, source2, source3, source4 = [
-        gp.Generator(channel_count=1,
+        gp.Generator(channel_count=1, name=f"source_{f}hz",
                      signal_frequency=f,
                      signal_amplitude=25) for f in (2, 4, 6, 8)
     ]
@@ -25,8 +25,8 @@ if __name__ == "__main__":
     splitter = gp.Router(output_channels=[[0, 3], [1, 2]])
 
     # Create scopes
-    scope1 = gp.TimeSeriesScope()
-    scope2 = gp.TimeSeriesScope()
+    scope1 = gp.TimeSeriesScope(name="scope1")
+    scope2 = gp.TimeSeriesScope(name="scope2")
 
     # Connect nodes
     p.connect(source1, combiner["in1"])

@@ -1,5 +1,5 @@
 # --------------------------------------------------------------
-# Example file s2e1_a_highpass.py
+# Example file s2e1_highpass.py
 # For details and usage, see g.Pype Training Season 2, Episode 1
 # --------------------------------------------------------------
 

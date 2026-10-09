@@ -30,6 +30,51 @@ from .constants import Constants
 #: is visible in every process listing on the machine.
 ENV_DATA_TOKEN = "GPYPE_DATA_TOKEN"
 
+#: Where an EDGE reads its edge id from when neither ``configure`` nor
+#: ``--edge-id`` gave one. Read under EDGE residency only, so a machine
+#: that exports it for its edge can still run a standalone script or a
+#: server beside it.
+ENV_EDGE_ID = "GPYPE_EDGE_ID"
+
+
+def check_edge_id(value, what: str = "edge_id") -> Optional[str]:
+    """Return *value* if it can name an edge, or refuse it.
+
+    One rule for both sides of the match: the id this process is
+    launched with and the id a node is assigned in a document. They are
+    compared for equality and nothing else, so anything that would make
+    two spellings of one edge unequal is refused rather than normalised
+    -- a number where the other side has a string, or a trailing space.
+
+    Args:
+        value: The candidate, or None for "no edge".
+        what: What is being checked, for the message.
+
+    Returns:
+        *value*, unchanged.
+
+    Raises:
+        TypeError: If *value* is neither None nor a string.
+        ValueError: If it is empty or has leading or trailing
+            whitespace.
+    """
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        raise TypeError(
+            f"{what} must be a string naming an edge, got "
+            f"{type(value).__name__} {value!r}. It is compared with the "
+            f"--edge-id of each edge process, which is a string, so a "
+            f"number would never match."
+        )
+    if not value or value != value.strip():
+        raise ValueError(
+            f"{what} must be a non-empty name without surrounding "
+            f"whitespace, got {value!r}. Ids are matched exactly, so "
+            f"'A ' would never match an edge launched as 'A'."
+        )
+    return value
+
 
 def _reset_raw_state() -> None:
     """Clear the raw-recording state that outlives a configuration.
@@ -57,6 +102,33 @@ def _reset_raw_state() -> None:
     raw.ReplayClock.reset()
 
 
+class _SilentParser(argparse.ArgumentParser):
+    """An ArgumentParser that fails without saying so.
+
+    Only for the implicit parse of a host process's argv, where g.Pype
+    is reading a command line it does not own. That parse already swallows
+    its own failure and falls back to defaults, so argparse's usage block
+    describes nothing the caller can act on -- and it is printed to
+    stderr from inside what looks to the user like an unrelated
+    operation.
+
+    Measured 2026-09-22: the integration tier's own ``addopts = -ra`` is
+    read as ``-r a``, an invalid choice for ``--residency``. With pytest
+    capturing, the block was invisible; under ``-s``, which the guided
+    manual procedures require, it printed into the middle of the
+    operator's briefing and read as a crash. The run was never affected
+    either way.
+
+    An explicit ``LaunchConfig.parse_args()`` from a real launcher still
+    reports normally: there the argv *is* g.Pype's, and a bad value is
+    the user's to fix.
+    """
+
+    def error(self, message):
+        """Fail the parse without printing to stderr."""
+        raise SystemExit(2)
+
+
 @dataclass
 class LaunchConfig:
     """Global launch configuration singleton.
@@ -69,12 +141,14 @@ class LaunchConfig:
     2. Command-line parsing: LaunchConfig.parse_args(sys.argv[1:])
     3. Programmatic: LaunchConfig.get() then modify fields
 
-    Usage in main():
+    Usage in main()::
+
         def main():
             LaunchConfig.parse_args()
             # ... rest of application
 
-    Usage in nodes:
+    Usage in nodes::
+
         config = LaunchConfig.get()
         if config.is_edge():
             ...
@@ -82,6 +156,14 @@ class LaunchConfig:
 
     #: Residency mode: standalone, edge, or server
     residency: str = Constants.Residency.STANDALONE
+
+    #: Which edge this process is, under EDGE residency. A node that
+    #: names an edge is built only by the edge of that name; a node
+    #: that names none is built by every edge. None -- the only value a
+    #: server or a standalone process has -- means "no edge", never
+    #: "every edge", so an edge launched without one builds only the
+    #: nodes that name none.
+    edge_id: Optional[str] = None
 
     #: WebSocket endpoint URL for edge/server communication. A ``wss``
     #: scheme is what switches the data socket to TLS: both ends read
@@ -124,10 +206,10 @@ class LaunchConfig:
     #: anything unauthenticated.
     #:
     #: Two capabilities rather than one, because the fan-in direction is
-    #: a *single receiver slot with no sender identity*: a connection
-    #: that may PUT can silently replace the stream an amplifier is
-    #: feeding. Read access and write access are therefore different
-    #: grants, and a viewer gets only the first.
+    #: a *single receiver slot*, held by whichever connection writes it
+    #: first: a connection that may PUT can take the stream an amplifier
+    #: is meant to feed. Read access and write access are therefore
+    #: different grants, and a viewer gets only the first.
     data_tokens: Optional[dict] = None
 
     #: Record every source's frames, at the point right after its core
@@ -168,7 +250,7 @@ class LaunchConfig:
             # build a node, so an unparseable argv falls back to the
             # default rather than exiting.
             try:
-                cls.parse_args()
+                cls.parse_args(quiet=True)
             except SystemExit:
                 # Falling back to defaults must not throw away a
                 # recording the operator asked for. argparse errors on a
@@ -207,7 +289,7 @@ class LaunchConfig:
         # host process whose argv it does not own, which is exactly
         # where a colliding prefix is likely. With abbreviation on, a
         # host's own ``--load <config>`` matched ``--load-from`` and
-        # every source in the graph was replaced by a replay core
+        # every source in the pipeline was replaced by a replay core
         # reading a path the operator never gave g.Pype.
         parser = argparse.ArgumentParser(add_help=False, allow_abbrev=False)
         parser.add_argument("--save-as", dest="save_as", default=None)
@@ -248,6 +330,7 @@ class LaunchConfig:
         data_tokens: Optional[dict] = None,
         save_as: Optional[str] = None,
         load_from: Optional[str] = None,
+        edge_id: Optional[str] = None,
     ) -> "LaunchConfig":
         """Configure the global launch settings.
 
@@ -275,13 +358,19 @@ class LaunchConfig:
                 stem. See :attr:`save_as`.
             load_from: Replay a recorded run instead of building any
                 source's own core. See :attr:`load_from`.
+            edge_id: Which edge this process is. EDGE residency only;
+                falls back to ``GPYPE_EDGE_ID`` in the environment. See
+                :attr:`edge_id`.
 
         Returns:
             The configured LaunchConfig instance.
 
         Raises:
             ValueError: If residency is invalid or required params
-                missing, or if both save_as and load_from are given.
+                missing, if both save_as and load_from are given, or if
+                an edge_id is given outside EDGE residency or is not a
+                usable name.
+            TypeError: If edge_id is not a string.
             InsecureTransportError: If the endpoint is plaintext and
                 names a host reachable from a network, and that was not
                 asked for. The samples on this socket are the
@@ -290,6 +379,7 @@ class LaunchConfig:
         """
         cls._validate_residency(residency, endpoint)
         cls._validate_bind(bind)
+        edge_id = cls._resolve_edge_id(residency, edge_id)
         if save_as and load_from:
             raise ValueError(
                 "save_as and load_from cannot both be set: one records "
@@ -316,6 +406,7 @@ class LaunchConfig:
         if cls._instance is None:
             cls._instance = LaunchConfig()
         cls._instance.residency = residency
+        cls._instance.edge_id = edge_id
         cls._instance.endpoint = endpoint
         cls._instance.bind = bind
         cls._instance.certfile = certfile
@@ -330,9 +421,9 @@ class LaunchConfig:
         cls._instance.load_from = load_from
 
         # A stream's key is its class plus an ordinal in construction
-        # order, so the counter has to start where the graph does.
+        # order, so the counter has to start where the pipeline does.
         # Without this, a second pipeline in one process continues
-        # counting and a load_from graph asks for 'Generator_1' from a
+        # counting and a load_from pipeline asks for 'Generator_1' from a
         # run that recorded 'Generator_0'. Imported here because the
         # module that owns the counter reads this one.
         _reset_raw_state()
@@ -372,6 +463,7 @@ class LaunchConfig:
         cls,
         args: Optional[Sequence[str]] = None,
         parser: Optional[argparse.ArgumentParser] = None,
+        quiet: bool = False,
     ) -> "LaunchConfig":
         """Parse command-line arguments into launch configuration.
 
@@ -382,6 +474,12 @@ class LaunchConfig:
             args: Command-line arguments. Defaults to sys.argv[1:].
             parser: Custom ArgumentParser to extend. If None, creates
                 a new parser with standard g.Pype arguments.
+            quiet: Do not print usage and an error message when the argv
+                cannot be parsed. Used by the implicit path in
+                :meth:`get_instance`, where the failure is caught and
+                defaults are applied anyway, so the message describes
+                nothing the caller can act on. Ignored when *parser* is
+                supplied, since that parser belongs to the caller.
 
         Returns:
             The configured LaunchConfig instance.
@@ -394,7 +492,8 @@ class LaunchConfig:
         if cls._instance is not None:
             return cls._instance
         if parser is None:
-            parser = argparse.ArgumentParser(
+            factory = _SilentParser if quiet else argparse.ArgumentParser
+            parser = factory(
                 description="g.Pype Application",
                 formatter_class=argparse.RawDescriptionHelpFormatter,
             )
@@ -424,6 +523,7 @@ class LaunchConfig:
             allow_insecure=getattr(parsed, "insecure", False),
             save_as=getattr(parsed, "save_as", None),
             load_from=getattr(parsed, "load_from", None),
+            edge_id=getattr(parsed, "edge_id", None),
         )
 
     @classmethod
@@ -440,6 +540,17 @@ class LaunchConfig:
             default=Constants.Residency.STANDALONE,
             help="Execution mode: standalone (local), edge (data source), "
             "or server (processing). Default: standalone",
+        )
+
+        parser.add_argument(
+            "--edge-id",
+            type=str,
+            default=None,
+            dest="edge_id",
+            help="Which edge this process is, with --residency edge. "
+            "It builds the nodes whose edge_id matches and the nodes "
+            "that name no edge, and nothing else. Falls back to "
+            f"{ENV_EDGE_ID}; refused in the other residencies.",
         )
 
         parser.add_argument(
@@ -589,6 +700,49 @@ class LaunchConfig:
                 raise ValueError(
                     f"--endpoint required for {residency} residency"
                 )
+
+    @classmethod
+    def _resolve_edge_id(
+        cls, residency: str, edge_id: Optional[str]
+    ) -> Optional[str]:
+        """The edge id this process runs with, checked.
+
+        Given explicitly, it has to be an edge's: a server or a
+        standalone process that is handed one has been launched with
+        something it would silently ignore, and a standalone run builds
+        every node whatever it says. Taken from the environment only
+        under EDGE residency, and never refused there: the variable
+        describes the machine, and a machine that exports it for its
+        edge must still be able to run anything else.
+
+        Args:
+            residency: The residency being configured.
+            edge_id: What the caller or the command line gave.
+
+        Returns:
+            The edge id, or None.
+
+        Raises:
+            ValueError: If *edge_id* is given outside EDGE residency, or
+                is not a usable name.
+            TypeError: If it is not a string.
+        """
+        if residency != Constants.Residency.EDGE:
+            if edge_id is not None:
+                raise ValueError(
+                    f"edge_id {edge_id!r} names an edge, and this "
+                    f"process is {residency}. Only an edge process "
+                    f"selects nodes by edge id: a server receives every "
+                    f"edge's streams and a standalone run builds every "
+                    f"node. Pass residency=edge, or drop --edge-id."
+                )
+            return None
+        if edge_id is None:
+            edge_id = os.environ.get(ENV_EDGE_ID) or None
+            what = ENV_EDGE_ID
+        else:
+            what = "edge_id (--edge-id)"
+        return check_edge_id(edge_id, what)
 
     @classmethod
     def reset(cls) -> None:

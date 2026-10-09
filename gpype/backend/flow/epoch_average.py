@@ -4,6 +4,8 @@ from typing import Optional
 
 import numpy as np
 
+from ...common._private import channels
+from ...common._private.naming import node_label
 from ...common.constants import Constants
 from ..core.i_port import IPort
 from ..core.io_node import IONode
@@ -198,6 +200,18 @@ class EpochAverage(IONode):
         count_ctx[OPort.Configuration.Keys.TIMING] = Constants.Timing.ASYNC
         port_context_out[self.PORT_COUNT] = count_ctx
 
+        # An averaged epoch is a template, not a moment in the source
+        # recording: a marker or gap carried over from the input would
+        # name a meaningless row (D-BATCH-86).
+        warning = channels.drop_grid(
+            port_context_out[PORT_OUT], node_label(self)
+        )
+        if warning:
+            self.log(warning, type=Constants.LogTypes.WARNING)
+        # An average has no trial axis to describe: PORT_COUNT already
+        # says how many trials went in (D-BATCH-89).
+        port_context_out[PORT_OUT].pop(Constants.Keys.TRIALS, None)
+
         self.reset()
         return port_context_out
 
@@ -269,4 +283,40 @@ class EpochAverage(IONode):
         return {
             PORT_OUT: average.astype(Constants.DATA_TYPE),
             self.PORT_COUNT: np.array([[self._n]], dtype=Constants.DATA_TYPE),
+        }
+
+    def process(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
+        """Average a whole ``(time, channel, trial)`` block, in one call.
+
+        The counterpart of :meth:`step` for a batch run, where a node
+        such as :class:`~gpype.Epochs` hands over every trial at once
+        instead of one epoch per cycle (D-BATCH-89). ``mode``,
+        ``reject_level`` and ``reject_peak_to_peak`` are not consulted:
+        there is no arrival order to be cumulative, moving or
+        exponential about, and no cycle-by-cycle amplitude check to run
+        -- the whole cube is averaged in one call.
+
+        Args:
+            data: The complete block, shape ``(time, channel, trial)``,
+                under key ``PORT_IN``.
+
+        Returns:
+            The mean over the trial axis, shape ``(time, channel)``,
+            under ``PORT_OUT``, and the trial count under
+            ``PORT_COUNT``.
+
+        Raises:
+            ValueError: If the input is not three-dimensional.
+        """
+        block = data[PORT_IN]
+        if block.ndim != 3:
+            raise ValueError(
+                f"{type(self).__name__}.process() needs a (time, "
+                f"channel, trial) block; got shape {block.shape}."
+            )
+        average = block.mean(axis=2).astype(Constants.DATA_TYPE)
+        count = block.shape[2]
+        return {
+            PORT_OUT: average,
+            self.PORT_COUNT: np.array([[count]], dtype=Constants.DATA_TYPE),
         }

@@ -1,20 +1,20 @@
 from __future__ import annotations
 
+import functools
 import time
-from typing import List
+from typing import Optional
 
-import ioiocore as ioc
 import numpy as np
 
 from ...common._private import channels, driver_usage
 from ...common.constants import Constants
-from ..core._private.chain_params import stream_id_for, strip_chain_keys
-from ..core._private.link import Link
-from ..core._private.oscar import Oscar
-from ..core._private.sync import Sync
-from ..core.o_port import OPort
-from .base import raw
-from .base.amplifier_source import AmplifierSource, as_whole_number
+from .base.amplifier_source import (
+    AmplifierSource,
+    apply_channel_units,
+    as_whole_number,
+    opens_no_device,
+    unopened_shape,
+)
 
 #: Default output port identifier
 PORT_OUT = Constants.Defaults.PORT_OUT
@@ -54,30 +54,29 @@ def _as_group_flags(value, name: str):
     return flags
 
 
-class _GUSBampCore(AmplifierSource):
-    """Internal node implementing g.USBamp amplifier acquisition logic.
-
-    This is the actual g.USBamp node (pure ONode inheritance). It is
-    wrapped by the GUSBamp chain for distributed operation.
+class GUSBamp(AmplifierSource):
+    """g.USBamp biosignal amplifier for real-time data acquisition.
 
     Interface to g.tec's g.USBamp wired biosignal amplifier.
     """
 
-    #: One channel appended after the device's own, carrying the
-    #: instant each block was first seen on this host.
-    #:
-    #: The stamp rides in band because it has to survive a Link. The
-    #: Sync at the end of this chain builds the master-timeline
-    #: relation from (position, instant) pairs, and under EDGE/SERVER
-    #: residency that Sync runs in the server process, where reading a
-    #: clock measures when the frame finished crossing the network
-    #: rather than when the amplifier delivered it. Sync consumes the
-    #: channel again, so nothing downstream sees a wider frame.
-    #:
-    #: Declared on the port and not in the configuration, unlike
-    #: Core-8's: a GDS configuration's channel_count is the number
-    #: handed to the driver, so widening it would ask the amplifier
-    #: for one more acquisition channel.
+    # One channel appended after the device's own, carrying the
+    # instant each block was first seen on this host.
+    #
+    # The stamp rides in band because it has to survive a Link. The
+    # Sync at the end of this chain builds the master-timeline
+    # relation from (position, instant) pairs, and under EDGE/SERVER
+    # residency that Sync runs in the server process, where reading a
+    # clock measures when the frame finished crossing the network
+    # rather than when the amplifier delivered it. Sync consumes the
+    # channel again, so nothing downstream sees a wider frame.
+    #
+    # Declared on the port and not in the configuration, unlike
+    # Core-8's, and so is the trigger: a GDS configuration's
+    # channel_count is the number handed to the driver, which is what
+    # every document since 4.0.0 records under that key. Widening it
+    # would ask the amplifier for more acquisition channels, on this
+    # build or on a 4.0.x one reading the document (D-CORE-67).
     NUM_TIMELINE_CHANNELS = 1
 
     class Configuration(AmplifierSource.Configuration):
@@ -91,8 +90,6 @@ class _GUSBampCore(AmplifierSource):
             concrete value before the configuration is built.
             """
 
-            #: Configuration key for the device serial number
-            SERIAL = "serial"
             #: Configuration key for enabling the digital trigger channel
             ENABLE_TRIGGER = "enable_trigger"
             #: Configuration key for enabling counter channel
@@ -115,6 +112,11 @@ class _GUSBampCore(AmplifierSource):
             #: Substituting a list of zeros to satisfy a mandatory key
             #: would quietly change that to "set every channel unipolar".
             BIPOLAR_CHANNELS = "bipolar_channels"
+            #: The serial of the unit that opened, wherever one did. A
+            #: process that opens no device -- a server, or a replay --
+            #: keeps None, which means what it meant to the author:
+            #: whichever amplifier answers first.
+            SERIAL = "serial"
 
     def __init__(
         self,
@@ -128,6 +130,8 @@ class _GUSBampCore(AmplifierSource):
         common_reference: list = None,
         shortcut_enabled: bool = None,
         bipolar_channels: list = None,
+        enable_oscar: bool = False,
+        edge_id: Optional[str] = None,
         **kwargs,
     ):
         """Initialize g.USBamp amplifier interface.
@@ -148,6 +152,10 @@ class _GUSBampCore(AmplifierSource):
             shortcut_enabled: Enable the g.USBamp shortcut.
             bipolar_channels: Reference channel number per channel, 0 to
                 derive that channel unipolar.
+            enable_oscar: Run OSCAR artifact removal on this stream.
+            edge_id: Which edge runs this node, matched against the
+                edge process's --edge-id. None, the default, is every
+                edge; ignored when the pipeline is not distributed.
             **kwargs: Additional parameters for AmplifierSource.
 
         Raises:
@@ -169,20 +177,6 @@ class _GUSBampCore(AmplifierSource):
         # platform its driver ships for. The import below stays lazy: a
         # missing driver is still a missing driver, and it must not break
         # `import gpype` or the node catalogue.
-
-        # Import gtec_gds only when actually needed (lazy import)
-        try:
-            import gtec_gds as gds
-
-            # The driver refuses to construct a handle until the
-            # local usage key is registered.
-            driver_usage.register()
-        except ImportError as e:
-            raise RuntimeError(
-                f"GDS library not available: {e}. "
-                "This may be expected in CI environments where the GDS "
-                "library is not installed."
-            ) from e
 
         # A restored configuration binds these named parameters in the
         # per-port list form they were stored as, and they are handed
@@ -213,53 +207,99 @@ class _GUSBampCore(AmplifierSource):
         common_reference = _as_group_flags(
             common_reference, "common_reference"
         )
+        # Before the branch, so an edge and a server store the same list:
+        # kept as given, a range or a numpy array made the pipeline
+        # unserialisable.
+        if bipolar_channels is not None:
+            bipolar_channels = channels.as_selection(
+                bipolar_channels, "bipolar_channels"
+            )
 
-        #: g.USBamp device interface instance
-        #
-        # The digital trigger parameter is `enable_trigger` here, not the
-        # `enable_di` that g.HIamp uses. The distinction matters more than
-        # a name usually would: the driver accepts **kwargs, so a wrong
-        # name is not rejected -- it is swallowed, the trigger silently
-        # stays off, and only the read-back below keeps the declared
-        # channel count from drifting one channel wide of the data.
-        self._device = gds.GUSBamp(
-            serial=serial,
-            sampling_rate=sampling_rate,
-            channel_count=channel_count,
-            frame_size=frame_size,
-            enable_trigger=enable_trigger,
-            enable_counter=enable_counter,
-            common_ground=common_ground,
-            common_reference=common_reference,
-            shortcut_enabled=shortcut_enabled,
-            bipolar_channels=bipolar_channels,
-        )
+        if opens_no_device(edge_id):
+            # **This process does not open the amplifier**: a server, where
+            # the device is on the edge; an edge it is not assigned to,
+            # where the device is on another; or a replay, where the
+            # recording stands in for it. A document naming one is
+            # constructed by every process that reads it, and the chain
+            # runs no core in any of them. What the edge would read
+            # back from the handle comes from the arguments instead: see
+            # unopened_shape for the shape; the flags take the value the
+            # driver itself gives None, and the serial stays as given,
+            # None included.
+            sampling_rate, channel_count, frame_size = unopened_shape(
+                self, sampling_rate, channel_count, frame_size
+            )
+            self._device = None
+            self._device_factory = None
+            enable_trigger = bool(enable_trigger)
+            enable_counter = bool(enable_counter)
+            shortcut_enabled = bool(shortcut_enabled)
+            if common_ground is None:
+                common_ground = [False] * GROUP_COUNT
+            if common_reference is None:
+                common_reference = [False] * GROUP_COUNT
+        else:
+            # Import gtec_gds only when actually needed (lazy import)
+            try:
+                import gtec_gds as gds
 
-        # Take the configuration from the device rather than from the
-        # arguments: the driver resolves None to a default, clamps the
-        # frame size to one the sampling rate supports, and reports the
-        # serial of the amplifier it actually opened.
-        serial = self._device.serial_number
-        sampling_rate = self._device.sampling_rate
-        channel_count = self._device.channel_count
-        frame_size = self._device.frame_size
-        enable_trigger = self._device.enable_trigger
-        enable_counter = self._device.enable_counter
-        common_ground = self._device.common_ground
-        common_reference = self._device.common_reference
-        shortcut_enabled = self._device.shortcut_enabled
+                # The driver refuses to construct a handle until the
+                # local usage key is registered.
+                driver_usage.register()
+            except ImportError as e:
+                raise RuntimeError(
+                    f"GDS library not available: {e}. "
+                    "This may be expected in CI environments where the "
+                    "GDS library is not installed."
+                ) from e
 
-        # The measured channels are the ones the device acquires.
-        # Recorded before the trigger is appended so setup() can tell the
-        # two apart.
-        self._eeg_channel_count = channel_count
+            #: g.USBamp device interface instance
+            #
+            # The digital trigger parameter is `enable_trigger` here, not
+            # the `enable_di` that g.HIamp uses. The distinction matters
+            # more than a name usually would: the driver accepts
+            # **kwargs, so a wrong name is not rejected -- it is
+            # swallowed, the trigger silently stays off, and only the
+            # read-back below keeps the declared channel count from
+            # drifting one channel wide of the data.
+            open_kwargs = dict(
+                serial=serial,
+                sampling_rate=sampling_rate,
+                channel_count=channel_count,
+                frame_size=frame_size,
+                enable_trigger=enable_trigger,
+                enable_counter=enable_counter,
+                common_ground=common_ground,
+                common_reference=common_reference,
+                shortcut_enabled=shortcut_enabled,
+                bipolar_channels=bipolar_channels,
+            )
+            self._device = gds.GUSBamp(**open_kwargs)
 
-        # Add the digital trigger channel if enabled
-        if enable_trigger:
-            channel_count += 1
+            # Take the configuration from the device rather than from the
+            # arguments: the driver resolves None to a default, clamps the
+            # frame size to one the sampling rate supports, and reports
+            # the serial of the amplifier it actually opened.
+            serial = self._device.serial_number
+            # Pinned to the unit that actually opened, so a bench with
+            # two amplifiers of this model reopens the same one after a
+            # stop(). See AmplifierSource._reopen_device.
+            open_kwargs["serial"] = serial
+            self._device_factory = functools.partial(
+                gds.GUSBamp, **open_kwargs
+            )
+            sampling_rate = self._device.sampling_rate
+            channel_count = self._device.channel_count
+            frame_size = self._device.frame_size
+            enable_trigger = self._device.enable_trigger
+            enable_counter = self._device.enable_counter
+            common_ground = self._device.common_ground
+            common_reference = self._device.common_reference
+            shortcut_enabled = self._device.shortcut_enabled
 
-        # Note: enable_counter overwrites a channel, it does not add one,
-        # so the arithmetic above is unaffected either way.
+        # channel_count stays the acquired count; setup() appends the
+        # trigger on the port. enable_counter overwrites a channel rather
+        # than adding one, so it changes neither.
         #
         # The GDS header states where: "a sample counter [...] applied on
         # channel 16 instead of the measured signal if selected for
@@ -274,7 +314,8 @@ class _GUSBampCore(AmplifierSource):
         # counter takes channel 1.
 
         # Set up data callback for real-time streaming
-        self._device.set_data_callback(self._data_callback)
+        if self._device is not None:
+            self._device.set_data_callback(self._data_callback)
 
         # Initialize parent AmplifierSource with final configuration
         #
@@ -285,6 +326,7 @@ class _GUSBampCore(AmplifierSource):
         # the serial the handle reports -- so the substitution would be
         # invisible in the data and wrong in the verdict.
         super().__init__(
+            enable_oscar=enable_oscar,
             serial=serial,
             sampling_rate=sampling_rate,
             channel_count=channel_count,
@@ -295,7 +337,26 @@ class _GUSBampCore(AmplifierSource):
             common_reference=common_reference,
             shortcut_enabled=shortcut_enabled,
             bipolar_channels=bipolar_channels,
+            edge_id=edge_id,
             **kwargs,
+        )
+
+    def channel_units(self) -> Optional[list]:
+        """One 'uV' per acquired channel (vendor/gds-headers's
+        ``GDSClientAPI_gUSBamp.h``: ``GDS_GUSBAMP_SCALING.Offset`` is in
+        microvolts), None for the digital trigger when enabled, and
+        None for the arrival stamp. A channel enabling
+        ``enable_counter`` overwrites a measured channel at a position
+        this node does not track (see ``setup``'s docstring), so it is
+        still declared 'uV'."""
+        n_eeg = self.scalar(self.config[self.Configuration.Keys.CHANNEL_COUNT])
+        trigger = int(
+            bool(self.config[self.Configuration.Keys.ENABLE_TRIGGER])
+        )
+        return (
+            ["uV"] * n_eeg
+            + [None] * trigger
+            + [None] * self.NUM_TIMELINE_CHANNELS
         )
 
     def setup(
@@ -309,9 +370,9 @@ class _GUSBampCore(AmplifierSource):
         oscillation, and nothing about the result announces that it was
         ever an event.
 
-        The arrival stamp is appended after both, and counted apart from
-        them: the trigger block is derived from the width the device
-        reports, which the stamp is no part of.
+        The configuration counts the channels handed to the driver, so
+        the trigger is added here, on the port, and the arrival stamp
+        after it.
 
         Enabling the counter overwrites a measured channel rather than
         appending one, so it stays inside the measured block and the
@@ -330,21 +391,23 @@ class _GUSBampCore(AmplifierSource):
             Output port contexts describing the channel layout.
         """
         port_context_out = super().setup(data, port_context_in)
+        trigger = int(
+            bool(self.config[self.Configuration.Keys.ENABLE_TRIGGER])
+        )
         stamped = self.NUM_TIMELINE_CHANNELS
+        units = self.channel_units()
         for context in port_context_out.values():
-            # Read before the count is raised: everything below counts
-            # the device's channels, and the stamp is not one of them.
-            total = channels.channel_count(context)
-            n_eeg = min(self._eeg_channel_count, total)
+            n_eeg = channels.channel_count(context)
             roles = [Constants.ChannelRoles.SIGNAL] * n_eeg
-            roles += [Constants.ChannelRoles.TRIGGER] * (total - n_eeg)
+            roles += [Constants.ChannelRoles.TRIGGER] * trigger
             roles += [Constants.ChannelRoles.TIMESTAMP] * stamped
-            context[Constants.Keys.CHANNEL_COUNT] = total + stamped
+            context[Constants.Keys.CHANNEL_COUNT] = n_eeg + trigger + stamped
             # Roles only. Naming the stamp would mean naming the
             # measured channels too, and an amplifier that reports no
             # montage has no names to give them; the stamp is found by
             # role, never by position or name.
             context.update(channels.describe(roles))
+            apply_channel_units(context, units)
         return port_context_out
 
     def start(self) -> None:
@@ -354,9 +417,13 @@ class _GUSBampCore(AmplifierSource):
         real-time biosignal processing.
         """
         # Start hardware data acquisition
+        self._reopen_device()
         self._device.start()
         # Start parent source processing
         super().start()
+        # The driver's own thread can die mid-run; see
+        # AmplifierSource._start_stream_watch.
+        self._start_stream_watch()
 
     def stop(self):
         """Stop g.USBamp data acquisition and cleanup resources.
@@ -380,8 +447,8 @@ class _GUSBampCore(AmplifierSource):
         """
         # First sight: the earliest instant this block exists on the
         # host, taken before it is widened, queued or scheduled.
-        # time.monotonic() and not perf_counter(), because Sync
-        # compares the stamp against its own reading of that clock.
+        # channels.stamp_clock(), because Sync compares the stamp
+        # against its own reading of that same clock.
         # One value for the whole block -- the block cannot exist
         # until its last sample has been acquired, which is the sample
         # Sync reads it back from.
@@ -405,126 +472,3 @@ class _GUSBampCore(AmplifierSource):
         """
         # Pass through data from input to output port
         return {PORT_OUT: data[PORT_IN]}
-
-
-class GUSBamp(ioc.OChain):
-    """g.USBamp biosignal amplifier chain for real-time data acquisition.
-
-    This is an OChain that contains:
-    - _GUSBampCore: The actual g.USBamp acquisition node
-    - Link: Bridge for distributed operation (passthrough in standalone)
-    - Oscar: OSCAR artifact removal processing
-
-    The chain structure enables distributed edge/server operation while
-    keeping node inheritance clean (no chain mixing in node path).
-
-    Interface to g.tec's g.USBamp wired biosignal amplifier.
-    """
-
-    def __init__(
-        self,
-        serial: str = None,
-        sampling_rate: float = None,
-        channel_count: int = None,
-        frame_size: int = None,
-        enable_trigger: bool = None,
-        enable_counter: bool = None,
-        common_ground: list = None,
-        common_reference: list = None,
-        shortcut_enabled: bool = None,
-        bipolar_channels: list = None,
-        enable_oscar: bool = False,
-        **kwargs,
-    ):
-        """Initialize g.USBamp amplifier chain.
-
-        Args:
-            serial: Device serial number. Uses first available if None.
-            sampling_rate: Sampling frequency in Hz.
-            channel_count: Number of channels to acquire.
-            frame_size: Samples per data frame (NumberOfScans).
-            enable_trigger: Enable the digital trigger channel.
-            enable_counter: Enable the counter channel.
-            common_ground: Four booleans, one per channel group.
-            common_reference: Four booleans, one per channel group.
-            shortcut_enabled: Enable the g.USBamp shortcut.
-            bipolar_channels: Reference channel number per channel.
-            enable_oscar: Enable OSCAR artifact removal processing.
-            **kwargs: Additional arguments.
-        """
-        # Store parameters for create_internal_nodes
-        self._link_stream_id = stream_id_for(kwargs)
-        self._core_params = {
-            "serial": serial,
-            "sampling_rate": sampling_rate,
-            "channel_count": channel_count,
-            "frame_size": frame_size,
-            "enable_trigger": enable_trigger,
-            "enable_counter": enable_counter,
-            "common_ground": common_ground,
-            "common_reference": common_reference,
-            "shortcut_enabled": shortcut_enabled,
-            "bipolar_channels": bipolar_channels,
-        }
-        self._core_params.update(strip_chain_keys(kwargs))
-        self._enable_oscar = enable_oscar
-
-        # Initialize OChain (calls create_internal_nodes)
-        kwargs.setdefault(
-            self.Configuration.Keys.OUTPUT_PORTS,
-            [OPort.Configuration()],
-        )
-        ioc.OChain.__init__(
-            self,
-            serial=serial,
-            sampling_rate=sampling_rate,
-            channel_count=channel_count,
-            frame_size=frame_size,
-            enable_trigger=enable_trigger,
-            enable_counter=enable_counter,
-            common_ground=common_ground,
-            common_reference=common_reference,
-            shortcut_enabled=shortcut_enabled,
-            bipolar_channels=bipolar_channels,
-            enable_oscar=enable_oscar,
-            stream_id=self._link_stream_id,
-            **kwargs,
-        )
-
-    def create_internal_nodes(self) -> List[ioc.Node]:
-        """Create the internal node chain.
-
-        Returns:
-            The head of the list is whatever stands in for this chain's
-            core: the core itself, the core followed by a raw tap
-            under ``save_as``, a replay core under ``load_from``,
-            or nothing at all under SERVER residency. Then a Link
-            where the pipeline is distributed, OSCAR where it is
-            enabled, and Sync last.
-        """
-        from ...common.launch_config import LaunchConfig
-
-        nodes = []
-        residency = LaunchConfig.get().residency
-        # Recorded, replaced, or simply built, as the launch
-        # configuration says. Contributes nothing under server
-        # residency: the core lives on the edge, and so does
-        # anything recording or replaying it.
-        nodes.extend(
-            raw.source_stage(self, lambda: _GUSBampCore(**self._core_params))
-        )
-        if residency != Constants.Residency.STANDALONE:
-            nodes.append(
-                Link(
-                    sender=Constants.Residency.EDGE,
-                    receiver=Constants.Residency.SERVER,
-                    stream_id=self._link_stream_id,
-                )
-            )
-        if self._enable_oscar:
-            nodes.append(Oscar())
-        # Sync places this stream on the master timeline. It carries no
-        # device counter, so Sync numbers it by counting samples: a valid
-        # timeline, but not a loss-aware one.
-        nodes.append(Sync())
-        return nodes

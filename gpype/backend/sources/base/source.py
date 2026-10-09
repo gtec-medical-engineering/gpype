@@ -5,12 +5,18 @@ from typing import Optional, Union
 
 import numpy as np
 
+from ....common._private.provenance import loggable
 from ....common.constants import Constants
+from ....common.document import omit_unassigned_edge
+from ....common.launch_config import check_edge_id
 from ...core.o_node import ONode
 from ...core.o_port import OPort
 
 #: Default output port identifier
 OUT_PORT = Constants.Defaults.PORT_OUT
+
+#: A setting the author never gave, written back as no key at all.
+ABSENT = object()
 
 
 class Source(ONode):
@@ -19,6 +25,11 @@ class Source(ONode):
     Provides foundation for all data source nodes that generate or acquire
     data. Sources have only output ports and serve as pipeline entry points.
     Handles validation of output ports, channel counts, and frame sizes.
+
+    Public as ``gp.Source``: subclass it for a source of your own, and the
+    pipeline builds the same chain around it as around a built-in one. In
+    a realtime pipeline a source drives its own cycles, from a thread or
+    from the call that has something to emit.
     """
 
     #: What this source's sample positions advance against. Live sources
@@ -36,6 +47,11 @@ class Source(ONode):
 
     #: Timeline of the pipeline this source belongs to, once bound.
     _timeline = None
+
+    #: This run's provenance record, once ``Pipeline.start()`` has
+    #: stamped one (LQ-P2). None before that, and for a process that
+    #: never starts this source at all.
+    _gpype_provenance: Optional[dict] = None
 
     #: Whether this kind of source derives a frame size from its rate
     #: when the author names none. False for sources where a frame is
@@ -144,6 +160,45 @@ class Source(ONode):
         """
         self._timeline = timeline
 
+    def attach_provenance(self, record: dict) -> None:
+        """Learn this run's provenance record.
+
+        Called by :meth:`Pipeline.start` on every node exposing this
+        method (the same hook a sink uses to learn the run's
+        entitlement), before any node's ``setup()`` runs. :meth:`setup`
+        merges this source's own input identity into a copy of it and
+        publishes the result under ``Constants.Keys.PROVENANCE``.
+
+        Args:
+            record: The run's provenance record, from
+                ``common._private.provenance.build``.
+        """
+        self._gpype_provenance = dict(record)
+
+    def _own_input_identity(self) -> Optional[dict]:
+        """This source's own ``Constants.Keys.INPUT``, if it has one.
+
+        Read from instance state set at construction time -- rather
+        than from the context :meth:`setup` builds -- because it has to
+        be available *inside* this base class's own :meth:`setup`,
+        which every reader's override calls before adding its own
+        identity to the context. ``CsvReader`` and ``GtcReader`` keep it
+        as ``self._input_identity``; ``RecordingReader`` (``MatReader``,
+        ``HDF5Reader``, ``EDFReader``) keeps it inside ``self._extras``
+        under the same context key -- both are covered here, so no
+        reader needs its own override.
+
+        Returns:
+            The identity dict, or None for a source with no file at all.
+        """
+        identity = getattr(self, "_input_identity", None)
+        if identity is not None:
+            return identity
+        extras = getattr(self, "_extras", None)
+        if isinstance(extras, dict):
+            return extras.get(Constants.Keys.INPUT)
+        return None
+
     def _publish_mastership(self, port_context_out: dict) -> None:
         """Tell downstream nodes if this source owns the timeline.
 
@@ -230,6 +285,41 @@ class Source(ONode):
             return value[0] if value else None
         return value
 
+    #: What the author gave for each setting this node stood in for,
+    #: because this process reaches none of the world that answers it.
+    #: None wherever the node asked. See ``raw.stand_in``.
+    _as_given: Optional[dict] = None
+
+    def serialize(self) -> dict:
+        """Serialise the node, writing back what it was given.
+
+        A stand-in only lets the configuration validate where the node is
+        never run. Written into a document it would reach the process
+        that does run it as an instruction, so the author's own value
+        -- None, or no key at all -- is written instead.
+
+        An ``edge_id`` left unset is written as no key at all, so a
+        document that assigns no edge is what it was before edge ids
+        existed. See ``document.omit_unassigned_edge``.
+
+        Returns:
+            The serialised node.
+        """
+        data = omit_unassigned_edge(super().serialize())
+        if not self._as_given:
+            return data
+        from ioiocore.imp.portable_imp import PortableImp
+
+        key = PortableImp.SerializationKeys.SETTINGS
+        settings = dict(data[key])
+        for name, given in self._as_given.items():
+            if given is ABSENT:
+                settings.pop(name, None)
+            else:
+                settings[name] = given
+        data[key] = settings
+        return data
+
     class Configuration(ONode.Configuration):
         """Configuration class for Source parameters."""
 
@@ -246,6 +336,7 @@ class Source(ONode):
         output_ports: Optional[list] = None,
         channel_count: Optional[Union[list, int]] = None,
         frame_size: Optional[Union[list, int]] = None,
+        edge_id: Optional[str] = None,
         **kwargs,
     ):
         """Initialize source with output port configuration.
@@ -256,11 +347,17 @@ class Source(ONode):
                 or list (per port). Defaults to 1. Must be >= 1 or INHERITED.
             frame_size: Samples per frame. Can be int (all ports) or list
                 (per port). Defaults to 1. Must be >= 1 or INHERITED.
+            edge_id: Which edge runs this node, matched against the
+                edge process's --edge-id. None, the default, is every
+                edge; ignored when the pipeline is not distributed.
             **kwargs: Additional arguments for parent ONode class.
 
         Raises:
-            ValueError: If validation fails or input_ports specified.
+            ValueError: If validation fails or input_ports specified, or
+                if edge_id is empty or padded with whitespace.
+            TypeError: If edge_id is not a string.
         """
+        check_edge_id(edge_id)
         # Validate that output_ports is provided (required for sources)
         if output_ports is None:
             raise ValueError("output_ports must be defined.")
@@ -321,6 +418,7 @@ class Source(ONode):
             output_ports=output_ports,
             channel_count=channel_count,
             frame_size=frame_size,
+            edge_id=edge_id,
             **kwargs,
         )
 
@@ -361,11 +459,28 @@ class Source(ONode):
             if total is not None:
                 context[Constants.Keys.SAMPLE_COUNT] = int(total)
 
+            # This run's provenance, plus this source's own input
+            # identity where it has one (LQ-P2). None before
+            # Pipeline.start() has stamped one -- absent rather than a
+            # placeholder, so Result.provenance can tell "no run yet"
+            # from "a run that recorded nothing".
+            if self._gpype_provenance is not None:
+                entry = dict(self._gpype_provenance)
+                own_input = self._own_input_identity()
+                if own_input is not None:
+                    entry["input"] = dict(own_input)
+                context[Constants.Keys.PROVENANCE] = entry
+
             # Get port name and update its context
             port_name = out_ports[i][OPort.Configuration.Keys.NAME]
             port_context_out[port_name].update(context)
 
         self._publish_mastership(port_context_out)
 
-        self.log(f"Source setup complete with {json.dumps(port_context_out)}")
+        # The provenance document is logged as its hash: in full it was
+        # the whole pipeline, once per source.
+        self.log(
+            f"Source setup complete with "
+            f"{json.dumps(loggable(port_context_out))}"
+        )
         return port_context_out

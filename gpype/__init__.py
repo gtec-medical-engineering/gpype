@@ -1,4 +1,5 @@
 import os
+import sys
 from typing import TYPE_CHECKING
 
 import ioiocore as ioc
@@ -11,7 +12,7 @@ from .__version__ import __version__
 #: which changes on every release whether the surface moved or not.
 #: Bump the minor part when something is added, the major part when
 #: something already published changes shape or disappears.
-API_VERSION = "1.0"
+API_VERSION = "1.1"
 
 _LAZY_IMPORTS = {}
 
@@ -19,9 +20,19 @@ _LAZY_IMPORTS = {}
 # top level & common
 
 if TYPE_CHECKING:  # pragma: no cover
+    from ._installer import (
+        InstallerError,
+        RequirementConflictError,
+        RequirementError,
+    )
     from .backend.pipeline import Pipeline
-    from .common._private.allowlist import allow_modules
+    from .common._private.allowlist import (
+        ModuleNotAllowedError,
+        allow_modules,
+    )
+    from .common._private.bundle import BundleError, MissingRequirementsError
     from .common.constants import Constants
+    from .common.diagnostics import deployment_report, set_licence_product
     from .common.document import canonicalize
     from .common.launch_config import LaunchConfig
     from .common.montage import Montage
@@ -34,7 +45,14 @@ _LAZY_IMPORTS.update(
         "backend.pipeline": "Pipeline",
         "frontend.main_app": "MainApp",
         "common._private.allowlist": "allow_modules",
+        # What Pipeline.check and deserialize refuse a document with; the
+        # other refusals are second names, below.
+        "common._private.bundle": "MissingRequirementsError",
+        # What refuses a document's pins (D-CORE-116).
+        "_installer": "RequirementError",
         "common.document": "canonicalize",
+        # What the licence gate would judge this process to be (D-CORE-131).
+        "common.diagnostics": "deployment_report",
         "common.constants": "Constants",
         "common.launch_config": "LaunchConfig",
         "common.montage": "Montage",
@@ -42,6 +60,24 @@ _LAZY_IMPORTS.update(
         "common.settings": "Settings",
     }
 )
+
+#: A further public name of a module that already has its entry in
+#: _LAZY_IMPORTS, keyed by the name. That map is keyed by module path,
+#: so it carries one name per module, and the default document
+#: allow-list is derived from its keys. A name here must therefore not
+#: bring a module of its own (test_init holds it): the allow-list and
+#: dir(gpype) then still agree about which modules are public
+#: (D-CORE-101). It is for a package whose initialiser is not API, as in
+#: common._private; elsewhere the initialiser re-exports the name, as
+#: backend.core does for action (D-NODE-39).
+_LAZY_SECOND_NAMES = {
+    "ModuleNotAllowedError": "common._private.allowlist",
+    "BundleError": "common._private.bundle",
+    "RequirementConflictError": "_installer",
+    "InstallerError": "_installer",
+    # Binds an application's own licence product (D-ENT-101).
+    "set_licence_product": "common.diagnostics",
+}
 
 # ----------------------------------------------
 # backend.core
@@ -77,8 +113,8 @@ _LAZY_IMPORTS.update(
 # ----------------------------------------------
 # chain layer, re-exported from ioiocore
 #
-# gpype's own sources, sinks and widgets are ioiocore chains, so the
-# containers are part of gpype's public API. These are ioiocore types
+# For a container an author writes by hand; the pipeline builds the chain
+# around gpype's own sources, sinks and widgets. These are ioiocore types
 # rather than gpype modules, so they cannot go through _LAZY_IMPORTS;
 # bind them directly.
 
@@ -116,6 +152,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from .backend.flow.channel_labeler import ChannelLabeler
     from .backend.flow.channel_selector import ChannelSelector
     from .backend.flow.epoch_average import EpochAverage
+    from .backend.flow.epochs import Epochs
     from .backend.flow.framer import Framer
     from .backend.flow.router import Router
     from .backend.flow.threshold import Threshold
@@ -126,6 +163,7 @@ _LAZY_IMPORTS.update(
         "backend.flow.channel_labeler": "ChannelLabeler",
         "backend.flow.channel_selector": "ChannelSelector",
         "backend.flow.epoch_average": "EpochAverage",
+        "backend.flow.epochs": "Epochs",
         "backend.flow.framer": "Framer",
         "backend.flow.router": "Router",
         "backend.flow.threshold": "Threshold",
@@ -137,6 +175,7 @@ _LAZY_IMPORTS.update(
 # backend.sinks
 
 if TYPE_CHECKING:  # pragma: no cover
+    from .backend.sinks.base.sink import Sink
     from .backend.sinks.collector import Collector
     from .backend.sinks.csv_writer import CsvWriter
     from .backend.sinks.edf_writer import EDFWriter
@@ -147,6 +186,9 @@ if TYPE_CHECKING:  # pragma: no cover
 
 _LAZY_IMPORTS.update(
     {
+        # The base a custom sink subclasses; a document names the
+        # subclass, never this (D-CORE-82).
+        "backend.sinks.base.sink": "Sink",
         "backend.sinks.collector": "Collector",
         "backend.sinks.csv_writer": "CsvWriter",
         "backend.sinks.edf_writer": "EDFWriter",
@@ -161,6 +203,7 @@ _LAZY_IMPORTS.update(
 # backend.sources
 
 if TYPE_CHECKING:  # pragma: no cover
+    from .backend.sources.base.source import Source
     from .backend.sources.bci_core import BCICore
     from .backend.sources.bci_core8 import BCICore8
     from .backend.sources.csv_reader import CsvReader
@@ -169,7 +212,6 @@ if TYPE_CHECKING:  # pragma: no cover
     from .backend.sources.g_nautilus import GNautilus
     from .backend.sources.g_usbamp import GUSBamp
     from .backend.sources.generator import Generator
-    from .backend.sources.gtc_reader import GtcReader
     from .backend.sources.hdf5_reader import HDF5Reader
     from .backend.sources.hybrid_black import HybridBlack
     from .backend.sources.keyboard import Keyboard
@@ -180,6 +222,8 @@ if TYPE_CHECKING:  # pragma: no cover
 
 _LAZY_IMPORTS.update(
     {
+        # The base a custom source subclasses (D-CORE-82).
+        "backend.sources.base.source": "Source",
         "backend.sources.bci_core": "BCICore",
         # The old name, kept resolvable. It needs its own module rather
         # than an alias entry because this map carries one symbol per
@@ -194,7 +238,6 @@ _LAZY_IMPORTS.update(
         "backend.sources.g_nautilus": "GNautilus",
         "backend.sources.g_usbamp": "GUSBamp",
         "backend.sources.generator": "Generator",
-        "backend.sources.gtc_reader": "GtcReader",
         "backend.sources.hybrid_black": "HybridBlack",
         "backend.sources.keyboard": "Keyboard",
         "backend.sources.lsl_receiver": "LslReceiver",
@@ -231,6 +274,8 @@ if TYPE_CHECKING:  # pragma: no cover
     from .backend.transform.fft import FFT
     from .backend.transform.reference import Reference
     from .backend.transform.rolling_statistic import RollingStatistic
+    from .backend.transform.sklearn import Sklearn
+    from .backend.transform.standardize import Standardize
 
 _LAZY_IMPORTS.update(
     {
@@ -242,6 +287,8 @@ _LAZY_IMPORTS.update(
         "backend.transform.fft": "FFT",
         "backend.transform.reference": "Reference",
         "backend.transform.rolling_statistic": "RollingStatistic",
+        "backend.transform.sklearn": "Sklearn",
+        "backend.transform.standardize": "Standardize",
     }
 )
 
@@ -249,6 +296,8 @@ _LAZY_IMPORTS.update(
 # frontend.widgets
 
 if TYPE_CHECKING:  # pragma: no cover
+    from .frontend.widgets.base.scope import Scope
+    from .frontend.widgets.base.widget import Widget
     from .frontend.widgets.paradigm_presenter import ParadigmPresenter
     from .frontend.widgets.result_scope import ResultScope
     from .frontend.widgets.spectrum_scope import SpectrumScope
@@ -257,6 +306,11 @@ if TYPE_CHECKING:  # pragma: no cover
 
 _LAZY_IMPORTS.update(
     {
+        # The bases a custom widget subclasses: Scope for a plot, Widget
+        # beside INode for anything else (D-CORE-82). Neither module
+        # imports Qt, so a server resolves both.
+        "frontend.widgets.base.scope": "Scope",
+        "frontend.widgets.base.widget": "Widget",
         "frontend.widgets.paradigm_presenter": "ParadigmPresenter",
         "frontend.widgets.result_scope": "ResultScope",
         "frontend.widgets.spectrum_scope": "SpectrumScope",
@@ -276,6 +330,8 @@ def __getattr__(name):
         if class_name == name:
             module_path = path
             break
+    if module_path is None:
+        module_path = _LAZY_SECOND_NAMES.get(name)
 
     if module_path:
         try:
@@ -315,6 +371,7 @@ _EXTRA_FOR_MODULE = {
     "gtec_ble": "devices",
     "gtec_gds": "devices",
     "gtec_pp": "devices",
+    "gtec_unicorn": "devices",
     "pylsl": "lsl",
     # h5py answers for both .mat and .h5: MATLAB v7.3 is HDF5 behind a
     # userblock, so one module carries two of the three formats and a
@@ -323,6 +380,29 @@ _EXTRA_FOR_MODULE = {
     "h5py": "formats",
     "pyedflib": "formats",
 }
+
+
+def _all_leaves_out(
+    module: str,
+    platform: str = sys.platform,
+    version: tuple = tuple(sys.version_info[:2]),
+) -> bool:
+    """Whether ``gpype[all]`` omits *module* on this platform.
+
+    pyedflib publishes no Windows wheel for Python 3.13 or later, and
+    building its sdist needs a C compiler, so ``all`` leaves it out there
+    and only ``formats`` asks for it. This mirrors the marker on ``all``
+    in ``pyproject.toml`` (D-BUILD-117).
+
+    Args:
+        module: Top-level module name.
+        platform: ``sys.platform`` to judge for.
+        version: ``(major, minor)`` of the interpreter to judge for.
+
+    Returns:
+        bool: True where ``all`` does not install *module*.
+    """
+    return module == "pyedflib" and platform == "win32" and version >= (3, 13)
 
 
 def _missing_extra_hint(error: BaseException) -> str:
@@ -353,18 +433,32 @@ def _missing_extra_hint(error: BaseException) -> str:
         return ""
     if not missing:
         return ""
-    extra = _EXTRA_FOR_MODULE.get(str(missing).split(".")[0])
+    module = str(missing).split(".")[0]
+    extra = _EXTRA_FOR_MODULE.get(module)
     if extra is None:
         return ""
+    if _all_leaves_out(module):
+        return (
+            f"{module!r} publishes no Windows wheel for this Python, so "
+            f"pip has to build it, which needs Microsoft C++ Build Tools; "
+            f"that is why `gpype[all]` leaves it out here. Install the "
+            f"Build Tools, then:\n"
+            f'    pip install "gpype[{extra}]"\n'
+            f"or use Python 3.12, where `gpype[all]` includes it."
+        )
     return (
         f"{missing!r} is provided by the '{extra}' extra, which "
         f"`pip install gpype` no longer installs on its own:\n"
-        f"    pip install 'gpype[{extra}]'\n"
-        f"or `pip install 'gpype[all]'` for everything, which is what "
+        f'    pip install "gpype[{extra}]"\n'
+        f'or `pip install "gpype[all]"` for everything, which is what '
         f"`pip install gpype` gave you before 4.0.0."
     )
 
 
 def __dir__():
     """Return all available attributes for autocomplete."""
-    return list(globals().keys()) + list(_LAZY_IMPORTS.values())
+    return (
+        list(globals().keys())
+        + list(_LAZY_IMPORTS.values())
+        + list(_LAZY_SECOND_NAMES)
+    )

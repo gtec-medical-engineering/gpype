@@ -13,6 +13,20 @@ PORT_IN = Constants.Defaults.PORT_IN
 PORT_OUT = Constants.Defaults.PORT_OUT
 
 
+def _as_list(coefficients) -> list:
+    """Return filter coefficients as a list of float.
+
+    Args:
+        coefficients: An ndarray, a tuple or a list.
+
+    Returns:
+        The same values, JSON-representable.
+    """
+    if isinstance(coefficients, np.ndarray):
+        return coefficients.astype(float).tolist()
+    return [float(value) for value in coefficients]
+
+
 class GenericFilter(IONode):
     """Generic Linear Time-Invariant (LTI) digital filter for real-time use.
 
@@ -38,8 +52,11 @@ class GenericFilter(IONode):
         """Initialize the generic filter with transfer function coefficients.
 
         Args:
-            b: Numerator coefficients of the transfer function.
-            a: Denominator coefficients of the transfer function.
+            b: Numerator coefficients of the transfer function, as an
+                ndarray, a tuple or a list. Stored as a list of float,
+                so the pipeline can be written to a document.
+            a: Denominator coefficients of the transfer function, the
+                same way.
             **kwargs: Additional arguments passed to parent IONode class.
 
         Raises:
@@ -65,8 +82,11 @@ class GenericFilter(IONode):
                 "Filter coefficients 'b' and 'a' must not be empty."
             )
 
-        # Initialize parent class with filter configuration
-        super().__init__(b=b, a=a, **kwargs)
+        # Stored as lists of float, whatever they arrive as. The
+        # configuration has to survive json.dumps(p.serialize()), and a
+        # numpy array does not (D-NODE-46, D-CORE-105). setup() calls
+        # np.asarray on them anyway.
+        super().__init__(b=_as_list(b), a=_as_list(a), **kwargs)
 
         # Initialize filter state (will be set up in setup() method)
         self._sos = None  # For IIR filters (second-order sections)

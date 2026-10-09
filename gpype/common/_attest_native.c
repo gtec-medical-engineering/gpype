@@ -2478,7 +2478,7 @@ int __pyx_module_is_main_gpype__common___attest_native = 0;
 /* Implementation of "gpype.common._attest_native" */
 /* #### Code section: global_var ### */
 /* #### Code section: string_decls ### */
-static const char __pyx_k_Attestation_verification_compile[] = "Attestation verification, compiled into g.Pype rather than imported.\n\nWP-E4. An importable ``gtec_attest`` can be shadowed by a stub earlier on\n``sys.path``, which defeats device attestation without touching a\ncompiled byte. This module links the same C verifier directly, so the\ncheck lives inside the package boundary: a submodule resolves through\n``gpype.__path__``, not ``sys.path``, so replacing it means writing into\nthe installed package rather than dropping a file in the working\ndirectory.\n\nSee ``_attest/PROVENANCE.md`` for what is vendored, its hashes, and the\naccepted cost (key rotation becomes a rebuild).\n\nThe C function is pure -- no I/O, no clock, no network, no allocation, no\nglobal state -- so there is nothing here to fail transiently and nothing\nto release.\n";
+static const char __pyx_k_Attestation_verification_compile[] = "Attestation verification, compiled into g.Pype rather than imported.\n\nWP-E4. An importable ``gtec_attest`` can be shadowed by a stub earlier on\n``sys.path``, which defeats device attestation without touching a\ncompiled byte. This module links the same C verifier directly, so the\ncheck lives inside the package boundary: a submodule resolves through\n``gpype.__path__``, not ``sys.path``, so replacing it means writing into\nthe installed package rather than dropping a file in the working\ndirectory.\n\nSee ``_attest/PROVENANCE.md`` for what is vendored, its hashes, and the\naccepted cost (key rotation becomes a rebuild).\n\nThe C function is pure -- no I/O, no clock, no network, no allocation, no\nglobal state -- so there is nothing here to fail transiently and nothing\nto release.\n\n:func:`verify` trusts every key in the table, the amplifier key and the\nlicence key alike. Call it through\n``gpype.common._private.attestation.verifier(domain)``, which refuses a\nkey from the other domain (D-ENT-70).\n";
 /* #### Code section: decls ### */
 static PyObject *__pyx_pf_5gpype_6common_14_attest_native_verify(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_attestation, PyObject *__pyx_v_serial, PyObject *__pyx_v_nonce); /* proto */
 static PyObject *__pyx_pf_5gpype_6common_14_attest_native_2production_key_ids(CYTHON_UNUSED PyObject *__pyx_self); /* proto */
@@ -2671,7 +2671,7 @@ return 0;
 #endif
 /* #### Code section: module_code ### */
 
-/* "gpype/common/_attest_native.pyx":75
+/* "gpype/common/_attest_native.pyx":80
  * 
  * 
  * def verify(attestation, serial, nonce):             # <<<<<<<<<<<<<<
@@ -2721,38 +2721,38 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   {
     PyObject ** const __pyx_pyargnames[] = {&__pyx_mstate_global->__pyx_n_u_attestation,&__pyx_mstate_global->__pyx_n_u_serial,&__pyx_mstate_global->__pyx_n_u_nonce,0};
     const Py_ssize_t __pyx_kwds_len = (__pyx_kwds) ? __Pyx_NumKwargs_FASTCALL(__pyx_kwds) : 0;
-    if (unlikely(__pyx_kwds_len < 0)) __PYX_ERR(0, 75, __pyx_L3_error)
+    if (unlikely(__pyx_kwds_len < 0)) __PYX_ERR(0, 80, __pyx_L3_error)
     if (__pyx_kwds_len > 0) {
       switch (__pyx_nargs) {
         case  3:
         values[2] = __Pyx_ArgRef_FASTCALL(__pyx_args, 2);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 75, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 80, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  2:
         values[1] = __Pyx_ArgRef_FASTCALL(__pyx_args, 1);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 75, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 80, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  1:
         values[0] = __Pyx_ArgRef_FASTCALL(__pyx_args, 0);
-        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 75, __pyx_L3_error)
+        if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 80, __pyx_L3_error)
         CYTHON_FALLTHROUGH;
         case  0: break;
         default: goto __pyx_L5_argtuple_error;
       }
       const Py_ssize_t kwd_pos_args = __pyx_nargs;
-      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "verify", 0) < (0)) __PYX_ERR(0, 75, __pyx_L3_error)
+      if (__Pyx_ParseKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values, kwd_pos_args, __pyx_kwds_len, "verify", 0) < (0)) __PYX_ERR(0, 80, __pyx_L3_error)
       for (Py_ssize_t i = __pyx_nargs; i < 3; i++) {
-        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("verify", 1, 3, 3, i); __PYX_ERR(0, 75, __pyx_L3_error) }
+        if (unlikely(!values[i])) { __Pyx_RaiseArgtupleInvalid("verify", 1, 3, 3, i); __PYX_ERR(0, 80, __pyx_L3_error) }
       }
     } else if (unlikely(__pyx_nargs != 3)) {
       goto __pyx_L5_argtuple_error;
     } else {
       values[0] = __Pyx_ArgRef_FASTCALL(__pyx_args, 0);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 75, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[0])) __PYX_ERR(0, 80, __pyx_L3_error)
       values[1] = __Pyx_ArgRef_FASTCALL(__pyx_args, 1);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 75, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[1])) __PYX_ERR(0, 80, __pyx_L3_error)
       values[2] = __Pyx_ArgRef_FASTCALL(__pyx_args, 2);
-      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 75, __pyx_L3_error)
+      if (!CYTHON_ASSUME_SAFE_MACROS && unlikely(!values[2])) __PYX_ERR(0, 80, __pyx_L3_error)
     }
     __pyx_v_attestation = values[0];
     __pyx_v_serial = values[1];
@@ -2760,7 +2760,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("verify", 1, 3, 3, __pyx_nargs); __PYX_ERR(0, 75, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("verify", 1, 3, 3, __pyx_nargs); __PYX_ERR(0, 80, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -2809,7 +2809,7 @@ static PyObject *__pyx_pf_5gpype_6common_14_attest_native_verify(CYTHON_UNUSED P
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("verify", 0);
 
-  /* "gpype/common/_attest_native.pyx":91
+  /* "gpype/common/_attest_native.pyx":96
  *         TypeError: If ``attestation`` or ``nonce`` is not bytes-like.
  *     """
  *     if not isinstance(attestation, (bytes, bytearray)):             # <<<<<<<<<<<<<<
@@ -2836,7 +2836,7 @@ static PyObject *__pyx_pf_5gpype_6common_14_attest_native_verify(CYTHON_UNUSED P
   if (unlikely(__pyx_t_2)) {
 
 
-    /* "gpype/common/_attest_native.pyx":92
+    /* "gpype/common/_attest_native.pyx":97
  *     """
  *     if not isinstance(attestation, (bytes, bytearray)):
  *         raise TypeError("attestation must be bytes")             # <<<<<<<<<<<<<<
@@ -2849,14 +2849,14 @@ static PyObject *__pyx_pf_5gpype_6common_14_attest_native_verify(CYTHON_UNUSED P
       PyObject *__pyx_callargs[2] = {__pyx_t_4, __pyx_mstate_global->__pyx_kp_u_attestation_must_be_bytes};
       __pyx_t_3 = __Pyx_PyObject_FastCall((PyObject*)(((PyTypeObject*)PyExc_TypeError)), __pyx_callargs+__pyx_t_5, (2-__pyx_t_5) | (__pyx_t_5*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-      if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 92, __pyx_L1_error)
+      if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 97, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
     }
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __PYX_ERR(0, 92, __pyx_L1_error)
+    __PYX_ERR(0, 97, __pyx_L1_error)
 
-    /* "gpype/common/_attest_native.pyx":91
+    /* "gpype/common/_attest_native.pyx":96
  *         TypeError: If ``attestation`` or ``nonce`` is not bytes-like.
  *     """
  *     if not isinstance(attestation, (bytes, bytearray)):             # <<<<<<<<<<<<<<
@@ -2865,7 +2865,7 @@ static PyObject *__pyx_pf_5gpype_6common_14_attest_native_verify(CYTHON_UNUSED P
 */
   }
 
-  /* "gpype/common/_attest_native.pyx":93
+  /* "gpype/common/_attest_native.pyx":98
  *     if not isinstance(attestation, (bytes, bytearray)):
  *         raise TypeError("attestation must be bytes")
  *     if not isinstance(nonce, (bytes, bytearray)):             # <<<<<<<<<<<<<<
@@ -2892,7 +2892,7 @@ static PyObject *__pyx_pf_5gpype_6common_14_attest_native_verify(CYTHON_UNUSED P
   if (unlikely(__pyx_t_1)) {
 
 
-    /* "gpype/common/_attest_native.pyx":94
+    /* "gpype/common/_attest_native.pyx":99
  *         raise TypeError("attestation must be bytes")
  *     if not isinstance(nonce, (bytes, bytearray)):
  *         raise TypeError("nonce must be bytes")             # <<<<<<<<<<<<<<
@@ -2905,14 +2905,14 @@ static PyObject *__pyx_pf_5gpype_6common_14_attest_native_verify(CYTHON_UNUSED P
       PyObject *__pyx_callargs[2] = {__pyx_t_4, __pyx_mstate_global->__pyx_kp_u_nonce_must_be_bytes};
       __pyx_t_3 = __Pyx_PyObject_FastCall((PyObject*)(((PyTypeObject*)PyExc_TypeError)), __pyx_callargs+__pyx_t_5, (2-__pyx_t_5) | (__pyx_t_5*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-      if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 94, __pyx_L1_error)
+      if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 99, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
     }
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __PYX_ERR(0, 94, __pyx_L1_error)
+    __PYX_ERR(0, 99, __pyx_L1_error)
 
-    /* "gpype/common/_attest_native.pyx":93
+    /* "gpype/common/_attest_native.pyx":98
  *     if not isinstance(attestation, (bytes, bytearray)):
  *         raise TypeError("attestation must be bytes")
  *     if not isinstance(nonce, (bytes, bytearray)):             # <<<<<<<<<<<<<<
@@ -2921,7 +2921,7 @@ static PyObject *__pyx_pf_5gpype_6common_14_attest_native_verify(CYTHON_UNUSED P
 */
   }
 
-  /* "gpype/common/_attest_native.pyx":96
+  /* "gpype/common/_attest_native.pyx":101
  *         raise TypeError("nonce must be bytes")
  * 
  *     cdef bytes blob = bytes(attestation)             # <<<<<<<<<<<<<<
@@ -2934,13 +2934,13 @@ static PyObject *__pyx_pf_5gpype_6common_14_attest_native_verify(CYTHON_UNUSED P
     PyObject *__pyx_callargs[2] = {__pyx_t_4, __pyx_v_attestation};
     __pyx_t_3 = __Pyx_PyObject_FastCall((PyObject*)(&PyBytes_Type), __pyx_callargs+__pyx_t_5, (2-__pyx_t_5) | (__pyx_t_5*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 96, __pyx_L1_error)
+    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 101, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
   }
   __pyx_v_blob = ((PyObject*)__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "gpype/common/_attest_native.pyx":97
+  /* "gpype/common/_attest_native.pyx":102
  * 
  *     cdef bytes blob = bytes(attestation)
  *     cdef bytes challenge = bytes(nonce)             # <<<<<<<<<<<<<<
@@ -2953,13 +2953,13 @@ static PyObject *__pyx_pf_5gpype_6common_14_attest_native_verify(CYTHON_UNUSED P
     PyObject *__pyx_callargs[2] = {__pyx_t_4, __pyx_v_nonce};
     __pyx_t_3 = __Pyx_PyObject_FastCall((PyObject*)(&PyBytes_Type), __pyx_callargs+__pyx_t_5, (2-__pyx_t_5) | (__pyx_t_5*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 97, __pyx_L1_error)
+    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 102, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
   }
   __pyx_v_challenge = ((PyObject*)__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "gpype/common/_attest_native.pyx":99
+  /* "gpype/common/_attest_native.pyx":104
  *     cdef bytes challenge = bytes(nonce)
  *     cdef bytes name = (
  *         serial.encode("utf-8") if isinstance(serial, str)             # <<<<<<<<<<<<<<
@@ -2975,15 +2975,15 @@ static PyObject *__pyx_pf_5gpype_6common_14_attest_native_verify(CYTHON_UNUSED P
       PyObject *__pyx_callargs[2] = {__pyx_t_6, __pyx_mstate_global->__pyx_kp_u_utf_8};
       __pyx_t_4 = __Pyx_PyObject_FastCallMethod((PyObject*)__pyx_mstate_global->__pyx_n_u_encode, __pyx_callargs+__pyx_t_5, (2-__pyx_t_5) | (1*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
       __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-      if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 99, __pyx_L1_error)
+      if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 104, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
     }
-    if (!(likely(PyBytes_CheckExact(__pyx_t_4))||((__pyx_t_4) == Py_None) || __Pyx_RaiseUnexpectedTypeError("bytes", __pyx_t_4))) __PYX_ERR(0, 99, __pyx_L1_error)
+    if (!(likely(PyBytes_CheckExact(__pyx_t_4))||((__pyx_t_4) == Py_None) || __Pyx_RaiseUnexpectedTypeError("bytes", __pyx_t_4))) __PYX_ERR(0, 104, __pyx_L1_error)
     __pyx_t_3 = __pyx_t_4;
     __pyx_t_4 = 0;
   } else {
 
-    /* "gpype/common/_attest_native.pyx":100
+    /* "gpype/common/_attest_native.pyx":105
  *     cdef bytes name = (
  *         serial.encode("utf-8") if isinstance(serial, str)
  *         else bytes(serial or b"")             # <<<<<<<<<<<<<<
@@ -2991,7 +2991,7 @@ static PyObject *__pyx_pf_5gpype_6common_14_attest_native_verify(CYTHON_UNUSED P
  * 
 */
     __pyx_t_6 = NULL;
-    __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_v_serial); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 100, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_v_serial); if (unlikely((__pyx_t_2 < 0))) __PYX_ERR(0, 105, __pyx_L1_error)
     if (!__pyx_t_2) {
     } else {
       __Pyx_INCREF(__pyx_v_serial);
@@ -3007,7 +3007,7 @@ static PyObject *__pyx_pf_5gpype_6common_14_attest_native_verify(CYTHON_UNUSED P
       __pyx_t_4 = __Pyx_PyObject_FastCall((PyObject*)(&PyBytes_Type), __pyx_callargs+__pyx_t_5, (2-__pyx_t_5) | (__pyx_t_5*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
       __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-      if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 100, __pyx_L1_error)
+      if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 105, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
     }
     __pyx_t_3 = __pyx_t_4;
@@ -3017,7 +3017,7 @@ static PyObject *__pyx_pf_5gpype_6common_14_attest_native_verify(CYTHON_UNUSED P
   __pyx_v_name = ((PyObject*)__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "gpype/common/_attest_native.pyx":103
+  /* "gpype/common/_attest_native.pyx":108
  *     )
  * 
  *     cdef unsigned short key_id = 0             # <<<<<<<<<<<<<<
@@ -3026,7 +3026,7 @@ static PyObject *__pyx_pf_5gpype_6common_14_attest_native_verify(CYTHON_UNUSED P
 */
   __pyx_v_key_id = 0;
 
-  /* "gpype/common/_attest_native.pyx":104
+  /* "gpype/common/_attest_native.pyx":109
  * 
  *     cdef unsigned short key_id = 0
  *     cdef gtec_attest_reason_t reason = GTEC_ATTEST_MALFORMED             # <<<<<<<<<<<<<<
@@ -3035,27 +3035,27 @@ static PyObject *__pyx_pf_5gpype_6common_14_attest_native_verify(CYTHON_UNUSED P
 */
   __pyx_v_reason = GTEC_ATTEST_MALFORMED;
 
-  /* "gpype/common/_attest_native.pyx":111
+  /* "gpype/common/_attest_native.pyx":116
  *     # rules in Python is how the two drift apart.
  *     ok = gtec_attest_verify(
  *         <const unsigned char *>blob, <size_t>len(blob),             # <<<<<<<<<<<<<<
  *         <const unsigned char *>challenge, <size_t>len(challenge),
  *         <const char *>name, <size_t>len(name),
 */
-  __pyx_t_8 = __Pyx_PyBytes_AsUString(__pyx_v_blob); if (unlikely((!__pyx_t_8) && PyErr_Occurred())) __PYX_ERR(0, 111, __pyx_L1_error)
-  __pyx_t_9 = __Pyx_PyBytes_GET_SIZE(__pyx_v_blob); if (unlikely(__pyx_t_9 == ((Py_ssize_t)-1))) __PYX_ERR(0, 111, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyBytes_AsUString(__pyx_v_blob); if (unlikely((!__pyx_t_8) && PyErr_Occurred())) __PYX_ERR(0, 116, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyBytes_GET_SIZE(__pyx_v_blob); if (unlikely(__pyx_t_9 == ((Py_ssize_t)-1))) __PYX_ERR(0, 116, __pyx_L1_error)
 
-  /* "gpype/common/_attest_native.pyx":112
+  /* "gpype/common/_attest_native.pyx":117
  *     ok = gtec_attest_verify(
  *         <const unsigned char *>blob, <size_t>len(blob),
  *         <const unsigned char *>challenge, <size_t>len(challenge),             # <<<<<<<<<<<<<<
  *         <const char *>name, <size_t>len(name),
  *         GTEC_ATTEST_PRODUCTION_KEYS, GTEC_ATTEST_PRODUCTION_KEY_COUNT,
 */
-  __pyx_t_10 = __Pyx_PyBytes_AsUString(__pyx_v_challenge); if (unlikely((!__pyx_t_10) && PyErr_Occurred())) __PYX_ERR(0, 112, __pyx_L1_error)
-  __pyx_t_11 = __Pyx_PyBytes_GET_SIZE(__pyx_v_challenge); if (unlikely(__pyx_t_11 == ((Py_ssize_t)-1))) __PYX_ERR(0, 112, __pyx_L1_error)
+  __pyx_t_10 = __Pyx_PyBytes_AsUString(__pyx_v_challenge); if (unlikely((!__pyx_t_10) && PyErr_Occurred())) __PYX_ERR(0, 117, __pyx_L1_error)
+  __pyx_t_11 = __Pyx_PyBytes_GET_SIZE(__pyx_v_challenge); if (unlikely(__pyx_t_11 == ((Py_ssize_t)-1))) __PYX_ERR(0, 117, __pyx_L1_error)
 
-  /* "gpype/common/_attest_native.pyx":113
+  /* "gpype/common/_attest_native.pyx":118
  *         <const unsigned char *>blob, <size_t>len(blob),
  *         <const unsigned char *>challenge, <size_t>len(challenge),
  *         <const char *>name, <size_t>len(name),             # <<<<<<<<<<<<<<
@@ -3064,16 +3064,16 @@ static PyObject *__pyx_pf_5gpype_6common_14_attest_native_verify(CYTHON_UNUSED P
 */
   if (unlikely(__pyx_v_name == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "expected bytes, NoneType found");
-    __PYX_ERR(0, 113, __pyx_L1_error)
+    __PYX_ERR(0, 118, __pyx_L1_error)
   }
-  __pyx_t_12 = __Pyx_PyBytes_AsString(__pyx_v_name); if (unlikely((!__pyx_t_12) && PyErr_Occurred())) __PYX_ERR(0, 113, __pyx_L1_error)
+  __pyx_t_12 = __Pyx_PyBytes_AsString(__pyx_v_name); if (unlikely((!__pyx_t_12) && PyErr_Occurred())) __PYX_ERR(0, 118, __pyx_L1_error)
   if (unlikely(__pyx_v_name == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "object of type \047NoneType\047 has no len()");
-    __PYX_ERR(0, 113, __pyx_L1_error)
+    __PYX_ERR(0, 118, __pyx_L1_error)
   }
-  __pyx_t_13 = __Pyx_PyBytes_GET_SIZE(__pyx_v_name); if (unlikely(__pyx_t_13 == ((Py_ssize_t)-1))) __PYX_ERR(0, 113, __pyx_L1_error)
+  __pyx_t_13 = __Pyx_PyBytes_GET_SIZE(__pyx_v_name); if (unlikely(__pyx_t_13 == ((Py_ssize_t)-1))) __PYX_ERR(0, 118, __pyx_L1_error)
 
-  /* "gpype/common/_attest_native.pyx":110
+  /* "gpype/common/_attest_native.pyx":115
  *     # input, sets *out_reason for every rejection, and duplicating its
  *     # rules in Python is how the two drift apart.
  *     ok = gtec_attest_verify(             # <<<<<<<<<<<<<<
@@ -3088,22 +3088,22 @@ static PyObject *__pyx_pf_5gpype_6common_14_attest_native_verify(CYTHON_UNUSED P
 
 
 
-  /* "gpype/common/_attest_native.pyx":118
+  /* "gpype/common/_attest_native.pyx":123
  *     )
  * 
  *     return bool(ok), _REASONS.get(<int>reason, "UNKNOWN"), int(key_id)             # <<<<<<<<<<<<<<
  * 
  * 
 */
-  __pyx_t_3 = __Pyx_PyBool_FromLong((!(!(__pyx_v_ok != 0)))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 118, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyBool_FromLong((!(!(__pyx_v_ok != 0)))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 123, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_t_7 = NULL;
-  __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_mstate_global->__pyx_n_u_REASONS); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 118, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_mstate_global->__pyx_n_u_REASONS); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 123, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  __pyx_t_14 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_mstate_global->__pyx_n_u_get); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 118, __pyx_L1_error)
+  __pyx_t_14 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_mstate_global->__pyx_n_u_get); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 123, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_14);
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __pyx_t_6 = __Pyx_PyLong_From_int(((int)__pyx_v_reason)); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 118, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyLong_From_int(((int)__pyx_v_reason)); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 123, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __pyx_t_5 = 1;
   #if CYTHON_UNPACK_METHODS
@@ -3123,11 +3123,11 @@ static PyObject *__pyx_pf_5gpype_6common_14_attest_native_verify(CYTHON_UNUSED P
     __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-    if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 118, __pyx_L1_error)
+    if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 123, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
   }
   __pyx_t_6 = NULL;
-  __pyx_t_7 = __Pyx_PyLong_From_unsigned_short(__pyx_v_key_id); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 118, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyLong_From_unsigned_short(__pyx_v_key_id); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 123, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __pyx_t_5 = 1;
   {
@@ -3135,17 +3135,17 @@ static PyObject *__pyx_pf_5gpype_6common_14_attest_native_verify(CYTHON_UNUSED P
     __pyx_t_14 = __Pyx_PyObject_FastCall((PyObject*)(&PyLong_Type), __pyx_callargs+__pyx_t_5, (2-__pyx_t_5) | (__pyx_t_5*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 118, __pyx_L1_error)
+    if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 123, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_14);
   }
-  __pyx_t_7 = PyTuple_New(3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 118, __pyx_L1_error)
+  __pyx_t_7 = PyTuple_New(3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 123, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_GIVEREF(__pyx_t_3);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_3) != (0)) __PYX_ERR(0, 118, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_3) != (0)) __PYX_ERR(0, 123, __pyx_L1_error);
   __Pyx_GIVEREF(__pyx_t_4);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_7, 1, __pyx_t_4) != (0)) __PYX_ERR(0, 118, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_7, 1, __pyx_t_4) != (0)) __PYX_ERR(0, 123, __pyx_L1_error);
   __Pyx_GIVEREF(__pyx_t_14);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_7, 2, __pyx_t_14) != (0)) __PYX_ERR(0, 118, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_7, 2, __pyx_t_14) != (0)) __PYX_ERR(0, 123, __pyx_L1_error);
   __pyx_t_3 = 0;
   __pyx_t_4 = 0;
   __pyx_t_14 = 0;
@@ -3160,7 +3160,7 @@ static PyObject *__pyx_pf_5gpype_6common_14_attest_native_verify(CYTHON_UNUSED P
   __pyx_t_7 = 0;
   goto __pyx_L0;
 
-  /* "gpype/common/_attest_native.pyx":75
+  /* "gpype/common/_attest_native.pyx":80
  * 
  * 
  * def verify(attestation, serial, nonce):             # <<<<<<<<<<<<<<
@@ -3189,17 +3189,17 @@ static PyObject *__pyx_pf_5gpype_6common_14_attest_native_verify(CYTHON_UNUSED P
   return __pyx_r;
 }
 
-/* "gpype/common/_attest_native.pyx":121
+/* "gpype/common/_attest_native.pyx":126
  * 
  * 
  * def production_key_ids():             # <<<<<<<<<<<<<<
- *     """Return the key ids this build accepts.
+ *     """Return the key ids this build accepts, in every domain.
  * 
 */
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5gpype_6common_14_attest_native_3production_key_ids(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-PyDoc_STRVAR(__pyx_doc_5gpype_6common_14_attest_native_2production_key_ids, "Return the key ids this build accepts.\n\n    Returns:\n        Tuple of ints, in table order.\n    ");
+PyDoc_STRVAR(__pyx_doc_5gpype_6common_14_attest_native_2production_key_ids, "Return the key ids this build accepts, in every domain.\n\n    Returns:\n        Tuple of ints, in table order.\n    ");
 static PyMethodDef __pyx_mdef_5gpype_6common_14_attest_native_3production_key_ids = {"production_key_ids", (PyCFunction)__pyx_pw_5gpype_6common_14_attest_native_3production_key_ids, METH_NOARGS, __pyx_doc_5gpype_6common_14_attest_native_2production_key_ids};
 static PyObject *__pyx_pw_5gpype_6common_14_attest_native_3production_key_ids(PyObject *__pyx_self, CYTHON_UNUSED PyObject *unused) {
   CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
@@ -3232,19 +3232,19 @@ static PyObject *__pyx_pf_5gpype_6common_14_attest_native_2production_key_ids(CY
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("production_key_ids", 0);
 
-  /* "gpype/common/_attest_native.pyx":128
+  /* "gpype/common/_attest_native.pyx":133
  *     """
  *     cdef size_t i
  *     ids = []             # <<<<<<<<<<<<<<
  *     for i in range(GTEC_ATTEST_PRODUCTION_KEY_COUNT):
  *         ids.append(int(GTEC_ATTEST_PRODUCTION_KEYS[i].key_id))
 */
-  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 128, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 133, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_ids = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "gpype/common/_attest_native.pyx":129
+  /* "gpype/common/_attest_native.pyx":134
  *     cdef size_t i
  *     ids = []
  *     for i in range(GTEC_ATTEST_PRODUCTION_KEY_COUNT):             # <<<<<<<<<<<<<<
@@ -3258,14 +3258,14 @@ static PyObject *__pyx_pf_5gpype_6common_14_attest_native_2production_key_ids(CY
   for (__pyx_t_4 = 0; __pyx_t_4 < __pyx_t_3; __pyx_t_4+=1) {
     __pyx_v_i = __pyx_t_4;
 
-    /* "gpype/common/_attest_native.pyx":130
+    /* "gpype/common/_attest_native.pyx":135
  *     ids = []
  *     for i in range(GTEC_ATTEST_PRODUCTION_KEY_COUNT):
  *         ids.append(int(GTEC_ATTEST_PRODUCTION_KEYS[i].key_id))             # <<<<<<<<<<<<<<
  *     return tuple(ids)
 */
     __pyx_t_5 = NULL;
-    __pyx_t_6 = __Pyx_PyLong_From_unsigned_short((GTEC_ATTEST_PRODUCTION_KEYS[__pyx_v_i]).key_id); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 130, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyLong_From_unsigned_short((GTEC_ATTEST_PRODUCTION_KEYS[__pyx_v_i]).key_id); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 135, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __pyx_t_7 = 1;
     {
@@ -3273,21 +3273,21 @@ static PyObject *__pyx_pf_5gpype_6common_14_attest_native_2production_key_ids(CY
       __pyx_t_1 = __Pyx_PyObject_FastCall((PyObject*)(&PyLong_Type), __pyx_callargs+__pyx_t_7, (2-__pyx_t_7) | (__pyx_t_7*__Pyx_PY_VECTORCALL_ARGUMENTS_OFFSET));
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-      if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 130, __pyx_L1_error)
+      if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 135, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
     }
-    __pyx_t_8 = __Pyx_PyList_Append(__pyx_v_ids, __pyx_t_1); if (unlikely(__pyx_t_8 == ((int)-1))) __PYX_ERR(0, 130, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyList_Append(__pyx_v_ids, __pyx_t_1); if (unlikely(__pyx_t_8 == ((int)-1))) __PYX_ERR(0, 135, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   }
 
 
-  /* "gpype/common/_attest_native.pyx":131
+  /* "gpype/common/_attest_native.pyx":136
  *     for i in range(GTEC_ATTEST_PRODUCTION_KEY_COUNT):
  *         ids.append(int(GTEC_ATTEST_PRODUCTION_KEYS[i].key_id))
  *     return tuple(ids)             # <<<<<<<<<<<<<<
 */
-  __pyx_t_1 = PyList_AsTuple(__pyx_v_ids); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 131, __pyx_L1_error)
+  __pyx_t_1 = PyList_AsTuple(__pyx_v_ids); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 136, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   {
     PyObject *__pyx_temp;
@@ -3300,11 +3300,11 @@ static PyObject *__pyx_pf_5gpype_6common_14_attest_native_2production_key_ids(CY
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "gpype/common/_attest_native.pyx":121
+  /* "gpype/common/_attest_native.pyx":126
  * 
  * 
  * def production_key_ids():             # <<<<<<<<<<<<<<
- *     """Return the key ids this build accepts.
+ *     """Return the key ids this build accepts, in every domain.
  * 
 */
 
@@ -3668,85 +3668,85 @@ __Pyx_RefNannySetupContext("PyInit__attest_native", 0);
   if (__Pyx_InitAfterSharedUtility() < (0)) __PYX_ERR(0, 1, __pyx_L1_error)
   /*--- Execution code ---*/
 
-  /* "gpype/common/_attest_native.pyx":58
+  /* "gpype/common/_attest_native.pyx":63
  * #: Reason codes, named as the C enum names them.
  * _REASONS = {
  *     0: "OK",             # <<<<<<<<<<<<<<
  *     1: "BAD_SIGNATURE",
  *     2: "UNKNOWN_KEY_ID",
 */
-  __pyx_t_2 = __Pyx_PyDict_NewPresized(6); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 58, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyDict_NewPresized(6); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 63, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_int_0, __pyx_mstate_global->__pyx_n_u_OK) < (0)) __PYX_ERR(0, 58, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_int_1, __pyx_mstate_global->__pyx_n_u_BAD_SIGNATURE) < (0)) __PYX_ERR(0, 58, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_int_2, __pyx_mstate_global->__pyx_n_u_UNKNOWN_KEY_ID) < (0)) __PYX_ERR(0, 58, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_int_3, __pyx_mstate_global->__pyx_n_u_MALFORMED) < (0)) __PYX_ERR(0, 58, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_int_4, __pyx_mstate_global->__pyx_n_u_SERIAL_MISMATCH) < (0)) __PYX_ERR(0, 58, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_int_5, __pyx_mstate_global->__pyx_n_u_RETIRED_KEY) < (0)) __PYX_ERR(0, 58, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_mstate_global->__pyx_d, __pyx_mstate_global->__pyx_n_u_REASONS, __pyx_t_2) < (0)) __PYX_ERR(0, 57, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_int_0, __pyx_mstate_global->__pyx_n_u_OK) < (0)) __PYX_ERR(0, 63, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_int_1, __pyx_mstate_global->__pyx_n_u_BAD_SIGNATURE) < (0)) __PYX_ERR(0, 63, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_int_2, __pyx_mstate_global->__pyx_n_u_UNKNOWN_KEY_ID) < (0)) __PYX_ERR(0, 63, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_int_3, __pyx_mstate_global->__pyx_n_u_MALFORMED) < (0)) __PYX_ERR(0, 63, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_int_4, __pyx_mstate_global->__pyx_n_u_SERIAL_MISMATCH) < (0)) __PYX_ERR(0, 63, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_mstate_global->__pyx_int_5, __pyx_mstate_global->__pyx_n_u_RETIRED_KEY) < (0)) __PYX_ERR(0, 63, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_mstate_global->__pyx_d, __pyx_mstate_global->__pyx_n_u_REASONS, __pyx_t_2) < (0)) __PYX_ERR(0, 62, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "gpype/common/_attest_native.pyx":69
+  /* "gpype/common/_attest_native.pyx":74
  * #: Callers report which verifier they reached, so a run resolved through
  * #: the importable package is distinguishable from one resolved here.
  * LINKED = True             # <<<<<<<<<<<<<<
  * 
  * ATTESTATION_LEN = GTEC_ATTEST_ATTESTATION_LEN
 */
-  if (PyDict_SetItem(__pyx_mstate_global->__pyx_d, __pyx_mstate_global->__pyx_n_u_LINKED, Py_True) < (0)) __PYX_ERR(0, 69, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_mstate_global->__pyx_d, __pyx_mstate_global->__pyx_n_u_LINKED, Py_True) < (0)) __PYX_ERR(0, 74, __pyx_L1_error)
 
-  /* "gpype/common/_attest_native.pyx":71
+  /* "gpype/common/_attest_native.pyx":76
  * LINKED = True
  * 
  * ATTESTATION_LEN = GTEC_ATTEST_ATTESTATION_LEN             # <<<<<<<<<<<<<<
  * NONCE_LEN = GTEC_ATTEST_NONCE_LEN
  * 
 */
-  __pyx_t_2 = __Pyx_PyLong_From_int(GTEC_ATTEST_ATTESTATION_LEN); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 71, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyLong_From_int(GTEC_ATTEST_ATTESTATION_LEN); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 76, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_mstate_global->__pyx_d, __pyx_mstate_global->__pyx_n_u_ATTESTATION_LEN, __pyx_t_2) < (0)) __PYX_ERR(0, 71, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_mstate_global->__pyx_d, __pyx_mstate_global->__pyx_n_u_ATTESTATION_LEN, __pyx_t_2) < (0)) __PYX_ERR(0, 76, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "gpype/common/_attest_native.pyx":72
+  /* "gpype/common/_attest_native.pyx":77
  * 
  * ATTESTATION_LEN = GTEC_ATTEST_ATTESTATION_LEN
  * NONCE_LEN = GTEC_ATTEST_NONCE_LEN             # <<<<<<<<<<<<<<
  * 
  * 
 */
-  __pyx_t_2 = __Pyx_PyLong_From_int(GTEC_ATTEST_NONCE_LEN); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 72, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyLong_From_int(GTEC_ATTEST_NONCE_LEN); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 77, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_mstate_global->__pyx_d, __pyx_mstate_global->__pyx_n_u_NONCE_LEN, __pyx_t_2) < (0)) __PYX_ERR(0, 72, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_mstate_global->__pyx_d, __pyx_mstate_global->__pyx_n_u_NONCE_LEN, __pyx_t_2) < (0)) __PYX_ERR(0, 77, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "gpype/common/_attest_native.pyx":75
+  /* "gpype/common/_attest_native.pyx":80
  * 
  * 
  * def verify(attestation, serial, nonce):             # <<<<<<<<<<<<<<
  *     """Verify an attestation against an expected serial and nonce.
  * 
 */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_5gpype_6common_14_attest_native_1verify, 0, __pyx_mstate_global->__pyx_n_u_verify, NULL, __pyx_mstate_global->__pyx_n_u_gpype_common__attest_native, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[0])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 75, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_5gpype_6common_14_attest_native_1verify, 0, __pyx_mstate_global->__pyx_n_u_verify, NULL, __pyx_mstate_global->__pyx_n_u_gpype_common__attest_native, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[0])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 80, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030E0000
   PyUnstable_Object_EnableDeferredRefcount(__pyx_t_2);
   #endif
-  if (PyDict_SetItem(__pyx_mstate_global->__pyx_d, __pyx_mstate_global->__pyx_n_u_verify, __pyx_t_2) < (0)) __PYX_ERR(0, 75, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_mstate_global->__pyx_d, __pyx_mstate_global->__pyx_n_u_verify, __pyx_t_2) < (0)) __PYX_ERR(0, 80, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "gpype/common/_attest_native.pyx":121
+  /* "gpype/common/_attest_native.pyx":126
  * 
  * 
  * def production_key_ids():             # <<<<<<<<<<<<<<
- *     """Return the key ids this build accepts.
+ *     """Return the key ids this build accepts, in every domain.
  * 
 */
-  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_5gpype_6common_14_attest_native_3production_key_ids, 0, __pyx_mstate_global->__pyx_n_u_production_key_ids, NULL, __pyx_mstate_global->__pyx_n_u_gpype_common__attest_native, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[1])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 121, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_5gpype_6common_14_attest_native_3production_key_ids, 0, __pyx_mstate_global->__pyx_n_u_production_key_ids, NULL, __pyx_mstate_global->__pyx_n_u_gpype_common__attest_native, __pyx_mstate_global->__pyx_d, ((PyObject *)__pyx_mstate_global->__pyx_codeobj_tab[1])); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 126, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   #if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030E0000
   PyUnstable_Object_EnableDeferredRefcount(__pyx_t_2);
   #endif
-  if (PyDict_SetItem(__pyx_mstate_global->__pyx_d, __pyx_mstate_global->__pyx_n_u_production_key_ids, __pyx_t_2) < (0)) __PYX_ERR(0, 121, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_mstate_global->__pyx_d, __pyx_mstate_global->__pyx_n_u_production_key_ids, __pyx_t_2) < (0)) __PYX_ERR(0, 126, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "gpype/common/_attest_native.pyx":1
@@ -3945,12 +3945,12 @@ static int __Pyx_CreateCodeObjects(__pyx_mstatetype *__pyx_mstate) {
   PyObject* tuple_dedup_map = PyDict_New();
   if (unlikely(!tuple_dedup_map)) return -1;
   {
-    const __Pyx_PyCode_New_function_description descr = {3, 0, 0, 9, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 75};
+    const __Pyx_PyCode_New_function_description descr = {3, 0, 0, 9, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 80};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_attestation, __pyx_mstate->__pyx_n_u_serial, __pyx_mstate->__pyx_n_u_nonce, __pyx_mstate->__pyx_n_u_blob, __pyx_mstate->__pyx_n_u_challenge, __pyx_mstate->__pyx_n_u_name_2, __pyx_mstate->__pyx_n_u_key_id, __pyx_mstate->__pyx_n_u_reason, __pyx_mstate->__pyx_n_u_ok};
     __pyx_mstate_global->__pyx_codeobj_tab[0] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_src_gpype_common__attest_native, __pyx_mstate->__pyx_n_u_verify, __pyx_mstate->__pyx_kp_b_iso88591_t_QnG1_iq_t_QhgQ_iq_e1A_5_gQl_A, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[0])) goto bad;
   }
   {
-    const __Pyx_PyCode_New_function_description descr = {0, 0, 0, 2, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 121};
+    const __Pyx_PyCode_New_function_description descr = {0, 0, 0, 2, (unsigned int)(CO_OPTIMIZED|CO_NEWLOCALS), 126};
     PyObject* const varnames[] = {__pyx_mstate->__pyx_n_u_i, __pyx_mstate->__pyx_n_u_ids};
     __pyx_mstate_global->__pyx_codeobj_tab[1] = __Pyx_PyCode_New(descr, varnames, __pyx_mstate->__pyx_kp_u_src_gpype_common__attest_native, __pyx_mstate->__pyx_n_u_production_key_ids, __pyx_mstate->__pyx_kp_b_iso88591_U_1_7_3a_2_2Q_5, tuple_dedup_map); if (unlikely(!__pyx_mstate_global->__pyx_codeobj_tab[1])) goto bad;
   }

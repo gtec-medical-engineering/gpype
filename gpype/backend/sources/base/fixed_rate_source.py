@@ -32,8 +32,8 @@ class FixedRateSource(Source):
     a reader before this was applied: 1.01x at frame_size 1, 5.02x at
     5, 24.98x at 25, 50.03x at 50.
 
-    Every subclass here does this -- ``_GeneratorCore``,
-    ``_CsvReaderCore`` and ``RecordingReader`` -- and a fourth must too.
+    Every subclass here does this -- ``Generator``,
+    ``CsvReader`` and ``RecordingReader`` -- and a fourth must too.
     Two exemptions, both real:
 
     * **Batch mode.** A batch reader starts no pacing thread; the driver

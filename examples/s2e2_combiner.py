@@ -13,7 +13,7 @@ if __name__ == "__main__":
 
     # Create 4 sources with different frequencies
     source1, source2, source3, source4 = [
-        gp.Generator(channel_count=1,
+        gp.Generator(channel_count=1, name=f"source_{f}hz",
                      signal_frequency=f,
                      signal_amplitude=25) for f in (2, 4, 6, 8)
     ]

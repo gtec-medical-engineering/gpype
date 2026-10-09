@@ -2,15 +2,11 @@ from __future__ import annotations
 
 import json
 import struct
-from typing import List
+from typing import Optional
 
-import ioiocore as ioc
 import numpy as np
 
 from ...common.constants import Constants
-from ..core._private.chain_params import stream_id_for, strip_chain_keys
-from ..core._private.link import Link
-from ..core.i_port import IPort
 from .base import recording_meta
 from .base.file_writer import FileWriter
 
@@ -37,35 +33,36 @@ def _h5py():
     except ImportError as error:  # pragma: no cover - environment
         raise ImportError(
             "MatWriter needs h5py, provided by the 'formats' extra: "
-            "pip install 'gpype[formats]'"
+            'pip install "gpype[formats]"'
         ) from error
     return h5py
 
 
-class _MatWriterCore(FileWriter):
-    """Internal node writing a recording as a MATLAB v7.3 (.mat) file.
+class MatWriter(FileWriter):
+    """MATLAB v7.3 (.mat) file writer for real-time data logging.
+
+    Writes multi-channel data as an HDF5-backed MAT-file MATLAB's own
+    ``load()`` opens directly, with a time column plus one column per
+    channel under ``variable_name``. Channel labels, roles and the
+    sampling rate are recorded in a ``gpype_meta`` document that
+    :class:`~gpype.MatReader` reads back exactly, and a plain
+    ``sampling_rate`` variable is written alongside it for a MATLAB user
+    who never asked about g.Pype's metadata format at all.
 
     MATLAB's v7.3 format *is* HDF5: a 128-byte header identifying the
-    file as MAT-file version 2.0 little-endian, sitting in a 512-byte
-    userblock in front of an ordinary HDF5 container. Verified against a
-    second implementation of the spec: ``scipy.io.matlab._miobase.
-    get_matfile_version`` reads the header back as ``(2, 0)``, and
-    ``scipy.io.loadmat`` on such a file raises ``NotImplementedError
-    ('Please use HDF reader for matlab v7.3 files, e.g. h5py')`` -- which
-    is exactly how a genuine v7.3 file is supposed to present itself.
-
-    The header is written while the file is *closed*, immediately after
-    creation, rather than at ``_close_file`` as the untracked draft this
-    replaces did. Measured on Windows: writing into the userblock while
-    h5py still holds the file open raises ``PermissionError: [Errno 13]
-    Permission denied``, so it cannot be done at close without first
-    closing and reopening anyway -- and writing it only at the very end
-    means a recording killed mid-run (a crash, a hardware disconnect)
-    leaves a file with a zeroed userblock that MATLAB refuses to load,
-    even though every sample the run produced is intact underneath it.
+    file as MAT-file version 2.0 little-endian, in a 512-byte userblock
+    in front of an ordinary HDF5 container. The header is written when
+    the file is created, not at close, so a recording killed mid-run
+    still loads in MATLAB.
     """
 
-    def __init__(self, file_name: str, variable_name: str = "data", **kwargs):
+    def __init__(
+        self,
+        file_name: str,
+        variable_name: str = "data",
+        edge_id: Optional[str] = None,
+        **kwargs,
+    ):
         """Initialize the MAT writer core.
 
         Args:
@@ -74,9 +71,17 @@ class _MatWriterCore(FileWriter):
             variable_name: Name of the HDF5 dataset MATLAB will load the
                 recording as, e.g. ``load(file); data`` gives back the
                 array under this name.
+            edge_id: Which edge runs this node, matched against the
+                edge process's --edge-id. None, the default, is every
+                edge; ignored when the pipeline is not distributed.
             **kwargs: Additional arguments passed to parent FileWriter.
         """
-        super().__init__(file_name=file_name, **kwargs)
+        super().__init__(
+            file_name=file_name,
+            variable_name=variable_name,
+            edge_id=edge_id,
+            **kwargs,
+        )
         self._variable_name = variable_name
         self._file = None
         self._data_ds = None
@@ -238,70 +243,3 @@ class _MatWriterCore(FileWriter):
         self._n_cols = None
         self._total_samples = 0
         self._meta = None
-
-
-class MatWriter(ioc.IChain):
-    """MATLAB v7.3 (.mat) file writer chain for real-time data logging.
-
-    Writes multi-channel data as an HDF5-backed MAT-file MATLAB's own
-    ``load()`` opens directly, with a time column plus one column per
-    channel under ``variable_name``. Channel labels, roles and the
-    sampling rate are recorded in a ``gpype_meta`` document that
-    :class:`~gpype.MatReader` reads back exactly, and a plain
-    ``sampling_rate`` variable is written alongside it for a MATLAB user
-    who never asked about g.Pype's metadata format at all.
-    """
-
-    def __init__(self, file_name: str, variable_name: str = "data", **kwargs):
-        """Initialize the MAT writer chain.
-
-        Args:
-            file_name: Base filename for the .mat output. A timestamp
-                will be automatically appended. Optional only so that a
-                stored configuration can supply it; one of the two must
-                be given.
-            variable_name: Name of the dataset the recording is written
-                under.
-            **kwargs: Additional arguments.
-
-        Raises:
-            ValueError: If no file name is available from either source.
-        """
-        self._link_stream_id = stream_id_for(kwargs)
-        fn_key = _MatWriterCore.Configuration.Keys.FILE_NAME
-        if file_name is None:
-            file_name = kwargs.get(fn_key)
-        if file_name is None:
-            raise ValueError("file_name must be provided.")
-        self._core_params = {
-            "file_name": file_name,
-            "variable_name": variable_name,
-        }
-        self._core_params.update(strip_chain_keys(kwargs))
-
-        kwargs.setdefault(fn_key, file_name)
-        kwargs.setdefault("variable_name", variable_name)
-        kwargs.setdefault(
-            self.Configuration.Keys.INPUT_PORTS,
-            [IPort.Configuration()],
-        )
-        ioc.IChain.__init__(
-            self,
-            stream_id=self._link_stream_id,
-            **kwargs,
-        )
-
-    def create_internal_nodes(self) -> List[ioc.Node]:
-        """Create the internal node chain.
-
-        Returns:
-            List containing [Link, _MatWriterCore].
-        """
-        return [
-            Link(
-                sender=Constants.Residency.SERVER,
-                receiver=Constants.Residency.EDGE,
-                stream_id=self._link_stream_id,
-            ),
-            _MatWriterCore(**self._core_params),
-        ]

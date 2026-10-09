@@ -1,5 +1,5 @@
 # --------------------------------------------------------------
-# Example file s2e1_c_bandpass.py
+# Example file s2e1_bandpass.py
 # For details and usage, see g.Pype Training Season 2, Episode 1
 # --------------------------------------------------------------
 

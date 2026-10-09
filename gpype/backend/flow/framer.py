@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import numpy as np
 
+from ...common._private import channels
+from ...common._private.naming import node_label
 from ...common.constants import Constants
 from ..core.io_node import IONode
 
@@ -147,6 +149,15 @@ class Framer(IONode):
         #: setup() reruns on every run.
         self._fill = 0
 
+        # A re-blocked frame no longer aligns one row per input sample
+        # the way the input's grid does: a marker or gap carried over
+        # would name a row of whichever frame happens to hold it rather
+        # than the sample it was about (D-BATCH-86).
+        warning = channels.drop_grid(
+            port_context_out[PORT_OUT], node_label(self)
+        )
+        if warning:
+            self.log(warning, type=Constants.LogTypes.WARNING)
         return port_context_out
 
     def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
@@ -184,6 +195,10 @@ class Framer(IONode):
                 # change underneath.
                 out = self._buf.copy()
                 self._fill = 0
+                # The input row the frame ends on, for a carried
+                # position: part-way through the input when its frame
+                # size does not divide this one's.
+                self._position_last_row = taken - 1
 
         if out is None:
             return None

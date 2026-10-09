@@ -1,28 +1,69 @@
 """Shared machinery for a source that replays a saved recording.
 
-``_CsvReaderCore`` (``csv_reader.py``) open-codes all of this today --
+``CsvReader`` (``csv_reader.py``) open-codes all of this today --
 mode validation, the pacing/batch split, exhaustion, frame emission. This
 module holds the same machinery once, so :class:`~gpype.MatReader`,
 :class:`~gpype.HDF5Reader` and :class:`~gpype.EDFReader` do not each
-reimplement it. Refactoring ``_CsvReaderCore`` onto this base is out of
+reimplement it. Refactoring ``CsvReader`` onto this base is out of
 scope for this change and is left as a follow-up.
 """
 
 from __future__ import annotations
 
+import datetime
+import hashlib
+import os
 from dataclasses import dataclass, field
 from typing import Optional
 
 import numpy as np
 
-from ....common._private import channels
+from ....common._private import channels, events
 from ....common.constants import Constants
+from ...core._private import assembly
 from ...core.o_port import OPort
+from . import file_shape, raw
 from .fixed_rate_source import FixedRateSource
-from .source import Source
+from .source import ABSENT, Source
 
 #: Default output port identifier
 PORT_OUT = Constants.Defaults.PORT_OUT
+
+#: Bytes hashed per read by :func:`input_identity`.
+_HASH_CHUNK = 1 << 20
+
+
+def input_identity(path) -> Optional[dict]:
+    """Say which file a reader read, for ``Constants.Keys.INPUT``.
+
+    The basename, not the path: a path names somebody's directory tree
+    and differs on every machine that reads the same file. The SHA-256
+    of the whole file is the identity, so a copy is the same input
+    under another name and mtime (D-BATCH-71).
+
+    Args:
+        path: The file the reader opened.
+
+    Returns:
+        ``{name, size, mtime, sha256}``, JSON-safe, or None when *path*
+        names no regular file.
+    """
+    if not os.path.isfile(path):
+        return None
+    digest = hashlib.sha256()
+    with open(path, "rb") as handle:
+        for chunk in iter(lambda: handle.read(_HASH_CHUNK), b""):
+            digest.update(chunk)
+    stat = os.stat(path)
+    mtime = datetime.datetime.fromtimestamp(
+        stat.st_mtime, tz=datetime.timezone.utc
+    )
+    return {
+        "name": os.path.basename(os.fspath(path)),
+        "size": int(stat.st_size),
+        "mtime": mtime.isoformat(),
+        "sha256": digest.hexdigest(),
+    }
 
 
 @dataclass
@@ -44,12 +85,18 @@ class Recording:
             the only source left.
         extras: Ready-made port-context entries the reader already knows
             how to name -- ``Constants.Keys.DEVICE_SERIAL``,
-            ``CHANNEL_UNITS``, ``START_TIME``, ``SAMPLING_RATE_EXACT``.
-            Merged into the output port context verbatim. The one
-            exception is the key ``"mark"``: it is not a port-context key
-            (nothing else in g.Pype has needed one), so the base class
-            pulls it out and exposes it as the reader's own ``mark``
-            property instead of publishing it downstream.
+            ``CHANNEL_UNITS``, ``START_TIME``, ``SAMPLING_RATE_EXACT``,
+            ``MARKERS``, ``GAPS``, ``TRUST``. Markers and gaps index the
+            recording's first sample. Merged into the output port
+            context verbatim. The one exception is the key ``"mark"``:
+            it is not a port-context key (nothing else in g.Pype has
+            needed one), so the base class pulls it out and exposes it
+            as the reader's own ``mark`` property instead of publishing
+            it downstream.
+        rate_from_times: Whether ``sampling_rate`` was derived from a
+            time column rather than stated by the file. A given rate
+            agrees with a derived one to ``file_shape``'s tolerance, and
+            with a stated one exactly.
     """
 
     samples: np.ndarray
@@ -57,6 +104,7 @@ class Recording:
     roles: Optional[list] = None
     sampling_rate: Optional[float] = None
     extras: dict = field(default_factory=dict)
+    rate_from_times: bool = False
 
 
 def rate_from_time_column(times) -> Optional[float]:
@@ -109,7 +157,7 @@ def _h5py():
     except ImportError as error:  # pragma: no cover - environment
         raise ImportError(
             "reading this file needs h5py, provided by the 'formats' "
-            "extra: pip install 'gpype[formats]'"
+            'extra: pip install "gpype[formats]"'
         ) from error
     return h5py
 
@@ -187,6 +235,7 @@ def read_h5(path: str, variable_name: str, has_time_row: bool) -> Recording:
         labels = None
         roles = None
         rate = None
+        from_times = False
         extras: dict = {}
 
         if meta is not None:
@@ -197,14 +246,35 @@ def read_h5(path: str, variable_name: str, has_time_row: bool) -> Recording:
                 extras[Constants.Keys.DEVICE_SERIAL] = meta["device_serial"]
             if "channel_units" in meta:
                 extras[Constants.Keys.CHANNEL_UNITS] = meta["channel_units"]
+            for key, name in (
+                (Constants.Keys.CHANNEL_GAINS, "channel_gains"),
+                (Constants.Keys.CHANNEL_OFFSETS, "channel_offsets"),
+                (Constants.Keys.CHANNEL_CLIPPING, "channel_clipping"),
+                (Constants.Keys.CHANNEL_FILTERS, "channel_filters"),
+            ):
+                if name in meta:
+                    extras[key] = meta[name]
             if "start_time" in meta:
                 extras[Constants.Keys.START_TIME] = meta["start_time"]
             if "sampling_rate_exact" in meta:
                 extras[Constants.Keys.SAMPLING_RATE_EXACT] = meta[
                     "sampling_rate_exact"
                 ]
+            for key in (
+                Constants.Keys.MARKERS,
+                Constants.Keys.GAPS,
+                Constants.Keys.TRUST,
+            ):
+                if key in meta:
+                    extras[key] = meta[key]
             if "mark" in meta:
                 extras["mark"] = meta["mark"]
+            # Not a context key: nested under this reader's own INPUT as
+            # ``derived_from`` in ``__init__``, once the identity it
+            # belongs to is known (LQ-P3). Popped back out before
+            # ``extras`` reaches the port context.
+            if "provenance" in meta:
+                extras["_recorded_provenance"] = meta["provenance"]
         else:
             # No gpype_meta: this is either a file written by the
             # untracked HDF5Writer draft (native attrs may still carry
@@ -232,6 +302,7 @@ def read_h5(path: str, variable_name: str, has_time_row: bool) -> Recording:
             samples = data[:, 1:]
             if rate is None:
                 rate = rate_from_time_column(times)
+                from_times = rate is not None
         else:
             samples = data
 
@@ -243,6 +314,7 @@ def read_h5(path: str, variable_name: str, has_time_row: bool) -> Recording:
         roles=list(roles) if roles else None,
         sampling_rate=rate,
         extras=extras,
+        rate_from_times=from_times,
     )
 
 
@@ -256,7 +328,7 @@ def _as_str(value) -> str:
 class RecordingReader(FixedRateSource):
     """Internal node base replaying a saved recording as a live stream.
 
-    Mirrors ``_CsvReaderCore`` exactly in its engine -- mode validation,
+    Mirrors ``CsvReader`` exactly in its engine -- mode validation,
     the realtime/batch split, exhaustion, frame emission -- so that
     behaviour does not drift between formats. The one new thing is the
     subclass seam: :meth:`_load` returns a :class:`Recording`, and
@@ -281,12 +353,11 @@ class RecordingReader(FixedRateSource):
 
         Args:
             file_name: Path to the recording.
-            sampling_rate: Rate to replay at. Takes priority over
-                whatever the file itself supplies, matching
-                :class:`~gpype.CsvReader`'s convention; taken from the
-                file when not given.
-            frame_size: Samples emitted per cycle. Ignored in batch mode,
-                where the frame is the whole recording.
+            sampling_rate: The recording's rate. Taken from the file
+                when not given; required when the file records none. One
+                given must agree with a rate the file records.
+            frame_size: Samples emitted per cycle. In batch mode the
+                frame is the whole recording.
             speed: Replay speed relative to real time. Zero runs as fast
                 as the machine allows.
             loop: Start again from the beginning at the end of the file.
@@ -296,8 +367,12 @@ class RecordingReader(FixedRateSource):
 
         Raises:
             ValueError: If no file name is given, if the rate can neither
-                be read from the file nor was supplied, or if a
-                realtime-only argument is combined with batch mode.
+                be read from the file nor was supplied, if a
+                realtime-only argument is combined with batch mode, or
+                if a ``sampling_rate``, ``channel_count`` or batch
+                ``frame_size`` given by hand disagrees with the file.
+                A document's copy is warned about and replaced by the
+                file's.
         """
         if file_name is None:
             raise ValueError("file_name must be provided.")
@@ -313,32 +388,95 @@ class RecordingReader(FixedRateSource):
                 f"'{Constants.ExecutionMode.BATCH}'; got {mode!r}."
             )
 
-        recording = self._load(file_name)
-        if sampling_rate is None:
-            sampling_rate = recording.sampling_rate
-        if not sampling_rate:
-            raise ValueError(
-                f"'{file_name}' carries no usable time column, so the "
-                f"sampling rate has to be given explicitly."
+        # **A server does not open the file, and nor does a replay.**
+        # Under `chain-assembly` step 4 the public name is the core, so a
+        # document naming a reader is *constructed* by every process that
+        # reads it -- and the recording lives on the edge that made it,
+        # or is stood in for by a raw run. Neither runs the node
+        # (`raw.source_stage`), and nor does an edge the reader is not
+        # assigned to, so what the author left to the file is stood in
+        # for and written back as given: a server takes the shape from
+        # the context the edge sends (D-CORE-70), a replay from the
+        # recording. A 4.0.x document records no channel count for a
+        # reader at all.
+        #
+        # A stored configuration returns per-port values as lists.
+        if isinstance(frame_size, list):
+            frame_size = frame_size[0]
+        batch = mode == Constants.ExecutionMode.BATCH
+        edge_id = kwargs.get(Constants.Keys.EDGE_ID)
+        if not assembly.builds_core_for(edge_id) or raw.is_replaying():
+            (sampling_rate,) = raw.stand_in(
+                self, sampling_rate=(sampling_rate, raw.READER_STAND_IN_RATE)
             )
+            raw.stand_in(
+                self,
+                channel_count=(
+                    kwargs.get(Constants.Keys.CHANNEL_COUNT, ABSENT),
+                    None,
+                ),
+            )
+            self._samples = None
+            self._labels = None
+            self._roles = None
+            self._mark = None
+            self._extras = {}
+        else:
+            recording = self._load(file_name)
+            # The file decides the shape where it is read: a stored
+            # channel count used to win, and a re-pointed document
+            # failed on the roles its new file gave (D-BATCH-75).
+            sampling_rate, frame_size = file_shape.recording(
+                self,
+                file_name,
+                kwargs,
+                sampling_rate,
+                frame_size,
+                batch,
+                recording.sampling_rate,
+                recording.samples,
+                rate_from_times=recording.rate_from_times,
+            )
+            if not sampling_rate:
+                raise ValueError(
+                    f"'{file_name}' carries no usable time column, so "
+                    f"the sampling rate has to be given explicitly."
+                )
 
-        self._samples = recording.samples
-        self._labels = recording.labels
-        self._roles = recording.roles
-        extras = dict(recording.extras or {})
-        # Not a port-context key -- see the Recording docstring -- so it
-        # is exposed as `self.mark` instead of published downstream.
-        self._mark = extras.pop("mark", None)
-        self._extras = extras
+            self._samples = recording.samples
+            self._labels = recording.labels
+            self._roles = recording.roles
+            extras = dict(recording.extras or {})
+            # Not a port-context key -- see the Recording docstring --
+            # so it is exposed as `self.mark` instead of published
+            # downstream.
+            self._mark = extras.pop("mark", None)
+            # Popped back out here too: this file's own recorded
+            # provenance is not this run's PROVENANCE (that is built
+            # fresh by Pipeline.start(), and would otherwise be
+            # overwritten by it anyway) -- it is what *produced* the
+            # file this run is reading, so it belongs on this reader's
+            # own INPUT, not on the context's PROVENANCE key (LQ-P3).
+            recorded_provenance = extras.pop("_recorded_provenance", None)
+            identity = input_identity(file_name)
+            if identity is not None:
+                if recorded_provenance is not None:
+                    identity = dict(identity)
+                    identity["derived_from"] = recorded_provenance
+                extras[Constants.Keys.INPUT] = identity
+            # A file that stores no events of its own may still carry a
+            # trigger channel; stored markers win, so nothing already
+            # counted by the file is counted a second time (D-BATCH-87).
+            if not extras.get(Constants.Keys.MARKERS) and self._roles:
+                derived = events.derive_markers(recording.samples, self._roles)
+                if derived:
+                    extras[Constants.Keys.MARKERS] = derived
+            self._extras = extras
         self._position = 0
         self._speed = float(speed)
         self._exhausted = False
 
-        # A stored configuration returns per-port values as lists.
-        if isinstance(frame_size, list):
-            frame_size = frame_size[0]
-
-        if mode == Constants.ExecutionMode.BATCH:
+        if batch:
             if float(speed) != 1.0:
                 raise ValueError(
                     "speed describes pacing and a batch run has none: "
@@ -351,8 +489,9 @@ class RecordingReader(FixedRateSource):
                     "looping reader never reaches the end, and a batch "
                     "run is defined by reaching it."
                 )
-            frame_size = int(self._samples.shape[0])
-            kwargs["frame_size"] = frame_size
+            # The file's sample count where it was read, and the
+            # document's frame size as given where it was not.
+            kwargs["frame_size"] = int(frame_size or 1)
             self.EXECUTION_MODE = Constants.ExecutionMode.BATCH
         else:
             kwargs.setdefault("frame_size", int(frame_size))
@@ -368,7 +507,6 @@ class RecordingReader(FixedRateSource):
             kwargs.setdefault("decimation_factor", int(frame_size))
 
         kwargs.setdefault("output_ports", [OPort.Configuration()])
-        kwargs.setdefault("channel_count", int(self._samples.shape[1]))
         super().__init__(
             sampling_rate=float(sampling_rate),
             file_name=file_name,
@@ -461,6 +599,12 @@ class RecordingReader(FixedRateSource):
             )
 
         port_context_out[PORT_OUT].update(self._extras)
+        identity = self._extras.get(Constants.Keys.INPUT)
+        if identity is not None:
+            # A copy, as CsvReader and GtcReader publish: otherwise a
+            # caller editing what setup() returned would change what the
+            # next setup() publishes.
+            port_context_out[PORT_OUT][Constants.Keys.INPUT] = dict(identity)
         return port_context_out
 
     def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:

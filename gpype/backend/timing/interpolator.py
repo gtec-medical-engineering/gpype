@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+from fractions import Fraction
+
 import numpy as np
 from scipy.signal import butter, sosfilt, sosfilt_zi
 
 from ...common._private import channels
+from ...common._private.naming import node_label
 from ...common.constants import Constants
 from ..core.io_node import IONode
 
@@ -41,6 +44,13 @@ class Interpolator(IONode):
     at setup -- both are consumed by Sync, so seeing one means this node
     sits upstream of Sync, where it must not sit. Only integer-factor
     upsampling is in scope.
+
+    A marker in the input context moves to the first of the L output
+    samples its input sample expands into. A gap covers every output
+    sample whose window holds a missing input sample. With ``"hold"`` the
+    window is the input sample an output expands, so a gap covers all L
+    of every missing one. With ``"filter"``, it is the input samples that
+    carry 99 % of the output's filter weight: 14 at L=2, 11 at L=4.
     """
 
     #: Cutoff as a fraction of the *input* Nyquist frequency. Below one so
@@ -50,6 +60,10 @@ class Interpolator(IONode):
     CUTOFF_RATIO = 0.8
     #: Order of the reconstruction low-pass.
     FILTER_ORDER = 8
+    #: Input periods of impulse response measured for a gap's window.
+    #: The windows are 11 to 14 of them for factors 2 to 16, and 512
+    #: gives the same windows.
+    RESPONSE_PERIODS = 64
     #: Repeat the last computed value across the L output rows.
     METHOD_HOLD = "hold"
     #: Zero-stuff and low-pass to reconstruct a smooth trajectory.
@@ -122,7 +136,7 @@ class Interpolator(IONode):
     def setup(
         self, data: dict[str, np.ndarray], port_context_in: dict[str, dict]
     ) -> dict[str, dict]:
-        """Setup output context with raised sampling rate and frame size.
+        """Setup output context with a raised sampling rate.
 
         Args:
             data: Input data arrays.
@@ -130,10 +144,11 @@ class Interpolator(IONode):
                 sampling rate, and per-channel role information.
 
         Returns:
-            Output port contexts with the interpolated sampling rate and
-            a proportionally larger frame size. Channel count, labels,
-            roles and montage are carried through unchanged -- this node
-            changes rows, not columns.
+            Output port contexts with the interpolated sampling rate.
+            Frame size is unchanged: the rate rises because L frames are
+            emitted per input frame. Channel count, labels, roles and
+            montage are carried through unchanged -- this node changes
+            rows, not columns.
 
         Raises:
             ValueError: If frame_size is not provided in the input
@@ -227,6 +242,26 @@ class Interpolator(IONode):
                 self._zi = np.repeat(
                     sosfilt_zi(self._sos)[:, :, None], n_signal, axis=2
                 )
+
+        # A held output is the input sample it expands. A filtered one
+        # depends on every input before it, through every L-th filter
+        # tap, and response_window() says how many carry 99 % of its
+        # weight: 14 at L=2, 11 at L=4 (D-BATCH-80).
+        window = 1
+        if self._sos is not None:
+            impulse = np.zeros(self.RESPONSE_PERIODS * L + 1)
+            impulse[0] = 1.0
+            window = channels.response_window(
+                sosfilt(self._sos, impulse), stride=L
+            )
+        warning = channels.rescale_grid(
+            port_context_out[PORT_OUT],
+            Fraction(L),
+            node_label(self),
+            window=window,
+        )
+        if warning:
+            self.log(warning, type=Constants.LogTypes.WARNING)
         return port_context_out
 
     def _emit(self, frame: np.ndarray) -> None:

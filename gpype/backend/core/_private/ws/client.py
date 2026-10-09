@@ -172,6 +172,15 @@ class WsClient:
         self._last_error_log: float = 0.0
         self._reported_error: bool = False
 
+        #: Where a warning goes besides the console: the owning Link's
+        #: own log, so it reaches the session log and the condition. Set
+        #: by the Link after construction (D-CORE-125).
+        self.on_warning: Optional[Callable[[str], None]] = None
+        #: Whether this client has ever been connected. Before that, a
+        #: failure is an edge started ahead of its server -- an ordinary
+        #: start-up order -- and stays on the console.
+        self._ever_connected: bool = False
+
         self._mode: Optional[str] = None  # "send" | "receive"
         self._stream_id: Optional[str] = None
         self._receive_callback: Optional[Callable[[np.ndarray], None]] = None
@@ -246,9 +255,10 @@ class WsClient:
         if self._ws is None or not self._ready.is_set():
             now = time.monotonic()
             if now - self._last_drop_log >= self._drop_log_interval:
-                log.warning(
-                    "WsClient: not connected to %s — dropping data",
-                    self._endpoint,
+                self._warn(
+                    f"WsClient: not connected to {self._endpoint} — "
+                    f"dropping data",
+                    to_owner=self._ever_connected,
                 )
                 self._last_drop_log = now
             return
@@ -301,13 +311,11 @@ class WsClient:
         if thread is not None:
             thread.join(timeout=DISCONNECT_TIMEOUT_S)
             if thread.is_alive():
-                log.warning(
-                    "WsClient: the connection to %s did not shut down "
-                    "within %g s; abandoning its thread and event loop. "
-                    "The socket and one worker thread stay held until "
-                    "the process exits.",
-                    self._endpoint,
-                    DISCONNECT_TIMEOUT_S,
+                self._warn(
+                    f"WsClient: the connection to {self._endpoint} did not "
+                    f"shut down within {DISCONNECT_TIMEOUT_S:g} s; "
+                    f"abandoning its thread and event loop. The socket and "
+                    f"one worker thread stay held until the process exits."
                 )
 
         self._ready.clear()
@@ -424,6 +432,7 @@ class WsClient:
                             )
                         )
                     self._ready.set()
+                    self._ever_connected = True
                     self._last_error = None
                     self._reported_error = False
                     log.debug(
@@ -481,20 +490,35 @@ class WsClient:
         self._last_error_log = now
         self._reported_error = True
         if was_connected:
-            log.warning(
-                "WsClient: connection to %s lost (%s), retrying every "
-                "%.1fs",
-                self._endpoint,
-                reason,
-                self._retry_interval,
+            self._warn(
+                f"WsClient: connection to {self._endpoint} lost ({reason}), "
+                f"retrying every {self._retry_interval:.1f}s"
             )
         else:
+            # Console only: an edge started ahead of its server meets
+            # this on an ordinary start.
             log.warning(
                 "WsClient: cannot reach %s (%s), retrying every %.1fs",
                 self._endpoint,
                 reason,
                 self._retry_interval,
             )
+
+    def _warn(self, text: str, to_owner: bool = True) -> None:
+        """Warn on the console, and to the owning Link unless told not to.
+
+        Args:
+            text: The warning, formatted.
+            to_owner: Whether it also goes to :attr:`on_warning`.
+        """
+        log.warning(text)
+        callback = self.on_warning
+        if not to_owner or callback is None:
+            return
+        try:
+            callback(text)
+        except Exception:  # pragma: no cover - must not break I/O
+            log.debug("warning callback for %s raised", self._endpoint)
 
     async def _receive_loop(self, ws) -> None:
         """Read frames from the broker and invoke data/context callbacks."""

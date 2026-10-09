@@ -71,35 +71,23 @@ class Router(IONode):
 
         Args:
             input_channels: Specification for input channel selection. Can be
-                None (all channels), list (channel indices), or dict (port
-                name to channel indices mapping).
+                None (all channels), a sequence of channel indices (a list,
+                tuple, range or numpy array), a list of such sequences (one
+                per port), or a dict (port name to channel indices).
             output_channels: Specification for output channel selection.
                 Same format as input_channels.
             **kwargs: Additional configuration parameters passed to IONode.
 
         Raises:
-            ValueError: If input_channels or output_channels is empty.
+            ValueError: If input_channels or output_channels is empty, or
+                an entry is not a channel index.
         """
         # Set default input channels to all channels on default port
         if input_channels is None:
             input_channels = dict(Router.DEFAULT_INPUT_CHANNELS)
-
-        # Convert list format to dictionary format for input channels
-        if type(input_channels) is list:
-            if len(input_channels) == 0:
-                raise ValueError("input_channels must not be empty.")
-            # Convert single list to list of lists if needed
-            if type(input_channels[0]) is not list:
-                input_channels = [input_channels]
-            # Create port mappings
-            if len(input_channels) == 1:
-                input_channels = {
-                    Constants.Defaults.PORT_IN: input_channels[0]
-                }
-            else:
-                input_channels = {
-                    f"in{i + 1}": val for i, val in enumerate(input_channels)
-                }
+        input_channels = Router._port_map(
+            input_channels, "input_channels", Constants.Defaults.PORT_IN, "in"
+        )
 
         # Create input port configurations
         input_ports = [
@@ -113,23 +101,12 @@ class Router(IONode):
         # Set default output channels to all channels on default port
         if output_channels is None:
             output_channels = dict(Router.DEFAULT_OUTPUT_CHANNELS)
-
-        # Convert list format to dictionary format for output channels
-        if type(output_channels) is list:
-            if len(output_channels) == 0:
-                raise ValueError("output_channels must not be empty.")
-            # Convert single list to list of lists if needed
-            if type(output_channels[0]) is not list:
-                output_channels = [output_channels]
-            # Create port mappings
-            if len(output_channels) == 1:
-                output_channels = {
-                    Constants.Defaults.PORT_OUT: output_channels[0]
-                }
-            else:
-                output_channels = {
-                    f"out{i + 1}": val for i, val in enumerate(output_channels)
-                }
+        output_channels = Router._port_map(
+            output_channels,
+            "output_channels",
+            Constants.Defaults.PORT_OUT,
+            "out",
+        )
 
         # Create output port configurations
         output_ports = [
@@ -157,6 +134,49 @@ class Router(IONode):
             output_ports=output_ports,
             **kwargs,
         )
+
+    @staticmethod
+    def _port_map(value, name: str, port: str, prefix: str) -> dict:
+        """Return a channel specification as port name to index list.
+
+        Every selection becomes a list of plain ints here, before it
+        reaches the configuration: a range or a numpy array stored as
+        given made the pipeline unserialisable.
+
+        Args:
+            value: A selection, a list of selections, or a dict of them
+                by port name.
+            name: Parameter name, for the error message.
+            port: Port name for a single selection.
+            prefix: Port name prefix for several, numbered from 1.
+
+        Returns:
+            One selection per port.
+
+        Raises:
+            ValueError: If the specification is empty, or an entry is
+                not a channel index.
+        """
+        if isinstance(value, dict):
+            return {
+                key: channels.as_selection(sel, f"{name}[{key!r}]")
+                for key, sel in value.items()
+            }
+        if isinstance(value, (str, bytes)) or not np.iterable(value):
+            raise ValueError(
+                f"{name} must be a list or a dict, got {value!r}."
+            )
+        value = list(value)
+        if len(value) == 0:
+            raise ValueError(f"{name} must not be empty.")
+        # One selection, or one per port.
+        first = value[0]
+        if isinstance(first, (str, bytes)) or not np.iterable(first):
+            value = [value]
+        selections = [channels.as_selection(sel, name) for sel in value]
+        if len(selections) == 1:
+            return {port: selections[0]}
+        return {f"{prefix}{i + 1}": sel for i, sel in enumerate(selections)}
 
     def setup(
         self, data: dict[str, np.ndarray], port_context_in: dict[str, dict]
@@ -368,13 +388,24 @@ class Router(IONode):
             # what it may touch -- of the only thing that identifies them.
             roles: list[str] = []
             labels: list = []
+            units: list = []
             systems = set()
             any_labelled = False
+            any_units = False
             for entry in self._map[op[name_key]]:
                 for port_in, ch_in in entry.items():
                     src = port_context_in[port_in]
                     src_roles = channels.roles_of(src)
                     roles.extend(src_roles[c] for c in ch_in)
+                    # A unit per channel, as labels are carried: an input
+                    # recording none contributes None for its channels,
+                    # rather than blanking the others' units.
+                    src_units = channels.units_of(src)
+                    if src_units is not None:
+                        any_units = True
+                        units.extend(src_units[c] for c in ch_in)
+                    else:
+                        units.extend(None for _ in ch_in)
                     if channels.has_labels(src):
                         any_labelled = True
                         src_labels = channels.labels_of(src)
@@ -404,6 +435,8 @@ class Router(IONode):
                     system if any_labelled else None,
                 )
             )
+            if any_units:
+                context[Constants.Keys.CHANNEL_UNITS] = units
             port_context_out[op[name_key]] = context
             self._channel_count_out[op[name_key]] = context[cc_key]
 

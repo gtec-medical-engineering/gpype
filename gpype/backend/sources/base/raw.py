@@ -22,7 +22,7 @@ a plain :class:`~gpype.CsvWriter` wired in by hand.
 **One shifted clock, not many.** ``channels.wrap_time`` carries host time
 as 100 us units modulo 2**20, so a timestamp channel repeats every 105
 seconds, and ``unwrap_time`` resolves a stored value against the
-*reader's* own ``perf_counter``. Replaying stored stamps verbatim offsets
+*reader's* own ``stamp_clock()``. Replaying stored stamps verbatim offsets
 every one of them by an arbitrary constant -- and when that constant
 approaches the 52.4 s half-period, the reconstructed instants jump by
 105 s partway through the run. So a replay computes **one** shift, at the
@@ -48,7 +48,7 @@ stream still aligns; it aligns to a different grid, and nothing says so.
 mints a random id when the document carries none, so files cannot be
 keyed on it. The key is the author's node name where there is one and
 ``<Class>_<ordinal>`` otherwise, and :func:`resolve_stream` refuses a
-graph whose shape disagrees with the manifest rather than pairing two
+pipeline whose shape disagrees with the manifest rather than pairing two
 streams that merely happen to sit in the same position.
 """
 
@@ -64,13 +64,14 @@ from typing import Callable, Optional
 
 import numpy as np
 
+from ...._installer import refuse_cache_path
 from ....common._private import channels
 from ....common.constants import Constants
 from ....common.launch_config import LaunchConfig
 from ...core.i_port import IPort
 from ...core.io_node import IONode
 from ...core.o_port import OPort
-from .source import Source
+from .source import ABSENT, Source
 
 #: Default port identifiers.
 PORT_IN = Constants.Defaults.PORT_IN
@@ -103,7 +104,7 @@ RAW_META_KEY = "raw"
 #: unbounded memory growth, and a blocking put turns it into an overrun
 #: on the acquisition thread. Dropping and *saying so* is the only one of
 #: the three that neither lies nor takes the run down -- the same trade
-#: ``_BCICoreCore`` makes for its own frame buffer.
+#: ``BCICore`` makes for its own frame buffer.
 QUEUE_LIMIT = 2048
 
 #: Seconds between two reports of a full queue, so a sustained overrun
@@ -126,7 +127,7 @@ def _h5py():
         raise ImportError(
             "save_as and load_from store raw streams as HDF5, which "
             "needs h5py, provided by the 'formats' extra: "
-            "pip install 'gpype[formats]'"
+            'pip install "gpype[formats]"'
         ) from error
     return h5py
 
@@ -135,7 +136,7 @@ def _h5py():
 
 #: How many chains of each class have been keyed since the last reset.
 _ordinals: dict = {}
-#: Keys already taken by a stream in the graph being built.
+#: Keys already taken by a stream in the pipeline being built.
 _claimed: set = set()
 #: Guards both; chains are normally built on one thread, but a process
 #: hosting two sessions is not obliged to.
@@ -148,15 +149,15 @@ def reset_stream_keys() -> None:
     Called from ``LaunchConfig.configure``, which is the one point that
     is guaranteed to run before any chain is built and after any previous
     run has finished. Without it a second pipeline in one process
-    continues counting, and a ``load_from`` graph built after a
-    ``save_as`` graph would ask for ``Generator_1``.
+    continues counting, and a ``load_from`` pipeline built after a
+    ``save_as`` pipeline would ask for ``Generator_1``.
     """
     with _ordinal_lock:
         _ordinals.clear()
         # Together, always. Reissuing an ordinal while still holding the
-        # claim on it makes this function a trap: the next graph asks
+        # claim on it makes this function a trap: the next pipeline asks
         # for Generator_0 again and is refused for colliding with the
-        # previous graph's stream. Found by a test that reset the
+        # previous pipeline's stream. Found by a test that reset the
         # ordinals on their own.
         _claimed.clear()
 
@@ -192,11 +193,31 @@ def stream_key(chain) -> str:
         A file-name-safe key.
     """
     from ....common._private.naming import public_name
+    from ...core._private import wrapping
 
-    cls = public_name(type(chain).__name__)
-    params = getattr(chain, "_core_params", None) or {}
-    name = params.get("name") or getattr(chain, "name", None)
-    if name and name != type(chain).__name__ and name != cls:
+    # A chain the *Pipeline* built holds the core itself rather than the
+    # parameters it was made from, and that core is already configured
+    # -- so its name is answerable here where the chain's is not.
+    # Without this a bare core recorded as `SourceChain_0`: the author's
+    # name lost, and two sources filed under one class name that exists
+    # only until step 4 removes it.
+    core = wrapping.core_of(chain)
+    if core is not None:
+        owner = type(core).__name__
+        cls = public_name(owner)
+        name = (core.config or {}).get("name")
+    else:
+        owner = type(chain).__name__
+        cls = public_name(owner)
+        params = getattr(chain, "_core_params", None) or {}
+        name = params.get("name") or getattr(chain, "name", None)
+    # An unnamed node's name *is* its class name, which is not a name
+    # the author chose and must fall through to the ordinal. Compared
+    # against the class that would have supplied it -- the core's, where
+    # there is one -- not the chain's: `_GeneratorCore` is not
+    # `SourceChain`, so comparing to the wrapper filed an unnamed
+    # generator under `_GeneratorCore` instead of `Generator_0`.
+    if name and name != owner and name != cls:
         return _sanitize(str(name))
 
     with _ordinal_lock:
@@ -206,7 +227,7 @@ def stream_key(chain) -> str:
 
 
 def claim_stream_key(key: str, owner: str) -> None:
-    """Reserve *key* for one stream of this graph, or refuse it.
+    """Reserve *key* for one stream of this pipeline, or refuse it.
 
     Two sources can reach one key: nothing in g.Pype refuses two nodes
     with the same name, and :func:`_sanitize` additionally maps distinct
@@ -218,7 +239,7 @@ def claim_stream_key(key: str, owner: str) -> None:
     what :func:`resolve_stream` promises to refuse and cannot detect
     here, because both nodes are the same class.
 
-    Refused while the graph is still being built rather than left to
+    Refused while the pipeline is still being built rather than left to
     the replay: the recording is the artifact, and one that cannot be
     replayed is worth failing a run to prevent.
 
@@ -227,12 +248,12 @@ def claim_stream_key(key: str, owner: str) -> None:
         owner: How to name the offending stream in the message.
 
     Raises:
-        ValueError: If the key is already claimed in this graph.
+        ValueError: If the key is already claimed in this pipeline.
     """
     with _ordinal_lock:
         if key in _claimed:
             raise ValueError(
-                f"two sources in this graph both file their raw stream "
+                f"two sources in this pipeline both file their raw stream "
                 f"under '{key}' ({owner} is the second). A stream key "
                 f"is the node's name, or its class and an ordinal when "
                 f"it has none -- and names are not unique, so two nodes "
@@ -338,6 +359,10 @@ class RawRun:
             save_as: Path stem. A ``.h5`` suffix is accepted and dropped:
                 the stem names a *run*, and a run is a directory of
                 streams rather than one file.
+
+        Raises:
+            ValueError: If the run directory would lie inside the package
+                cache (D-CORE-120).
         """
         self.stem = save_as
         stem, ext = os.path.splitext(save_as)
@@ -351,6 +376,7 @@ class RawRun:
         while os.path.exists(directory):
             directory = f"{base}_{stamp}_{suffix}"
             suffix += 1
+        refuse_cache_path(directory, "save_as")
         os.makedirs(directory, exist_ok=True)
         self.directory = directory
 
@@ -428,7 +454,7 @@ class RawRun:
         """Forget the origin, so the next run anchors itself afresh.
 
         A pipeline may be started again after ``stop()``, and this
-        object lives as long as the *graph* rather than the run -- it is
+        object lives as long as the *pipeline* rather than the run -- it is
         created in ``create_internal_nodes``. Without this, run 2's
         block times stay relative to run 1's origin: a recording made
         ten seconds after the first carries ``t_emit`` around 10.5, and
@@ -439,7 +465,7 @@ class RawRun:
 
         The mirror of :meth:`ReplayClock.reset`, called from the same
         place in ``Pipeline.start`` and for the same reason. The
-        directory is deliberately not reset: it belongs to the graph,
+        directory is deliberately not reset: it belongs to the pipeline,
         and ``_free_path`` gives each stream's second recording its own
         file inside it.
         """
@@ -475,7 +501,9 @@ class RawRun:
                 "format": MANIFEST_VERSION,
                 "created": datetime.now(timezone.utc).isoformat(),
                 "residency": LaunchConfig.get().residency,
-                "origin_clock": "perf_counter",
+                # The base the origin was taken in: the process's own
+                # perf_counter, or a server reference an edge synced to.
+                "origin_clock": channels.stamp_base(),
                 "streams": [self._entries[k] for k in sorted(self._entries)],
             }
             # Written beside and renamed rather than truncated in
@@ -636,7 +664,7 @@ class _RawTap(IONode):
             run: The run this stream belongs to, for the shared origin
                 and the manifest.
             source_class: Public class name of the chain, recorded so a
-                loader can refuse a graph that has changed shape.
+                loader can refuse a pipeline that has changed shape.
             node_name: The chain's node name, recorded for the same
                 reason.
             node_id: The chain's document id, recorded for the same
@@ -646,7 +674,12 @@ class _RawTap(IONode):
                 wait for data on every cycle -- the same reason ``Sync``
                 takes this.
             **kwargs: Additional arguments for IONode.
+
+        Raises:
+            ValueError: If *file_name* lies inside the package cache
+                (D-CORE-120).
         """
+        refuse_cache_path(file_name, "save_as")
         self._run = run
         self._node_name = node_name
         self._node_id = node_id
@@ -812,6 +845,8 @@ class _RawTap(IONode):
         key = self.config[keys.STREAM_KEY]
         rate = context.get(Constants.Keys.SAMPLING_RATE)
 
+        # Resolved again before the first write (D-CORE-120).
+        refuse_cache_path(path, "save_as")
         os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
         path = _free_path(path)
         self._file = module.File(path, "w")
@@ -850,6 +885,8 @@ class _RawTap(IONode):
             The sub-document stored under :data:`RAW_META_KEY`.
         """
         candidacy = getattr(self, "_candidacy", None)
+        if callable(candidacy):
+            candidacy = candidacy()
         return {
             "format": MANIFEST_VERSION,
             # The absolute origin, without which a replayed stamp is
@@ -876,8 +913,18 @@ class _RawTap(IONode):
         the tap has no other way to see it and a replay that does not
         reproduce it lets the election pick a different winner.
 
+        :func:`source_stage` passes the core's ``master_candidacy`` itself,
+        and the tap asks it when it writes its metadata, in ``setup``:
+        after the election, so what is recorded is the claim the run was
+        elected on. Asked at pipeline construction, a BCI Core with no rate
+        declared connected from inside ``connect()`` to learn its rate --
+        a Bluetooth discovery before the pipeline had even started, and
+        with the device absent a second one, since the failure was not
+        this start's to remember.
+
         Args:
-            candidacy: ``(rate, priority)``, or None.
+            candidacy: ``(rate, priority)``, None, or a callable returning
+                either, asked when the metadata is written.
         """
         self._candidacy = candidacy
 
@@ -1048,7 +1095,7 @@ def resolve_stream(manifest: dict, key: str, source_class: str) -> dict:
     """The manifest entry for one chain, or a refusal naming the problem.
 
     Matched on the key, and then cross-checked on the class. Never
-    positionally: pairing the *n*-th source of this graph with the
+    positionally: pairing the *n*-th source of this pipeline with the
     *n*-th stream of the recording is what silently crosses two streams
     when a node has been inserted, and a crossed stream looks like
     plausible data.
@@ -1065,22 +1112,31 @@ def resolve_stream(manifest: dict, key: str, source_class: str) -> dict:
         ValueError: If no stream carries that key, or if the stream that
             does was recorded from a different class.
     """
+    from ....common._private.naming import legacy_public_name
+
     streams = {entry["key"]: entry for entry in manifest.get("streams", [])}
     entry = streams.get(key)
+    # A run recorded before 4.1.0 spelled a public class ending in "Core"
+    # without it -- "BCI" for BCICore -- in both its ordinal keys and its
+    # source_class. Accepted, so that recording still replays.
+    legacy = legacy_public_name(source_class)
+    if entry is None and legacy != source_class:
+        if key.startswith(source_class + "_"):
+            entry = streams.get(legacy + key[len(source_class) :])
     if entry is None:
         available = ", ".join(sorted(streams)) or "nothing"
         raise ValueError(
             f"this run has no raw stream '{key}' to replay; it holds "
             f"{available}. The key is the node's name where it has one "
-            f"and <Class>_<ordinal> otherwise, so a graph that gained "
+            f"and <Class>_<ordinal> otherwise, so a pipeline that gained "
             f"or lost a source since the recording no longer lines up. "
             f"Name the nodes and record again, or load a matching run."
         )
     recorded = entry.get("source_class")
-    if recorded and recorded != source_class:
+    if recorded and recorded not in (source_class, legacy):
         raise ValueError(
             f"raw stream '{key}' was recorded from {recorded} and this "
-            f"graph asks for it as {source_class}. Replaying it would "
+            f"pipeline asks for it as {source_class}. Replaying it would "
             f"feed one device's stream through another's chain."
         )
     entry = dict(entry)
@@ -1238,13 +1294,23 @@ class _RawReplayCore(Source):
         """Whether every recorded block has been emitted."""
         return self._exhausted
 
+    @property
+    def mark(self) -> Optional[str]:
+        """The entitlement mark the recording run wrote, if it had one.
+
+        Read by the pipeline's gate, so a replay of a marked run is
+        marked whatever this machine's licence (D-ENT-97).
+        """
+        mark = self._meta.get("mark")
+        return None if mark is None else str(mark)
+
     def setup(
         self, data: dict[str, np.ndarray], port_context_in: dict[str, dict]
     ) -> dict[str, dict]:
         """Publish the recorded stream's own description.
 
         Everything the live source put in its context has to come back,
-        or the graph behind this node is set up differently than it was
+        or the pipeline behind this node is set up differently than it was
         during the recording: roles decide what ``Sync`` consumes, the
         presence of a rate decides whether a stream is counted or
         placed, and the labels are what a downstream writer records.
@@ -1287,6 +1353,15 @@ class _RawReplayCore(Source):
                 context[key] = value
 
         context[OPort.Configuration.Keys.TIMING] = self._timing
+        # Nothing behind this node will feed the rate estimator, and
+        # the node that has to instead cannot tell by looking. A live
+        # amplifier observes the timeline from its acquisition callback
+        # -- ``BCICore`` is the only source in the package that
+        # does -- and ``Sync``'s numbered path leaves the estimator to
+        # it on exactly that assumption. Reproducing the frames and the
+        # candidacy does not reproduce the observing, so this says so.
+        # See Constants.Keys.UNOBSERVED_SOURCE for what it cost.
+        context[Constants.Keys.UNOBSERVED_SOURCE] = True
         self._position = 0
         self._exhausted = False
         self._reported_end = False
@@ -1358,7 +1433,7 @@ class _RawReplayCore(Source):
 
         Wrapped, because a thread that raises here is invisible: Python
         prints the traceback to stderr and the pipeline goes on
-        reporting a healthy graph that happens to carry no data.
+        reporting a healthy pipeline that happens to carry no data.
         Measured during development -- an AttributeError in the shift
         arithmetic produced a replay of exactly nothing, with the
         pipeline reporting no failure at all.
@@ -1476,7 +1551,7 @@ class _RawReplayCore(Source):
         Going quiet rather than stopping the pipeline: a device that
         stops sending does not take the application down with it, and a
         Qt app whose pipeline stopped itself would leave a live window
-        over a dead graph. ``is_exhausted`` is what an application reads
+        over a dead pipeline. ``is_exhausted`` is what an application reads
         to decide otherwise.
         """
         if self._reported_end:
@@ -1557,17 +1632,21 @@ def source_stage(
     Four answers, in the order they are decided:
 
     * nothing, under ``SERVER`` residency -- the core lives on the edge,
-      and so does anything recording or replaying it;
+      and so does anything recording or replaying it. An edge the
+      source is not assigned to never reaches this function: its chain
+      is a placeholder (``assembly.source_nodes``), and it takes no
+      stream key either;
     * a replay core, under ``load_from``;
     * the core and a tap behind it, under ``save_as``;
     * the core alone.
 
     Args:
         chain: The chain being built, for its key and its identity.
-        factory: Builds the core. A callable rather than a class and its
-            parameters, because a core's constructor may import a driver
-            -- ``_KeyboardCore`` imports pynput -- and a replayed or
-            server-side chain must not.
+        factory: Returns the core, which the author built before any
+            chain existed. Called only where the core is run; a
+            replayed or server-side chain runs none, which is why a
+            source's constructor has to reach no device and no file in
+            either (``is_replaying``, ``assembly.is_server``).
         timing: Timing of the stream. Sparse sources pass ASYNC, for the
             reason they already pass it to their ``Link`` and ``Sync``.
 
@@ -1583,7 +1662,7 @@ def source_stage(
 
     # Nothing below this line runs with the feature off, and that
     # matters: stream_key consumes a process-global ordinal, so keying
-    # unconditionally let a feature-off graph advance the counter. A
+    # unconditionally let a feature-off pipeline advance the counter. A
     # host that then switched recording on filed its streams as
     # Generator_3 and Generator_4, and the replay -- whose counter
     # starts clean -- asked for Generator_0 and was refused.
@@ -1591,7 +1670,18 @@ def source_stage(
         return [factory()]
 
     key = stream_key(chain)
-    source_class = public_name(type(chain).__name__)
+    # The core's class, for the same reason `stream_key` reads it: a
+    # chain the *Pipeline* built is assembly, and `SourceChain` is not a
+    # name any recording should carry. `resolve_stream` refuses a replay
+    # whose pipeline asks for a different class than the manifest recorded,
+    # so getting this wrong does not merely mislabel a file -- it makes
+    # a recording unreplayable by the other build, and collapses the
+    # cross-check that stops one device's stream being replayed through
+    # another device's chain into a constant.
+    from ...core._private import wrapping
+
+    owner = wrapping.core_of(chain) or chain
+    source_class = public_name(type(owner).__name__)
 
     if config.load_from:
         manifest = read_manifest(config.load_from)
@@ -1606,7 +1696,7 @@ def source_stage(
 
     core = factory()
     run = RawRun.current(config.save_as)
-    # Refused here, while the graph is still being built, rather than
+    # Refused here, while the pipeline is still being built, rather than
     # left to produce a run whose manifest describes fewer streams than
     # it holds. See RawRun.claim.
     claim_stream_key(key, f"{source_class} '{key}'")
@@ -1624,14 +1714,20 @@ def source_stage(
         # no such attribute at any point, so that read could only ever
         # return None. Both fields were therefore null in every manifest
         # of every run, while claiming to be what a loader would check a
-        # changed graph against. Found by three of the test authors
+        # changed pipeline against. Found by three of the test authors
         # independently.
-        node_name=(getattr(chain, "_core_params", None) or {}).get("name"),
+        node_name=(
+            (owner.config or {}).get("name")
+            if owner is not chain
+            else (getattr(chain, "_core_params", None) or {}).get("name")
+        ),
         node_id=getattr(chain, "_link_stream_id", None),
         timing=timing,
         name=f"{key}_tap",
     )
-    tap.attach_candidacy(declare() if callable(declare) else None)
+    # The claim itself, not its value: asked when the tap writes its
+    # metadata, after the election. See _RawTap.attach_candidacy.
+    tap.attach_candidacy(declare if callable(declare) else None)
     return [core, tap]
 
 
@@ -1640,9 +1736,52 @@ def is_replaying() -> bool:
 
     Read by a source that offers a live API of its own -- ``Marker.emit``
     -- so it can decline rather than emit an event beside the recorded
-    one it is meant to be reproducing.
+    one it is meant to be reproducing. And by every source whose
+    constructor would otherwise reach a device or a file: under
+    ``load_from`` the recording supplies the stream and the node is never
+    run, so it asks neither -- see :func:`stand_in`.
 
     Returns:
         True when ``load_from`` is configured.
     """
     return bool(LaunchConfig.get().load_from)
+
+
+#: The rate a recording reader is built with under ``load_from`` when its
+#: author left the rate to the file. Only ``FixedRateSource`` reads it,
+#: to validate; the node is never run and ``stand_in`` never writes
+#: it back.
+READER_STAND_IN_RATE = 1.0
+
+
+def stand_in(node, **values) -> list:
+    """What to build *node* with, where this process asks no world.
+
+    Under ``load_from`` and on a server, a source that calls this opens
+    no device and reads no file: the recording or the edge supplies the
+    stream, and the node is never run. A value its author left to the
+    device or the file still has to satisfy the configuration, so a
+    stand-in takes its place, and the author's own value is recorded on
+    the node for ``Source.serialize`` to write back. Refusing it instead
+    would refuse every amplifier example, none of which names a serial or
+    a frame size.
+
+    Args:
+        node: The node being built.
+        **values: Setting name to ``(given, stand_in)``. A given of None,
+            or ``source.ABSENT`` for a setting never passed, takes the
+            stand-in and is written back as it was.
+
+    Returns:
+        The value to build with for each setting, in the order given.
+    """
+    as_given = dict(getattr(node, "_as_given", None) or {})
+    chosen = []
+    for name, (given, substitute) in values.items():
+        if given is None or given is ABSENT:
+            as_given[name] = given
+            chosen.append(substitute)
+        else:
+            chosen.append(given)
+    node._as_given = as_given
+    return chosen

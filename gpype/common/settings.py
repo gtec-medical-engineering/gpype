@@ -1,9 +1,69 @@
 import os
 import sys
+import tempfile
+import warnings
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any, Optional
 from xml.dom import minidom
+
+#: File name of the settings document, in whichever directory holds it.
+_FILE_NAME = "settings.xml"
+
+
+def _fallback_settings_path() -> Optional[Path]:
+    """Where settings go when the platform's own directory is unusable.
+
+    Android is the case this exists for: there ``Path.home()`` can raise,
+    and a home directory that resolves is not necessarily writable. The
+    temp directory is the app's own on a mobile platform, and the one
+    Python checks is writable.
+
+    It is the directory the pipeline's log falls back to
+    (``pipeline._fallback_log_directory``), but not for the same reason.
+    The log falls back on a platform ioiocore does not know, whatever its
+    home; settings fall back when their own directory cannot be named or
+    created, on any platform -- Windows included, where that replaces a
+    machine-wide directory with this user's temp directory.
+
+    Returns:
+        A path under the temp directory, or None -- settings held in
+        memory only -- when no temp directory is usable either.
+    """
+    try:
+        return Path(tempfile.gettempdir()) / "gtec" / "gPype" / _FILE_NAME
+    except (OSError, RuntimeError):
+        return None
+
+
+def _fallback_warning(wanted: Optional[Path], used: Optional[Path]) -> str:
+    """Say where the settings went instead, or that they will not last.
+
+    Args:
+        wanted: The file the platform's directory would have held, or None
+            where that directory could not be named.
+        used: The fallback file, or None where settings live in memory.
+
+    Returns:
+        The warning to give.
+    """
+    because = (
+        f"{wanted.parent} could not be created"
+        if wanted is not None
+        else "no home directory could be named"
+    )
+    if used is not None:
+        return (
+            f"g.Pype settings are kept in {used}, because {because}. The "
+            f"temp directory may be cleared; set GPYPE_SETTINGS_DIR to keep "
+            f"them elsewhere."
+        )
+    return (
+        f"g.Pype settings are kept in memory only, because {because} and "
+        f"the temp directory is not writable either. Anything written to "
+        f"gp.Settings, the OSCAR key included, is lost when this process "
+        f"exits; set GPYPE_SETTINGS_DIR to keep it."
+    )
 
 
 class _Settings(dict):
@@ -16,6 +76,14 @@ class _Settings(dict):
     Storage locations:
     - Windows: %PROGRAMDATA%/gtec/gPype/settings.xml
     - macOS: ~/Library/Application Support/gtec/gPype/settings.xml
+    - elsewhere: $XDG_CONFIG_HOME (or ~/.config)/gtec/gPype/settings.xml
+
+    Where that directory cannot be determined or created -- Android, with
+    no usable home -- the temp directory's gtec/gPype is used instead, and
+    where that fails too the settings live in memory only (``file_path``
+    is None). Either is announced once, with a RuntimeWarning naming the
+    file used or saying the settings will not persist. An explicit
+    ``GPYPE_SETTINGS_DIR`` is never replaced.
 
     Use Settings.get() to access the singleton instance.
     """
@@ -81,38 +149,77 @@ class _Settings(dict):
             _Settings()
         return _Settings._instance
 
-    def _get_settings_path(self) -> Path:
+    def _get_settings_path(self) -> Optional[Path]:
         """Determine platform-specific settings file path.
 
         Returns:
-            Path: Full path to the settings XML file.
-
-        Raises:
-            RuntimeError: If the operating system is not supported.
+            Path: Full path to the settings XML file, or None when the
+            platform's directory cannot be determined -- no home
+            directory, as on Android. ``_ensure_path_exists`` then falls
+            back.
         """
         # Check for environment variable override (useful for testing)
         if "GPYPE_SETTINGS_DIR" in os.environ:
             base = Path(os.environ["GPYPE_SETTINGS_DIR"])
-            return base / "settings.xml"
+            return base / _FILE_NAME
 
-        if sys.platform == "win32":
-            # Windows: Use PROGRAMDATA for system-wide settings
-            base = Path(os.getenv("PROGRAMDATA", r"C:\ProgramData"))
-        elif sys.platform == "darwin":
-            # macOS: Use user's Application Support directory
-            base = Path.home() / "Library" / "Application Support"
-        else:
-            # Everything else follows the XDG convention. Settings is
-            # constructed at import, so raising here would make the whole
-            # package unimportable rather than merely unsupported, and
-            # ioiocore itself runs on Linux.
-            base = Path(os.getenv("XDG_CONFIG_HOME", Path.home() / ".config"))
+        try:
+            if sys.platform == "win32":
+                # Windows: Use PROGRAMDATA for system-wide settings
+                base = Path(os.getenv("PROGRAMDATA", r"C:\ProgramData"))
+            elif sys.platform == "darwin":
+                # macOS: Use user's Application Support directory
+                base = Path.home() / "Library" / "Application Support"
+            else:
+                # Everything else follows the XDG convention. Settings is
+                # constructed at import, so raising here would make the
+                # whole package unimportable rather than merely
+                # unsupported, and ioiocore itself runs on Linux.
+                xdg = os.getenv("XDG_CONFIG_HOME")
+                base = Path(xdg) if xdg else Path.home() / ".config"
+        except (KeyError, OSError, RuntimeError):
+            # Path.home() raises where there is no home to name: no HOME
+            # and no password-database entry, which is Android's normal
+            # state (RuntimeError from 3.12; KeyError before).
+            return None
 
-        return base / "gtec" / "gPype" / "settings.xml"
+        return base / "gtec" / "gPype" / _FILE_NAME
 
     def _ensure_path_exists(self):
-        """Create the settings directory if it doesn't exist."""
-        self.file_path.parent.mkdir(parents=True, exist_ok=True)
+        """Create the settings directory, falling back where it cannot be.
+
+        The platform's own directory first. Where it could not be named,
+        or cannot be created, the temp directory's; where that cannot be
+        created either, ``file_path`` becomes None and the settings live
+        in memory for this process. An explicit ``GPYPE_SETTINGS_DIR`` is
+        created or refused as given: a directory someone chose is not
+        silently replaced by another.
+
+        A fallback warns, once, since this runs once per process: it
+        moves the settings somewhere nobody chose, and in memory a key
+        written through ``gp.Settings`` is gone at exit. Without the
+        warning both happened silently.
+        """
+        if self.file_path is not None:
+            try:
+                self.file_path.parent.mkdir(parents=True, exist_ok=True)
+                return
+            except OSError:
+                if "GPYPE_SETTINGS_DIR" in os.environ:
+                    raise
+
+        fallback = _fallback_settings_path()
+        if fallback is not None:
+            try:
+                fallback.parent.mkdir(parents=True, exist_ok=True)
+            except OSError:
+                fallback = None
+        warnings.warn(
+            _fallback_warning(self.file_path, fallback),
+            RuntimeWarning,
+            stacklevel=2,
+        )
+        self.file_path = fallback
 
     def _convert_type(self, value: str) -> Any:
         """Convert string values to appropriate Python types.
@@ -152,8 +259,8 @@ class _Settings(dict):
         Returns:
             dict[str, Any]: Dictionary of setting key-value pairs.
         """
-        # Return empty dict if file doesn't exist
-        if not self.file_path.exists():
+        # Return empty dict if file doesn't exist, or there is none
+        if self.file_path is None or not self.file_path.exists():
             return {}
 
         try:
@@ -172,7 +279,15 @@ class _Settings(dict):
             return {}
 
     def write(self):
-        """Write current settings to the XML file with pretty formatting."""
+        """Write current settings to the XML file with pretty formatting.
+
+        Does nothing where no directory could be created (``file_path``
+        is None): the settings are then kept for this process only, as
+        the warning given at construction said.
+        """
+        if self.file_path is None:
+            return
+
         # Create XML root element
         root = ET.Element("Settings")
 

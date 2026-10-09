@@ -40,17 +40,8 @@ hiddenimports = [
 hiddenimports += collect_submodules("gpype")
 
 # Runtime data files. PyInstaller collects none of these by itself.
-#
-#   gpype           the window icon, frontend/resources/gtec.ico
-#   gtec_oscar      OSCAR_LIVE.profile and the randomisation table, which
-#                   gtec_oscar loads from inside its own package at
-#                   runtime; an OSCAR-enabled pipeline fails without them
+# gpype's own: the window icon, frontend/resources/gpype.ico. gtec_oscar
+# collects its profile and randomisation table with its own hook since
+# 1.3.1, as ioiocore and gtec_gds declare their compiled modules'
+# imports in theirs (gpype-docs E-PKG-07).
 datas = collect_data_files("gpype")
-
-try:
-    datas += collect_data_files("gtec_oscar")
-except Exception:
-    # A build environment without OSCAR is legitimate: only pipelines
-    # that enable it need the package, and gpype degrades to a clear
-    # ImportError at that point rather than at import time.
-    pass

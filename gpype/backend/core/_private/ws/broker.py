@@ -5,12 +5,20 @@ port (derived from LaunchConfig.endpoint) and multiplexes data by
 stream_id:
 
   PUT      – a binary frame from an EDGE sender is routed to the
-             registered receiver callback for that stream_id.
+             registered receiver callback for that stream_id. A stream
+             has one sender: the first connection to write it, by a
+             frame or a context, holds it until it disconnects, and
+             another connection's writes to it are refused.
 
   SUBSCRIBE – a text-JSON message ``{"command": "subscribe",
              "stream_id": "..."}`` from an EDGE receiver registers the
              WS connection as a subscriber for a stream_id.  The broker
              pushes binary frames to it when push() is called.
+
+  CLOCK    – a text-JSON probe ``{"command": "clock", "t0": ...}`` is
+             answered on the same connection with this process's
+             ``channels.stamp_clock()`` at receive and at send, and its
+             epoch: the server's reference an edge syncs to (D-TIME-66).
 
 The broker is a process-wide singleton.  Link nodes call acquire() when
 they start and release() when they stop; the underlying WS server starts
@@ -20,11 +28,15 @@ on the first acquire() and stops after the last release().
 from __future__ import annotations
 
 import asyncio
+import errno
 import hmac
 import json
 import logging
 import queue
+import socket
+import sys
 import threading
+import time
 from typing import Any, Callable, Dict, List, Optional, Set
 from urllib.parse import urlparse
 
@@ -36,13 +48,18 @@ import websockets
 # layer.
 from ....._transport import ServerTls, endpoint_is_secure
 from ....._wire import (
+    CLOCK_QUERY,
     decode,
     decode_attest,
+    decode_clock,
     decode_context,
     encode,
     encode_attest,
+    encode_clock_reply,
     encode_context,
 )
+from .....common._private import channels
+from .. import threads
 
 # Both ends of the link run a background asyncio loop and both have to
 # close it, so the teardown lives once, next to the other one, rather
@@ -87,9 +104,12 @@ CAP_SUBSCRIBE = "subscribe"
 
 #: Writing to a stream: binary PUT frames, and describing them with a
 #: ``context``. Separate from reading because fan-in is a *single
-#: receiver slot with no sender identity* -- a connection that may PUT
-#: can silently replace the stream an amplifier is feeding, and that is
-#: not a privilege a viewer should get by being able to reach the port.
+#: receiver slot* -- a connection that may PUT can take a stream before
+#: the amplifier's edge connects, and it was once able to interleave
+#: frames into one that edge was already feeding. Neither is a privilege
+#: a viewer should get by being able to reach the port. A stream's
+#: sender is now the first connection to write it (``_claim_sender``),
+#: which closes the second and not the first.
 CAP_PUT = "put"
 
 #: What a connection may do when the deployment configured no tokens at
@@ -140,6 +160,150 @@ SHUTDOWN_TIMEOUT_S = 2.0
 #: on it and saying so.
 STOP_TIMEOUT_S = 5.0
 
+#: How long the connection holding a stream has to answer a ping once
+#: another connection tries to write that stream, before the broker
+#: closes it and the stream passes on. See WsBroker._probe_sender.
+#:
+#: The case it exists for is a sender that reconnected: a phone that
+#: changed network dials again at once, while its old socket is still
+#: open here until websockets' own keepalive gives up on it, 20 to 40 s
+#: later. If the old socket also subscribed, what the broker pushes to
+#: it piles up until its writer pauses, and the keepalive never gives
+#: up: its ping waits for that writer. Only TCP then closes it. Without
+#: a probe the new connection's frames are refused for that long.
+#:
+#: The budget covers getting the ping out as well as its answer, so a
+#: live subscriber more than this far behind is taken for gone. Five
+#: seconds is generous for a pong on a live link and short next to the
+#: keepalive.
+SENDER_PROBE_TIMEOUT_S = 5.0
+
+#: How often one holder is probed at most, however many refused frames
+#: arrive. Two live senders then cost one ping every few seconds.
+SENDER_PROBE_INTERVAL_S = 5.0
+
+#: The option that keeps the broker's port to itself: Windows only, None
+#: elsewhere, where the bind is unchanged (D-CORE-133). Without it,
+#: Windows lets another program bind the port on ``127.0.0.1`` or
+#: ``::1``, before the broker or after it, and hands that address's
+#: connections to the other program: a local edge dialling ``localhost``
+#: reaches it instead of the broker. With it, either bind fails.
+_EXCLUSIVE_OPTION = (
+    getattr(socket, "SO_EXCLUSIVEADDRUSE", None)
+    if sys.platform == "win32"
+    else None
+)
+
+
+def _exclusive_sockets(
+    hosts: Optional[List[str]], port: int
+) -> List[socket.socket]:
+    """Bind *port* on *hosts* with :data:`_EXCLUSIVE_OPTION` set.
+
+    Does what ``loop.create_server`` does with a host and a port, which
+    takes no socket option: every address *hosts* resolve to, the
+    wildcard of each family for None, IPv6 sockets IPv6-only, and an
+    address this host does not have skipped.
+
+    Args:
+        hosts: The hosts to bind, or None for the wildcard.
+        port: The port.
+
+    Returns:
+        The bound sockets, not yet listening.
+
+    Raises:
+        OSError: If an address cannot be bound, naming the port, with
+            the bind's errno: 10048 when the port is held; 13
+            (``EACCES``, WinError 10013) when a holder has it exclusively
+            on the wildcard and this is a loopback address, or Windows
+            reserves it.
+    """
+    infos = []
+    for host in hosts or [None]:
+        infos.extend(
+            socket.getaddrinfo(
+                host,
+                port,
+                socket.AF_UNSPEC,
+                socket.SOCK_STREAM,
+                0,
+                socket.AI_PASSIVE,
+            )
+        )
+    sockets: List[socket.socket] = []
+    try:
+        for family, kind, proto, _, address in dict.fromkeys(infos):
+            sock = socket.socket(family, kind, proto)
+            sockets.append(sock)
+            sock.setsockopt(socket.SOL_SOCKET, _EXCLUSIVE_OPTION, 1)
+            if family == socket.AF_INET6:
+                sock.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 1)
+            try:
+                sock.bind(address)
+            except OSError as error:
+                if error.errno == errno.EADDRNOTAVAIL:
+                    sockets.pop().close()
+                    continue
+                message = (
+                    f"the broker cannot bind port {port} on {address[0]}: "
+                    f"{str(error.strerror or error).rstrip('.')}"
+                )
+                if error.errno == errno.EADDRINUSE:
+                    message += (
+                        f". Another program holds port {port}, on this "
+                        f"address or on a loopback one."
+                    )
+                elif error.errno == errno.EACCES:
+                    # Windows answers EACCES, not 10048, when a holder has
+                    # the port exclusively on the wildcard and this is a
+                    # loopback address -- a broker bound ANY, then one
+                    # bound LOOPBACK -- and for a port it reserves.
+                    message += (
+                        f". Another program holds port {port} "
+                        f"exclusively on every address, as a g.Pype "
+                        f"broker bound to all of them does, or Windows "
+                        f"reserves it."
+                    )
+                raise OSError(error.errno, message) from None
+        if not sockets:
+            raise OSError(
+                errno.EADDRNOTAVAIL,
+                f"the broker found no address to bind port {port} on",
+            )
+    except BaseException:
+        for sock in sockets:
+            sock.close()
+        raise
+    return sockets
+
+
+class _Servers:
+    """Several ``websockets`` servers that report and close as one.
+
+    ``loop.create_server`` takes one socket, so each of
+    :func:`_exclusive_sockets` gets a server of its own.
+    """
+
+    def __init__(self, servers: List[Any]) -> None:
+        self._servers = servers
+
+    @property
+    def sockets(self) -> List[socket.socket]:
+        """Every server's listening sockets."""
+        return [sock for server in self._servers for sock in server.sockets]
+
+    def close(self) -> None:
+        """Close every server; see ``websockets``' ``Server.close``."""
+        for server in self._servers:
+            server.close()
+
+    async def wait_closed(self) -> None:
+        """Wait until every server has closed."""
+        await asyncio.gather(
+            *(server.wait_closed() for server in self._servers)
+        )
+
 
 def _port_of(endpoint: Optional[str]) -> int:
     """Return the port a broker endpoint names.
@@ -154,6 +318,46 @@ def _port_of(endpoint: Optional[str]) -> int:
     if not endpoint:
         return DEFAULT_PORT
     return urlparse(endpoint).port or DEFAULT_PORT
+
+
+def _is_clock_connection(ws) -> bool:
+    """Whether *ws* was opened only to probe the clock.
+
+    An edge marks that connection with :data:`CLOCK_QUERY` on the
+    endpoint it dials. The request path is ``ws.request.path`` on the
+    asyncio implementation of ``websockets`` and ``ws.path`` on the
+    legacy one; either may be absent on a stand-in.
+
+    Args:
+        ws: A server-side connection.
+
+    Returns:
+        True if the handshake named the clock role.
+    """
+    request = getattr(ws, "request", None)
+    path = getattr(request, "path", None) or getattr(ws, "path", None)
+    if not isinstance(path, str):
+        return False
+    return CLOCK_QUERY in urlparse(path).query.split("&")
+
+
+def _peer_of(ws) -> str:
+    """Name a connection by the address it came from, for a log line.
+
+    Args:
+        ws: A connection, or anything standing in for one.
+
+    Returns:
+        ``host:port``, with an IPv6 host in brackets, or a description
+        when the address is unknown.
+    """
+    address = getattr(ws, "remote_address", None)
+    if isinstance(address, tuple) and len(address) >= 2:
+        host, port = address[0], address[1]
+        if ":" in str(host):
+            host = f"[{host}]"
+        return f"{host}:{port}"
+    return "an unknown address"
 
 
 class WsBroker:
@@ -234,6 +438,11 @@ class WsBroker:
         self._receivers: Dict[str, Callable[[np.ndarray], None]] = {}
         self._receivers_lock: threading.Lock = threading.Lock()
 
+        #: stream_id -> the per-connection state of the one connection
+        #: writing it. See _claim_sender.
+        self._senders: Dict[str, dict] = {}
+        self._senders_lock: threading.Lock = threading.Lock()
+
         # stream_id -> set of live WS connections (EDGE subscriber Links)
         self._subscribers: Dict[str, Set] = {}
         self._subscribers_lock: threading.Lock = threading.Lock()
@@ -246,6 +455,11 @@ class WsBroker:
         self._context_receivers: Dict[str, Callable[[dict], None]] = {}
         self._context_receivers_lock: threading.Lock = threading.Lock()
 
+        #: stream_id -> where a warning about that stream goes besides
+        #: the console: the receiving Link's own log. See _warn_stream.
+        self._warning_receivers: Dict[str, Callable[[str], None]] = {}
+        self._warning_receivers_lock: threading.Lock = threading.Lock()
+
         #: Causes already reported, so a per-frame failure is said once
         #: rather than at the sampling rate. See _warn_once.
         self._reported: set = set()
@@ -255,6 +469,10 @@ class WsBroker:
         self._loop: Optional[asyncio.AbstractEventLoop] = None
         self._thread: Optional[threading.Thread] = None
         self._server = None
+
+        #: Connections handed in by the host (accept), where there is no
+        #: socket: closed by a stop, as the server closes its own.
+        self._connections: Set = set()
 
         #: Which hosts to bind, resolved from LaunchConfig at _start().
         #: None is the wildcard; a list names the loopback literals.
@@ -366,12 +584,19 @@ class WsBroker:
         into a pipeline that hangs with no message, which is worse than
         one that fails and says why.
 
+        Without threads it answers at once. A page connects through the
+        loop this call would be blocking, so nothing could arrive while
+        it waited, and the worker would stand still for the whole
+        timeout (D-CORE-129).
+
         Args:
             timeout: Seconds to wait.
 
         Returns:
             True if an edge connected in time.
         """
+        if not threads.available():
+            return self._client_joined.is_set()
         return self._client_joined.wait(timeout=timeout)
 
     def attest_channels(self) -> List[Any]:
@@ -409,6 +634,12 @@ class WsBroker:
             loop = self._loop
             if loop is None:
                 raise ConnectionError("WsBroker is not running")
+            if not threads.available():
+                # Waiting for the send would block the loop that sends.
+                raise ConnectionError(
+                    "remote attestation needs threads: without them a "
+                    "send cannot be waited for"
+                )
             future = asyncio.run_coroutine_threadsafe(
                 ws.send(encode_attest(data)), loop
             )
@@ -461,6 +692,49 @@ class WsBroker:
         """Remove the PUT handler for *stream_id*."""
         with self._receivers_lock:
             self._receivers.pop(stream_id, None)
+
+    def register_warning(
+        self, stream_id: str, callback: Callable[[str], None]
+    ) -> None:
+        """Send warnings about *stream_id* to *callback* as well.
+
+        The broker is below the node layer and shared by the process, so
+        its warnings reached the console alone -- not the session log and
+        not the condition, where a refused stream's discarded frames
+        belong. The receiving Link registers its own log here; a warning
+        about no particular stream stays on the console (D-CORE-125).
+
+        Args:
+            stream_id: The stream the warnings concern.
+            callback: Takes the formatted warning.
+        """
+        with self._warning_receivers_lock:
+            self._warning_receivers[stream_id] = callback
+
+    def unregister_warning(self, stream_id: str) -> None:
+        """Stop sending warnings about *stream_id* anywhere but the console."""
+        with self._warning_receivers_lock:
+            self._warning_receivers.pop(stream_id, None)
+
+    def _warn_stream(self, stream_ids, text: str) -> None:
+        """Warn on the console once, and to the Link of each stream.
+
+        Args:
+            stream_ids: The stream, or the streams, the warning concerns.
+            text: The warning, formatted.
+        """
+        log.warning(text)
+        if isinstance(stream_ids, str):
+            stream_ids = [stream_ids]
+        for stream_id in stream_ids:
+            with self._warning_receivers_lock:
+                callback = self._warning_receivers.get(stream_id)
+            if callback is None:
+                continue
+            try:
+                callback(text)
+            except Exception:  # pragma: no cover - must not break I/O
+                log.debug("warning callback for %r raised", stream_id)
 
     # ------------------------------------------------------------------
     # Context: store / deliver / callbacks
@@ -538,6 +812,9 @@ class WsBroker:
         has no business knowing about certificates.
         """
         self._endpoint = endpoint
+        if not threads.available():
+            self._start_in_process()
+            return
         self._tls = self._configured_tls(endpoint)
         # Resolved here, on the caller's thread, so a bad value is a
         # start-time error rather than a bind that silently never
@@ -603,6 +880,66 @@ class WsBroker:
 
         log.debug("WsBroker listening on port %s", _port_of(endpoint))
 
+    def _start_in_process(self) -> None:
+        """Serve without a thread or a socket (called under _ref_lock).
+
+        Where no thread can be started, as under Pyodide, there is no
+        server to run either: a browser page reaches the pipeline in its
+        Web Worker by ``postMessage``, and the host hands each client in
+        through :meth:`accept`. The broker serves on the loop already
+        running in this thread, and borrows it: a stop closes this
+        broker's connections, never the loop.
+
+        Raises:
+            RuntimeError: If there is no event loop to serve on.
+        """
+        loop = threads.event_loop()
+        if loop is None:
+            raise RuntimeError(
+                "WsBroker cannot serve without threads unless an event "
+                "loop is running: start the pipeline from a coroutine, as "
+                "a Pyodide worker does."
+            )
+        self._loop = loop
+        self._bind_done.set()
+        log.debug("WsBroker serving in process, without a socket")
+
+    def accept(self, connection) -> None:
+        """Serve one connection the host carries itself.
+
+        The in-process counterpart of a client dialling the port: the
+        connection runs through the same handler, with the same tokens,
+        subscriptions and one-sender rule. See
+        :class:`~.message_connection.MessageConnection`.
+
+        Args:
+            connection: A MessageConnection, or anything with its
+                surface.
+
+        Raises:
+            RuntimeError: If the broker is not serving yet; a page must
+                connect after the pipeline has started.
+        """
+        loop = self._loop
+        if loop is None:
+            raise RuntimeError(
+                "WsBroker is not serving. Start the pipeline before "
+                "connecting to it."
+            )
+        self._connections.add(connection)
+
+        async def serve() -> None:
+            try:
+                # Closed before its turn came -- a stop in the same call
+                # that accepted it -- so serving it would rebuild state
+                # the stop has cleared.
+                if not getattr(connection, "closed", False):
+                    await self._handle_client(connection)
+            finally:
+                self._connections.discard(connection)
+
+        asyncio.run_coroutine_threadsafe(serve(), loop)
+
     def _stop(self) -> None:
         """Close the WS server (called under _ref_lock)."""
         self._force_stop()
@@ -640,7 +977,18 @@ class WsBroker:
         self._loop = None
         self._thread = None
 
-        if loop is not None:
+        # Served in process, the loop is borrowed (_start_in_process):
+        # close this broker's connections and leave the loop running.
+        for connection in list(self._connections):
+            end = getattr(connection, "end", None)
+            if callable(end):
+                try:
+                    end(1001, "server stopped")
+                except Exception:  # a stop that raises never finishes
+                    log.debug("ending a connection raised", exc_info=True)
+        self._connections.clear()
+
+        if loop is not None and thread is not None:
             coro = self._shutdown()
             try:
                 loop.call_soon_threadsafe(loop.create_task, coro)
@@ -671,6 +1019,8 @@ class WsBroker:
             self._subscribers.clear()
         with self._receivers_lock:
             self._receivers.clear()
+        with self._senders_lock:
+            self._senders.clear()
         with self._contexts_lock:
             self._contexts.clear()
         with self._context_receivers_lock:
@@ -773,12 +1123,13 @@ class WsBroker:
             # ANY is host=None, the wildcard on both families. LOOPBACK
             # is the loopback addresses as *literals*, which keeps that
             # property while refusing everything off this machine.
-            self._server = await _ws_serve(
-                self._handle_client,
-                self._bind_hosts,
-                port,
-                ssl=self._tls.context() if self._tls else None,
-            )
+            ssl = self._tls.context() if self._tls else None
+            if _EXCLUSIVE_OPTION is None:
+                self._server = await _ws_serve(
+                    self._handle_client, self._bind_hosts, port, ssl=ssl
+                )
+            else:
+                self._server = await self._serve_exclusive(port, ssl)
         except Exception as exc:
             # Every failure, not only OSError. A bind can fail for
             # reasons that carry no errno: a TypeError from an argument
@@ -794,6 +1145,31 @@ class WsBroker:
             self._bind_done.set()
             return
         self._bind_done.set()
+
+    async def _serve_exclusive(self, port: int, ssl: Any) -> _Servers:
+        """Serve on sockets that hold *port* alone (Windows, D-CORE-133).
+
+        Args:
+            port: The port.
+            ssl: The TLS context, or None.
+
+        Returns:
+            The servers, one per bound socket.
+        """
+        sockets = _exclusive_sockets(self._bind_hosts, port)
+        servers = []
+        try:
+            for sock in sockets:
+                servers.append(
+                    await _ws_serve(self._handle_client, sock=sock, ssl=ssl)
+                )
+        except BaseException:
+            for server in servers:
+                server.close()
+            for sock in sockets:
+                sock.close()
+            raise
+        return _Servers(servers)
 
     async def _shutdown(self) -> None:
         """Close the server, then stop this broker's loop.
@@ -898,14 +1274,30 @@ class WsBroker:
         # plane to mint a token and nothing to protect it from.
         required = self._required_tokens()
         caps = _ALL_CAPABILITIES if required is None else frozenset()
-        state = {"caps": caps}
+        # The state is also this connection's identity as a sender: a
+        # stream is held by the state of the connection writing it, and
+        # released with it below.
+        state = {
+            "caps": caps,
+            "peer": _peer_of(ws),
+            "refused": set(),
+            "ws": ws,
+            # Claimed by the client and not proven, so it may only
+            # narrow what this connection can do, never widen it.
+            "clock_only": _is_clock_connection(ws),
+        }
 
         log.debug("WsBroker: client connected from %s", ws.remote_address)
         # Register the mailbox before reading anything: a challenge sent
         # the instant this connection appears must not fall on the floor.
-        with self._attest_lock:
-            self._attest_inbox[ws] = queue.Queue()
-        self._client_joined.set()
+        # Not for a connection opened only to probe the clock. An edge
+        # opens that one before its Links connect, so counting it would
+        # let the server challenge a socket that carries no device, and
+        # find no edge at all once it has closed.
+        if not state["clock_only"]:
+            with self._attest_lock:
+                self._attest_inbox[ws] = queue.Queue()
+            self._client_joined.set()
 
         # An unauthenticated connection can do nothing, but it can sit
         # there holding a slot -- and on a socket with no other
@@ -923,7 +1315,15 @@ class WsBroker:
                         message, ws, subscribed, state, required
                     )
                 elif isinstance(message, bytes):
-                    self._handle_put_message(message, state)
+                    # A clock connection is out of attestation's sight,
+                    # so it may carry no frame (D-TIME-71).
+                    if state["clock_only"]:
+                        self._warn_once(
+                            "clock:put",
+                            "Ignored a frame on a clock connection.",
+                        )
+                    else:
+                        self._handle_put_message(message, state)
         except Exception:
             pass
         finally:
@@ -934,6 +1334,7 @@ class WsBroker:
                     conns = self._subscribers.get(sid)
                     if conns:
                         conns.discard(ws)
+            self._release_sender(state)
             with self._attest_lock:
                 self._attest_inbox.pop(ws, None)
             log.debug("WsBroker: client disconnected")
@@ -981,12 +1382,27 @@ class WsBroker:
             required: The configured tokens, or None when this broker
                 requires none.
         """
+        # First, before parsing: a clock probe's receive instant. Taken for
+        # every text message because the read costs less than deciding.
+        received = channels.stamp_clock()
         try:
             msg = json.loads(message)
             cmd = msg.get("command", "").lower()
 
             if cmd == "auth":
                 await self._handle_auth(message, ws, state, required)
+                return
+
+            # A clock connection is never challenged, so it may only
+            # probe: anything else would reach the data plane unattested.
+            # One key, not one per command: the name is the client's, and
+            # every new one would be kept, and logged, for good.
+            if state.get("clock_only") and cmd != "clock":
+                self._warn_once(
+                    "clock:command",
+                    "Ignored a command other than auth and clock on a "
+                    "clock connection.",
+                )
                 return
 
             if cmd == "subscribe":
@@ -1004,14 +1420,46 @@ class WsBroker:
                 # read-only connection would let a viewer relabel
                 # somebody else's channels.
                 if self._permits(state, CAP_PUT, "context"):
-                    self._handle_context_from_edge(msg)
+                    self._handle_context_from_edge(msg, state)
             elif cmd == "attest":
                 # Attestation is a challenge/response *about a device*,
                 # carried on whichever connection holds it, and it grants
                 # nothing on its own -- so it needs no capability.
                 self._handle_attest_message(message, ws)
+            elif cmd == "clock":
+                # No capability either, but an authenticated connection
+                # when tokens are configured: an answer before auth
+                # would make this socket a timing oracle for anybody who
+                # can reach the port (D-TIME-66).
+                if state.get("caps"):
+                    await self._handle_clock(message, ws, received)
+                else:
+                    self._warn_once(
+                        "clock:unauthenticated",
+                        "Ignored a clock probe from a connection that has "
+                        "not authenticated. This deployment configures "
+                        "data tokens, so an edge presents its token "
+                        "before it probes.",
+                    )
         except Exception:
             pass
+
+    async def _handle_clock(self, message: str, ws, received: float) -> None:
+        """Answer one clock probe on the connection it came from.
+
+        Args:
+            message: The raw text message.
+            ws: The connection it arrived on.
+            received: ``channels.stamp_clock()`` when it arrived.
+        """
+        probe = decode_clock(message)
+        if probe is None or "t1" in probe:
+            return
+        epoch = channels.stamp_epoch()
+        sent = channels.stamp_clock()
+        await self._safe_send_text(
+            ws, encode_clock_reply(probe["t0"], received, sent, epoch)
+        )
 
     def _permits(self, state: dict, capability: str, what: str) -> bool:
         """Whether this connection may do *what*, and say so if not.
@@ -1178,18 +1626,76 @@ class WsBroker:
         """
         return self._loop is not None
 
-    def _handle_context_from_edge(self, msg: dict) -> None:
+    def _handle_context_from_edge(self, msg: dict, state: dict) -> None:
         """Store context received from an EDGE sender and route to
-        SERVER callback."""
+        SERVER callback.
+
+        Args:
+            msg: The decoded ``context`` message.
+            state: Per-connection state of the connection it arrived on.
+                A context is refused, like a frame, from a connection
+                that does not hold the stream (:meth:`_claim_sender`):
+                accepted, it would relabel the channels of the stream
+                another sender is feeding.
+        """
         stream_id = msg.get("stream_id")
         context = msg.get("context")
         if stream_id and context is not None:
-            with self._contexts_lock:
-                self._contexts[stream_id] = context
-            with self._context_receivers_lock:
-                cb = self._context_receivers.get(stream_id)
-            if cb is not None:
-                cb(context)
+            if not self._claim_sender(stream_id, state):
+                # Kept, not dropped: a sender that reconnected onto its
+                # own half-open socket sends its context first and never
+                # again, so once this connection takes the stream it is
+                # the context the server has to hold (_take_refused).
+                state.setdefault("refused_contexts", {})[stream_id] = context
+                return
+            state.get("refused_contexts", {}).pop(stream_id, None)
+            self._apply_context(stream_id, context)
+
+    def _apply_context(self, stream_id: str, context: dict) -> None:
+        """Store a stream's context and hand it to the server's receiver.
+
+        A receiver that raises is reported once, as a frame receiver is.
+        This runs inside frame routing too (:meth:`_take_refused`), where
+        an exception would lose the frame that took the stream and end
+        the connection that had just taken it.
+
+        Args:
+            stream_id: The stream it describes.
+            context: The context its sender sent.
+        """
+        with self._contexts_lock:
+            self._contexts[stream_id] = context
+        with self._context_receivers_lock:
+            cb = self._context_receivers.get(stream_id)
+        if cb is None:
+            return
+        try:
+            cb(context)
+        except Exception as e:
+            self._warn_once(
+                f"context_receiver:{stream_id}",
+                f"The context receiver for stream '{stream_id}' raised: "
+                f"{e}. The context is stored, and frames for it continue "
+                f"to be delivered.",
+            )
+
+    def _take_refused(self, stream_id: str, state: dict) -> None:
+        """Apply the context a connection sent while it was refused.
+
+        Called once that connection holds the stream. 4.0 applied a
+        reconnected sender's context at once; since the stream binding,
+        the context arrived while the old socket still held the stream
+        and the server kept the previous connection's description.
+
+        Args:
+            stream_id: The stream it now holds.
+            state: Per-connection state of that connection.
+        """
+        pending = state.get("refused_contexts")
+        if pending:
+            context = pending.pop(stream_id, None)
+            if context is not None:
+                self._apply_context(stream_id, context)
 
     def _handle_put_message(self, message: bytes, state: dict) -> None:
         """Decode *message* and route to the registered receiver callback.
@@ -1211,7 +1717,8 @@ class WsBroker:
                 than at the socket because routing reads the frame's own
                 header and never looked at the connection at all -- which
                 is exactly why an unauthenticated PUT could replace the
-                stream an amplifier was feeding.
+                stream an amplifier was feeding. And only if this
+                connection holds the stream (:meth:`_claim_sender`).
         """
         if not self._permits(state, CAP_PUT, "a binary frame"):
             return
@@ -1236,6 +1743,11 @@ class WsBroker:
             )
             return
 
+        if not self._claim_sender(stream_id, state):
+            return
+        if state.get("refused_contexts"):
+            self._take_refused(stream_id, state)
+
         with self._receivers_lock:
             cb = self._receivers.get(stream_id)
             known = sorted(self._receivers)
@@ -1258,6 +1770,179 @@ class WsBroker:
                 f"The receiver for stream '{stream_id}' raised: {e}. "
                 f"Frames for it continue to be delivered.",
             )
+
+    def _claim_sender(self, stream_id: str, state: dict) -> bool:
+        """Whether this connection may write *stream_id*, taking it if free.
+
+        A stream has one sender. The first connection to write it -- a
+        context or a frame -- holds it until that connection closes, and
+        every write from another connection is refused, with one warning
+        per stream and connection.
+
+        Before this the broker routed a frame by its header alone, and a
+        second sender did not fail: its frames were interleaved with the
+        first one's in the single receiver slot. Measured with a
+        Generator that names no edge, in a document two edges ran: both
+        edges opened it and each sent about 112 frames, the server's
+        receiving Link counted 226, and the file recording it held twice
+        the rows its sampling rate allows. Nothing said so.
+
+        First rather than last: a later sender taking over would move
+        the stream to whichever of two live senders wrote most recently,
+        which is the interleaving again. A sender that reconnects is a
+        new connection, and resumes once its old one is seen to close --
+        which a refused write hastens: the holder is pinged, and closed
+        if it does not answer (:meth:`_probe_sender`).
+
+        Args:
+            stream_id: The stream being written.
+            state: Per-connection state of the writing connection, which
+                is also its identity as a sender.
+
+        Returns:
+            True if the write should be routed.
+        """
+        with self._senders_lock:
+            holder = self._senders.get(stream_id)
+            if holder is state:
+                return True
+            if holder is None:
+                self._senders[stream_id] = state
+        peer = state.get("peer", "an unknown address")
+        refused = state.setdefault("refused", set())
+        if holder is None:
+            if stream_id in refused:
+                refused.discard(stream_id)
+                self._warn_stream(
+                    stream_id,
+                    f"WsBroker: stream '{stream_id}' is now sent from "
+                    f"{peer}, which was refused it while another "
+                    f"connection held it; that connection has closed. If "
+                    f"it was another sender rather than this one "
+                    f"reconnecting, the stream now carries a different "
+                    f"device's samples.",
+                )
+            return True
+        if stream_id not in refused:
+            refused.add(stream_id)
+            other = holder.get("peer", "an unknown address")
+            self._warn_stream(
+                stream_id,
+                f"WsBroker: refusing stream '{stream_id}' from {peer}: the "
+                f"connection from {other} is already sending it, and a "
+                f"stream has one sender. Frames and context for it from "
+                f"{peer} are discarded while {other} stays connected. Most "
+                f"often this is a source that names no edge, in a document "
+                f"two edges run: every edge opens such a source, so give "
+                f"it an edge_id. Otherwise two edges were started with one "
+                f"edge id, or this sender reconnected while its previous "
+                f"connection still looks open; that one is being pinged, "
+                f"and is closed if it does not answer.",
+            )
+        self._probe_sender(holder)
+        return False
+
+    def _probe_sender(self, holder: dict) -> None:
+        """Ping the connection holding a stream another one tried to write.
+
+        A holder that answers is a live sender, and the refusal stands.
+        One that does not is a socket whose peer has gone -- most often
+        the same sender, reconnected -- and is closed and released, so
+        the next write takes the stream. Without this the new connection
+        waits out websockets' keepalive on the old one, 20 to 40 s, or,
+        when the old one also subscribed, until TCP gives up on it.
+
+        At most one ping in flight per holder, and one every
+        :data:`SENDER_PROBE_INTERVAL_S`, since this is reached on every
+        refused frame. Nothing is probed without a running loop or a
+        connection to ping, which is the routing tested on its own.
+
+        Args:
+            holder: Per-connection state of the connection holding it.
+        """
+        ws, loop = holder.get("ws"), self._loop
+        if ws is None or loop is None:
+            return
+        now = time.monotonic()
+        with self._senders_lock:
+            if holder.get("probing"):
+                return
+            if now - holder.get("probed_at", -1e9) < SENDER_PROBE_INTERVAL_S:
+                return
+            holder["probing"] = True
+            holder["probed_at"] = now
+        try:
+            asyncio.run_coroutine_threadsafe(self._ping_sender(holder), loop)
+        except RuntimeError:
+            # The loop is closing; there is nobody left to hand over to.
+            holder["probing"] = False
+
+    async def _ping_sender(self, holder: dict) -> None:
+        """Close and release *holder* if it does not answer a ping.
+
+        The timeout covers sending the ping, not only its answer:
+        websockets' ``ping()`` waits for the writer to drain before it
+        returns, and the writer to a subscriber whose peer has gone
+        stays paused, so the wait would never end. The close is an
+        abort for the same reason; a close frame waits behind
+        everything that peer has not read.
+
+        Args:
+            holder: Per-connection state of the connection to probe.
+        """
+        ws = holder["ws"]
+
+        async def answered() -> None:
+            await (await ws.ping())
+
+        try:
+            # wait_for, not asyncio.timeout, which 3.10 does not have.
+            await asyncio.wait_for(answered(), timeout=SENDER_PROBE_TIMEOUT_S)
+            return
+        except Exception:
+            pass
+        finally:
+            holder["probing"] = False
+        with self._senders_lock:
+            held = sorted(
+                stream_id
+                for stream_id, state in self._senders.items()
+                if state is holder
+            )
+        if not held:
+            # It closed while the ping was out, and gave everything up.
+            return
+        # Released before the abort, so the stream is free the moment
+        # the next write arrives rather than when the handler notices.
+        self._release_sender(holder)
+        self._warn_stream(
+            held,
+            f"WsBroker: closing the connection from "
+            f"{holder.get('peer', 'an unknown address')}, which was sending "
+            f"{', '.join(repr(s) for s in held)} but did not answer a ping "
+            f"within {SENDER_PROBE_TIMEOUT_S:g} s after another connection "
+            f"wrote to it. The next connection to write "
+            f"{'it' if len(held) == 1 else 'one of them'} takes it.",
+        )
+        try:
+            ws.transport.abort()
+        except Exception:
+            pass
+
+    def _release_sender(self, state: dict) -> None:
+        """Give up every stream the connection with *state* was sending.
+
+        Args:
+            state: Per-connection state of a connection that has closed.
+        """
+        with self._senders_lock:
+            held = [
+                stream_id
+                for stream_id, holder in self._senders.items()
+                if holder is state
+            ]
+            for stream_id in held:
+                del self._senders[stream_id]
 
     def _warn_once(self, cause: str, message: str) -> None:
         """Report *cause* the first time it happens and never again.

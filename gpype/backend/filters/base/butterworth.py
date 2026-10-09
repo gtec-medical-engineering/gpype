@@ -177,8 +177,8 @@ class Butterworth(IONode):
         # once it is connected to a 250 Hz source and started -- roughly
         # two seconds in, when the monitoring thread reports the error.
         # Catching it before a run needs the sampling rate propagated
-        # from the sources through the graph, which is a whole-document
-        # question and belongs to a graph validator, not to a node.
+        # from the sources through the pipeline, which is a whole-document
+        # question and belongs to a pipeline validator, not to a node.
         nyquist = sampling_rate / 2
         names = (
             ("f_lo", "f_hi") if btype in ("bandpass", "bandstop") else ("f_c",)

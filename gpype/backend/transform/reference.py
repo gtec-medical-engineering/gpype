@@ -70,20 +70,30 @@ class Reference(IONode):
             **kwargs: Additional arguments for the parent IONode.
 
         Raises:
-            ValueError: If both reference and pairs are given, or if
-                either is given but empty.
+            ValueError: If both reference and pairs are given, if either
+                is given but empty, or if an entry is neither a label
+                nor an index.
         """
         if reference is not None and pairs is not None:
             raise ValueError("Give either 'reference' or 'pairs', not both.")
+        # Plain lists of labels and ints before anything is stored: a
+        # numpy index made the pipeline unserialisable.
         if reference is not None:
-            if isinstance(reference, (str, int)):
+            if isinstance(reference, (str, int, np.integer)):
                 reference = [reference]
+            reference = channels.as_selection(
+                reference, "reference", labels=True
+            )
             if not reference:
                 raise ValueError("reference must not be empty.")
             kwargs.setdefault(
-                self.Configuration.OptionalKeys.REFERENCE, list(reference)
+                self.Configuration.OptionalKeys.REFERENCE, reference
             )
         if pairs is not None:
+            pairs = [
+                channels.as_selection(pair, "pairs", labels=True)
+                for pair in pairs
+            ]
             if not pairs:
                 raise ValueError("pairs must not be empty.")
             for pair in pairs:
@@ -91,10 +101,7 @@ class Reference(IONode):
                     raise ValueError(
                         f"Each pair needs exactly two entries, got {pair}."
                     )
-            kwargs.setdefault(
-                self.Configuration.OptionalKeys.PAIRS,
-                [list(pair) for pair in pairs],
-            )
+            kwargs.setdefault(self.Configuration.OptionalKeys.PAIRS, pairs)
 
         super().__init__(**kwargs)
         self._split = None  # Channels the reference applies to
@@ -173,6 +180,17 @@ class Reference(IONode):
             out = port_context_out[PORT_OUT]
             out[Constants.Keys.CHANNEL_COUNT] = len(self._pairs)
             out.update(channels.describe(roles, labels, None))
+            # A difference is in its channels' unit when they share one,
+            # and in no single unit when they do not.
+            units_key = Constants.Keys.CHANNEL_UNITS
+            units = channels.units_of(context)
+            if units is not None:
+                out[units_key] = [
+                    units[a] if units[a] == units[r] else None
+                    for a, r in self._pairs
+                ]
+            elif context.get(units_key) is not None:
+                out[units_key] = None
             return port_context_out
 
         reference = self.config.get(opt.REFERENCE)

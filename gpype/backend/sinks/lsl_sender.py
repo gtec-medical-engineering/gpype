@@ -1,18 +1,15 @@
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import Optional
 
-import ioiocore as ioc
 import numpy as np
 from pylsl import StreamInfo, StreamOutlet, cf_double64
 
 from ...common._private import channels
 from ...common._private.entitlement import MARK
 from ...common.constants import Constants
-from ..core._private.chain_params import stream_id_for, strip_chain_keys
-from ..core._private.link import Link
 from ..core.i_node import INode
-from ..core.i_port import IPort
+from .base.sink import Sink
 
 #: Channel role to the XDF channel type a consumer expects. A consumer
 #: that knows a column is a marker rather than a measured signal can plot
@@ -26,15 +23,18 @@ _LSL_TYPES = {
 }
 
 
-class _LSLSenderCore(INode):
-    """Internal node implementing LSL streaming logic.
+class LSLSender(Sink):
+    """Lab Streaming Layer (LSL) sender for real-time data streaming.
 
-    This is the actual LSL sender node (pure INode inheritance).
-    It is wrapped by the LSLSender chain for distributed operation.
+    Streams multi-channel data to the Lab Streaming Layer network,
+    configuring the LSL stream from its input port's context.
 
-    Implements an LSL outlet that streams multi-channel data to the Lab
-    Streaming Layer network. Automatically configures the LSL stream based
-    on input port context.
+    Where the input names its channels, or gives any of them a role
+    other than signal, each channel's type, label and physical unit are
+    written to the stream's channel description (desc/channels/channel,
+    the XDF convention). A channel that was never named gets no label;
+    a unit is empty rather than omitted where the channel's own unit is
+    not recorded.
     """
 
     #: Default LSL stream name for g.Pype data streams
@@ -49,12 +49,20 @@ class _LSLSenderCore(INode):
             #: Stream name configuration key
             STREAM_NAME = "stream_name"
 
-    def __init__(self, stream_name: Optional[str] = None, **kwargs):
+    def __init__(
+        self,
+        stream_name: Optional[str] = None,
+        edge_id: Optional[str] = None,
+        **kwargs,
+    ):
         """Initialize the LSL sender with specified stream name.
 
         Args:
             stream_name: Name for the LSL stream. If None, uses the default
                 stream name. Used for stream identification on the LSL network.
+            edge_id: Which edge runs this node, matched against the
+                edge process's --edge-id. None, the default, is every
+                edge; ignored when the pipeline is not distributed.
             **kwargs: Additional arguments passed to parent INode class.
         """
         # Use default stream name if none provided
@@ -62,7 +70,9 @@ class _LSLSenderCore(INode):
             stream_name = LSLSender.DEFAULT_STREAM_NAME
 
         # Initialize parent INode with configuration
-        INode.__init__(self, stream_name=stream_name, **kwargs)
+        INode.__init__(
+            self, stream_name=stream_name, edge_id=edge_id, **kwargs
+        )
 
         # Initialize LSL components (created during setup)
         self._lsl_info = None  # LSL stream metadata
@@ -84,16 +94,6 @@ class _LSLSenderCore(INode):
 
     #: Whether this run must mark its output. Set by the pipeline
     #: before anything starts.
-    _marked: bool = False
-
-    def attach_entitlement(self, verdict) -> None:
-        """Record whether this stream must carry the mark.
-
-        Args:
-            verdict: The pipeline's resolved Entitlement.
-        """
-        self._marked = bool(verdict.marked)
-
     def setup(
         self, data: dict[str, np.ndarray], port_context_in: dict[str, dict]
     ) -> dict[str, dict]:
@@ -128,18 +128,37 @@ class _LSLSenderCore(INode):
             source_id=stream_name,
         )  # Unique identifier
 
-        # Name the channels if the source told us what they are, so
-        # consumers see electrode names instead of positions. This has to
-        # happen before the outlet is created: liblsl copies the stream
-        # info into the outlet, so anything added afterwards is written to
-        # a copy nobody ever sees.
-        if channels.has_labels(context):
+        # Describe the channels if the source told us what they are, so
+        # consumers see electrode names instead of positions and a
+        # trigger channel as a marker. This has to happen before the
+        # outlet is created: liblsl copies the stream info into the
+        # outlet, so anything added afterwards is written to a copy
+        # nobody ever sees.
+        #
+        # Roles and labels are guarded separately, as a recording's
+        # metadata is: a stream with roles but no names still says which
+        # channel is the trigger, and gets no label rather than an
+        # invented "Ch01". Roles that are all signal say nothing a
+        # receiver does not already assume, and a plain Generator
+        # declares exactly those, so its description stays as it was.
+        named = channels.has_labels(context)
+        roles = channels.roles_of(context)
+        signal = Constants.ChannelRoles.SIGNAL
+        if named or any(role != signal for role in roles):
             desc = self._lsl_info.desc().append_child("channels")
-            roles = channels.roles_of(context)
-            for label, role in zip(channels.labels_of(context), roles):
+            units = channels.units_of(context)
+            labels = channels.labels_of(context) if named else None
+            for index, role in enumerate(roles):
                 entry = desc.append_child("channel")
-                entry.append_child_value("label", str(label))
+                if named:
+                    entry.append_child_value("label", str(labels[index]))
                 entry.append_child_value("type", _LSL_TYPES.get(role, "Misc"))
+                # The XDF convention: desc/channels/channel/unit, beside
+                # label and type. Empty rather than omitted where this
+                # channel's own unit is not recorded, so a reader sees a
+                # channel description either way.
+                unit = units[index] if units is not None else None
+                entry.append_child_value("unit", str(unit) if unit else "")
 
         # The mark travels in the stream description, beside the channels,
         # for the same reason and with the same constraint: liblsl copies
@@ -234,62 +253,3 @@ class _LSLSenderCore(INode):
 
         # No output data for sink nodes
         return None
-
-
-class LSLSender(ioc.IChain):
-    """Lab Streaming Layer (LSL) sender chain for real-time data streaming.
-
-    This is an IChain that contains:
-    - Link: Bridge for distributed operation (passthrough in standalone)
-    - _LSLSenderCore: The actual LSL streaming node
-
-    The chain structure enables distributed edge/server operation while
-    keeping node inheritance clean (no chain mixing in node path).
-
-    Streams multi-channel data to the Lab Streaming Layer network.
-    """
-
-    #: Default LSL stream name for g.Pype data streams
-    DEFAULT_STREAM_NAME = _LSLSenderCore.DEFAULT_STREAM_NAME
-
-    def __init__(self, stream_name: Optional[str] = None, **kwargs):
-        """Initialize the LSL sender chain.
-
-        Args:
-            stream_name: Name for the LSL stream. If None, uses the default
-                stream name. Used for stream identification on the LSL network.
-            **kwargs: Additional arguments.
-        """
-        # Store parameters for create_internal_nodes
-        self._link_stream_id = stream_id_for(kwargs)
-        self._core_params = {"stream_name": stream_name}
-        self._core_params.update(strip_chain_keys(kwargs))
-
-        # Initialize IChain (calls create_internal_nodes)
-        kwargs.setdefault(
-            self.Configuration.Keys.INPUT_PORTS,
-            [IPort.Configuration()],
-        )
-        # The chain's own parameters go into the chain's own
-        # configuration; see Generator for the full rationale.
-        ioc.IChain.__init__(
-            self,
-            stream_name=stream_name,
-            stream_id=self._link_stream_id,
-            **kwargs,
-        )
-
-    def create_internal_nodes(self) -> List[ioc.Node]:
-        """Create the internal node chain.
-
-        Returns:
-            List containing [Link, _LSLSenderCore].
-        """
-        return [
-            Link(
-                sender=Constants.Residency.SERVER,
-                receiver=Constants.Residency.EDGE,
-                stream_id=self._link_stream_id,
-            ),
-            _LSLSenderCore(**self._core_params),
-        ]

@@ -42,20 +42,37 @@ consumer rather than a package bump. Re-vendor and rebuild when
 ## Upstream
 
 - **Source:** `gtec-attest`, `src/gtec_attest/core/`
-- **Retrieved:** 2026-08-21
+- **Retrieved:** 2026-08-21; `gtec_attest_keys.h` again on 2026-10-05,
+  from `gtec-attest-core-1.0.0.zip`, the core zip of the gtec_attest
+  1.0.0 release (`6f307ab`), which retires `0x0002` and `0x0003`. The
+  other six files are byte-identical to that zip and to 0.4.0's, so all
+  seven hashes below are the release's
 - **Licence:** g.tec Non-Commercial (GNCL) for the g.tec files; TweetNaCl
   is public domain
-- **Contains no secrets.** Public keys only; the signing keys live in the
-  amplifier packages. Verified before vendoring: the sole occurrence of
-  the word "signing" in `gtec_attest_keys.h` is the comment saying so, and
-  the key table holds 32 bytes — one public key — not 64.
+- **Contains no secrets.** Public keys only: `0x0004`, the amplifier key,
+  whose private half is in the amplifier drivers' release builds;
+  `0x0005`, reserved for licence attestations signed by g.tec's licence
+  server, which no build carries; and three retired keys -- `0x0001`, the
+  first amplifier key; `0x0003`, the amplifier key before `0x0004`; and
+  `0x0002`, gtec_licensing's licence key up to 2.2.0 (D-ENT-102). The
+  header marks all three retired, and so does `attestation.KEY_DOMAINS`,
+  so a table that listed one as active still could not vouch with it
+  (D-ENT-73). The header's comments are
+  upstream's registry notes, rendered, and are not edited here. Each of
+  the five arrays is 32 bytes, one public key, not 64.
+
+**The table is domain-blind.** It trusts every key it lists, and they
+all sign the same payload shape, so `attestation.verifier(domain)` refuses
+a key from another domain (D-ENT-70) and a retired one in every domain
+(D-ENT-73). A key added upstream is trusted nowhere until
+`attestation.KEY_DOMAINS` names its domain.
 
 SHA-256 as vendored:
 
 ```
 9b6b8c2d44fb7b62809659c8ac80f3a7ab177c9f3fd24053bc00a5d8105c3135  gtec_attest_verify.c
 744fda421f81179decaa658340f2b8b101571bfb3caccf13f35114c0d8261e6a  gtec_attest_verify.h
-01b2d910fbeefd0557fc96793dddfa57dcfb27813549dd0ad6a2d4beb742f0e4  gtec_attest_keys.h
+315e6eb084263568e1bf28cb6b661c031d6e2f5365c288b3e908cf4cb0404e52  gtec_attest_keys.h
 02e65bc3013ff2168983365e55906bc783c4c7e0a60d8100f17bb303a17175c4  tweetnacl.c
 43f29ad721d9927b747b0100ab4160c119e7bb180c7c98a66e4bf79d31244287  tweetnacl.h
 bb75a323df5fe149a73cee3d5d0be565ec7a02aa2e0a196b0c8dbdbc6953e7d5  randombytes_stub.c
@@ -101,9 +118,10 @@ extern block and that test.
 **Note on the supported channel.** Upstream ships the linkable core as a
 separate `gtec-attest-core-<ver>.zip` GitHub release artifact -- with an
 `INTEGRATION.md` -- and deliberately keeps `.c`, `.h` and `.pxd` out of
-the published wheel. These copies were taken from the repository working
-tree because `gtec_attest` has no releases yet (WP-E6). **Re-vendor from
-the core zip once one exists**, and check the hashes here against it.
+the published wheel. The first copies were taken from the repository
+working tree, before `gtec_attest` had releases (WP-E6); since 0.2.0 all
+seven match the core zip. **Re-vendor from the core zip**, and check the
+hashes here against it.
 
 ## What is used
 

@@ -5,6 +5,7 @@ from typing import Optional
 import numpy as np
 
 from ...common._private import channels
+from ...common._private.naming import node_label
 from ...common.constants import Constants
 from ..core.io_node import IONode
 
@@ -34,6 +35,20 @@ class BandPower(IONode):
     given as explicit ranges. The output is one value per band per
     channel, labelled so that a downstream file or stream says which is
     which rather than leaving the reader to count columns.
+
+    Each value is the band's power: the sum of the squared spectrum
+    amplitudes over its bins, in the input's unit squared. That unit has
+    no notation yet, so the output records none. Before 4.1.0 the node
+    summed the amplitudes themselves.
+
+    A row arrives once per FFT cycle -- FFT's ``FRAME_RATE``, not the
+    signal's own sampling rate carried through unchanged -- and this
+    node declares its own rate accordingly, so ``Result.rate``,
+    ``times`` and ``duration`` behind it describe how often a row
+    actually arrives rather than the rate the spectrum was taken at.
+    Before that fix (found 2026-09-26), a Collector after
+    ``FFT(250) -> BandPower`` at 250 Hz reported the input's 250 Hz for
+    values arriving twice a second -- 125 times too fast.
     """
 
     #: The conventional EEG bands, by name -- which is the form an
@@ -129,6 +144,16 @@ class BandPower(IONode):
                 "FFT, whose output context carries the sampling rate and "
                 "the number of frequency bins."
             )
+        # FFT's own SAMPLING_RATE is the signal rate the spectrum was
+        # taken at -- kept unchanged so the frequency axis above can be
+        # rebuilt from it -- not the rate its rows arrive at. This
+        # node's own row is different again: one per input cycle, so
+        # its declared rate is FFT's FRAME_RATE, the cadence a cycle
+        # actually recurs at. Left as the inherited SAMPLING_RATE, a
+        # Result behind this node reported a rate up to two orders of
+        # magnitude too high, and times/duration the same factor too
+        # short (found 2026-09-26, examples-4-0-1.md).
+        frame_rate = context.get(Constants.Keys.FRAME_RATE)
 
         # An FFT emits the one-sided spectrum of a window, so the window
         # length follows from the bin count and gives back the axis.
@@ -158,15 +183,34 @@ class BandPower(IONode):
         out = port_context_out[PORT_OUT]
         out[Constants.Keys.CHANNEL_COUNT] = len(labels)
         out[Constants.Keys.FRAME_SIZE] = 1
+        # This node's own row rate, not FFT's signal rate -- see the
+        # comment above frame_rate's assignment. Absent rather than
+        # left at the misleading inherited value: FRAME_RATE is only
+        # ever written by a source or by FFT, so a BandPower fed from
+        # anything else declares no rate rather than a wrong one.
+        out[Constants.Keys.SAMPLING_RATE] = frame_rate
+        out.pop(Constants.Keys.SAMPLING_RATE_EXACT, None)
         out.update(
             channels.describe(
                 [Constants.ChannelRoles.SIGNAL] * len(labels), labels, None
             )
         )
+        # Each output is a power, in its input channel's unit squared,
+        # which has no notation yet (D-BATCH-82, D-BATCH-85). Left alone,
+        # the input's list kept the input's width and the wrong unit.
+        if context.get(Constants.Keys.CHANNEL_UNITS) is not None:
+            out[Constants.Keys.CHANNEL_UNITS] = [None] * len(labels)
+
+        # A row is now one band's power per channel, not a sample: a
+        # marker or gap naming an input sample would name a meaningless
+        # row (D-BATCH-86).
+        warning = channels.drop_grid(out, node_label(self))
+        if warning:
+            self.log(warning, type=Constants.LogTypes.WARNING)
         return port_context_out
 
     def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
-        """Sum the spectrum over each band.
+        """Sum the squared spectrum over each band.
 
         Args:
             data: One spectrum, bins by channels.
@@ -175,7 +219,8 @@ class BandPower(IONode):
             One row, channel-major with one value per band.
         """
         spectrum = data[PORT_IN]
-        values = [spectrum[mask, :].sum(axis=0) for mask in self._masks]
+        power = np.square(spectrum)
+        values = [power[mask, :].sum(axis=0) for mask in self._masks]
         # Channel-major so a channel's bands stay adjacent, matching the
         # labels published at setup.
         stacked = np.stack(values, axis=1)

@@ -1,19 +1,15 @@
+from __future__ import annotations
+
+import errno
 import re
 import select
 import socket
 import threading
 import time
-from typing import List
-
-import ioiocore as ioc
+from typing import Optional
 
 from ...common._private.naming import node_label
 from ...common.constants import Constants
-from ..core._private.chain_params import stream_id_for, strip_chain_keys
-from ..core._private.link import Link
-from ..core._private.sync import Sync
-from ..core.o_port import OPort
-from .base import raw
 from .base.event_source import EventSource
 
 #: Default output port identifier
@@ -26,11 +22,63 @@ PORT_OUT = Constants.Defaults.PORT_OUT
 _NUMBER = re.compile(r"^[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$")
 
 
-class _UDPReceiverCore(EventSource):
-    """Internal node implementing UDP network event reception.
+def _bind_failure_cause(error: OSError, port: int) -> str:
+    """Why a bind failed, in the words that lead to the cure.
 
-    This is the actual UDP receiver node (pure ONode inheritance).
-    It is wrapped by the UDPReceiver chain for distributed operation.
+    ``WinError 10013`` is not a port in use. It is access denied, and on a
+    Windows host the usual cause is a reservation: Hyper-V and WSL reserve
+    blocks of the dynamic range, and the blocks move between reboots. The
+    message used to blame another process for it, which sent the reader
+    looking for one -- measured 2026-09-23, port 51000 inside a reserved
+    block on a bench with nothing else listening.
+
+    It blamed one for every other failure too. On macOS and Linux the
+    default port, 1000, is privileged, and binding it is refused with
+    ``EACCES``: nothing holds it.
+
+    Args:
+        error: What ``bind`` raised.
+        port: The port that was asked for.
+
+    Returns:
+        str: One sentence naming the likely cause, or "" for a failure
+        with no better words than the error's own.
+    """
+    if getattr(error, "winerror", None) == 10013:
+        return (
+            "Windows refused access to the port: it most likely lies in a "
+            "range the system has reserved -- Hyper-V and WSL reserve blocks "
+            "of the dynamic range above 49152, and they move between "
+            "reboots; `netsh interface ipv4 show excludedportrange "
+            "protocol=udp` lists them. Choose a port outside every range."
+        )
+    if error.errno == errno.EADDRINUSE:
+        return (
+            "Another receiver or a leftover process is holding the port; "
+            "note that ParadigmPresenter is itself a UDPReceiver and "
+            "defaults to the same address, so wiring both binds it twice."
+        )
+    if error.errno in (errno.EACCES, errno.EPERM):
+        if port < 1024:
+            return (
+                f"Ports below 1024 are privileged on macOS and Linux, so "
+                f"{port} needs root. Choose one from 1024 to 49151, and "
+                f"point the sender at the same port."
+            )
+        return (
+            "The system refused access to the port -- a firewall, a "
+            "sandbox or a security policy. Choose another port."
+        )
+    if error.errno == errno.EADDRNOTAVAIL:
+        return (
+            "The address is not one of this machine's: 127.0.0.1 listens "
+            "on this machine only, 0.0.0.0 on every interface."
+        )
+    return ""
+
+
+class UDPReceiver(EventSource):
+    """UDP network receiver for capturing remote trigger events.
 
     Listens on specified IP/port for UDP packets containing numeric
     trigger values. Each trigger outputs the received value, and then a
@@ -76,18 +124,27 @@ class _UDPReceiverCore(EventSource):
             PORT: str = "port"
 
     def __init__(
-        self, ip: str = DEFAULT_IP, port: int = DEFAULT_PORT, **kwargs
+        self,
+        ip: str = DEFAULT_IP,
+        port: int = DEFAULT_PORT,
+        edge_id: Optional[str] = None,
+        **kwargs,
     ):
         """Initialize UDP receiver.
 
         Args:
             ip: IP address to bind socket to. Use "0.0.0.0" for all interfaces
                 or "127.0.0.1" for localhost. Defaults to localhost.
-            port: UDP port number to listen on. Defaults to 1000.
+            port: UDP port number to listen on. Defaults to 1000, which
+                macOS and Linux reserve for root: pass one from 1024 to
+                49151 there, and point the sender at it.
+            edge_id: Which edge runs this node, matched against the
+                edge process's --edge-id. None, the default, is every
+                edge; ignored when the pipeline is not distributed.
             **kwargs: Additional parameters for EventSource base class.
         """
         # Initialize parent EventSource with network configuration
-        super().__init__(ip=ip, port=port, **kwargs)
+        super().__init__(ip=ip, port=port, edge_id=edge_id, **kwargs)
 
         #: Flag indicating if UDP listener thread is running
         self._udp_thread_running = False
@@ -154,12 +211,11 @@ class _UDPReceiverCore(EventSource):
             sock.bind((ip, port))
         except OSError as error:
             self._udp_thread_running = False
+            cause = _bind_failure_cause(error, port)
             self.log(
                 f"Could not listen on {ip}:{port} -- {error}. No trigger "
-                f"will be received on this node. Another receiver or a "
-                f"leftover process is holding the port; note that "
-                f"ParadigmPresenter is itself a UDPReceiver and defaults "
-                f"to the same address, so wiring both binds it twice.",
+                f"will be received on this node."
+                + (f" {cause}" if cause else ""),
                 type=Constants.LogTypes.ERROR,
             )
             try:
@@ -250,9 +306,11 @@ class _UDPReceiverCore(EventSource):
             # A reset still owed would strand the trigger asserted for
             # the rest of the run. In a finally, because the loop can
             # also leave by exception -- and a listener that dies is
-            # exactly when a stuck trigger would be hardest to spot.
-            self._reset_due = 0.0
-            self._release_reset()
+            # exactly when a stuck trigger would be hardest to spot. Only
+            # one that is owed: a listener that saw no value emits nothing.
+            if self._reset_due is not None:
+                self._reset_due = 0.0
+                self._release_reset()
 
     def _release_reset(self) -> None:
         """Emit the pending reset, if it has come due."""
@@ -399,107 +457,3 @@ class _UDPReceiverCore(EventSource):
         # join is what crashed the process; see the note above.
         if socket_to_close is not None:
             socket_to_close.close()
-
-
-class UDPReceiver(ioc.OChain):
-    """UDP network receiver chain for capturing remote trigger events.
-
-    This is an OChain that contains:
-    - _UDPReceiverCore: The actual UDP reception node
-    - Link: Bridge for distributed operation (passthrough in standalone)
-
-    The chain structure enables distributed edge/server operation while
-    keeping node inheritance clean (no chain mixing in node path).
-
-    Listens on specified IP/port for UDP packets containing numeric
-    trigger values. Each trigger outputs the received value, and then a
-    zero once ``HOLD_TIME_MS`` has passed -- not immediately. Emitted
-    back to back, the value and its reset are observed microseconds
-    apart, which at any real sampling rate is the *same sample*: they
-    then place onto one row of the grid and the reset overwrites the
-    value it was meant to follow. Measured through a Router at 250 Hz,
-    six datagrams with frames of 25: one trigger reached the consumer
-    with the immediate reset, five with it held.
-    """
-
-    #: Default IP address for localhost binding
-    DEFAULT_IP = _UDPReceiverCore.DEFAULT_IP
-    #: Default UDP port number for listening
-    DEFAULT_PORT = _UDPReceiverCore.DEFAULT_PORT
-
-    def __init__(
-        self,
-        ip: str = _UDPReceiverCore.DEFAULT_IP,
-        port: int = _UDPReceiverCore.DEFAULT_PORT,
-        **kwargs,
-    ):
-        """Initialize UDP receiver chain.
-
-        Args:
-            ip: IP address to bind socket to. Use "0.0.0.0" for all interfaces
-                or "127.0.0.1" for localhost. Defaults to localhost.
-            port: UDP port number to listen on. Defaults to 1000.
-            **kwargs: Additional parameters.
-        """
-        # Store parameters for create_internal_nodes
-        self._link_stream_id = stream_id_for(kwargs)
-        self._core_params = {"ip": ip, "port": port}
-        self._core_params.update(strip_chain_keys(kwargs))
-
-        # Initialize OChain (calls create_internal_nodes)
-        kwargs.setdefault(
-            self.Configuration.Keys.OUTPUT_PORTS,
-            [OPort.Configuration()],
-        )
-        ioc.OChain.__init__(
-            self,
-            ip=ip,
-            port=port,
-            stream_id=self._link_stream_id,
-            **kwargs,
-        )
-
-    def create_internal_nodes(self) -> List[ioc.Node]:
-        """Create the internal node chain.
-
-        Returns:
-            The head of the list is whatever stands in for this chain's
-            core: the core itself, the core followed by a raw tap
-            under ``save_as``, a replay core under ``load_from``,
-            or nothing at all under SERVER residency. Then a Link
-            where the pipeline is distributed, and Sync last.
-        """
-        from ...common.launch_config import LaunchConfig
-
-        nodes = []
-        residency = LaunchConfig.get().residency
-        # Recorded, replaced, or simply built, as the launch
-        # configuration says. Contributes nothing under server
-        # residency: the core lives on the edge, and so does
-        # anything recording or replaying it.
-        nodes.extend(
-            raw.source_stage(
-                self,
-                lambda: _UDPReceiverCore(**self._core_params),
-                timing=Constants.Timing.ASYNC,
-            )
-        )
-        if residency != Constants.Residency.STANDALONE:
-            nodes.append(
-                Link(
-                    sender=Constants.Residency.EDGE,
-                    receiver=Constants.Residency.SERVER,
-                    stream_id=self._link_stream_id,
-                    # An event stream is sparse on both sides of the
-                    # link, so the ports have to say so. Without this the
-                    # ASYNC output of the event core meets a SYNC input
-                    # and the chain cannot be built at all.
-                    timing=Constants.Timing.ASYNC,
-                )
-            )
-        # Sync places each event on the master timeline. ASYNC
-        # because a sparse stream must stay sparse: announced as
-        # continuous, every downstream node would wait for data on
-        # every cycle.
-        nodes.append(Sync(timing=Constants.Timing.ASYNC))
-        return nodes

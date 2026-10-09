@@ -1,20 +1,52 @@
 from __future__ import annotations
 
-from typing import List
+from typing import Optional
 
-import ioiocore as ioc
 import numpy as np
 
 from ...common._private import channels
 from ...common._private.entitlement import MARK
 from ...common.constants import Constants
-from ..core._private.chain_params import stream_id_for, strip_chain_keys
-from ..core._private.link import Link
-from ..core.i_port import IPort
+from .base import recording_meta
 from .base.file_writer import FileWriter
 
 #: Default input port identifier
 PORT_IN = Constants.Defaults.PORT_IN
+
+#: What EDF+ stores an annotation's onset and duration to, in seconds:
+#: pyedflib rounds both to units of 100 microseconds.
+ANNOTATION_RESOLUTION = 1e-4
+
+#: EDF's 16-bit sample range. A trigger channel is written with this as
+#: its physical range as well, so one physical unit is one digital step
+#: and an integer code reads back as the same integer. Scaled into the
+#: +/-10000 signal range, code 1 came back as 0.763 and the code 0
+#: between markers as 0.153, and every one became a marker of its own
+#: (D-BATCH-107).
+DIGITAL_MIN = -32768
+DIGITAL_MAX = 32767
+
+#: How much of an annotation's text EDF+ keeps, in bytes of UTF-8.
+#: Measured with pyedflib 0.1.42: a 41-byte label read back as its first
+#: 40 bytes.
+ANNOTATION_TEXT_BYTES = 40
+
+
+def _annotation_text(label: str) -> str:
+    """Cut *label* to what an annotation keeps, at a character boundary.
+
+    pyedflib cuts at the byte. Cut inside a character, the text does not
+    decode: 39 ASCII characters and an 'Ä' read back through pyedflib's
+    latin1 fallback, with a UserWarning (measured).
+
+    Args:
+        label: The marker's label.
+
+    Returns:
+        The label, or its longest prefix that fits.
+    """
+    stored = label.encode("utf-8")[:ANNOTATION_TEXT_BYTES]
+    return stored.decode("utf-8", "ignore")
 
 
 def _pyedflib():
@@ -32,40 +64,37 @@ def _pyedflib():
     """
     try:
         import pyedflib
-    except ImportError as error:  # pragma: no cover - environment
-        raise ImportError(
-            "EDFWriter needs pyedflib, provided by the 'formats' extra: "
-            "pip install 'gpype[formats]'"
-        ) from error
+    except ImportError as error:
+        from ... import _missing_extra_hint
+
+        hint = _missing_extra_hint(error) or str(error)
+        raise ImportError(f"EDFWriter needs pyedflib. {hint}") from error
     return pyedflib
 
 
-class _EDFWriterCore(FileWriter):
-    """Internal node writing a recording as an EDF+ (.edf) file.
+class EDFWriter(FileWriter):
+    """EDF+ (.edf) file writer for real-time data logging.
 
-    Rewritten from the untracked ``luna_edf_file_writer.py`` draft as a
-    plain :class:`FileWriter` subclass: the draft's async ``record``
-    port, ``set_file_prefix()`` and its own second queue and worker
-    thread are dropped rather than ported, since ``FileWriter`` already
-    owns the queue, the worker thread and the timestamped, collision-free
-    output path.
+    Buffers incoming blocks to whole EDF data records -- writing a
+    partial record per pipeline block was measured to interleave
+    fabricated padding between the real samples -- and records the true
+    sample count as an EDF+ annotation, since EDF's own header cannot
+    express a count that is not a multiple of the record size.
+    :class:`~gpype.EDFReader` trims to it.
 
-    EDF stores samples in fixed-length *data records*, and pyedflib pads
-    every ``writeSamples`` call out to a whole record -- silently, and
-    not with zeros. Measured: three 100-sample ``writeSamples`` calls
-    against a 250-sample record produced a 750-sample file of which 450
-    samples were fabricated, interleaved *between* the real blocks (value
-    counts ``{0.153: 450, 0.763: 100, 1.984: 100, 2.899: 100}``). So this
-    writer buffers incoming blocks and writes only whole records; the
-    buffering in :meth:`_write_block` is load-bearing, not tidiness.
+    The stream's markers are written as EDF+ annotations, onset and
+    duration in seconds. The annotation channel holds one annotation per
+    data record, and the sample count takes the first, so a file of *n*
+    records stores *n* - 1 markers. EDF+ annotations name no channel. A
+    marker that does not fit, or that names a channel, is not written,
+    and the writer logs how many at close. An annotation keeps 40 bytes
+    of UTF-8 text, so a longer label is cut at a character boundary, and
+    the writer names it. A marker past the last sample written is left
+    out.
 
-    The true sample count is not recoverable from the header at all --
-    measured, 1010 samples written at 250 Hz come back as
-    ``datarecords=5``, ``getNSamples()[0]=1250`` -- and the 240 padding
-    samples are not even zero (``0.15259022`` uV at the default range,
-    i.e. between two digital codes), so a reader cannot detect them by
-    looking for zeros either. The true count is therefore written as one
-    EDF+ annotation at close, which :class:`~gpype.EDFReader` trims to.
+    A trigger-role channel is written unscaled, with EDF's digital range
+    as its physical range, so an integer code in that range survives
+    exactly. ``physical_min`` and ``physical_max`` apply to the others.
     """
 
     def __init__(
@@ -73,6 +102,7 @@ class _EDFWriterCore(FileWriter):
         file_name: str,
         physical_min: float = -10000.0,
         physical_max: float = 10000.0,
+        edge_id: Optional[str] = None,
         **kwargs,
     ):
         """Initialize the EDF writer core.
@@ -80,7 +110,8 @@ class _EDFWriterCore(FileWriter):
         Args:
             file_name: Base filename for the .edf output. A timestamp
                 will be automatically appended.
-            physical_min: Physical minimum value in uV. Kept wide
+            physical_min: Physical minimum value in uV, for every
+                channel but a trigger (see above). Kept wide
                 (-10000) by default: EDF clips silently outside this
                 range (measured -- see :meth:`_write_block`), and the
                 header is written in ``setup()`` before any sample is
@@ -90,14 +121,23 @@ class _EDFWriterCore(FileWriter):
                 is reported at close.
             physical_max: Physical maximum value in uV. See
                 ``physical_min``.
+            edge_id: Which edge runs this node, matched against the
+                edge process's --edge-id. None, the default, is every
+                edge; ignored when the pipeline is not distributed.
             **kwargs: Additional arguments passed to parent FileWriter.
 
         Raises:
             ValueError: If physical_max is not greater than physical_min.
         """
-        super().__init__(file_name=file_name, **kwargs)
         if float(physical_max) <= float(physical_min):
             raise ValueError("physical_max must be greater than physical_min.")
+        super().__init__(
+            file_name=file_name,
+            physical_min=float(physical_min),
+            physical_max=float(physical_max),
+            edge_id=edge_id,
+            **kwargs,
+        )
         self._physical_min = float(physical_min)
         self._physical_max = float(physical_max)
         self._writer = None
@@ -106,6 +146,9 @@ class _EDFWriterCore(FileWriter):
         self._channel_count = None
         self._written = 0
         self._clipped = 0
+        self._markers = []
+        self._channel_min = None
+        self._channel_max = None
 
     @property
     def file_extension(self) -> str:
@@ -131,24 +174,44 @@ class _EDFWriterCore(FileWriter):
         n_channels = int(channels.channel_count(context))
         labels = channels.labels_of(context)
         roles = channels.roles_of(context)
+        units = channels.units_of(context)
 
         self._writer = pyedflib.EdfWriter(
             file_path, n_channels, file_type=pyedflib.FILETYPE_EDFPLUS
         )
 
         truncated = [label for label in labels if len(label) > 16]
+        trigger = [role == Constants.ChannelRoles.TRIGGER for role in roles]
+        self._channel_min = np.array(
+            [
+                DIGITAL_MIN if trigger[i] else self._physical_min
+                for i in range(n_channels)
+            ],
+            dtype=np.float64,
+        )
+        self._channel_max = np.array(
+            [
+                DIGITAL_MAX if trigger[i] else self._physical_max
+                for i in range(n_channels)
+            ],
+            dtype=np.float64,
+        )
         signal_headers = [
             {
                 "label": labels[i],
-                "dimension": "uV",
+                # From the context, per channel: empty where the
+                # channel's unit is not recorded, e.g. a trigger, rather
+                # than the 'uV' every channel used to get regardless
+                # (D-BATCH-43).
+                "dimension": (units[i] or "") if units is not None else "",
                 # NOT "sample_rate": edfwriter.py raises FutureWarning
                 # ("Use of `sample_rate` is deprecated, use
                 # `sample_frequency` instead") on that older key.
                 "sample_frequency": rate,
-                "physical_min": self._physical_min,
-                "physical_max": self._physical_max,
-                "digital_min": -32768,
-                "digital_max": 32767,
+                "physical_min": float(self._channel_min[i]),
+                "physical_max": float(self._channel_max[i]),
+                "digital_min": DIGITAL_MIN,
+                "digital_max": DIGITAL_MAX,
                 # The 80-char transducer field round-trips exactly
                 # (measured) and is the natural per-signal home for a
                 # role EDF itself has no concept of.
@@ -192,6 +255,10 @@ class _EDFWriterCore(FileWriter):
         self._buffer = np.empty((0, n_channels), dtype=np.float64)
         self._written = 0
         self._clipped = 0
+        # On the grid of the file's first sample, which is the stream's.
+        self._markers = recording_meta.entries(
+            context.get(Constants.Keys.MARKERS), 4
+        )
 
     def _write_block(self, block: np.ndarray, timestamps: np.ndarray) -> None:
         """Buffer a block and flush whole records as they fill.
@@ -211,8 +278,8 @@ class _EDFWriterCore(FileWriter):
         # into a +/-250 uV range came back as +/-250 with no exception
         # and no warning from the library -- so out-of-range samples are
         # counted here, before writing, and reported once at close.
-        out_of_range = block < self._physical_min
-        out_of_range |= block > self._physical_max
+        out_of_range = block < self._channel_min
+        out_of_range |= block > self._channel_max
         self._clipped += int(np.count_nonzero(out_of_range))
 
         self._buffer = np.vstack((self._buffer, block.astype(np.float64)))
@@ -254,7 +321,10 @@ class _EDFWriterCore(FileWriter):
         # only n_records x samples_per_record, so 1010 written reads
         # back as 1250 without this. duration=-1 marks it as an
         # unbounded-duration EDF+ annotation rather than an interval.
+        # Written first: pyedflib keeps annotations in the order given
+        # and drops those past the channel's capacity (measured).
         self._writer.writeAnnotation(0.0, -1, f"gpype:samples={self._written}")
+        self._write_markers()
 
         if self._clipped > 0:
             self.log(
@@ -272,82 +342,81 @@ class _EDFWriterCore(FileWriter):
         self._buffer = None
         self._samples_per_record = None
         self._channel_count = None
+        self._markers = []
 
+    def _write_markers(self) -> None:
+        """Write the markers that fit as annotations, and log the rest.
 
-class EDFWriter(ioc.IChain):
-    """EDF+ (.edf) file writer chain for real-time data logging.
-
-    Buffers incoming blocks to whole EDF data records -- writing a
-    partial record per pipeline block was measured to interleave
-    fabricated padding between the real samples -- and records the true
-    sample count as an EDF+ annotation, since EDF's own header cannot
-    express a count that is not a multiple of the record size.
-
-    Args:
-        file_name: Base filename for the .edf output.
-        physical_min: Physical minimum value in uV (default -10000).
-        physical_max: Physical maximum value in uV (default +10000).
-        **kwargs: Additional arguments.
-    """
-
-    def __init__(
-        self,
-        file_name: str,
-        physical_min: float = -10000.0,
-        physical_max: float = 10000.0,
-        **kwargs,
-    ):
-        """Initialize the EDF writer chain.
-
-        Args:
-            file_name: Base filename for the .edf output. A timestamp
-                will be automatically appended. Optional only so that a
-                stored configuration can supply it; one of the two must
-                be given.
-            physical_min: Physical minimum value in uV.
-            physical_max: Physical maximum value in uV.
-            **kwargs: Additional arguments.
-
-        Raises:
-            ValueError: If no file name is available from either source.
+        The annotation channel holds one annotation per data record
+        (measured: 65 written into a 10-record file, the first 10 read
+        back), and the sample count takes the first. A marker past the
+        last sample written is about no sample of this file, and is left
+        out, as ``recording_meta.finalize`` leaves it out of ``.mat`` and
+        ``.h5``.
         """
-        self._link_stream_id = stream_id_for(kwargs)
-        fn_key = _EDFWriterCore.Configuration.Keys.FILE_NAME
-        if file_name is None:
-            file_name = kwargs.get(fn_key)
-        if file_name is None:
-            raise ValueError("file_name must be provided.")
-        self._core_params = {
-            "file_name": file_name,
-            "physical_min": physical_min,
-            "physical_max": physical_max,
-        }
-        self._core_params.update(strip_chain_keys(kwargs))
+        markers = [m for m in self._markers if int(m[0]) < self._written]
+        if not markers:
+            return
+        rate = float(self._sampling_rate)
+        n = self._samples_per_record
+        records = -(-self._written // n) if n else 0
+        room = max(records - 1, 0)
 
-        kwargs.setdefault(fn_key, file_name)
-        kwargs.setdefault("physical_min", physical_min)
-        kwargs.setdefault("physical_max", physical_max)
-        kwargs.setdefault(
-            self.Configuration.Keys.INPUT_PORTS,
-            [IPort.Configuration()],
-        )
-        ioc.IChain.__init__(
-            self,
-            stream_id=self._link_stream_id,
-            **kwargs,
-        )
+        scoped = [m for m in markers if m[2] is not None]
+        whole = [m for m in markers if m[2] is None]
+        kept = whole[:room]
+        cut = {}
+        for sample, duration, _, label in kept:
+            text = str(label)
+            stored = _annotation_text(text)
+            if stored != text:
+                cut.setdefault(text, stored)
+            self._writer.writeAnnotation(
+                int(sample) / rate,
+                int(duration) / rate if int(duration) > 0 else -1,
+                stored,
+            )
 
-    def create_internal_nodes(self) -> List[ioc.Node]:
-        """Create the internal node chain.
+        if cut:
+            shown = ", ".join(
+                f"{text!r} -> {stored!r}"
+                for text, stored in list(cut.items())[:3]
+            )
+            more = f", and {len(cut) - 3} more" if len(cut) > 3 else ""
+            self.log(
+                f"{len(cut)} marker label(s) are longer than EDF+'s "
+                f"{ANNOTATION_TEXT_BYTES}-byte annotation text and were "
+                f"cut on disk: {shown}{more}.",
+                type=Constants.LogTypes.WARNING,
+            )
 
-        Returns:
-            List containing [Link, _EDFWriterCore].
-        """
-        return [
-            Link(
-                sender=Constants.Residency.SERVER,
-                receiver=Constants.Residency.EDGE,
-                stream_id=self._link_stream_id,
-            ),
-            _EDFWriterCore(**self._core_params),
-        ]
+        lost = len(whole) - len(kept)
+        if lost or scoped:
+            reasons = []
+            if lost:
+                reasons.append(
+                    f"{lost} did not fit: EDF+ keeps one annotation per "
+                    f"data record, this file has {records}, and the "
+                    f"sample count takes one"
+                )
+            if scoped:
+                reasons.append(
+                    f"{len(scoped)} name a channel, which an EDF+ "
+                    f"annotation cannot"
+                )
+            self.log(
+                f"{lost + len(scoped)} of {len(markers)} marker(s) "
+                f"were not written to the file: {'; '.join(reasons)}.",
+                type=Constants.LogTypes.WARNING,
+            )
+        # A marker comes back on its own sample while the rounding of
+        # its onset stays under half a sample. At 10 kHz a sample is one
+        # 100 us step, so nothing rounds; above it, a marker can move.
+        if kept and rate * ANNOTATION_RESOLUTION > 1:
+            self.log(
+                f"EDF+ stores a marker's onset to "
+                f"{ANNOTATION_RESOLUTION * 1e6:.0f} us, so at {rate:g} Hz "
+                f"a marker can read back up to "
+                f"{rate * ANNOTATION_RESOLUTION / 2:.1f} samples away.",
+                type=Constants.LogTypes.WARNING,
+            )

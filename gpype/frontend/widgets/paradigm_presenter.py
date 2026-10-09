@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 # Standard library imports
 import glob
 import os
 import sys
+from typing import Optional
 
 # Third-party imports
 from PySide6.QtWidgets import (
@@ -19,7 +22,7 @@ from PySide6.QtWidgets import (
 from ...backend.sources.udp_receiver import UDPReceiver
 
 # Local imports
-from .base.widget import Widget, _require_qt_application
+from .base.widget import Widget, _require_qt_application, _weak_slot
 
 # UI constants
 MINIMUM_BUTTON_WIDTH = 120
@@ -55,6 +58,7 @@ class ParadigmPresenter(Widget, UDPReceiver):
         self,
         paradigm: str = None,
         refresh_rate: float = None,
+        edge_id: Optional[str] = None,
         **kwargs,
     ):
         """Initialize the Paradigm Presenter control widget.
@@ -67,6 +71,9 @@ class ParadigmPresenter(Widget, UDPReceiver):
                 containing paradigm files. If None, uses file dialog.
             refresh_rate (float, optional): Repaints per second. Defaults
                 to DEFAULT_REFRESH_RATE.
+            edge_id: Which edge runs this node, matched against the
+                edge process's --edge-id. None, the default, is every
+                edge; ignored when the pipeline is not distributed.
             **kwargs: Additional configuration, including the values a
                 stored configuration supplies when this widget is rebuilt.
 
@@ -122,7 +129,7 @@ class ParadigmPresenter(Widget, UDPReceiver):
             paradigm = kwargs.pop(pd_key, None)
         if paradigm:
             kwargs[pd_key] = paradigm
-        UDPReceiver.__init__(self, **kwargs)
+        UDPReceiver.__init__(self, edge_id=edge_id, **kwargs)
 
         # Initialize the Paradigm Presenter instance
         self.paradigm_presenter = pp.ParadigmPresenter()
@@ -162,7 +169,7 @@ class ParadigmPresenter(Widget, UDPReceiver):
         """Create and configure the start paradigm button."""
         self.start_button = QPushButton("Start Paradigm")
         self.start_button.setMinimumWidth(MINIMUM_BUTTON_WIDTH)
-        self.start_button.clicked.connect(self._start_paradigm)
+        self.start_button.clicked.connect(_weak_slot(self._start_paradigm))
 
     def _create_paradigm_selection(self):
         """Create paradigm selection UI (dropdown, file display, or load)."""
@@ -183,7 +190,7 @@ class ParadigmPresenter(Widget, UDPReceiver):
         """Create the load paradigm button for file dialog selection."""
         self.load_button = QPushButton("Load Paradigm...")
         self.load_button.setMinimumWidth(MINIMUM_BUTTON_WIDTH)
-        self.load_button.clicked.connect(self._load_paradigm)
+        self.load_button.clicked.connect(_weak_slot(self._load_paradigm))
         self.start_button.setEnabled(False)  # Disabled until paradigm loaded
         self._layout.addWidget(self.load_button)
 
@@ -231,7 +238,9 @@ class ParadigmPresenter(Widget, UDPReceiver):
             # Configure dropdown with found paradigms
             self.dropdown.addItems(self.paradigms)
             self.dropdown.setMinimumWidth(2 * MINIMUM_BUTTON_WIDTH)
-            self.dropdown.currentIndexChanged.connect(self._select_paradigm)
+            self.dropdown.currentIndexChanged.connect(
+                _weak_slot(self._select_paradigm)
+            )
 
             # Load the first paradigm by default
             paradigm_file = os.path.join(self._root_folder, self.paradigms[0])
@@ -258,7 +267,7 @@ class ParadigmPresenter(Widget, UDPReceiver):
         # Create stop button
         self.stop_button = QPushButton("Stop Paradigm")
         self.stop_button.setMinimumWidth(MINIMUM_BUTTON_WIDTH)
-        self.stop_button.clicked.connect(self._stop_paradigm)
+        self.stop_button.clicked.connect(_weak_slot(self._stop_paradigm))
         self.stop_button.setEnabled(False)  # Disabled until paradigm starts
         self._layout.addWidget(self.stop_button)
 

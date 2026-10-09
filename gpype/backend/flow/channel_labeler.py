@@ -28,6 +28,13 @@ class ChannelLabeler(IONode):
     a digital input as a trigger, an accelerometer as auxiliary, a link
     quality as quality -- is what stops a filter from smearing them.
 
+    And it carries units: the other route a stream's physical unit
+    reaches the context by, beside an amplifier source declaring its
+    own. A ``Generator``, a foreign LSL stream, or an amplifier this
+    package does not yet cover can be told what it measures, and units
+    given here override whatever the input already declared -- the
+    author is asserting ground truth, not merely filling a gap.
+
     The data passes through untouched; only the description changes.
     """
 
@@ -53,12 +60,15 @@ class ChannelLabeler(IONode):
             ROLES = "roles"
             #: Electrode system the labels come from
             SYSTEM = "system"
+            #: Physical unit, one per channel
+            UNITS = "units"
 
     def __init__(
         self,
         labels: Optional[list] = None,
         roles: Optional[list] = None,
         montage: Optional[Montage] = None,
+        units: Optional[list] = None,
         **kwargs,
     ):
         """Initialize the channel labeler.
@@ -69,10 +79,13 @@ class ChannelLabeler(IONode):
                 Channels left unnamed here count as measured signal.
             montage: A Montage to take the labels from, as an alternative
                 to passing them directly.
+            units: One physical unit per channel, e.g. ``["uV", "uV"]``;
+                None for a channel with none. Overrides whatever the
+                input already declared, rather than only filling a gap.
             **kwargs: Additional arguments for the parent IONode.
 
         Raises:
-            ValueError: If both a montage and labels are given, if either
+            ValueError: If both a montage and labels are given, if any
                 list is empty, or if a role is not a known role.
         """
         if montage is not None:
@@ -104,6 +117,10 @@ class ChannelLabeler(IONode):
             kwargs.setdefault(
                 self.Configuration.OptionalKeys.SYSTEM, montage.system
             )
+        if units is not None:
+            if not units:
+                raise ValueError("units must not be empty.")
+            kwargs.setdefault(self.Configuration.OptionalKeys.UNITS, units)
 
         super().__init__(**kwargs)
 
@@ -129,8 +146,13 @@ class ChannelLabeler(IONode):
         count = channels.channel_count(port_context_in[PORT_IN])
         labels = self.config.get(opt.LABELS)
         roles = self.config.get(opt.ROLES)
+        units = self.config.get(opt.UNITS)
 
-        for name, value in (("labels", labels), ("roles", roles)):
+        for name, value in (
+            ("labels", labels),
+            ("roles", roles),
+            ("units", units),
+        ):
             if value is not None and len(value) != count:
                 raise ValueError(
                     f"{name} has {len(value)} entries but the input has "
@@ -147,6 +169,13 @@ class ChannelLabeler(IONode):
                 self.config.get(opt.SYSTEM),
             )
         )
+        if units is not None:
+            # An explicit override, not merely a fill-in: the author is
+            # asserting ground truth for every channel this node
+            # touches, so it replaces whatever the input declared.
+            port_context_out[PORT_OUT][Constants.Keys.CHANNEL_UNITS] = list(
+                units
+            )
         return port_context_out
 
     def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:

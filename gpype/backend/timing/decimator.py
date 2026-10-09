@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+from fractions import Fraction
+
 import numpy as np
 from scipy.signal import butter, sosfilt, sosfilt_zi
 
 from ...common._private import channels
+from ...common._private.naming import node_label
 from ...common.constants import Constants
 from ..core.io_node import IONode
 
@@ -25,6 +28,14 @@ class Decimator(IONode):
     decimated by 50, everything from 2.5 Hz to 125 Hz lands on top of the
     band of interest. The filter runs on the measured-signal channels only,
     so an in-band master index or a trigger channel survives intact.
+
+    The first sample kept is input sample ``decimation_factor - 1``, and
+    ``start_time`` is moved to it. A marker in the input context moves to
+    the first kept sample at or after it. A gap covers every kept sample
+    whose window holds a missing input sample. Without the anti-alias
+    filter the window is the kept sample itself. With it, the window is
+    the input samples that carry 99 % of the kept sample's filter weight,
+    53 at a factor of 5.
     """
 
     #: Cutoff as a fraction of the output Nyquist frequency. Below one so
@@ -33,6 +44,10 @@ class Decimator(IONode):
     CUTOFF_RATIO = 0.8
     #: Order of the anti-alias low-pass.
     FILTER_ORDER = 8
+    #: Output periods of impulse response measured for a gap's window.
+    #: The 99 % point sits at 10.2 to 13 of them for factors 2 to 1000,
+    #: and 512 gives the same windows.
+    RESPONSE_PERIODS = 64
 
     class Configuration(IONode.Configuration):
         class Keys(IONode.Configuration.Keys):
@@ -173,6 +188,28 @@ class Decimator(IONode):
                     sosfilt_zi(self._sos)[:, :, None], n_signal, axis=2
                 )
                 self._primed = False
+
+        # The first sample kept is input sample M - 1 (see step()).
+        # Without the filter a kept sample is that one input sample. With
+        # it, a kept sample depends on every input before it, and
+        # response_window() says how many carry 99 % of its weight: 53
+        # at M=5, 512 at M=50 (D-BATCH-80).
+        window = 1
+        if self._sos is not None:
+            impulse = np.zeros(self.RESPONSE_PERIODS * M + 1)
+            impulse[0] = 1.0
+            window = max(
+                M, channels.response_window(sosfilt(self._sos, impulse))
+            )
+        warning = channels.rescale_grid(
+            port_context_out[PORT_OUT],
+            Fraction(1, M),
+            node_label(self),
+            offset=M - 1,
+            window=window,
+        )
+        if warning:
+            self.log(warning, type=Constants.LogTypes.WARNING)
         return port_context_out
 
     def step(self, data: dict):
@@ -214,4 +251,7 @@ class Decimator(IONode):
         self._n_seen += rows
         if first >= rows:
             return None
+        # The input row the output ends on, for a carried position: not
+        # the input's last row when the factor exceeds the frame.
+        self._position_last_row = first + M * ((rows - 1 - first) // M)
         return {PORT_OUT: block[first::M, :]}

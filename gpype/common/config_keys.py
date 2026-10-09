@@ -40,10 +40,12 @@ KEY_HOLDERS = ("Keys", "OptionalKeys", "EmptyableKeys")
 
 #: Keys the framework itself sets, which no node declares.
 #:
-#: ``stream_id`` is derived by ``chain_params.stream_id_for`` and passed
-#: through ``**kwargs`` into the chain's configuration, so it appears in
-#: neither a Keys holder nor a constructor signature. It is declared as a
-#: key only on the private ``Link`` node.
+#: ``stream_id`` pins the stream a world-facing node's Link pairs on. It
+#: arrives through ``**kwargs`` -- set by an author, or carried by a
+#: document written before step 4 of ``chain-assembly``, where the chain
+#: recorded it -- so it appears in neither a Keys holder nor a
+#: constructor signature. It is declared as a key only on the private
+#: ``Link`` node.
 #:
 #: Measured rather than guessed: the rule was run against every node in
 #: the package, built cleanly with no stray keys, and this was the only

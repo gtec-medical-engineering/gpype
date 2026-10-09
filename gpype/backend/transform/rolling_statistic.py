@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+from fractions import Fraction
 from typing import Optional
 
 import numpy as np
 
 from ...common._private import channels
+from ...common._private.naming import node_label
 from ...common.constants import Constants
 from ..core.io_node import IONode
 
@@ -27,6 +29,15 @@ class RollingStatistic(IONode):
     ``window_size`` samples, and the first values are computed against a
     history primed with the first sample rather than against silence, so
     there is no start-up ramp to mistake for signal.
+
+    One row per input frame, so a frame longer than one sample lowers the
+    rate. A row is timed at the last sample of its frame, and
+    ``start_time`` is moved to the first frame's. A marker in the input
+    context then moves to the first row at or after it. A gap covers
+    every row whose window holds a missing sample, at any frame size.
+
+    Every statistic but ``"var"`` is in its input's unit. A variance is
+    in that unit squared, so its channels record no unit.
     """
 
     #: Exactly one of these must be given; the window is either a
@@ -146,6 +157,21 @@ class RollingStatistic(IONode):
         count = channels.channel_count(context)
         if not self._split.all_signal:
             count = len(self._split.signal)
+            # Only the signal channels are emitted, so only they are
+            # described: labels, roles and units at the input's width
+            # named a trigger this node no longer emits.
+            port_context_out[PORT_OUT].update(
+                channels.select(context, self._split.signal.tolist())
+            )
+        units_key = Constants.Keys.CHANNEL_UNITS
+        if (
+            self.config[self.Configuration.Keys.STATISTIC] == "var"
+            and port_context_out[PORT_OUT].get(units_key) is not None
+        ):
+            # A variance is in its input's unit squared, which has no
+            # notation yet (D-BATCH-82). Carrying 'uV' on made to_si()
+            # scale it by 1e-6 instead of 1e-12.
+            port_context_out[PORT_OUT][units_key] = [None] * count
 
         self._buffer = np.zeros((window, count), dtype=Constants.DATA_TYPE)
         self._index = 0
@@ -169,6 +195,17 @@ class RollingStatistic(IONode):
             port_context_out[PORT_OUT][Constants.Keys.SAMPLING_RATE] = (
                 rate_in / frame_size_in
             )
+        # The first row describes the window ending at the last sample
+        # of the first frame, input sample frame_size_in - 1.
+        warning = channels.rescale_grid(
+            port_context_out[PORT_OUT],
+            Fraction(1, int(frame_size_in)),
+            node_label(self),
+            offset=int(frame_size_in) - 1,
+            window=window,
+        )
+        if warning:
+            self.log(warning, type=Constants.LogTypes.WARNING)
         return port_context_out
 
     def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:

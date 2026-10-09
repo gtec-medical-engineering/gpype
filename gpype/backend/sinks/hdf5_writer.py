@@ -1,15 +1,11 @@
 from __future__ import annotations
 
 import json
-from typing import List
+from typing import Optional
 
-import ioiocore as ioc
 import numpy as np
 
 from ...common.constants import Constants
-from ..core._private.chain_params import stream_id_for, strip_chain_keys
-from ..core._private.link import Link
-from ..core.i_port import IPort
 from .base import recording_meta
 from .base.file_writer import FileWriter
 
@@ -31,33 +27,33 @@ def _h5py():
     except ImportError as error:  # pragma: no cover - environment
         raise ImportError(
             "HDF5Writer needs h5py, provided by the 'formats' extra: "
-            "pip install 'gpype[formats]'"
+            'pip install "gpype[formats]"'
         ) from error
     return h5py
 
 
-class _HDF5WriterCore(FileWriter):
-    """Internal node writing a recording as a plain HDF5 (.h5) file.
+class HDF5Writer(FileWriter):
+    """Plain HDF5 (.h5) file writer for real-time data logging.
 
-    Unlike :class:`~gpype.backend.sinks.mat_writer._MatWriterCore`, this
-    is an ordinary HDF5 container with no userblock and no MATLAB
-    conventions -- for a consumer that wants HDF5 without MATLAB's
-    baggage, or a language whose HDF5 bindings do not speak MATLAB's
-    dialect.
+    Writes multi-channel data with a time column plus one column per
+    channel under ``variable_name``, alongside a ``gpype_meta`` JSON
+    document and plain HDF5 attributes describing the rate, labels and
+    roles -- so both a g.Pype :class:`~gpype.HDF5Reader` and a bare h5py
+    script can make sense of the file.
 
-    The untracked draft this replaces ignored ``port_context_in``
-    entirely, so a file it produced carried no rate, no labels and no
-    roles -- a reader had nothing to go on but a bare array. This writer
-    records the same ``gpype_meta`` JSON document
-    :class:`~gpype.backend.sinks.mat_writer._MatWriterCore` writes (so
-    one parser in :mod:`recording_meta` serves both readers) and, in
-    addition, plain HDF5 attributes on the data dataset -- sampling
-    rate, channel labels, channel roles, sample count -- so a tool with
-    no g.Pype involvement at all can still make sense of the file with
-    an ordinary HDF5 library.
+    Unlike :class:`~gpype.MatWriter`, this is an ordinary HDF5 container
+    with no userblock and no MATLAB conventions -- for a consumer that
+    wants HDF5 without MATLAB's baggage, or a language whose HDF5
+    bindings do not speak MATLAB's dialect.
     """
 
-    def __init__(self, file_name: str, variable_name: str = "data", **kwargs):
+    def __init__(
+        self,
+        file_name: str,
+        variable_name: str = "data",
+        edge_id: Optional[str] = None,
+        **kwargs,
+    ):
         """Initialize the HDF5 writer core.
 
         Args:
@@ -65,9 +61,17 @@ class _HDF5WriterCore(FileWriter):
                 will be automatically appended.
             variable_name: Name of the dataset the recording is written
                 under.
+            edge_id: Which edge runs this node, matched against the
+                edge process's --edge-id. None, the default, is every
+                edge; ignored when the pipeline is not distributed.
             **kwargs: Additional arguments passed to parent FileWriter.
         """
-        super().__init__(file_name=file_name, **kwargs)
+        super().__init__(
+            file_name=file_name,
+            variable_name=variable_name,
+            edge_id=edge_id,
+            **kwargs,
+        )
         self._variable_name = variable_name
         self._file = None
         self._data_ds = None
@@ -212,68 +216,3 @@ class _HDF5WriterCore(FileWriter):
         self._total_samples = 0
         self._meta = None
         self._h5py_module = None
-
-
-class HDF5Writer(ioc.IChain):
-    """Plain HDF5 (.h5) file writer chain for real-time data logging.
-
-    Writes multi-channel data with a time column plus one column per
-    channel under ``variable_name``, alongside a ``gpype_meta`` JSON
-    document and plain HDF5 attributes describing the rate, labels and
-    roles -- so both a g.Pype :class:`~gpype.HDF5Reader` and a bare h5py
-    script can make sense of the file.
-    """
-
-    def __init__(self, file_name: str, variable_name: str = "data", **kwargs):
-        """Initialize the HDF5 writer chain.
-
-        Args:
-            file_name: Base filename for the .h5 output. A timestamp will
-                be automatically appended. Optional only so that a stored
-                configuration can supply it; one of the two must be
-                given.
-            variable_name: Name of the dataset the recording is written
-                under.
-            **kwargs: Additional arguments.
-
-        Raises:
-            ValueError: If no file name is available from either source.
-        """
-        self._link_stream_id = stream_id_for(kwargs)
-        fn_key = _HDF5WriterCore.Configuration.Keys.FILE_NAME
-        if file_name is None:
-            file_name = kwargs.get(fn_key)
-        if file_name is None:
-            raise ValueError("file_name must be provided.")
-        self._core_params = {
-            "file_name": file_name,
-            "variable_name": variable_name,
-        }
-        self._core_params.update(strip_chain_keys(kwargs))
-
-        kwargs.setdefault(fn_key, file_name)
-        kwargs.setdefault("variable_name", variable_name)
-        kwargs.setdefault(
-            self.Configuration.Keys.INPUT_PORTS,
-            [IPort.Configuration()],
-        )
-        ioc.IChain.__init__(
-            self,
-            stream_id=self._link_stream_id,
-            **kwargs,
-        )
-
-    def create_internal_nodes(self) -> List[ioc.Node]:
-        """Create the internal node chain.
-
-        Returns:
-            List containing [Link, _HDF5WriterCore].
-        """
-        return [
-            Link(
-                sender=Constants.Residency.SERVER,
-                receiver=Constants.Residency.EDGE,
-                stream_id=self._link_stream_id,
-            ),
-            _HDF5WriterCore(**self._core_params),
-        ]

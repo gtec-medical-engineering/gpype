@@ -1,5 +1,5 @@
 # --------------------------------------------------------------
-# Example file s2e1_d_bandstop.py
+# Example file s2e1_bandstop.py
 # For details and usage, see g.Pype Training Season 2, Episode 1
 # --------------------------------------------------------------
 
@@ -16,7 +16,7 @@ if __name__ == "__main__":
                           signal_amplitude=75,
                           noise_amplitude=15)
 
-    # Create bandstop filter
+    # Create bandstop filter for 50 Hz mains; use 58-62 Hz for 60 Hz
     bandstop = gp.Bandstop(f_lo=48, f_hi=52)
 
     # Create scope

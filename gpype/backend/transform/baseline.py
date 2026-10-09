@@ -31,6 +31,11 @@ class Baseline(IONode):
     A high-pass filter is not a substitute: it is causal, it distorts the
     slow components that carry much of the response, and it removes a
     standing offset over its own time constant rather than exactly.
+
+    In SUBTRACT mode a channel keeps its input's unit, since the
+    corrected value is still that unit. In PERCENT mode the corrected
+    value is a ratio, so every channel this node rescales declares '%'
+    -- known even where the input's own unit is not.
     """
 
     class Configuration(IONode.Configuration):
@@ -179,6 +184,21 @@ class Baseline(IONode):
             )
         self._slice = slice(i0, i1)
         self._split = channels.SignalSplit(context)
+
+        if self.config[self.Configuration.Keys.MODE] == self.PERCENT:
+            # A percentage change from the baseline is '%' regardless of
+            # the input's own unit -- unlike a squared statistic, this
+            # derived unit is known even when the input's is not
+            # (D-BATCH-43). Only the channels this node actually
+            # rescales change; a carried channel keeps what it had.
+            count = channels.channel_count(context)
+            original = channels.units_of(context)
+            updated = (
+                list(original) if original is not None else ([None] * count)
+            )
+            for index in self._split.signal.tolist():
+                updated[index] = "%"
+            port_context_out[PORT_OUT][Constants.Keys.CHANNEL_UNITS] = updated
         return port_context_out
 
     def step(self, data: dict[str, np.ndarray]) -> dict[str, np.ndarray]:

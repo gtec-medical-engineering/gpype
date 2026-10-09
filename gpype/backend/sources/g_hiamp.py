@@ -1,20 +1,20 @@
 from __future__ import annotations
 
+import functools
 import time
-from typing import List
+from typing import Optional
 
-import ioiocore as ioc
 import numpy as np
 
 from ...common._private import channels, driver_usage
 from ...common.constants import Constants
-from ..core._private.chain_params import stream_id_for, strip_chain_keys
-from ..core._private.link import Link
-from ..core._private.oscar import Oscar
-from ..core._private.sync import Sync
-from ..core.o_port import OPort
-from .base import raw
-from .base.amplifier_source import AmplifierSource, as_whole_number
+from .base.amplifier_source import (
+    AmplifierSource,
+    apply_channel_units,
+    as_whole_number,
+    opens_no_device,
+    unopened_shape,
+)
 
 #: Default output port identifier
 PORT_OUT = Constants.Defaults.PORT_OUT
@@ -22,30 +22,27 @@ PORT_OUT = Constants.Defaults.PORT_OUT
 PORT_IN = Constants.Defaults.PORT_IN
 
 
-class _GHIampCore(AmplifierSource):
-    """Internal node implementing g.HIamp amplifier acquisition logic.
-
-    This is the actual g.HIamp node (pure ONode inheritance).
-    It is wrapped by the GHIamp chain for distributed operation.
+class GHIamp(AmplifierSource):
+    """g.HIamp EEG amplifier for real-time data acquisition.
 
     Interface to g.tec's g.HIamp wired EEG amplifier system.
     """
 
-    #: One channel appended after the device's own, carrying the
-    #: instant each block was first seen on this host.
-    #:
-    #: The stamp rides in band because it has to survive a Link. The
-    #: Sync at the end of this chain builds the master-timeline
-    #: relation from (position, instant) pairs, and under EDGE/SERVER
-    #: residency that Sync runs in the server process, where reading a
-    #: clock measures when the frame finished crossing the network
-    #: rather than when the amplifier delivered it. Sync consumes the
-    #: channel again, so nothing downstream sees a wider frame.
-    #:
-    #: Declared on the port and not in the configuration, unlike
-    #: Core-8's: a GDS configuration's channel_count is the number
-    #: handed to the driver, so widening it would ask the amplifier
-    #: for one more acquisition channel.
+    # One channel appended after the device's own, carrying the
+    # instant each block was first seen on this host.
+    #
+    # The stamp rides in band because it has to survive a Link. The
+    # Sync at the end of this chain builds the master-timeline
+    # relation from (position, instant) pairs, and under EDGE/SERVER
+    # residency that Sync runs in the server process, where reading a
+    # clock measures when the frame finished crossing the network
+    # rather than when the amplifier delivered it. Sync consumes the
+    # channel again, so nothing downstream sees a wider frame.
+    #
+    # Declared on the port and not in the configuration, unlike
+    # Core-8's, and so is the digital input: a GDS configuration's
+    # channel_count is the number handed to the driver, which is what
+    # every document since 4.0.0 records under that key (D-CORE-67).
     NUM_TIMELINE_CHANNELS = 1
 
     class Configuration(AmplifierSource.Configuration):
@@ -54,12 +51,19 @@ class _GHIampCore(AmplifierSource):
         class Keys(AmplifierSource.Configuration.Keys):
             """Configuration key constants for the g.HIamp amplifier."""
 
-            #: Configuration key for the device serial number
-            SERIAL = "serial"
             #: Configuration key for enabling the digital trigger input
             ENABLE_DI = "enable_di"
             #: Configuration key for enabling counter channel
             ENABLE_COUNTER = "enable_counter"
+
+        class OptionalKeys(AmplifierSource.Configuration.OptionalKeys):
+            """Configuration keys that may legitimately be absent."""
+
+            #: The serial of the unit that opened, wherever one did. A
+            #: process that opens no device -- a server, or a replay --
+            #: keeps None, which means what it meant to the author:
+            #: whichever amplifier answers first.
+            SERIAL = "serial"
 
     def __init__(
         self,
@@ -69,6 +73,8 @@ class _GHIampCore(AmplifierSource):
         frame_size: int = None,
         enable_di: bool = None,
         enable_counter: bool = None,
+        enable_oscar: bool = False,
+        edge_id: Optional[str] = None,
         **kwargs,
     ):
         """Initialize g.HIamp amplifier interface.
@@ -80,6 +86,10 @@ class _GHIampCore(AmplifierSource):
             frame_size: Samples per data frame (NumberOfScans).
             enable_di: Enable digital trigger input channel.
             enable_counter: Enable counter channel (increments each block).
+            enable_oscar: Run OSCAR artifact removal on this stream.
+            edge_id: Which edge runs this node, matched against the
+                edge process's --edge-id. None, the default, is every
+                edge; ignored when the pipeline is not distributed.
             **kwargs: Additional parameters for AmplifierSource.
 
         Raises:
@@ -101,21 +111,6 @@ class _GHIampCore(AmplifierSource):
         # missing driver is still a missing driver, and it must not break
         # `import gpype` or the node catalogue.
 
-        # Import gtec_gds only when actually needed (lazy import)
-        try:
-            import gtec_gds as gds
-
-            # The driver refuses to construct a handle until the
-            # local usage key is registered.
-            driver_usage.register()
-        except ImportError as e:
-            raise RuntimeError(
-                f"GDS library not available: {e}. "
-                "This may be expected in CI environments where the GDS "
-                "library is not installed."
-            ) from e
-
-        #: g.HIamp device interface instance
         # A restored configuration binds these named parameters in
         # the per-port list form they were stored as, and they are
         # handed straight to the native driver below, which expects
@@ -133,36 +128,64 @@ class _GHIampCore(AmplifierSource):
         sampling_rate = as_whole_number(sampling_rate, "sampling_rate")
         frame_size = as_whole_number(frame_size, "frame_size")
         channel_count = as_whole_number(channel_count, "channel_count")
-        self._device = gds.GHIamp(
-            serial=serial,
-            sampling_rate=sampling_rate,
-            channel_count=channel_count,
-            frame_size=frame_size,
-            enable_di=enable_di,
-            enable_counter=enable_counter,
-        )
 
-        # Update parameters with actual device configuration
-        serial = self._device.serial_number
-        channel_count = self._device.channel_count
-        frame_size = self._device.frame_size
-        enable_di = self._device.enable_di
-        enable_counter = self._device.enable_counter
+        if opens_no_device(edge_id):
+            # **This process does not open the amplifier**: a server,
+            # another edge's process, or a replay. See GUSBamp: the shape
+            # comes from the arguments (unopened_shape), an unset flag
+            # takes the value the driver gives None, and the serial stays
+            # as given.
+            sampling_rate, channel_count, frame_size = unopened_shape(
+                self, sampling_rate, channel_count, frame_size
+            )
+            self._device = None
+            self._device_factory = None
+            enable_di = bool(enable_di)
+            enable_counter = bool(enable_counter)
+        else:
+            # Import gtec_gds only when actually needed (lazy import)
+            try:
+                import gtec_gds as gds
 
-        # The measured channels are the ones the device exposes as
-        # Channels. Recorded before the digital input is appended so
-        # setup() can tell the two apart.
-        self._eeg_channel_count = channel_count
+                # The driver refuses to construct a handle until the
+                # local usage key is registered.
+                driver_usage.register()
+            except ImportError as e:
+                raise RuntimeError(
+                    f"GDS library not available: {e}. "
+                    "This may be expected in CI environments where the "
+                    "GDS library is not installed."
+                ) from e
 
-        # Add digital input channel if enabled
-        if enable_di:
-            channel_count += 1
+            open_kwargs = dict(
+                serial=serial,
+                sampling_rate=sampling_rate,
+                channel_count=channel_count,
+                frame_size=frame_size,
+                enable_di=enable_di,
+                enable_counter=enable_counter,
+            )
+            self._device = gds.GHIamp(**open_kwargs)
 
-        # Note: enable_counter replaces channel 1 with counter data,
-        # it does not add an additional channel
+            # Update parameters with actual device configuration
+            serial = self._device.serial_number
+            # Pinned to the unit that actually opened, so a bench with
+            # two amplifiers of this model reopens the same one after a
+            # stop(). See AmplifierSource._reopen_device.
+            open_kwargs["serial"] = serial
+            self._device_factory = functools.partial(gds.GHIamp, **open_kwargs)
+            channel_count = self._device.channel_count
+            frame_size = self._device.frame_size
+            enable_di = self._device.enable_di
+            enable_counter = self._device.enable_counter
+
+        # channel_count stays the acquired count; setup() appends the
+        # digital input on the port. enable_counter replaces channel 1
+        # with counter data rather than adding one.
 
         # Set up data callback for real-time streaming
-        self._device.set_data_callback(self._data_callback)
+        if self._device is not None:
+            self._device.set_data_callback(self._data_callback)
 
         # Initialize parent AmplifierSource with final configuration
         #
@@ -174,13 +197,30 @@ class _GHIampCore(AmplifierSource):
         # binds a signature to the serial the handle reports, so the
         # verdict would be about the wrong device too.
         super().__init__(
+            enable_oscar=enable_oscar,
             serial=serial,
             sampling_rate=sampling_rate,
             channel_count=channel_count,
             frame_size=frame_size,
             enable_di=enable_di,
             enable_counter=enable_counter,
+            edge_id=edge_id,
             **kwargs,
+        )
+
+    def channel_units(self) -> Optional[list]:
+        """One 'uV' per EEG channel (vendor/gds-headers's
+        ``GDSClientAPI_gHIamp.h``: ``GDS_GHIAMP_SCALING.Offset`` is in
+        uV), None for the digital input when enabled, and None for the
+        arrival stamp. A channel enabling ``enable_counter`` overwrites
+        a measured channel at a position this node does not track (see
+        ``setup``'s docstring), so it is still declared 'uV'."""
+        n_eeg = self.scalar(self.config[self.Configuration.Keys.CHANNEL_COUNT])
+        trigger = int(bool(self.config[self.Configuration.Keys.ENABLE_DI]))
+        return (
+            ["uV"] * n_eeg
+            + [None] * trigger
+            + [None] * self.NUM_TIMELINE_CHANNELS
         )
 
     def setup(
@@ -194,9 +234,9 @@ class _GHIampCore(AmplifierSource):
         decaying oscillation, and nothing about the result announces that
         it was ever an event.
 
-        The arrival stamp is appended after both, and counted apart from
-        them: the trigger block is derived from the width the device
-        reports, which the stamp is no part of.
+        The configuration counts the channels handed to the driver, so
+        the digital input is added here, on the port, and the arrival
+        stamp after it.
 
         Enabling the counter replaces one of the measured channels rather
         than appending one, and which one is not exposed here, so it
@@ -210,21 +250,21 @@ class _GHIampCore(AmplifierSource):
             Output port contexts describing the channel layout.
         """
         port_context_out = super().setup(data, port_context_in)
+        trigger = int(bool(self.config[self.Configuration.Keys.ENABLE_DI]))
         stamped = self.NUM_TIMELINE_CHANNELS
+        units = self.channel_units()
         for context in port_context_out.values():
-            # Read before the count is raised: everything below counts
-            # the device's channels, and the stamp is not one of them.
-            total = channels.channel_count(context)
-            n_eeg = min(self._eeg_channel_count, total)
+            n_eeg = channels.channel_count(context)
             roles = [Constants.ChannelRoles.SIGNAL] * n_eeg
-            roles += [Constants.ChannelRoles.TRIGGER] * (total - n_eeg)
+            roles += [Constants.ChannelRoles.TRIGGER] * trigger
             roles += [Constants.ChannelRoles.TIMESTAMP] * stamped
-            context[Constants.Keys.CHANNEL_COUNT] = total + stamped
+            context[Constants.Keys.CHANNEL_COUNT] = n_eeg + trigger + stamped
             # Roles only. Naming the stamp would mean naming the
             # measured channels too, and an amplifier that reports no
             # montage has no names to give them; the stamp is found by
             # role, never by position or name.
             context.update(channels.describe(roles))
+            apply_channel_units(context, units)
         return port_context_out
 
     def start(self) -> None:
@@ -234,9 +274,13 @@ class _GHIampCore(AmplifierSource):
         real-time EEG data processing.
         """
         # Start hardware data acquisition
+        self._reopen_device()
         self._device.start()
         # Start parent source processing
         super().start()
+        # The driver's own thread can die mid-run; see
+        # AmplifierSource._start_stream_watch.
+        self._start_stream_watch()
 
     def stop(self):
         """Stop g.HIamp data acquisition and cleanup resources.
@@ -259,8 +303,8 @@ class _GHIampCore(AmplifierSource):
         """
         # First sight: the earliest instant this block exists on the
         # host, taken before it is widened, queued or scheduled.
-        # time.monotonic() and not perf_counter(), because Sync
-        # compares the stamp against its own reading of that clock.
+        # channels.stamp_clock(), because Sync compares the stamp
+        # against its own reading of that same clock.
         # One value for the whole block -- the block cannot exist
         # until its last sample has been acquired, which is the sample
         # Sync reads it back from.
@@ -284,110 +328,3 @@ class _GHIampCore(AmplifierSource):
         """
         # Pass through data from input to output port
         return {PORT_OUT: data[PORT_IN]}
-
-
-class GHIamp(ioc.OChain):
-    """g.HIamp EEG amplifier chain for real-time data acquisition.
-
-    This is an OChain that contains:
-    - _GHIampCore: The actual g.HIamp acquisition node
-    - Link: Bridge for distributed operation (passthrough in standalone)
-    - Oscar: OSCAR artifact removal processing
-
-    The chain structure enables distributed edge/server operation while
-    keeping node inheritance clean (no chain mixing in node path).
-
-    Interface to g.tec's g.HIamp wired EEG amplifier system.
-    """
-
-    def __init__(
-        self,
-        serial: str = None,
-        sampling_rate: float = None,
-        channel_count: int = None,
-        frame_size: int = None,
-        enable_di: bool = None,
-        enable_counter: bool = None,
-        enable_oscar: bool = False,
-        **kwargs,
-    ):
-        """Initialize g.HIamp amplifier chain.
-
-        Args:
-            serial: Device serial number. Uses first available if None.
-            sampling_rate: Sampling frequency in Hz.
-            channel_count: Number of EEG channels to acquire.
-            frame_size: Samples per data frame (NumberOfScans).
-            enable_di: Enable digital trigger input channel.
-            enable_counter: Enable counter channel.
-            enable_oscar: Enable OSCAR artifact removal processing.
-            **kwargs: Additional arguments.
-        """
-        # Store parameters for create_internal_nodes
-        self._link_stream_id = stream_id_for(kwargs)
-        self._core_params = {
-            "serial": serial,
-            "sampling_rate": sampling_rate,
-            "channel_count": channel_count,
-            "frame_size": frame_size,
-            "enable_di": enable_di,
-            "enable_counter": enable_counter,
-        }
-        self._core_params.update(strip_chain_keys(kwargs))
-        self._enable_oscar = enable_oscar
-
-        # Initialize OChain (calls create_internal_nodes)
-        kwargs.setdefault(
-            self.Configuration.Keys.OUTPUT_PORTS,
-            [OPort.Configuration()],
-        )
-        ioc.OChain.__init__(
-            self,
-            serial=serial,
-            sampling_rate=sampling_rate,
-            channel_count=channel_count,
-            frame_size=frame_size,
-            enable_di=enable_di,
-            enable_counter=enable_counter,
-            enable_oscar=enable_oscar,
-            stream_id=self._link_stream_id,
-            **kwargs,
-        )
-
-    def create_internal_nodes(self) -> List[ioc.Node]:
-        """Create the internal node chain.
-
-        Returns:
-            The head of the list is whatever stands in for this chain's
-            core: the core itself, the core followed by a raw tap
-            under ``save_as``, a replay core under ``load_from``,
-            or nothing at all under SERVER residency. Then a Link
-            where the pipeline is distributed, OSCAR where it is
-            enabled, and Sync last.
-        """
-        from ...common.launch_config import LaunchConfig
-
-        nodes = []
-        residency = LaunchConfig.get().residency
-        # Recorded, replaced, or simply built, as the launch
-        # configuration says. Contributes nothing under server
-        # residency: the core lives on the edge, and so does
-        # anything recording or replaying it.
-        nodes.extend(
-            raw.source_stage(self, lambda: _GHIampCore(**self._core_params))
-        )
-        if residency != Constants.Residency.STANDALONE:
-            nodes.append(
-                Link(
-                    sender=Constants.Residency.EDGE,
-                    receiver=Constants.Residency.SERVER,
-                    stream_id=self._link_stream_id,
-                )
-            )
-        if self._enable_oscar:
-            nodes.append(Oscar())
-        # Sync places this stream on the master timeline. It
-        # carries no device counter, so Sync numbers it by counting
-        # samples: a valid timeline, but not a loss-aware one.
-        nodes.append(Sync())
-        return nodes

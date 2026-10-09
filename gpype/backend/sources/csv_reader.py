@@ -1,20 +1,22 @@
 from __future__ import annotations
 
 import csv
-from typing import List, Optional
+from typing import Optional
 
-import ioiocore as ioc
 import numpy as np
 
 from ...common._private import channels
+from ...common._private.entitlement import MARK
 from ...common.constants import Constants
-from ..core._private.chain_params import stream_id_for, strip_chain_keys
-from ..core._private.link import Link
-from ..core._private.sync import Sync
+from ..core._private import assembly
 from ..core.o_port import OPort
-from .base import raw
+from .base import file_shape, raw
 from .base.fixed_rate_source import FixedRateSource
-from .base.source import Source
+from .base.recording_reader import (
+    input_identity,
+    rate_from_time_column,
+)
+from .base.source import ABSENT, Source
 
 #: Default output port identifier
 PORT_OUT = Constants.Defaults.PORT_OUT
@@ -29,8 +31,10 @@ def _read_csv(path: str) -> tuple:
         path: Path to the file.
 
     Returns:
-        A tuple of (labels, samples, sampling_rate). The rate is None
-        when it cannot be derived from the time column.
+        A tuple of (labels, samples, sampling_rate, mark). The rate is
+        None when it cannot be derived from the time column; the mark is
+        the entitlement mark CsvWriter put on a marked run's first line,
+        or None.
 
     Raises:
         ValueError: If the file has no header or no data rows.
@@ -42,6 +46,18 @@ def _read_csv(path: str) -> tuple:
     # CsvWriter puts the entitlement mark on the first line of a marked
     # run -- so without this, g.Pype cannot read a file g.Pype wrote, and
     # the failure is a float conversion error naming the word "Time".
+    # The mark itself is kept: dropped with the rest, a marked file
+    # trained an unmarked artifact (D-BATCH-92).
+    mark = None
+    for row in rows:
+        first = row[0].strip() if row else ""
+        if not first:
+            continue
+        if not first.startswith("#"):
+            break  # the header: the mark is a leading comment
+        if first.lstrip("#").strip() == MARK:
+            mark = MARK
+            break
     rows = [
         row
         for row in rows
@@ -53,37 +69,45 @@ def _read_csv(path: str) -> tuple:
         raise ValueError(f"'{path}' has no header row and data rows to read.")
 
     header = [cell.strip() for cell in rows[0]]
+    # Parsed as float64 and narrowed after the time column is taken out.
+    # Parsed as float32, the time column lost the step to the stamps'
+    # own resolution: 100000 samples at 250 Hz, written by CsvWriter,
+    # read back as 250.137 Hz (measured).
     values = np.asarray(
         [[float(cell) for cell in row] for row in rows[1:]],
-        dtype=Constants.DATA_TYPE,
+        dtype=np.float64,
     )
 
     rate = None
     if header and header[0] == TIME_COLUMN:
-        times = values[:, 0]
         labels = header[1:]
         samples = values[:, 1:]
-        if len(times) > 1:
-            step = float(np.median(np.diff(times)))
-            if step > 0:
-                rate = 1.0 / step
-                # The time column is written in a short format, so the
-                # derived rate lands just beside the real one: 250 Hz
-                # comes back as 249.99996. Sampling rates are whole
-                # numbers in practice, so snap when the difference is
-                # clearly rounding rather than a genuine fractional rate.
-                nearest = round(rate)
-                if nearest > 0 and abs(rate - nearest) / nearest < 1e-4:
-                    rate = float(nearest)
+        rate = rate_from_time_column(values[:, 0])
     else:
         labels = header
         samples = values
 
-    return labels, samples, rate
+    samples = np.asarray(samples, dtype=Constants.DATA_TYPE)
+    return labels, samples, rate, mark
 
 
-class _CsvReaderCore(FixedRateSource):
-    """Internal node replaying a recording as a live stream."""
+class CsvReader(FixedRateSource):
+    """Replays a recording as if it were a live source.
+
+    This is what makes a session repeatable: a chain can be debugged
+    without a subject present, yesterday's recording can be run through
+    a changed pipeline, and a regression test can use real data instead
+    of a synthetic approximation of it.
+
+    Channel names are taken from the file's header, so a recording made
+    with a montage keeps its electrode names on the way back in.
+
+    ``speed`` decides what "replay" means. At one the file is paced to
+    the wall clock, so the recording behaves like the amplifier that
+    produced it and everything downstream sees the timing it expects. At
+    zero it runs as fast as the machine allows, which is what offline
+    reprocessing wants.
+    """
 
     #: Positions advance through the file, not with the host clock, so
     #: this stream cannot be merged with a live one.
@@ -97,28 +121,37 @@ class _CsvReaderCore(FixedRateSource):
         speed: float = 1.0,
         loop: bool = False,
         mode: str = Constants.ExecutionMode.REALTIME,
+        edge_id: Optional[str] = None,
         **kwargs,
     ):
         """Initialize the reader core.
 
         Args:
             file_name: Path to the recording.
-            sampling_rate: Rate to replay at. Taken from the file's time
-                column when not given.
-            frame_size: Samples emitted per cycle. Ignored in batch mode,
-                where the frame is the whole recording.
+            sampling_rate: The recording's rate. Taken from the file's
+                time column when not given; required without one. One
+                given must agree with the time column.
+            frame_size: Samples emitted per cycle. In batch mode the
+                frame is the whole recording.
             speed: Replay speed relative to real time. Zero runs as fast
                 as the machine allows.
             loop: Start again from the beginning at the end of the file.
             mode: ``realtime`` to replay frame by frame, ``batch`` to
                 emit the whole recording in one cycle. See
                 Constants.ExecutionMode.
+            edge_id: Which edge runs this node, matched against the
+                edge process's --edge-id. None, the default, is every
+                edge; ignored when the pipeline is not distributed.
             **kwargs: Additional arguments for the parent source.
 
         Raises:
             ValueError: If no file name is given, if the rate can neither
-                be read from the file nor was supplied, or if a
-                realtime-only argument is combined with batch mode.
+                be read from the file nor was supplied, if a
+                realtime-only argument is combined with batch mode, or
+                if a ``sampling_rate``, ``channel_count`` or batch
+                ``frame_size`` given by hand disagrees with the file.
+                A document's copy is warned about and replaced by the
+                file's.
         """
         if file_name is None:
             raise ValueError("file_name must be provided.")
@@ -134,27 +167,67 @@ class _CsvReaderCore(FixedRateSource):
                 f"'{Constants.ExecutionMode.BATCH}'; got {mode!r}."
             )
 
-        labels, samples, file_rate = _read_csv(file_name)
-        if sampling_rate is None:
-            sampling_rate = file_rate
-        if not sampling_rate:
-            raise ValueError(
-                f"'{file_name}' carries no usable time column, so the "
-                f"sampling rate has to be given explicitly."
-            )
-
-        self._samples = samples
-        self._labels = labels
-        self._position = 0
-        self._speed = float(speed)
-        self._exhausted = False
-
+        # **A server does not open the file, and nor does a replay.** See
+        # `RecordingReader.__init__` for the whole argument: a document
+        # naming a reader is constructed by every process that reads it,
+        # neither of these runs the node -- nor does an edge it is not
+        # assigned to -- and what the author left to the file is stood
+        # in for and written back as given.
+        #
         # A stored configuration returns per-port values as lists, so the
         # frame size can come back either way.
         if isinstance(frame_size, list):
             frame_size = frame_size[0]
+        batch = mode == Constants.ExecutionMode.BATCH
+        if not assembly.builds_core_for(edge_id) or raw.is_replaying():
+            (sampling_rate,) = raw.stand_in(
+                self, sampling_rate=(sampling_rate, raw.READER_STAND_IN_RATE)
+            )
+            raw.stand_in(
+                self,
+                channel_count=(
+                    kwargs.get(Constants.Keys.CHANNEL_COUNT, ABSENT),
+                    None,
+                ),
+            )
+            samples = None
+            labels = None
+            identity = None
+            mark = None
+        else:
+            labels, samples, file_rate, mark = _read_csv(file_name)
+            # The file decides the shape where it is read: a stored
+            # channel count used to win, and a re-pointed document
+            # failed on the roles its new file gave (D-BATCH-75).
+            sampling_rate, frame_size = file_shape.recording(
+                self,
+                file_name,
+                kwargs,
+                sampling_rate,
+                frame_size,
+                batch,
+                file_rate,
+                samples,
+                rate_from_times=True,
+            )
+            if not sampling_rate:
+                raise ValueError(
+                    f"'{file_name}' carries no usable time column, so "
+                    f"the sampling rate has to be given explicitly."
+                )
+            identity = input_identity(file_name)
 
-        if mode == Constants.ExecutionMode.BATCH:
+        self._samples = samples
+        self._labels = labels
+        #: What `Constants.Keys.INPUT` publishes, or None where the file
+        #: was not read.
+        self._input_identity = identity
+        self._mark = mark
+        self._position = 0
+        self._speed = float(speed)
+        self._exhausted = False
+
+        if batch:
             # Both of these describe pacing, and a batch run has none.
             # Refused rather than ignored: a caller who asked for
             # half-speed playback and got a single block would have no
@@ -171,11 +244,10 @@ class _CsvReaderCore(FixedRateSource):
                     "looping reader never reaches the end, and a batch "
                     "run is defined by reaching it."
                 )
-            # The frame *is* the recording. Assigned rather than
-            # defaulted, so a stored configuration cannot reinstate a
-            # realtime frame size on a batch reader.
-            frame_size = int(samples.shape[0])
-            kwargs["frame_size"] = frame_size
+            # The frame *is* the recording: the file's sample count where
+            # it was read, and the document's frame size as given where
+            # it was not.
+            kwargs["frame_size"] = int(frame_size or 1)
             self.EXECUTION_MODE = Constants.ExecutionMode.BATCH
         else:
             kwargs.setdefault("frame_size", int(frame_size))
@@ -191,15 +263,13 @@ class _CsvReaderCore(FixedRateSource):
             kwargs.setdefault("decimation_factor", int(frame_size))
 
         kwargs.setdefault("output_ports", [OPort.Configuration()])
-        # The channel count comes from the file, but a stored
-        # configuration carries it too, so default rather than pass it.
-        kwargs.setdefault("channel_count", int(samples.shape[1]))
         super().__init__(
             sampling_rate=float(sampling_rate),
             file_name=file_name,
             speed=float(speed),
             loop=bool(loop),
             mode=mode,
+            edge_id=edge_id,
             **kwargs,
         )
 
@@ -223,6 +293,15 @@ class _CsvReaderCore(FixedRateSource):
         return int(self._samples.shape[0])
 
     @property
+    def mark(self) -> Optional[str]:
+        """The entitlement mark recovered from the file, if it had one.
+
+        None for a file written by an unmarked run, or where the file
+        was not read.
+        """
+        return self._mark
+
+    @property
     def is_exhausted(self) -> bool:
         """Whether the whole recording has been emitted.
 
@@ -242,7 +321,8 @@ class _CsvReaderCore(FixedRateSource):
             port_context_in: Input port contexts.
 
         Returns:
-            Output port contexts carrying the file's channel names.
+            Output port contexts carrying the file's channel names and,
+            where the file was read, its identity.
         """
         port_context_out = super().setup(data, port_context_in)
         self._position = 0
@@ -254,6 +334,10 @@ class _CsvReaderCore(FixedRateSource):
                     list(self._labels),
                     None,
                 )
+            )
+        if self._input_identity is not None:
+            port_context_out[PORT_OUT][Constants.Keys.INPUT] = dict(
+                self._input_identity
             )
         return port_context_out
 
@@ -310,119 +394,3 @@ class _CsvReaderCore(FixedRateSource):
             f"{self._position} sample(s).",
             type=Constants.LogTypes.INFO,
         )
-
-
-class CsvReader(ioc.OChain):
-    """Replays a recording as if it were a live source.
-
-    This is what makes a session repeatable: a chain can be debugged
-    without a subject present, yesterday's recording can be run through
-    a changed pipeline, and a regression test can use real data instead
-    of a synthetic approximation of it.
-
-    Channel names are taken from the file's header, so a recording made
-    with a montage keeps its electrode names on the way back in.
-
-    ``speed`` decides what "replay" means. At one the file is paced to
-    the wall clock, so the recording behaves like the amplifier that
-    produced it and everything downstream sees the timing it expects. At
-    zero it runs as fast as the machine allows, which is what offline
-    reprocessing wants.
-    """
-
-    def __init__(
-        self,
-        file_name: str,
-        sampling_rate: Optional[float] = None,
-        frame_size: int = 1,
-        speed: float = 1.0,
-        loop: bool = False,
-        mode: str = Constants.ExecutionMode.REALTIME,
-        **kwargs,
-    ):
-        """Initialize the reader chain.
-
-        Args:
-            file_name: Path to the recording.
-            sampling_rate: Rate to replay at, if the file cannot say.
-            frame_size: Samples emitted per cycle. One by default, which
-                keeps every downstream node usable. Ignored in batch
-                mode, where the frame is the whole recording.
-            speed: Replay speed relative to real time; zero for as fast
-                as possible.
-            loop: Start again at the end of the file.
-            mode: ``realtime`` (default) replays the file frame by frame,
-                so everything downstream sees the timing the amplifier
-                would have produced. ``batch`` emits the whole recording
-                in one cycle, for offline processing driven by
-                ``Pipeline.run()``.
-            **kwargs: Additional arguments.
-
-        Raises:
-            ValueError: If no file name is available.
-        """
-        self._link_stream_id = stream_id_for(kwargs)
-        if file_name is None:
-            file_name = kwargs.get("file_name")
-        if file_name is None:
-            raise ValueError("file_name must be provided.")
-
-        self._core_params = {
-            "file_name": file_name,
-            "sampling_rate": sampling_rate,
-            "frame_size": frame_size,
-            "speed": speed,
-            "loop": loop,
-            "mode": mode,
-        }
-        self._core_params.update(strip_chain_keys(kwargs))
-
-        kwargs.setdefault("file_name", file_name)
-        kwargs.setdefault(
-            self.Configuration.Keys.OUTPUT_PORTS,
-            [OPort.Configuration()],
-        )
-        # file_name already reaches kwargs via the setdefault above;
-        # the rest of the chain's own parameters are forwarded here.
-        ioc.OChain.__init__(
-            self,
-            sampling_rate=sampling_rate,
-            frame_size=frame_size,
-            speed=speed,
-            loop=loop,
-            mode=mode,
-            stream_id=self._link_stream_id,
-            **kwargs,
-        )
-
-    def create_internal_nodes(self) -> List[ioc.Node]:
-        """Create the internal node chain.
-
-        Returns:
-            The head of the list is whatever stands in for this chain's
-            core: the core itself, the core followed by a raw tap
-            under ``save_as``, a replay core under ``load_from``,
-            or nothing at all under SERVER residency. Then a Link
-            where the pipeline is distributed, and Sync last.
-        """
-        from ...common.launch_config import LaunchConfig
-
-        nodes = []
-        residency = LaunchConfig.get().residency
-        # Recorded, replaced, or simply built, as the launch
-        # configuration says. Contributes nothing under server
-        # residency: the core lives on the edge, and so does
-        # anything recording or replaying it.
-        nodes.extend(
-            raw.source_stage(self, lambda: _CsvReaderCore(**self._core_params))
-        )
-        if residency != Constants.Residency.STANDALONE:
-            nodes.append(
-                Link(
-                    sender=Constants.Residency.EDGE,
-                    receiver=Constants.Residency.SERVER,
-                    stream_id=self._link_stream_id,
-                )
-            )
-        nodes.append(Sync())
-        return nodes

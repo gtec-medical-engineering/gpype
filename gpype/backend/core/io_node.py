@@ -89,8 +89,8 @@ class IONode(PlacingMixin, ioc.IONode, Node):
         # Validate sampling rates - all ports must have the same rate.
         #
         # The two ways this fails read nothing alike, so they say
-        # different things: a graph where no port declares a rate is
-        # missing its source, while a graph declaring two is the
+        # different things: a pipeline where no port declares a rate is
+        # missing its source, while a pipeline declaring two is the
         # 250 Hz/500 Hz mix that needs a Decimator. Both name the ports,
         # because "all ports" identifies no pair once a pipeline has
         # more than two of them.
@@ -132,7 +132,7 @@ class IONode(PlacingMixin, ioc.IONode, Node):
         # them from the broadcast is observable too - such a port used to
         # report the signal's width once setup() had run and now keeps
         # the one it declared. Sparse here means ASYNC, not "anything but
-        # SYNC": a port left at INHERITED is continuous once the graph
+        # SYNC": a port left at INHERITED is continuous once the pipeline
         # resolves its timing, and exempting Trigger's trigger port left
         # the output count a per-port map that np.zeros refused.
         cc_key = Constants.Keys.CHANNEL_COUNT
@@ -149,7 +149,7 @@ class IONode(PlacingMixin, ioc.IONode, Node):
         # disagreeing about a width it was never describing.
         #
         # Only ASYNC counts, not "anything but SYNC": a port left at
-        # INHERITED is continuous once the graph resolves its timing, and
+        # INHERITED is continuous once the pipeline resolves its timing, and
         # exempting Trigger's INHERITED trigger port made the output
         # count a per-port map that np.zeros refused.
         declared = {}
@@ -253,7 +253,8 @@ class IONode(PlacingMixin, ioc.IONode, Node):
         # when ports disagree, which is right for a key like timing that
         # is genuinely per-port, and wrong for a key that has to be one
         # list per channel: every reader of channel_roles would get a
-        # dict of two entries where it expects one entry per channel.
+        # dict of two entries where it expects one entry per channel, and
+        # a writer handed such a channel_units recorded the port names.
         all_keys = set().union(*port_context_in.values())
         all_keys -= channels.DESCRIPTION_KEYS
 

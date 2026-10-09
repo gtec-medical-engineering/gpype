@@ -18,8 +18,9 @@ annotation channel has room for roughly one entry per data record
 (measured: 64 written into a 10-record file, 10 recovered) -- so
 :mod:`edf_writer` does not use this module for the bulk of its metadata;
 it uses the format's own fields (``transducer`` for role, ``equipment``
-for the device serial, ``recording_additional`` for the mark) and reaches
-here only indirectly, for the shared vocabulary of key names.
+for the device serial, ``recording_additional`` for the mark, annotations
+for markers) and reaches here only for :func:`entries`, which checks the
+markers it writes.
 """
 
 from __future__ import annotations
@@ -96,9 +97,35 @@ def collect(
     if exact is not None:
         meta["sampling_rate_exact"] = [int(exact[0]), int(exact[1])]
 
+    # Only a list with one unit per channel is written. Anything else
+    # describes other channels -- a node upstream changed them and not
+    # the list -- or is a {port: list} map, whose list() is the port
+    # names. A reader takes what is written as the truth.
     units = context.get(Constants.Keys.CHANNEL_UNITS)
-    if units is not None:
+    if (
+        isinstance(units, (list, tuple))
+        and count is not None
+        and len(units) == int(count)
+    ):
         meta["channel_units"] = list(units)
+
+    # GTC's calibration field set (D-BATCH-43), by the same rule: only a
+    # list with one entry per channel is written, so a stale or merged
+    # list -- describing other channels, or a {port: list} map -- is
+    # not recorded as if it were the truth.
+    for key, name in (
+        (Constants.Keys.CHANNEL_GAINS, "channel_gains"),
+        (Constants.Keys.CHANNEL_OFFSETS, "channel_offsets"),
+        (Constants.Keys.CHANNEL_CLIPPING, "channel_clipping"),
+        (Constants.Keys.CHANNEL_FILTERS, "channel_filters"),
+    ):
+        value = context.get(key)
+        if (
+            isinstance(value, (list, tuple))
+            and count is not None
+            and len(value) == int(count)
+        ):
+            meta[name] = list(value)
 
     serial = context.get(Constants.Keys.DEVICE_SERIAL)
     if serial:
@@ -112,10 +139,92 @@ def collect(
     if start_time is not None:
         meta["start_time"] = str(start_time)
 
+    # On the grid of the file's first sample, which is the stream's: a
+    # writer records from the first frame it is handed. Additive fields,
+    # so a reader of this version that predates them ignores them.
+    markers = entries(context.get(Constants.Keys.MARKERS), 4)
+    if markers:
+        meta["markers"] = [
+            [int(s), int(d), None if c is None else int(c), str(label)]
+            for s, d, c, label in markers
+        ]
+    gaps = entries(context.get(Constants.Keys.GAPS), 3)
+    if gaps:
+        meta["gaps"] = [[int(f), int(n), str(why)] for f, n, why in gaps]
+    trust = context.get(Constants.Keys.TRUST)
+    if trust is not None:
+        meta["trust"] = str(trust)
+
+    # This run's provenance record (LQ-P3): already JSON-safe, since it
+    # is exactly what crosses a Link (D-BATCH-14), so it is written
+    # through unchanged. A reader of this file nests it as its own
+    # INPUT's ``derived_from``, so reprocessing a g.Pype output yields a
+    # lineage chain -- ``recording_meta`` itself does not chase that; it
+    # only carries what setup() published for this file.
+    provenance = context.get(Constants.Keys.PROVENANCE)
+    if provenance is not None:
+        meta["provenance"] = provenance
+
+    # What the server's Sync found wrong with a stream's clock sync
+    # (D-TIME-69): the note that marks this recording's timing as not in
+    # one base. A context merged from several inputs holds a
+    # {port: note} map, whose notes are all about this file's streams.
+    notes = clock_notes(context.get(Constants.Keys.CLOCK_NOTE))
+    if notes:
+        meta["clock_notes"] = notes
+
     if marked:
         meta["mark"] = MARK
 
     return meta
+
+
+def clock_notes(value) -> list:
+    """Return a context's clock notes as a list of distinct strings.
+
+    Args:
+        value: ``clock_note`` from a port context: a string, a
+            ``{port: note}`` map, or absent.
+
+    Returns:
+        The notes, in order and without repeats; empty for none.
+    """
+    if isinstance(value, str):
+        candidates = [value]
+    elif isinstance(value, dict):
+        candidates = list(value.values())
+    elif isinstance(value, (list, tuple)):
+        candidates = list(value)
+    else:
+        return []
+    notes: list = []
+    for note in candidates:
+        if isinstance(note, str) and note and note not in notes:
+            notes.append(note)
+    return notes
+
+
+def entries(value, width: int) -> list:
+    """Return a context's grid entries, or nothing when they are not a list.
+
+    Args:
+        value: ``markers`` or ``gaps`` from a port context.
+        width: Fields per entry.
+
+    Returns:
+        The entries. Empty when the value is absent, or is not a list of
+        entries of that width -- a context merged from several inputs
+        can hold a ``{port: list}`` map, and writing its keys would
+        record port names as events.
+    """
+    if not isinstance(value, (list, tuple)):
+        return []
+    if any(
+        not isinstance(entry, (list, tuple)) or len(entry) != width
+        for entry in value
+    ):
+        return []
+    return list(value)
 
 
 def finalize(meta: dict, sample_count: int) -> dict:
@@ -126,15 +235,35 @@ def finalize(meta: dict, sample_count: int) -> dict:
     open time (which is what a killed recording leaves on disk) is not
     surprised by a count it never got to write.
 
+    Markers and gaps were collected at open, from a context that can
+    describe more than the writer was handed: a realtime replay stopped
+    early. Those that start past the last sample are about no sample of
+    the file and are left out, and a gap that crosses it is cut there,
+    as ``GtcReader`` cuts one at the end of a range.
+
     Args:
         meta: The document :func:`collect` built.
         sample_count: Total samples actually written.
 
     Returns:
-        A new dict, identical to *meta* plus ``sample_count``.
+        A new dict: *meta* plus ``sample_count``, with markers and gaps
+        inside the samples written.
     """
+    count = int(sample_count)
     out = dict(meta)
-    out["sample_count"] = int(sample_count)
+    out["sample_count"] = count
+    if "markers" in out:
+        out["markers"] = [m for m in out["markers"] if m[0] < count]
+        if not out["markers"]:
+            del out["markers"]
+    if "gaps" in out:
+        out["gaps"] = [
+            [first, min(n, count - first), why]
+            for first, n, why in out["gaps"]
+            if first < count
+        ]
+        if not out["gaps"]:
+            del out["gaps"]
     return out
 
 

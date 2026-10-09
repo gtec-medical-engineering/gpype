@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import time
-from typing import List
+from typing import Optional
 
 import ioiocore as ioc
 import numpy as np
@@ -9,11 +9,7 @@ import numpy as np
 from ...common._private import channels
 from ...common._private.naming import public_name
 from ...common.constants import Constants
-from ..core._private.chain_params import stream_id_for, strip_chain_keys
-from ..core._private.link import Link
-from ..core._private.sync import Sync
 from ..core.o_port import OPort
-from .base import raw
 from .base.fixed_rate_source import FixedRateSource
 
 #: Port identifier for signal output
@@ -26,19 +22,10 @@ def _check_signal_shape(signal_shape: str) -> None:
     The shape used to be checked in step(), and only on the branch taken
     when the signal is audible at all -- ``if freq and amp > 0.0``. Since
     the default amplitude is 0.0, a document naming a nonsense shape ran
-    silently and indefinitely, reporting nothing. With a non-zero
-    amplitude it failed on the first sample instead, blaming
-    ``_GeneratorCore``, a class the author never wrote.
+    silently and indefinitely, reporting nothing. The constructor is
+    where an author can still act on it.
 
-    The constructor is where an author can still act on it. The Raises:
-    section of both constructors already promised this, which was the
-    other reason to move it: the documentation was describing behaviour
-    that did not exist.
-
-    None is left alone: it means "not supplied", and the core substitutes
-    DEFAULT_SIGNAL_SHAPE further in. The chain checks before that
-    substitution happens, so rejecting None here would refuse every
-    document that simply does not mention a shape.
+    None is left alone: it means "not supplied".
 
     Args:
         signal_shape: The requested shape, or None if not supplied.
@@ -49,23 +36,20 @@ def _check_signal_shape(signal_shape: str) -> None:
     """
     if signal_shape is None:
         return
-    if signal_shape not in _GeneratorCore.SIGNAL_SHAPES:
-        accepted = ", ".join(repr(s) for s in _GeneratorCore.SIGNAL_SHAPES)
+    if signal_shape not in Generator.SIGNAL_SHAPES:
+        accepted = ", ".join(repr(s) for s in Generator.SIGNAL_SHAPES)
         raise ValueError(
             f"signal_shape must be one of {accepted}; got "
             f"{signal_shape!r}."
         )
 
 
-class _GeneratorCore(FixedRateSource):
-    """Internal node implementing signal generation logic.
-
-    This is the actual signal generator node (pure ONode inheritance).
-    It is wrapped by the Generator chain for distributed operation.
+class Generator(FixedRateSource):
+    """Signal generator for creating synthetic test signals.
 
     Generates configurable test signals with optional noise for testing
     pipelines. Supports multiple waveforms (sine, rectangular, pulse) with
-    multi-channel output.
+    multi-channel output; every channel carries the same signal.
     """
 
     #: Sinusoidal waveform signal shape
@@ -120,9 +104,10 @@ class _GeneratorCore(FixedRateSource):
         signal_shape: str = None,
         signal_amplitude: float = 0.0,
         noise_amplitude: float = 0.0,
+        edge_id: Optional[str] = None,
         **kwargs,
     ):
-        """Initialize signal generator core.
+        """Initialize the signal generator.
 
         Args:
             sampling_rate: Sampling frequency in Hz.
@@ -132,6 +117,9 @@ class _GeneratorCore(FixedRateSource):
             signal_shape: Waveform shape (sine, rect, pulse). Defaults to sine.
             signal_amplitude: Peak amplitude of signal component.
             noise_amplitude: Standard deviation of Gaussian noise.
+            edge_id: Which edge runs this node, matched against the
+                edge process's --edge-id. None, the default, is every
+                edge; ignored when the pipeline is not distributed.
             **kwargs: Additional parameters for FixedRateSource.
 
         Raises:
@@ -157,7 +145,7 @@ class _GeneratorCore(FixedRateSource):
         if noise_amplitude < 0:
             raise ValueError("noise_amplitude must be positive.")
         frame_size = kwargs.pop(
-            _GeneratorCore.Configuration.Keys.FRAME_SIZE, frame_size
+            Generator.Configuration.Keys.FRAME_SIZE, frame_size
         )
         # Resolved before it is reused below. Left as None, the frame size
         # still defaulted further down while decimation_factor kept the
@@ -173,18 +161,19 @@ class _GeneratorCore(FixedRateSource):
             # Source, because decimation_factor below has to be the same
             # number -- FixedRateSource paces this source per sample, so
             # it emits one frame every frame_size cycles.
-            frame_size = _GeneratorCore.frame_size_for(sampling_rate)
+            frame_size = Generator.frame_size_for(sampling_rate)
         decimation_factor = frame_size
         decimation_factor = kwargs.pop(
-            _GeneratorCore.Configuration.Keys.DECIMATION_FACTOR,
+            Generator.Configuration.Keys.DECIMATION_FACTOR,
             decimation_factor,
         )
 
         # Configure output ports
+        # None means "the default port", as it did while Generator was a
+        # chain deriving its port from the node inside.
         output_ports = kwargs.pop(
-            _GeneratorCore.Configuration.Keys.OUTPUT_PORTS,
-            [OPort.Configuration()],
-        )
+            Generator.Configuration.Keys.OUTPUT_PORTS, None
+        ) or [OPort.Configuration()]
 
         # Initialize parent FixedRateSource with all parameters
         FixedRateSource.__init__(
@@ -198,6 +187,7 @@ class _GeneratorCore(FixedRateSource):
             signal_shape=signal_shape,
             noise_amplitude=noise_amplitude,
             output_ports=output_ports,
+            edge_id=edge_id,
             **kwargs,
         )
 
@@ -302,11 +292,10 @@ class _GeneratorCore(FixedRateSource):
                     if (ti % period) < dt:
                         wave[i] = amp
             else:
-                # Unreachable through the public constructor: the chain
-                # validates signal_shape before the core is built (see
-                # _check_signal_shape). It stays for a configuration
-                # mutated after construction, and says what that check
-                # says.
+                # Unreachable through the constructor, which validates
+                # signal_shape (see _check_signal_shape). It stays for a
+                # configuration mutated after construction, and says
+                # what that check says.
                 accepted = ", ".join(repr(s) for s in self.SIGNAL_SHAPES)
                 raise ValueError(
                     f"signal_shape must be one of {accepted}; "
@@ -337,138 +326,3 @@ class _GeneratorCore(FixedRateSource):
             dtype=Constants.DATA_TYPE,
         )
         return {OUT_PORT: np.hstack((output, stamp))}
-
-
-class Generator(ioc.OChain):
-    """Signal generator chain for creating synthetic test signals.
-
-    This is an OChain that contains:
-    - _GeneratorCore: The actual signal generation node
-    - Link: Bridge for distributed operation (passthrough in standalone)
-
-    The chain structure enables distributed edge/server operation while
-    keeping node inheritance clean (no chain mixing in node path).
-    """
-
-    # Re-export shape constants from core
-    SHAPE_SINUSOID = _GeneratorCore.SHAPE_SINUSOID
-    SHAPE_RECTANGULAR = _GeneratorCore.SHAPE_RECTANGULAR
-    SHAPE_PULSE = _GeneratorCore.SHAPE_PULSE
-    SIGNAL_SHAPES = _GeneratorCore.SIGNAL_SHAPES
-
-    # Re-export defaults from core
-    DEFAULT_SAMPLING_RATE = _GeneratorCore.DEFAULT_SAMPLING_RATE
-    DEFAULT_CHANNEL_COUNT = _GeneratorCore.DEFAULT_CHANNEL_COUNT
-    DEFAULT_SIGNAL_FREQUENCY = _GeneratorCore.DEFAULT_SIGNAL_FREQUENCY
-    DEFAULT_SIGNAL_SHAPE = _GeneratorCore.DEFAULT_SIGNAL_SHAPE
-    DEFAULT_SIGNAL_AMPLITUDE = _GeneratorCore.DEFAULT_SIGNAL_AMPLITUDE
-    DEFAULT_NOISE_AMPLITUDE = _GeneratorCore.DEFAULT_NOISE_AMPLITUDE
-
-    def __init__(
-        self,
-        sampling_rate: float = None,
-        channel_count: int = None,
-        frame_size: int = None,
-        signal_frequency: float = None,
-        signal_shape: str = None,
-        signal_amplitude: float = 0.0,
-        noise_amplitude: float = 0.0,
-        **kwargs,
-    ):
-        """Initialize signal generator chain.
-
-        Args:
-            sampling_rate: Sampling frequency in Hz.
-            channel_count: Number of output channels. All get same signals.
-            frame_size: Samples per output frame.
-            signal_frequency: Signal frequency in Hz. Defaults to 10.0.
-            signal_shape: Waveform shape (sine, rect, pulse). Defaults to sine.
-            signal_amplitude: Peak amplitude of signal component.
-            noise_amplitude: Standard deviation of Gaussian noise.
-            **kwargs: Additional parameters.
-
-        Raises:
-            ValueError: If signal_frequency or noise_amplitude is negative,
-                or signal_shape is unsupported.
-        """
-        # Checked here as well as in the core: in SERVER residency the
-        # core is never built, so this was the difference between a
-        # document being refused and being accepted.
-        _check_signal_shape(signal_shape)
-
-        # Store parameters for create_internal_nodes
-        self._link_stream_id = stream_id_for(kwargs)
-        self._core_params = {
-            "sampling_rate": sampling_rate,
-            "channel_count": channel_count,
-            "frame_size": frame_size,
-            "signal_frequency": signal_frequency,
-            "signal_shape": signal_shape,
-            "signal_amplitude": signal_amplitude,
-            "noise_amplitude": noise_amplitude,
-        }
-        self._core_params.update(strip_chain_keys(kwargs))
-
-        # Initialize OChain (calls create_internal_nodes)
-        kwargs.setdefault(
-            self.Configuration.Keys.OUTPUT_PORTS,
-            [OPort.Configuration()],
-        )
-        # The chain's own parameters go into the chain's own
-        # configuration. They used to live only on the internal core,
-        # which meant they travelled only inside ``_internal_nodes`` --
-        # so a document could not describe this node independently of the
-        # internal composition some other process happened to build. An
-        # authoring tool could not write one, and dropping the internals
-        # to let the receiving side rebuild them lost every parameter.
-        #
-        # They are constructor parameter names, so the unknown-key check
-        # already recognises them and no Keys declaration is needed.
-        ioc.OChain.__init__(
-            self,
-            sampling_rate=sampling_rate,
-            channel_count=channel_count,
-            frame_size=frame_size,
-            signal_frequency=signal_frequency,
-            signal_shape=signal_shape,
-            signal_amplitude=signal_amplitude,
-            noise_amplitude=noise_amplitude,
-            stream_id=self._link_stream_id,
-            **kwargs,
-        )
-
-    def create_internal_nodes(self) -> List[ioc.Node]:
-        """Create the internal node chain.
-
-        Returns:
-            The head of the list is whatever stands in for this chain's
-            core: the core itself, the core followed by a raw tap
-            under ``save_as``, a replay core under ``load_from``,
-            or nothing at all under SERVER residency. Then a Link
-            where the pipeline is distributed, and Sync last.
-        """
-        from ...common.launch_config import LaunchConfig
-
-        nodes = []
-        residency = LaunchConfig.get().residency
-        # Recorded, replaced, or simply built, as the launch
-        # configuration says. Contributes nothing under server
-        # residency: the core lives on the edge, and so does
-        # anything recording or replaying it.
-        nodes.extend(
-            raw.source_stage(self, lambda: _GeneratorCore(**self._core_params))
-        )
-        if residency != Constants.Residency.STANDALONE:
-            # edge or server
-            nodes.append(
-                Link(
-                    sender=Constants.Residency.EDGE,
-                    receiver=Constants.Residency.SERVER,
-                    stream_id=self._link_stream_id,
-                )
-            )
-        # Sync places this stream on the master timeline. It
-        # carries no device counter, so Sync numbers it by counting
-        # samples: a valid timeline, but not a loss-aware one.
-        nodes.append(Sync())
-        return nodes

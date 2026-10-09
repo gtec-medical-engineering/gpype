@@ -79,20 +79,12 @@ class MovingAverage(GenericFilter):
         b = kwargs.pop(MovingAverage.Configuration.Keys.B, b)
         a = kwargs.pop(MovingAverage.Configuration.Keys.A, a)
 
-        # Configuration must stay JSON-representable, and a numpy array is
-        # not: it would make this node the one filter that cannot be
-        # serialised. setup() calls np.asarray on them anyway.
-        def as_list(coefficients):
-            return (
-                coefficients.tolist()
-                if isinstance(coefficients, np.ndarray)
-                else [float(value) for value in coefficients]
-            )
-
-        # Initialize parent generic filter with computed coefficients
+        # Initialize parent generic filter with computed coefficients.
+        # GenericFilter stores them as lists, so the configuration stays
+        # JSON-representable.
         super().__init__(
-            b=as_list(b),
-            a=as_list(a),
+            b=b,
+            a=a,
             window_size=window_size,
             window_function=window_function,
             **kwargs,

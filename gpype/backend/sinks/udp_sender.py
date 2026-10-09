@@ -1,26 +1,20 @@
 from __future__ import annotations
 
 import socket
-from typing import List, Optional
+from typing import Optional
 
-import ioiocore as ioc
 import numpy as np
 
 from ...common.constants import Constants
-from ..core._private.chain_params import stream_id_for, strip_chain_keys
-from ..core._private.link import Link
 from ..core.i_node import INode
-from ..core.i_port import IPort
+from .base.sink import Sink
 
 
-class _UDPSenderCore(INode):
-    """Internal node implementing UDP data transmission.
+class UDPSender(Sink):
+    """UDP sender for real-time data transmission.
 
-    This is the actual UDP sender node (pure INode inheritance).
-    It is wrapped by the UDPSender chain for distributed operation.
-
-    Transmits data as float64 numpy arrays via UDP packets to a configurable
-    target address. Supports optional frame size conversion via buffering.
+    Transmits data as float64 numpy arrays via UDP packets to a
+    configurable target address, optionally re-framed through a buffer.
     """
 
     #: Default target IP address (localhost)
@@ -54,6 +48,7 @@ class _UDPSenderCore(INode):
         ip: Optional[str] = None,
         port: Optional[int] = None,
         frame_size_out: Optional[int] = None,
+        edge_id: Optional[str] = None,
         **kwargs,
     ):
         """Initialize UDP sender with target address and port.
@@ -64,6 +59,9 @@ class _UDPSenderCore(INode):
             frame_size_out: Output frame size. If None, data is sent with
                 its original frame size. If specified, data is buffered
                 and sent when frame_size_out samples are accumulated.
+            edge_id: Which edge runs this node, matched against the
+                edge process's --edge-id. None, the default, is every
+                edge; ignored when the pipeline is not distributed.
             **kwargs: Additional arguments for parent INode.
         """
         # Use default values if not specified
@@ -74,7 +72,12 @@ class _UDPSenderCore(INode):
 
         # Initialize parent INode with configuration
         INode.__init__(
-            self, ip=ip, port=port, frame_size_out=frame_size_out, **kwargs
+            self,
+            ip=ip,
+            port=port,
+            frame_size_out=frame_size_out,
+            edge_id=edge_id,
+            **kwargs,
         )
 
         # Initialize networking components
@@ -205,80 +208,3 @@ class _UDPSenderCore(INode):
 
         # No output data for sink nodes
         return {}
-
-
-class UDPSender(ioc.IChain):
-    """UDP sender chain for real-time data transmission.
-
-    This is an IChain that contains:
-    - Link: Bridge for distributed operation (passthrough in standalone)
-    - _UDPSenderCore: The actual UDP transmission node
-
-    The chain structure enables distributed edge/server operation while
-    keeping node inheritance clean (no chain mixing in node path).
-
-    Transmits data as float64 numpy arrays via UDP packets to a configurable
-    target address.
-    """
-
-    #: Default target IP address (localhost)
-    DEFAULT_IP = _UDPSenderCore.DEFAULT_IP
-    #: Default target UDP port number
-    DEFAULT_PORT = _UDPSenderCore.DEFAULT_PORT
-
-    def __init__(
-        self,
-        ip: Optional[str] = None,
-        port: Optional[int] = None,
-        frame_size_out: Optional[int] = None,
-        **kwargs,
-    ):
-        """Initialize UDP sender chain.
-
-        Args:
-            ip: Target IP address. Defaults to localhost if None.
-            port: Target port number. Defaults to DEFAULT_PORT if None.
-            frame_size_out: Output frame size. If None, data is sent with
-                its original frame size. If specified, data is buffered
-                and sent when frame_size_out samples are accumulated.
-            **kwargs: Additional arguments.
-        """
-        # Store parameters for create_internal_nodes
-        self._link_stream_id = stream_id_for(kwargs)
-        self._core_params = {
-            "ip": ip,
-            "port": port,
-            "frame_size_out": frame_size_out,
-        }
-        self._core_params.update(strip_chain_keys(kwargs))
-
-        # Initialize IChain (calls create_internal_nodes)
-        kwargs.setdefault(
-            self.Configuration.Keys.INPUT_PORTS,
-            [IPort.Configuration()],
-        )
-        # The chain's own parameters go into the chain's own
-        # configuration; see Generator for the full rationale.
-        ioc.IChain.__init__(
-            self,
-            ip=ip,
-            port=port,
-            frame_size_out=frame_size_out,
-            stream_id=self._link_stream_id,
-            **kwargs,
-        )
-
-    def create_internal_nodes(self) -> List[ioc.Node]:
-        """Create the internal node chain.
-
-        Returns:
-            List containing [Link, _UDPSenderCore].
-        """
-        return [
-            Link(
-                sender=Constants.Residency.SERVER,
-                receiver=Constants.Residency.EDGE,
-                stream_id=self._link_stream_id,
-            ),
-            _UDPSenderCore(**self._core_params),
-        ]

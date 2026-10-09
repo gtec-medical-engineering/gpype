@@ -114,6 +114,9 @@ def dark_palette():
     palette.setColor(role.ToolTipText, QColor(53, 53, 53))
     palette.setColor(role.Text, white)
     palette.setColor(disabled, role.Text, grey)
+    # Qt's default is a near-black grey, written for a light Base: on this
+    # one an empty field's hint ("matplotlib", "nodes") was unreadable.
+    palette.setColor(role.PlaceholderText, QColor(140, 140, 140))
     palette.setColor(role.Dark, QColor(35, 35, 35))
     palette.setColor(role.Shadow, QColor(20, 20, 20))
     palette.setColor(role.Button, QColor(53, 53, 53))

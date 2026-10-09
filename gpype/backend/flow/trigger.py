@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import numpy as np
 
+from ...common._private import channels
+from ...common._private.naming import node_label
 from ...common.constants import Constants
 from ..core.i_port import IPort
 from ..core.io_node import IONode
@@ -154,7 +156,7 @@ class Trigger(IONode):
         # sample per frame, because the trigger line was read as a single
         # value per cycle and there was no way to tell *which* sample of
         # a longer frame it belonged to. An ERP paradigm at 500 Hz
-        # therefore ran the whole graph 500 times a second.
+        # therefore ran the whole pipeline 500 times a second.
         #
         # Placement removed that limit: a sparse trigger now arrives as a
         # grid aligned to this frame, one row per sample, so the sample
@@ -225,6 +227,15 @@ class Trigger(IONode):
         timing = trigger_ctx.get(IPort.Configuration.Keys.TIMING)
         self._edge_triggered = timing != Constants.Timing.ASYNC
 
+        # An output row is now a position within an epoch, not a
+        # position in the source recording: a marker or gap carried
+        # over from the input would name a meaningless row
+        # (D-BATCH-86).
+        warning = channels.drop_grid(
+            port_context_out[PORT_OUT], node_label(self)
+        )
+        if warning:
+            self.log(warning, type=Constants.LogTypes.WARNING)
         return port_context_out
 
     def _trigger_at(self, triggers, row: int, rows: int):
@@ -293,7 +304,7 @@ class Trigger(IONode):
         if rows == 0:
             # A trigger arriving on its own cycle, with no frame to place
             # it in. That is what an unplaced sparse source does -- it
-            # cycles the graph when the event happens -- and the event
+            # cycles the pipeline when the event happens -- and the event
             # must still be recorded: it starts a countdown at the
             # current buffer position and completes on later data
             # cycles. Dropping it here silently lost every event from an
@@ -310,7 +321,7 @@ class Trigger(IONode):
 
         # One sample at a time. The per-sample logic is what makes an
         # epoch land on the right sample, and a loop over ten rows costs
-        # far less than ten trips through the graph -- which is the whole
+        # far less than ten trips through the pipeline -- which is the whole
         # reason for accepting longer frames.
         for row in range(rows):
             value = self._trigger_at(triggers, row, rows)
