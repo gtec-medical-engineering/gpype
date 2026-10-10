@@ -28,13 +28,13 @@ Navigate to the subfolder `./gpype/examples` and run the example scripts directl
 
 | Device | Connection | Platforms |
 | --- | --- | --- |
-| BCI Core-4, BCI Core-8, gCore | Bluetooth Low Energy | Windows, macOS, Linux (x86_64, aarch64) |
+| BCI Core-4, BCI Core-8, gCore | Bluetooth Low Energy | Windows, macOS, Linux |
 | Unicorn Hybrid Black | Bluetooth | Windows, macOS, Linux |
 | g.Nautilus | wireless, through the GDS service | Windows, macOS, Linux |
 | g.USBamp | USB, through the GDS service | Windows, macOS, Linux |
-| g.HIamp | USB, through the GDS service | Windows, macOS, Linux |
+| g.HIamp, also with g.Pangolin | USB, through the GDS service | Windows, macOS, Linux |
 
-Any other device joins through Lab Streaming Layer or UDP beside a g.tec amplifier, and a pipeline runs on the built-in signal generator with no hardware at all. The full table, with channels, rates and extras, is in the manual's [Supported Devices and Platforms](https://gpype.gtec.at/content/1_basic_concepts/supported_devices.html); measured timing accuracy on every amplifier and platform is on its [benchmarks page](https://gpype.gtec.at/content/4_advanced_topics/benchmarks.html).
+Linux means x86_64: g.Pype publishes no wheel for ARM Linux. Any other device comes in as a source you write, or joins through Lab Streaming Layer or UDP, beside a g.tec amplifier, and a pipeline runs on the built-in signal generator with no hardware at all. The full table, with channels, rates and extras, is in the manual's [Supported Devices and Platforms](https://gpype.gtec.at/content/1_basic_concepts/supported_devices.html); measured timing accuracy on every amplifier and platform is on its [benchmarks page](https://gpype.gtec.at/content/4_advanced_topics/benchmarks.html).
 
 # Documentation
 Full documentation is available at [gpype.gtec.at](https://gpype.gtec.at).

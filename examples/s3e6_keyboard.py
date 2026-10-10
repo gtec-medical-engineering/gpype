@@ -1,4 +1,4 @@
-"""Season 3, Episode 3: key presses as an event channel beside the signal."""
+"""Season 3, Episode 6: key presses as an event channel beside the signal."""
 
 import gpype as gp
 

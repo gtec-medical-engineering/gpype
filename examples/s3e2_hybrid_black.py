@@ -1,4 +1,4 @@
-"""Season 3, Episode 4: a Unicorn's EEG, motion and status in one pipeline."""
+"""Season 3, Episode 2: a Unicorn's EEG, motion and status in one pipeline."""
 
 import gpype as gp
 

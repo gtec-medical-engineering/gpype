@@ -35,8 +35,8 @@ if __name__ == "__main__":
     p.connect(bandpass, notch50)
     p.connect(notch50, notch60)
 
-    # The paradigm's codes, and the M key (77) for a mark made by hand
-    codes = gp.UDPReceiver()
+    # The presenter receives the codes; the M key (77) marks by hand
+    presenter = gp.ParadigmPresenter(PARADIGM)
     keyboard = gp.Keyboard()
 
     # Filtered signal, codes and key presses side by side on one scope
@@ -50,7 +50,7 @@ if __name__ == "__main__":
                                hidden_channels=[CHANNELS, CHANNELS + 1])
     shown = gp.Router(input_channels=[gp.Router.ALL] * 3)
     p.connect(notch60, shown["in1"])
-    p.connect(codes, shown["in2"])
+    p.connect(presenter, shown["in2"])
     p.connect(keyboard, shown["in3"])
     p.connect(shown, scope)
 
@@ -58,7 +58,7 @@ if __name__ == "__main__":
     # it, in a file named after the paradigm
     kept = gp.Router(input_channels=[gp.Router.ALL] * 3)
     p.connect(amp, kept["in1"])
-    p.connect(codes, kept["in2"])
+    p.connect(presenter, kept["in2"])
     p.connect(keyboard, kept["in3"])
     p.connect(kept, gp.CsvWriter(file_name="CheckerboardFace.csv"))
 
@@ -71,13 +71,12 @@ if __name__ == "__main__":
                               plots=["face", "checkerboard",
                                      "face-checkerboard"])
     p.connect(notch60, checkerboard)
-    p.connect(codes, checkerboard[gp.Trigger.PORT_TRIGGER])
+    p.connect(presenter, checkerboard[gp.Trigger.PORT_TRIGGER])
     p.connect(notch60, face)
-    p.connect(codes, face[gp.Trigger.PORT_TRIGGER])
+    p.connect(presenter, face[gp.Trigger.PORT_TRIGGER])
     p.connect(checkerboard, average["checkerboard"])
     p.connect(face, average["face"])
 
-    presenter = gp.ParadigmPresenter(PARADIGM)
     app.add_widget(presenter)
     app.add_widget(scope)
     app.add_widget(average)

@@ -1,4 +1,4 @@
-"""Season 3, Episode 6: a g.HIamp streamed into a filtered scope."""
+"""Season 3, Episode 3: a g.Nautilus streamed into a filtered scope."""
 
 import gpype as gp
 
@@ -7,9 +7,9 @@ if __name__ == "__main__":
     app = gp.MainApp()
     p = gp.Pipeline()
 
-    # Opens the device here, through the GDS service. The rate must be
-    # one the connected g.HIamp lists; anything else is refused
-    source = gp.GHIamp(sampling_rate=1200, channel_count=8)
+    # Opens the device here, through the GDS service. The rate is 250 or
+    # 500 Hz, nothing else; the channel count is what the headset has
+    source = gp.GNautilus(sampling_rate=250, channel_count=8)
 
     # 1-30 Hz keeps the brain rhythms and drops the drift below and the
     # muscle activity above; two notches cover either mains standard

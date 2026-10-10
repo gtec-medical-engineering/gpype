@@ -21,9 +21,9 @@ if __name__ == "__main__":
                           signal_frequency=10, signal_amplitude=10,
                           noise_amplitude=10)
 
-    # The presenter's codes arrive here: port 1000 is the default on
-    # both ends
-    receiver = gp.UDPReceiver()
+    # The presenter receives its codes itself: port 1000 is the default
+    # on both ends
+    presenter = gp.ParadigmPresenter(PARADIGMS)
 
     # The generator's 8 channels, then the codes on channel 8
     router = gp.Router(input_channels=[gp.Router.ALL, gp.Router.ALL])
@@ -36,12 +36,11 @@ if __name__ == "__main__":
                                markers=markers, hidden_channels=[8])
 
     p.connect(source, router["in1"])
-    p.connect(receiver, router["in2"])
+    p.connect(presenter, router["in2"])
     p.connect(router, scope)
 
-    # The widget is not connected to the pipeline: it lists the folder's
-    # paradigms, and starts and stops the one you pick
-    presenter = gp.ParadigmPresenter(PARADIGMS)
+    # The widget lists the folder's paradigms, and starts and stops the
+    # one you pick
     app.add_widget(presenter)
     app.add_widget(scope)
 
